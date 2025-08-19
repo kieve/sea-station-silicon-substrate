@@ -12,13 +12,15 @@ public record GameContext(
     Dominion ecs,
     PositionContext pos,
     InputMultiplexer inputMux,
-    List<System> systems
+    List<System> updateSystems,
+    List<System> renderSystems
 ) {
     public GameContext() {
         this(
             Dominion.create(),
             new PositionContext(),
             new InputMultiplexer(),
+            new ArrayList<>(),
             new ArrayList<>()
         );
     }
