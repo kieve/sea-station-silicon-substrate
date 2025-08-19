@@ -1,0 +1,15 @@
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+dependencies {
+  api "com.badlogicgames.gdx:gdx:$gdxVersion"
+  api "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
+
+  api "dev.dominion.ecs:dominion-ecs-engine:$dominionEcsVersion"
+
+  api "com.squidpony:squidcore:$squidSquadVersion"
+  api "com.squidpony:squidsmooth:$squidSquadVersion"
+
+  if (enableGraalNative == 'true') {
+    implementation "io.github.berstanio:gdx-svmhelper-annotations:$graalHelperVersion"
+  }
+}
