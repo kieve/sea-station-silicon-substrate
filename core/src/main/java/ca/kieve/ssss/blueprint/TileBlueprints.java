@@ -30,7 +30,8 @@ public class TileBlueprints {
         var entity = context.ecs().createEntity(
             flatten(
                 GlyphRepo.INTERPUNCT,
-                new Position(pos)
+                new Position(pos),
+                MaterialBlueprint.createWoodComponents()
             )
         );
         context.pos().add(entity, pos);
