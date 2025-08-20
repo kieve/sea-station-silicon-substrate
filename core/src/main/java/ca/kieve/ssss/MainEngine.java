@@ -19,6 +19,7 @@ import ca.kieve.ssss.component.CameraComp;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.system.CameraSystem;
 import ca.kieve.ssss.system.TileGlyphRenderSystem;
+import ca.kieve.ssss.system.VelocitySystem;
 import ca.kieve.ssss.system.WasdSystem;
 import ca.kieve.ssss.util.Vec3i;
 
@@ -112,6 +113,7 @@ public class MainEngine extends ApplicationAdapter {
     private void createSystems() {
         m_gameContext.updateSystems().addAll(List.of(
             new WasdSystem(m_gameContext),
+            new VelocitySystem(m_gameContext),
             new CameraSystem(m_gameContext)
         ));
 

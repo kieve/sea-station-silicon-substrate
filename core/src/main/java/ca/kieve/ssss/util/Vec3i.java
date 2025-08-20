@@ -3,6 +3,8 @@ package ca.kieve.ssss.util;
 import java.util.Objects;
 
 public class Vec3i {
+    public static final Vec3i ZERO = new Vec3i(0, 0, 0);
+
     public int x;
     public int y;
     public int z;
@@ -27,6 +29,12 @@ public class Vec3i {
         this.x = val.x;
         this.y = val.y;
         this.z = val.z;
+    }
+
+    public void addMut(Vec3i val) {
+        this.x += val.x;
+        this.y += val.y;
+        this.z += val.z;
     }
 
     @Override

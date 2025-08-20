@@ -2,7 +2,6 @@ package ca.kieve.ssss.context;
 
 import dev.dominion.ecs.api.Entity;
 
-import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.util.Vec3i;
 
 import java.util.ArrayList;

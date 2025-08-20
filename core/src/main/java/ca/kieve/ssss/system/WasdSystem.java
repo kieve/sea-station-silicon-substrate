@@ -2,6 +2,7 @@ package ca.kieve.ssss.system;
 
 import ca.kieve.ssss.component.Density;
 import ca.kieve.ssss.component.Position;
+import ca.kieve.ssss.component.Velocity;
 import ca.kieve.ssss.component.WasdController;
 import ca.kieve.ssss.context.GameContext;
 
@@ -19,7 +20,7 @@ public class WasdSystem extends System {
     public void run() {
         var searchResults = m_gameContext.ecs().findEntitiesWith(
             WasdController.class,
-            Position.class
+            Velocity.class
         );
 
         var optionalResult = searchResults.stream().findFirst();
@@ -29,32 +30,20 @@ public class WasdSystem extends System {
 
         var withResult = optionalResult.get();
         var wasdController = withResult.comp1();
-        var pos = withResult.comp2().getPosition();
-
-        var oldPos = pos.copy();
-        var newPos = pos.copy();
+        var velocity = withResult.comp2();
+        var instantVelocity = velocity.instant();
 
         if (wasdController.consume(W)) {
-            newPos.y++;
+            instantVelocity.y++;
         }
         if (wasdController.consume(A)) {
-            newPos.x--;
+            instantVelocity.x--;
         }
         if (wasdController.consume(S)) {
-            newPos.y--;
+            instantVelocity.y--;
         }
         if (wasdController.consume(D)) {
-            newPos.x++;
+            instantVelocity.x++;
         }
-        var entities = m_gameContext.pos().getAt(newPos);
-        var solid = entities.stream().anyMatch(entity -> {
-            var density = entity.get(Density.class);
-            return density == Density.SOLID;
-        });
-        if (solid) {
-            return;
-        }
-        pos.set(newPos);
-        m_gameContext.pos().move(withResult.entity(), oldPos, pos);
     }
 }

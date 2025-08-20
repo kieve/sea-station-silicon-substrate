@@ -4,6 +4,7 @@ import dev.dominion.ecs.api.Entity;
 
 import ca.kieve.ssss.component.CameraComp;
 import ca.kieve.ssss.component.Position;
+import ca.kieve.ssss.component.Velocity;
 import ca.kieve.ssss.component.WasdController;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.repository.ComponentRepo;
@@ -22,6 +23,7 @@ public class PlayerBlueprint {
             new CameraComp(),
             wasdController,
             new Position(pos),
+            new Velocity(),
             ComponentRepo.COLLIDER
         );
         context.inputMux().addProcessor(wasdController);
