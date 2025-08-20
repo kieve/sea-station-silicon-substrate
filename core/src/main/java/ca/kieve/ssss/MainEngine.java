@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -85,6 +86,21 @@ public class MainEngine extends ApplicationAdapter {
     private void render(float delta) {
         ScreenUtils.clear(Color.BLACK);
         m_gameContext.renderSystems().forEach(Runnable::run);
+
+        m_shapeRenderer.setProjectionMatrix(m_camera.combined);
+        m_shapeRenderer.begin(ShapeType.Line);
+        m_shapeRenderer.setColor(Color.BLUE);
+        var x = m_camera.position.x;
+        var y = m_camera.position.y;
+        var vpw = m_camera.viewportWidth;
+        var vph = m_camera.viewportHeight;
+        m_shapeRenderer.rect(
+            x - vpw / 2 + 0.01f,
+            y - vph / 2 + 0.01f,
+            vpw - 0.01f,
+            vph - 0.01f
+        );
+        m_shapeRenderer.end();
     }
 
     @Override
