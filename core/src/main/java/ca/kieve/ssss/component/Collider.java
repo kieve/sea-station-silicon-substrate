@@ -1,4 +1,4 @@
 package ca.kieve.ssss.component;
 
-public record Collider() {
+public record Collider() implements Component {
 }

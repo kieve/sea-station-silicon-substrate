@@ -2,11 +2,12 @@ package ca.kieve.ssss.blueprint;
 
 import dev.dominion.ecs.api.Entity;
 
-import ca.kieve.ssss.component.Density;
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.repository.GlyphRepo;
 import ca.kieve.ssss.util.Vec3i;
+
+import static ca.kieve.ssss.util.ListUtil.flatten;
 
 public class TileBlueprints {
     private TileBlueprints() {
@@ -15,9 +16,11 @@ public class TileBlueprints {
 
     public static Entity createWall(GameContext context, Vec3i pos) {
         var entity = context.ecs().createEntity(
-            GlyphRepo.POUND,
-            new Position(pos),
-            Density.SOLID
+            flatten(
+                GlyphRepo.POUND,
+                new Position(pos),
+                MaterialBlueprint.createStoneComponents()
+            )
         );
         context.pos().add(entity, pos);
         return entity;
@@ -25,8 +28,10 @@ public class TileBlueprints {
 
     public static Entity createFloor(GameContext context, Vec3i pos) {
         var entity = context.ecs().createEntity(
-            GlyphRepo.INTERPUNCT,
-            new Position(pos)
+            flatten(
+                GlyphRepo.INTERPUNCT,
+                new Position(pos)
+            )
         );
         context.pos().add(entity, pos);
         return entity;

@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
 import ca.kieve.ssss.component.CameraComp;
+import ca.kieve.ssss.component.Material;
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.component.TileGlyph;
 import ca.kieve.ssss.context.GameContext;
@@ -49,6 +50,15 @@ public class TileGlyphRenderSystem extends System {
 
             var pos = position.getPosition();
             var font = glyph.font();
+
+            var material = with.entity().get(Material.class);
+            var color = switch (material) {
+                case WOOD -> Color.BROWN;
+                case STONE -> Color.GRAY;
+                case null -> Color.WHITE;
+            };
+            font.setColor(color);
+
             font.draw(m_spriteBatch, "" + glyph.glyph(),
                 pos.x + glyph.dx(),
                 pos.y + glyph.dy());

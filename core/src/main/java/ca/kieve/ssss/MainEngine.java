@@ -18,6 +18,7 @@ import ca.kieve.ssss.blueprint.TileBlueprints;
 import ca.kieve.ssss.component.CameraComp;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.system.CameraSystem;
+import ca.kieve.ssss.system.SanityCheckSystem;
 import ca.kieve.ssss.system.TileGlyphRenderSystem;
 import ca.kieve.ssss.system.VelocitySystem;
 import ca.kieve.ssss.system.WasdSystem;
@@ -114,7 +115,8 @@ public class MainEngine extends ApplicationAdapter {
         m_gameContext.updateSystems().addAll(List.of(
             new WasdSystem(m_gameContext),
             new VelocitySystem(m_gameContext),
-            new CameraSystem(m_gameContext)
+            new CameraSystem(m_gameContext),
+            new SanityCheckSystem(m_gameContext)
         ));
 
         var tileGlyphRenderSystem =

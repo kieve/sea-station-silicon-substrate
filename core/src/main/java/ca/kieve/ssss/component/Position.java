@@ -37,4 +37,11 @@ public class Position implements Component {
     public void cleanup(GameContext context, Entity entity) {
         context.pos().remove(entity, m_position);
     }
+
+    @Override
+    public String toString() {
+        return "Position{" +
+            "pos=" + m_position +
+            '}';
+    }
 }

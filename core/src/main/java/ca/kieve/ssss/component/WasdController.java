@@ -12,7 +12,7 @@ import static ca.kieve.ssss.input.InputAction.D;
 import static ca.kieve.ssss.input.InputAction.S;
 import static ca.kieve.ssss.input.InputAction.W;
 
-public class WasdController extends InputAdapter {
+public class WasdController extends InputAdapter implements Component {
     private final Map<InputAction, KeyState> m_enumMap;
 
     public WasdController() {

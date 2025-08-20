@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 
 import ca.kieve.ssss.util.Vec3i;
 
-public record CameraComp(OrthographicCamera gdx) {
+public record CameraComp(OrthographicCamera gdx) implements Component {
     public CameraComp() {
         this(new OrthographicCamera());
     }
