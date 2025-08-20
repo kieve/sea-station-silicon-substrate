@@ -6,6 +6,7 @@ import ca.kieve.ssss.component.CameraComp;
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.component.WasdController;
 import ca.kieve.ssss.context.GameContext;
+import ca.kieve.ssss.repository.ComponentRepo;
 import ca.kieve.ssss.repository.GlyphRepo;
 import ca.kieve.ssss.util.Vec3i;
 
@@ -20,7 +21,8 @@ public class PlayerBlueprint {
             GlyphRepo.PLAYER,
             new CameraComp(),
             wasdController,
-            new Position(pos)
+            new Position(pos),
+            ComponentRepo.COLLIDER
         );
         context.inputMux().addProcessor(wasdController);
         context.pos().add(entity, pos);

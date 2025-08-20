@@ -23,6 +23,12 @@ public class Vec3i {
         return new Vec3i(this);
     }
 
+    public void set(Vec3i val) {
+        this.x = val.x;
+        this.y = val.y;
+        this.z = val.z;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof Vec3i vec3i)) return false;

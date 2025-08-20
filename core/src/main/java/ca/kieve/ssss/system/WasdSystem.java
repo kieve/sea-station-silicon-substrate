@@ -1,5 +1,6 @@
 package ca.kieve.ssss.system;
 
+import ca.kieve.ssss.component.Density;
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.component.WasdController;
 import ca.kieve.ssss.context.GameContext;
@@ -29,20 +30,31 @@ public class WasdSystem extends System {
         var withResult = optionalResult.get();
         var wasdController = withResult.comp1();
         var pos = withResult.comp2().getPosition();
+
         var oldPos = pos.copy();
+        var newPos = pos.copy();
 
         if (wasdController.consume(W)) {
-            pos.y++;
+            newPos.y++;
         }
         if (wasdController.consume(A)) {
-            pos.x--;
+            newPos.x--;
         }
         if (wasdController.consume(S)) {
-            pos.y--;
+            newPos.y--;
         }
         if (wasdController.consume(D)) {
-            pos.x++;
+            newPos.x++;
         }
+        var entities = m_gameContext.pos().getAt(newPos);
+        var solid = entities.stream().anyMatch(entity -> {
+            var density = entity.get(Density.class);
+            return density == Density.SOLID;
+        });
+        if (solid) {
+            return;
+        }
+        pos.set(newPos);
         m_gameContext.pos().move(withResult.entity(), oldPos, pos);
     }
 }

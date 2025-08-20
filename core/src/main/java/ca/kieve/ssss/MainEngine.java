@@ -25,7 +25,7 @@ import java.util.List;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class MainEngine extends ApplicationAdapter {
-    private static boolean DEBUG_GRID = true;
+    private static boolean DEBUG_GRID = false;
 
     private static final float TARGET_FPS = 60f;
     private static final float TARGET_FRAME_TIME_MS = 1000f / TARGET_FPS;
