@@ -5,14 +5,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
-public class UiWindow implements
-    UiNode,
-    HasUiPosition,
-    HasUiSize,
-    HasUiOrigin,
-    UiRenderable,
-    UiParent<UiWindow>
-{
+public class UiWindow extends UiNode {
     private final ScreenViewport m_viewport;
     private final Camera m_camera;
     private final SpriteBatch m_spriteBatch;
@@ -22,14 +15,10 @@ public class UiWindow implements
     // It ignores any UiRenderContext it's parent might have.
     private final UiRenderContext m_renderContext;
 
-    private UiPosition m_position;
-    private UiSize m_size;
-    private final UiOrigin m_origin;
-
     private UiNode m_child;
 
     public UiWindow() {
-        m_origin = new UiOrigin();
+        super();
 
         m_viewport = new ScreenViewport();
         m_camera = m_viewport.getCamera();
@@ -56,56 +45,32 @@ public class UiWindow implements
     }
 
     @Override
-    public UiPosition getUiPosition() {
-        return m_position;
-    }
-
-    @Override
-    public void setUiPosition(UiPosition uiPosition) {
-        m_position = uiPosition;
+    public void setPosition(UiPosition uiPosition) {
+        super.setPosition(uiPosition);
         m_viewport.setScreenPosition(uiPosition.x(), uiPosition.y());
     }
 
     @Override
-    public UiSize getUiSize() {
-        return m_size;
-    }
-
-    @Override
-    public void setUiSize(UiSize uiSize) {
-        m_size = uiSize;
+    public void setSize(UiSize uiSize) {
+        super.setSize(uiSize);
         m_viewport.update(uiSize.w(), uiSize.h(), true);
     }
 
-    @Override
-    public UiPosition getOrigin() {
-        return m_origin.getPosition();
-    }
-
-    @Override
-    public void setOrigin(UiPosition origin) {
-        m_origin.setPosition(origin);
-    }
-
-    @Override
-    public UiWindow addChild(UiNode child) {
+    public void addChild(UiNode child) {
         m_child = child;
-        return this;
     }
 
     @Override
     public void update(UiRenderContext renderContext, float delta) {
-        if (m_child instanceof UiRenderable renderable) {
-            renderable.update(m_renderContext, delta);
-        }
+        if (m_child == null) return;
+        m_child.update(m_renderContext, delta);
     }
 
     @Override
     public void render(UiRenderContext renderContext, float delta) {
+        if (m_child == null) return;
         m_spriteBatch.setProjectionMatrix(m_camera.combined);
         m_shapeRenderer.setProjectionMatrix(m_camera.combined);
-        if (m_child instanceof UiRenderable renderable) {
-            renderable.render(m_renderContext, delta);
-        }
+        m_child.render(m_renderContext, delta);
     }
 }

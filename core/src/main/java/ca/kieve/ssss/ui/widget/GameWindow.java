@@ -16,7 +16,6 @@ import ca.kieve.ssss.system.VelocitySystem;
 import ca.kieve.ssss.system.WasdSystem;
 import ca.kieve.ssss.ui.core.UiNode;
 import ca.kieve.ssss.ui.core.UiRenderContext;
-import ca.kieve.ssss.ui.core.UiRenderable;
 import ca.kieve.ssss.ui.core.UiWindow;
 import ca.kieve.ssss.util.Vec3i;
 
@@ -24,10 +23,7 @@ import java.util.List;
 
 import static ca.kieve.ssss.MainEngine.DEBUG_GRID;
 
-public class GameWindow implements
-    UiNode,
-    UiRenderable
-{
+public class GameWindow extends UiNode {
     public static final int TILE_SIZE = 32;
     public static final float TILE_SCALE = (float) 1 / TILE_SIZE;
 

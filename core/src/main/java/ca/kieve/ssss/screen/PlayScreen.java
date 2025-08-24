@@ -7,7 +7,7 @@ import ca.kieve.ssss.ui.core.UiScreen;
 import ca.kieve.ssss.ui.core.UiSize;
 import ca.kieve.ssss.ui.core.UiWindow;
 import ca.kieve.ssss.ui.layout.HorizontalLayout;
-import ca.kieve.ssss.ui.node.UiPanel;
+import ca.kieve.ssss.ui.layout.StackLayout;
 import ca.kieve.ssss.ui.widget.GameWindow;
 
 public class PlayScreen implements UiScreen {
@@ -19,14 +19,14 @@ public class PlayScreen implements UiScreen {
         var w = Gdx.graphics.getWidth();
         var h = Gdx.graphics.getHeight();
 
-        m_layout.setUiSize(new UiSize(w, h));
+        m_layout.setSize(new UiSize(w, h));
 
         var window = new UiWindow();
         var gameWindow = new GameWindow(gameContext, window);
         window.addChild(gameWindow);
 
-        m_layout.addChild(window);
-        m_layout.addChild(new UiPanel());
+        m_layout.add(window);
+        m_layout.add(new StackLayout());
     }
 
     @Override
@@ -41,6 +41,6 @@ public class PlayScreen implements UiScreen {
 
     @Override
     public void resize(int width, int height) {
-        m_layout.setUiSize(new UiSize(width, height));
+        m_layout.setSize(new UiSize(width, height));
     }
 }
