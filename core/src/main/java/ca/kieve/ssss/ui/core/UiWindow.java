@@ -78,8 +78,13 @@ public class UiWindow implements
     }
 
     @Override
-    public UiOrigin getOrigin() {
-        return m_origin;
+    public UiPosition getOrigin() {
+        return m_origin.getPosition();
+    }
+
+    @Override
+    public void setOrigin(UiPosition origin) {
+        m_origin.setPosition(origin);
     }
 
     @Override

@@ -1,7 +1,5 @@
 package ca.kieve.ssss.ui.layout;
 
-import ca.kieve.ssss.ui.core.HasUiOrigin;
-import ca.kieve.ssss.ui.core.HasUiSize;
 import ca.kieve.ssss.ui.core.UiNode;
 import ca.kieve.ssss.ui.core.UiOrigin;
 import ca.kieve.ssss.ui.core.UiPosition;
@@ -33,6 +31,7 @@ public class NodeLayout implements UiLayout<NodeLayout> {
     @Override
     public void setUiPosition(UiPosition uiPosition) {
         m_position = uiPosition;
+        LayoutCommon.updateChildOrigin(m_origin, m_position, m_child);
     }
 
     @Override
@@ -43,28 +42,30 @@ public class NodeLayout implements UiLayout<NodeLayout> {
     @Override
     public void setUiSize(UiSize uiSize) {
         m_size = uiSize;
-        // Relayout children...
-        if (m_child instanceof HasUiSize hasSize) {
-            hasSize.setUiSize(m_size);
-        }
+        LayoutCommon.updateChildSize(m_size, m_child);
     }
 
     @Override
-    public UiOrigin getOrigin() {
-        return m_origin;
+    public UiPosition getOrigin() {
+        return m_origin.getPosition();
+    }
+
+    @Override
+    public void setOrigin(UiPosition origin) {
+        m_origin.setPosition(origin);
+        LayoutCommon.updateChildOrigin(m_origin, m_position, m_child);
     }
 
     @Override
     public NodeLayout addChild(UiNode child) {
         m_child = child;
+        LayoutCommon.updateChildSize(m_size, m_child);
+        LayoutCommon.updateChildOrigin(m_origin, m_position, m_child);
         return this;
     }
 
     @Override
     public void update(UiRenderContext renderContext, float delta) {
-        if (m_child instanceof HasUiOrigin hasOrigin) {
-            hasOrigin.getOrigin().setOrigin(m_position);
-        }
         if (m_child instanceof UiRenderable renderable) {
             renderable.update(renderContext, delta);
         }

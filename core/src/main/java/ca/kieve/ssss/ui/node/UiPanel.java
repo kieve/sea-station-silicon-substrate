@@ -2,7 +2,6 @@ package ca.kieve.ssss.ui.node;
 
 import ca.kieve.ssss.ui.core.HasUiPosition;
 import ca.kieve.ssss.ui.core.HasUiSize;
-import ca.kieve.ssss.ui.core.UiOrigin;
 import ca.kieve.ssss.ui.core.UiNode;
 import ca.kieve.ssss.ui.core.UiParent;
 import ca.kieve.ssss.ui.core.UiPosition;

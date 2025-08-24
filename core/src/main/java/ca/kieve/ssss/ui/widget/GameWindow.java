@@ -31,9 +31,9 @@ public class GameWindow implements
     public static final int TILE_SIZE = 32;
     public static final float TILE_SCALE = (float) 1 / TILE_SIZE;
 
-    private GameContext m_gameContext;
-    private Camera m_camera;
-    private UiRenderContext m_renderContext;
+    private final GameContext m_gameContext;
+    private final Camera m_camera;
+    private final UiRenderContext m_renderContext;
 
     public GameWindow(GameContext gameContext, UiWindow parent) {
         m_gameContext = gameContext;

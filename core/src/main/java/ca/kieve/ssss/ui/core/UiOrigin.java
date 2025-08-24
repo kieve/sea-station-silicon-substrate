@@ -7,7 +7,11 @@ public class UiOrigin {
         m_origin = UiPosition.ZERO;
     }
 
-    public void setOrigin(UiPosition origin) {
+    public UiPosition getPosition() {
+        return m_origin;
+    }
+
+    public void setPosition(UiPosition origin) {
         m_origin = origin;
     }
 }

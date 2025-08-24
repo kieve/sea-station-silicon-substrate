@@ -1,5 +1,6 @@
 package ca.kieve.ssss.ui.core;
 
 public interface HasUiOrigin {
-    UiOrigin getOrigin();
+    UiPosition getOrigin();
+    void setOrigin(UiPosition origin);
 }
