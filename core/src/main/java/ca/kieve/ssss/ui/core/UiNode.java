@@ -1,9 +1,12 @@
 package ca.kieve.ssss.ui.core;
 
+import ca.kieve.ssss.ui.layout.UiLayoutParams;
+
 public abstract class UiNode {
     protected UiPosition m_position;
     protected UiSize m_size;
     protected UiPosition m_origin;
+    protected UiLayoutParams m_layoutParams;
 
     public UiNode() {
         m_position = UiPosition.ZERO;
@@ -33,6 +36,14 @@ public abstract class UiNode {
 
     public void setOrigin(UiPosition origin) {
         m_origin = origin;
+    }
+
+    public UiLayoutParams getLayoutParams() {
+        return m_layoutParams;
+    }
+
+    public void setLayoutParams(UiLayoutParams layoutParams) {
+        m_layoutParams = layoutParams;
     }
 
     public abstract void update(UiRenderContext renderContext, float delta);

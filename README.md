@@ -3,9 +3,13 @@
 ## References
 
 https://github.com/yellowstonegames/SquidSquad  
-https://github.com/yellowstonegames/SquidLib-Demos/blob/master/SquidSquad/DawnSquad-beta2/core/src/main/java/com/github/yellowstonegames/SunriseSquad.java  
+https://github.com/yellowstonegameos/SquidLib-Demos/blob/master/SquidSquad/DawnSquad-beta2/core/src/main/java/com/github/yellowstonegames/SunriseSquad.java  
+
+https://github.com/dominion-dev/dominion-ecs-java  
 https://github.com/dominion-dev/dominion-ecs-java/blob/main/dominion-ecs-examples/README.md  
-https://hexworks.org/posts/tutorials/2019/01/05/how-to-make-a-roguelike-generating-random-caves.html
+https://github.com/dominion-dev/dominion-ecs-java/blob/main/dominion-ecs-examples/src/main/java/dev/dominion/ecs/examples/dark/DarkEntities.java  
+
+https://hexworks.org/posts/tutorials/2019/01/05/how-to-make-a-roguelike-generating-random-caves.html  
 
 # DEPENDENCY MANAGEMENT
 

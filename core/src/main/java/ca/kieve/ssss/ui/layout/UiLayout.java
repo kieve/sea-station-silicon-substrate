@@ -17,6 +17,11 @@ public abstract class UiLayout extends UiNode {
 
     abstract public void layout();
 
+    public void add(UiNode child, UiLayoutParams layoutParams) {
+        child.setLayoutParams(layoutParams);
+        add(child);
+    }
+
     public void add(UiNode child) {
         m_children.add(child);
         updateChildOrigin(child);

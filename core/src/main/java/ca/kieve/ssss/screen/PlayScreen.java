@@ -7,6 +7,7 @@ import ca.kieve.ssss.ui.core.UiScreen;
 import ca.kieve.ssss.ui.core.UiSize;
 import ca.kieve.ssss.ui.core.UiWindow;
 import ca.kieve.ssss.ui.layout.HorizontalLayout;
+import ca.kieve.ssss.ui.layout.HorizontalLayout.LayoutParams;
 import ca.kieve.ssss.ui.layout.StackLayout;
 import ca.kieve.ssss.ui.widget.GameWindow;
 
@@ -26,7 +27,7 @@ public class PlayScreen implements UiScreen {
         window.addChild(gameWindow);
 
         m_layout.add(window);
-        m_layout.add(new StackLayout());
+        m_layout.add(new StackLayout(), new LayoutParams(300));
     }
 
     @Override
