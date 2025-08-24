@@ -1,7 +1,5 @@
 package ca.kieve.ssss.system;
 
-import ca.kieve.ssss.component.Density;
-import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.component.Velocity;
 import ca.kieve.ssss.component.WasdController;
 import ca.kieve.ssss.context.GameContext;
