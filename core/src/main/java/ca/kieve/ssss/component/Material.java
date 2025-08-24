@@ -5,6 +5,7 @@ import ca.kieve.ssss.util.Description;
 public enum Material implements Component, Description {
     WOOD("Wood"),
     STONE("Stone"),
+    STEEL("Steel"),
     ;
 
     private final String description;

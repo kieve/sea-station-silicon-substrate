@@ -15,25 +15,37 @@ public class TileBlueprints {
     }
 
     public static Entity createWall(GameContext context, Vec3i pos) {
-        var entity = context.ecs().createEntity(
-            flatten(
-                GlyphRepo.POUND,
-                new Position(pos),
-                MaterialBlueprint.createStoneComponents()
-            )
+        return createTile(
+            context,
+            pos,
+            GlyphRepo.POUND,
+            new Position(pos),
+            MaterialBlueprint.createStoneComponents()
         );
-        context.pos().add(entity, pos);
-        return entity;
     }
 
     public static Entity createFloor(GameContext context, Vec3i pos) {
-        var entity = context.ecs().createEntity(
-            flatten(
-                GlyphRepo.INTERPUNCT,
-                new Position(pos),
-                MaterialBlueprint.createWoodComponents()
-            )
+        return createTile(
+            context,
+            pos,
+            GlyphRepo.INTERPUNCT,
+            new Position(pos),
+            MaterialBlueprint.createWoodComponents()
         );
+    }
+
+    public static Entity createSteelWall(GameContext context, Vec3i pos) {
+        return createTile(
+            context,
+            pos,
+            GlyphRepo.SOLID,
+            new Position(pos),
+            MaterialBlueprint.createSteelComponents()
+        );
+    }
+
+    private static Entity createTile(GameContext context, Vec3i pos, Object ...components) {
+        var entity = context.ecs().createEntity(flatten(components));
         context.pos().add(entity, pos);
         return entity;
     }

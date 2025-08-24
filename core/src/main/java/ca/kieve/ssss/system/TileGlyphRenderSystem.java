@@ -55,6 +55,7 @@ public class TileGlyphRenderSystem extends System {
             var color = switch (material) {
                 case WOOD -> Color.BROWN;
                 case STONE -> Color.GRAY;
+                case STEEL -> Color.ORANGE;
                 case null -> Color.WHITE;
             };
             font.setColor(color);

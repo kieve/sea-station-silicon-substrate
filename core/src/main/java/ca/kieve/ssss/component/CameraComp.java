@@ -1,12 +1,18 @@
 package ca.kieve.ssss.component;
 
-import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Camera;
 
 import ca.kieve.ssss.util.Vec3i;
 
-public record CameraComp(OrthographicCamera gdx) implements Component {
-    public CameraComp() {
-        this(new OrthographicCamera());
+public class CameraComp implements Component {
+    private Camera m_gdx = null;
+
+    public Camera gdx() {
+        return m_gdx;
+    }
+
+    public void setGdx(Camera gdx) {
+        m_gdx = gdx;
     }
 
     public void setPosition(Position pos) {
@@ -14,6 +20,9 @@ public record CameraComp(OrthographicCamera gdx) implements Component {
     }
 
     public void setPosition(Vec3i pos) {
-        gdx.position.set(pos.x, pos.y, 0);
+        if (this.m_gdx == null) {
+            return;
+        }
+        m_gdx.position.set(pos.x, pos.y, 0);
     }
 }

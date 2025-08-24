@@ -9,6 +9,7 @@ import java.util.List;
 
 import static ca.kieve.ssss.component.Density.AIR;
 import static ca.kieve.ssss.component.Density.SOLID;
+import static ca.kieve.ssss.component.Material.STEEL;
 import static ca.kieve.ssss.component.Material.STONE;
 import static ca.kieve.ssss.component.Material.WOOD;
 
@@ -23,6 +24,10 @@ public class MaterialBlueprint {
 
     public static List<Component> createStoneComponents() {
         return createMaterial(STONE, SOLID, 100);
+    }
+
+    public static List<Component> createSteelComponents() {
+        return createMaterial(STEEL, SOLID, 1000);
     }
 
     private static List<Component> createMaterial(

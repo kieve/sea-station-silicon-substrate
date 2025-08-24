@@ -23,7 +23,7 @@ public final class MapModelBuilder {
      * @return the map model
      */
     public static MapModel build(int width, int height, int roomCount) {
-        return buildHallways(buildRooms(width, height, roomCount));
+        return clearDeepWalls(buildHallways(buildRooms(width, height, roomCount)));
     }
 
     private static void fillRect(Rect rect, Tile tile, Tile[][] map) {
@@ -112,6 +112,35 @@ public final class MapModelBuilder {
                 return curr;
             });
         return mapModel;
+    }
+
+    private static MapModel clearDeepWalls(MapModel model) {
+        var map = model.map;
+        for (int x = 0; x < map.length; ++x) {
+            for (int y = 0; y < map[x].length; ++y) {
+                // Check all 9 directions to see if there's a floor tile. If not, delete self.
+                boolean anyFloor = false;
+                offsetSearch: for (int dx = -1; dx <= 1; ++dx) {
+                    for (int dy = -1; dy <= 1; ++dy) {
+                        if (x + dx < 0
+                            || y + dy < 0
+                            || x + dx >= map.length
+                            || y + dy >= map[x].length
+                        ) {
+                            continue;
+                        }
+                        if (map[x + dx][y + dy] == Tile.FLOOR) {
+                            anyFloor = true;
+                            break offsetSearch;
+                        }
+                    }
+                }
+                if (!anyFloor) {
+                    map[x][y] = null;
+                }
+            }
+        }
+        return model;
     }
 
     public enum Tile {

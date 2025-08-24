@@ -7,8 +7,10 @@ import ca.kieve.ssss.system.System;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public record GameContext(
+    Random random,
     Dominion ecs,
     PositionContext pos,
     InputMultiplexer inputMux,
@@ -17,6 +19,7 @@ public record GameContext(
 ) {
     public GameContext() {
         this(
+            new Random(),
             Dominion.create(),
             new PositionContext(),
             new InputMultiplexer(),
