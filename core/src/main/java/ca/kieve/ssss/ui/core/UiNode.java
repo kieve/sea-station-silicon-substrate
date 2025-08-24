@@ -46,6 +46,13 @@ public abstract class UiNode {
         m_layoutParams = layoutParams;
     }
 
+    public UiPosition getScreenPosition() {
+        return new UiPosition(
+            m_origin.x() + m_position.x(),
+            m_origin.y() + m_position.y()
+        );
+    }
+
     public abstract void update(UiRenderContext renderContext, float delta);
     public abstract void render(UiRenderContext renderContext, float delta);
 }

@@ -5,19 +5,24 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
-public class UiWindow extends UiNode {
-    private final ScreenViewport m_viewport;
-    private final Camera m_camera;
-    private final SpriteBatch m_spriteBatch;
-    private final ShapeRenderer m_shapeRenderer;
+import ca.kieve.ssss.context.GameContext;
+import ca.kieve.ssss.ui.layout.UiLayout;
+
+public class UiWindow extends UiLayout {
+    protected final ScreenViewport m_viewport;
+    protected final Camera m_camera;
+    protected final SpriteBatch m_spriteBatch;
+    protected final ShapeRenderer m_shapeRenderer;
 
     // UiWindow owns the UiRenderContext for all it's children.
     // It ignores any UiRenderContext it's parent might have.
     private final UiRenderContext m_renderContext;
 
-    private UiNode m_child;
+    public UiWindow(GameContext gameContext) {
+        this(gameContext, true);
+    }
 
-    public UiWindow() {
+    public UiWindow(GameContext gameContext, boolean yDown) {
         super();
 
         m_viewport = new ScreenViewport();
@@ -26,51 +31,66 @@ public class UiWindow extends UiNode {
         m_shapeRenderer = new ShapeRenderer();
 
         m_renderContext = new UiRenderContext(
+            gameContext,
             m_camera,
             m_spriteBatch,
             m_shapeRenderer
         );
-    }
 
-    public ScreenViewport getViewport() {
-        return m_viewport;
-    }
-
-    public Camera getCamera() {
-        return m_viewport.getCamera();
-    }
-
-    public UiRenderContext getRenderContext() {
-        return m_renderContext;
+        if (yDown) {
+            m_camera.up.set(0, -1, 0);
+            m_camera.direction.set(0, 0, 1);
+        }
     }
 
     @Override
     public void setPosition(UiPosition uiPosition) {
         super.setPosition(uiPosition);
-        m_viewport.setScreenPosition(uiPosition.x(), uiPosition.y());
+        updateViewport();
     }
 
     @Override
     public void setSize(UiSize uiSize) {
         super.setSize(uiSize);
-        m_viewport.update(uiSize.w(), uiSize.h(), true);
+        updateViewport();
     }
 
-    public void addChild(UiNode child) {
-        m_child = child;
+    @Override
+    protected void updateChildOrigin(UiNode child) {
+        // Do nothing; window children do not need to consider the windows offset
+        // As, the window defines the 0,0 coordinate
+    }
+
+    private void updateViewport() {
+        var pos = getScreenPosition();
+        var x = pos.x();
+        var y = pos.y();
+        var w = m_size.w();
+        var h = m_size.h();
+        var upp = m_viewport.getUnitsPerPixel();
+
+        m_viewport.setScreenBounds(x, y, w, h);
+        m_viewport.setWorldSize(w * upp, h * upp);
+    }
+
+    @Override
+    public void layout() {
+        m_children.forEach(child -> {
+            child.setPosition(UiPosition.ZERO);
+            child.setSize(new UiSize(m_size.w(), m_size.h()));
+        });
     }
 
     @Override
     public void update(UiRenderContext renderContext, float delta) {
-        if (m_child == null) return;
-        m_child.update(m_renderContext, delta);
+        super.update(m_renderContext, delta);
     }
 
     @Override
     public void render(UiRenderContext renderContext, float delta) {
-        if (m_child == null) return;
+        m_viewport.apply(true);
         m_spriteBatch.setProjectionMatrix(m_camera.combined);
         m_shapeRenderer.setProjectionMatrix(m_camera.combined);
-        m_child.render(m_renderContext, delta);
+        super.render(m_renderContext, delta);
     }
 }

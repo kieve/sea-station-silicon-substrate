@@ -8,6 +8,11 @@ public class StackLayout extends UiLayout {
     }
 
     @Override
+    public void setPosition(UiPosition position) {
+        super.setPosition(position);
+    }
+
+    @Override
     public void layout() {
         m_children.forEach(child -> {
             child.setPosition(UiPosition.ZERO);

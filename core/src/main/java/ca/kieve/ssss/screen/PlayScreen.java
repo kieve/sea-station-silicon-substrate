@@ -9,6 +9,7 @@ import ca.kieve.ssss.ui.core.UiWindow;
 import ca.kieve.ssss.ui.layout.HorizontalLayout;
 import ca.kieve.ssss.ui.layout.HorizontalLayout.LayoutParams;
 import ca.kieve.ssss.ui.layout.StackLayout;
+import ca.kieve.ssss.ui.node.Text;
 import ca.kieve.ssss.ui.widget.GameWindow;
 
 public class PlayScreen implements UiScreen {
@@ -22,12 +23,19 @@ public class PlayScreen implements UiScreen {
 
         m_layout.setSize(new UiSize(w, h));
 
-        var window = new UiWindow();
-        var gameWindow = new GameWindow(gameContext, window);
-        window.addChild(gameWindow);
+        var gameWindow = new GameWindow(gameContext);
+        m_layout.add(gameWindow);
 
-        m_layout.add(window);
-        m_layout.add(new StackLayout(), new LayoutParams(300));
+        // Another viewport...
+        var rightUiWindow = new UiWindow(gameContext);
+        m_layout.add(rightUiWindow, new LayoutParams(300));
+
+        var stackLayout = new StackLayout();
+        rightUiWindow.add(stackLayout);
+
+        // Testing label?
+        var text = new Text("This is a test.");
+        stackLayout.add(text);
     }
 
     @Override

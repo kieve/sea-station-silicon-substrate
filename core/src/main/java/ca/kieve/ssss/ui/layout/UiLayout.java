@@ -32,6 +32,7 @@ public abstract class UiLayout extends UiNode {
     public void setPosition(UiPosition position) {
         super.setPosition(position);
         updateChildrenOrigin();
+        layout();
     }
 
     @Override
@@ -44,6 +45,7 @@ public abstract class UiLayout extends UiNode {
     public void setOrigin(UiPosition origin) {
         super.setOrigin(origin);
         updateChildrenOrigin();
+        layout();
     }
 
     protected void updateChildrenOrigin() {

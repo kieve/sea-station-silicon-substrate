@@ -14,7 +14,6 @@ import ca.kieve.ssss.system.SanityCheckSystem;
 import ca.kieve.ssss.system.TileGlyphRenderSystem;
 import ca.kieve.ssss.system.VelocitySystem;
 import ca.kieve.ssss.system.WasdSystem;
-import ca.kieve.ssss.ui.core.UiNode;
 import ca.kieve.ssss.ui.core.UiRenderContext;
 import ca.kieve.ssss.ui.core.UiWindow;
 import ca.kieve.ssss.util.Vec3i;
@@ -23,21 +22,16 @@ import java.util.List;
 
 import static ca.kieve.ssss.MainEngine.DEBUG_GRID;
 
-public class GameWindow extends UiNode {
+public class GameWindow extends UiWindow {
     public static final int TILE_SIZE = 32;
     public static final float TILE_SCALE = (float) 1 / TILE_SIZE;
 
     private final GameContext m_gameContext;
-    private final Camera m_camera;
-    private final UiRenderContext m_renderContext;
 
-    public GameWindow(GameContext gameContext, UiWindow parent) {
+    public GameWindow(GameContext gameContext) {
+        super(gameContext, false);
         m_gameContext = gameContext;
-        m_camera = parent.getCamera();
-        m_renderContext = parent.getRenderContext();
-
-        var viewport = parent.getViewport();
-        viewport.setUnitsPerPixel(TILE_SCALE);
+        m_viewport.setUnitsPerPixel(TILE_SCALE);
 
         createSystems();
         createEntities();
@@ -49,25 +43,26 @@ public class GameWindow extends UiNode {
     }
 
     @Override
-    public void render(UiRenderContext renderContext, float delta) {
+    public void render(UiRenderContext dnu, float delta) {
+        m_viewport.apply();
+        m_spriteBatch.setProjectionMatrix(m_camera.combined);
+        m_shapeRenderer.setProjectionMatrix(m_camera.combined);
+
         m_gameContext.renderSystems().forEach(Runnable::run);
 
-        var shapeRenderer = renderContext.shapeRenderer();
-
-        shapeRenderer.setProjectionMatrix(m_camera.combined);
-        shapeRenderer.begin(ShapeType.Line);
-        shapeRenderer.setColor(Color.BLUE);
+        m_shapeRenderer.begin(ShapeType.Line);
+        m_shapeRenderer.setColor(Color.BLUE);
         var x = m_camera.position.x;
         var y = m_camera.position.y;
         var vpw = m_camera.viewportWidth;
         var vph = m_camera.viewportHeight;
-        shapeRenderer.rect(
+        m_shapeRenderer.rect(
             x - vpw / 2 + 0.01f,
             y - vph / 2 + 0.01f,
             vpw - 0.01f,
             vph - 0.01f
         );
-        shapeRenderer.end();
+        m_shapeRenderer.end();
     }
 
     private void createSystems() {
@@ -80,8 +75,8 @@ public class GameWindow extends UiNode {
 
         var tileGlyphRenderSystem = new TileGlyphRenderSystem(
             m_gameContext,
-            m_renderContext.spriteBatch(),
-            m_renderContext.shapeRenderer()
+            m_spriteBatch,
+            m_shapeRenderer
         );
         tileGlyphRenderSystem.setDebugGrid(DEBUG_GRID);
 

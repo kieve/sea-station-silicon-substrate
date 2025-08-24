@@ -49,7 +49,7 @@ public class HorizontalLayout extends UiLayout {
         int dynamicWidth = totalWidth - reservedWidth;
 
         int numChildren = m_children.size();
-        int numChildrenUnreserved = numChildren - numReserved;
+        int numChildrenUnreserved = Math.max(numChildren - numReserved, 1);
         int widthPerChild = dynamicWidth / numChildrenUnreserved;
         int remainder = dynamicWidth % numChildrenUnreserved;
 
