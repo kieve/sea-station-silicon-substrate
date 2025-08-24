@@ -13,43 +13,44 @@ import ca.kieve.ssss.ui.node.Text;
 import ca.kieve.ssss.ui.widget.GameWindow;
 
 public class PlayScreen implements UiScreen {
-    private final HorizontalLayout m_layout;
+    private final UiWindow m_mainUiWindow;
 
     public PlayScreen(GameContext gameContext) {
-        m_layout = new HorizontalLayout();
-
+        m_mainUiWindow = new UiWindow(gameContext);
         var w = Gdx.graphics.getWidth();
         var h = Gdx.graphics.getHeight();
+        m_mainUiWindow.setSize(new UiSize(w, h));
 
-        m_layout.setSize(new UiSize(w, h));
+        var layout = new HorizontalLayout();
+        m_mainUiWindow.add(layout);
+
+        // Have to explicitly set the parent so it can reapply the viewport
+        // after it renders the GameWindow
+        layout.setParentWindow(m_mainUiWindow);
 
         var gameWindow = new GameWindow(gameContext);
-        m_layout.add(gameWindow);
+        layout.add(gameWindow);
 
-        // Another viewport...
-        var rightUiWindow = new UiWindow(gameContext);
-        m_layout.add(rightUiWindow, new LayoutParams(300));
-
-        var stackLayout = new StackLayout();
-        rightUiWindow.add(stackLayout);
+        var rightLayout = new StackLayout();
+        layout.add(rightLayout, new LayoutParams(300));
 
         // Testing label?
         var text = new Text("This is a test.");
-        stackLayout.add(text);
+        rightLayout.add(text);
     }
 
     @Override
     public void update(float delta) {
-        m_layout.update(null, delta);
+        m_mainUiWindow.update(null, delta);
     }
 
     @Override
     public void render(float delta) {
-        m_layout.render(null, delta);
+        m_mainUiWindow.render(null, delta);
     }
 
     @Override
     public void resize(int width, int height) {
-        m_layout.setSize(new UiSize(width, height));
+        m_mainUiWindow.setSize(new UiSize(width, height));
     }
 }

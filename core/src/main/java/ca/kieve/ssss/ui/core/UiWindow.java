@@ -73,6 +73,12 @@ public class UiWindow extends UiLayout {
         m_viewport.setWorldSize(w * upp, h * upp);
     }
 
+    public void applyViewport() {
+        m_viewport.apply(true);
+        m_spriteBatch.setProjectionMatrix(m_camera.combined);
+        m_shapeRenderer.setProjectionMatrix(m_camera.combined);
+    }
+
     @Override
     public void layout() {
         m_children.forEach(child -> {
@@ -88,9 +94,7 @@ public class UiWindow extends UiLayout {
 
     @Override
     public void render(UiRenderContext renderContext, float delta) {
-        m_viewport.apply(true);
-        m_spriteBatch.setProjectionMatrix(m_camera.combined);
-        m_shapeRenderer.setProjectionMatrix(m_camera.combined);
+        applyViewport();
         super.render(m_renderContext, delta);
     }
 }

@@ -4,18 +4,20 @@ import ca.kieve.ssss.ui.core.UiNode;
 import ca.kieve.ssss.ui.core.UiPosition;
 import ca.kieve.ssss.ui.core.UiRenderContext;
 import ca.kieve.ssss.ui.core.UiSize;
+import ca.kieve.ssss.ui.core.UiWindow;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class UiLayout extends UiNode {
-    protected List<UiNode> m_children;
-
-    protected UiLayout() {
-        m_children = new ArrayList<>();
-    }
+    private UiWindow m_parentWindow = null;
+    protected List<UiNode> m_children = new ArrayList<>();
 
     abstract public void layout();
+
+    public void setParentWindow(UiWindow parentWindow) {
+        m_parentWindow = parentWindow;
+    }
 
     public void add(UiNode child, UiLayoutParams layoutParams) {
         child.setLayoutParams(layoutParams);
@@ -68,6 +70,13 @@ public abstract class UiLayout extends UiNode {
 
     @Override
     public void render(UiRenderContext renderContext, float delta) {
-        m_children.forEach(child -> child.render(renderContext, delta));
+        m_children.forEach(child -> {
+            child.render(renderContext, delta);
+            if (m_parentWindow != null && child instanceof UiWindow) {
+                // UiWindows will apply their own viewport.
+                // So, we have to reset the viewport back.
+                m_parentWindow.applyViewport();
+            }
+        });
     }
 }
