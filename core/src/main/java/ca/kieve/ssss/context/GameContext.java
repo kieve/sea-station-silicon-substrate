@@ -12,8 +12,10 @@ import java.util.Random;
 public record GameContext(
     Random random,
     Dominion ecs,
+    ClockContext clock,
     PositionContext pos,
     InputMultiplexer inputMux,
+    LogContext log,
     List<System> updateSystems,
     List<System> renderSystems
 ) {
@@ -21,8 +23,10 @@ public record GameContext(
         this(
             new Random(),
             Dominion.create(),
+            new ClockContext(),
             new PositionContext(),
             new InputMultiplexer(),
+            new LogContext(),
             new ArrayList<>(),
             new ArrayList<>()
         );

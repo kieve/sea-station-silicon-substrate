@@ -4,7 +4,7 @@ import ca.kieve.ssss.component.CameraComp;
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.context.GameContext;
 
-public class CameraSystem extends System{
+public class CameraSystem extends System {
     public CameraSystem(GameContext gameContext) {
         super(gameContext);
     }

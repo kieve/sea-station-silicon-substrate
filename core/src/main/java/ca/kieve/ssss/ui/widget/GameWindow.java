@@ -9,6 +9,8 @@ import ca.kieve.ssss.blueprint.TileBlueprints;
 import ca.kieve.ssss.component.CameraComp;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.system.CameraSystem;
+import ca.kieve.ssss.system.ClockSystem;
+import ca.kieve.ssss.system.InteractSystem;
 import ca.kieve.ssss.system.SanityCheckSystem;
 import ca.kieve.ssss.system.TileGlyphRenderSystem;
 import ca.kieve.ssss.system.VelocitySystem;
@@ -66,9 +68,11 @@ public class GameWindow extends UiWindow {
 
     private void createSystems() {
         m_gameContext.updateSystems().addAll(List.of(
+            new ClockSystem(m_gameContext),
             new WasdSystem(m_gameContext),
             new VelocitySystem(m_gameContext),
             new CameraSystem(m_gameContext),
+            new InteractSystem(m_gameContext),
             new SanityCheckSystem(m_gameContext)
         ));
 

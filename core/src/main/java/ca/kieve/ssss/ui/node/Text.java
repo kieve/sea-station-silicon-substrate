@@ -34,10 +34,29 @@ public class Text extends UiNode {
             return;
         }
 
+        StringBuilder textBuilder = new StringBuilder();
+
         var withResult = optionalResults.get();
         var pos = withResult.comp1().getPosition();
 
-        m_text = "Position: { " + pos.x + ", " +  pos.y + " }";
+        textBuilder.append("Position: { ")
+            .append(pos.x)
+            .append(", ")
+            .append(pos.y)
+            .append(" }");
+
+
+        var clock = gc.clock();
+        var currentTime = clock.getCurrentTime();
+
+        textBuilder.append("\n")
+            .append("Time: ")
+            .append(currentTime);
+
+        var logMessages = gc.log().getMessages();
+        logMessages.forEach(message -> textBuilder.append("\n").append(message));
+
+        m_text = textBuilder.toString();
     }
 
     @Override

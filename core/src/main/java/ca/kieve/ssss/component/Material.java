@@ -1,8 +1,8 @@
 package ca.kieve.ssss.component;
 
-import ca.kieve.ssss.util.Description;
+import ca.kieve.ssss.util.HasDescription;
 
-public enum Material implements Component, Description {
+public enum Material implements Component, HasDescription {
     WOOD("Wood"),
     STONE("Stone"),
     STEEL("Steel"),
@@ -15,7 +15,7 @@ public enum Material implements Component, Description {
     }
 
     @Override
-    public String getDescription() {
+    public String description() {
         return description;
     }
 }

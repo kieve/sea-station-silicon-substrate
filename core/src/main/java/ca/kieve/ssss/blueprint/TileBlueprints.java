@@ -2,6 +2,7 @@ package ca.kieve.ssss.blueprint;
 
 import dev.dominion.ecs.api.Entity;
 
+import ca.kieve.ssss.component.Descriptor;
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.repository.GlyphRepo;
@@ -20,6 +21,7 @@ public class TileBlueprints {
             pos,
             GlyphRepo.POUND,
             new Position(pos),
+            new Descriptor("Stone wall", "It's a stone wall."),
             MaterialBlueprint.createStoneComponents()
         );
     }
@@ -40,6 +42,7 @@ public class TileBlueprints {
             pos,
             GlyphRepo.SOLID,
             new Position(pos),
+            new Descriptor("Steel wall", "It's a steel wall."),
             MaterialBlueprint.createSteelComponents()
         );
     }

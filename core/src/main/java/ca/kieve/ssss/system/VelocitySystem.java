@@ -6,13 +6,18 @@ import ca.kieve.ssss.component.Velocity;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.util.Vec3i;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class VelocitySystem extends System {
+    private final List<Vec3i> m_instantsToZero = new ArrayList<>();
+
     public VelocitySystem(GameContext gameContext) {
         super(gameContext);
     }
 
     @Override
-    public void run() {
+    public void tick() {
         var searchResults = m_gameContext.ecs().findEntitiesWith(
             Position.class,
             Velocity.class
@@ -32,7 +37,7 @@ public class VelocitySystem extends System {
         var newPos = pos.copy();
 
         newPos.addMut(instantVelocity);
-        instantVelocity.set(Vec3i.ZERO);
+        m_instantsToZero.add(instantVelocity);
 
         var entities = m_gameContext.pos().getAt(newPos);
         var solid = entities.stream().anyMatch(entity -> {
@@ -45,5 +50,11 @@ public class VelocitySystem extends System {
 
         pos.set(newPos);
         m_gameContext.pos().move(withResult.entity(), oldPos, pos);
+    }
+
+    @Override
+    public void postTick() {
+        m_instantsToZero.forEach(instant -> instant.set(Vec3i.ZERO));
+        m_instantsToZero.clear();
     }
 }
