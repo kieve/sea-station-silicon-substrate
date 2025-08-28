@@ -12,7 +12,7 @@ import ca.kieve.ssss.ui.core.UiScreen;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class MainEngine extends ApplicationAdapter {
-    public static final boolean DEBUG_GRID = false;
+    public static final boolean DEBUG_GRID = true;
 
     private static final float TARGET_FPS = 60f;
     private static final float TARGET_FRAME_TIME_MS = 1000f / TARGET_FPS;

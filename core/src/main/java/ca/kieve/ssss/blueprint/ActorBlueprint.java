@@ -1,47 +1,50 @@
 package ca.kieve.ssss.blueprint;
 
+import com.badlogic.gdx.graphics.Color;
 import dev.dominion.ecs.api.Entity;
 
-import ca.kieve.ssss.component.CameraComp;
 import ca.kieve.ssss.component.Descriptor;
-import ca.kieve.ssss.component.Inventory;
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.component.Speed;
 import ca.kieve.ssss.component.Velocity;
-import ca.kieve.ssss.component.WasdController;
+import ca.kieve.ssss.component.ai.AiSeesawController;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.repository.GlyphRepo;
 import ca.kieve.ssss.util.Vec3i;
 
 import static ca.kieve.ssss.repository.ComponentRepo.COLLIDER;
 
-public class PlayerBlueprint {
-    private PlayerBlueprint() {
+public class ActorBlueprint {
+    private ActorBlueprint() {
         // Do not instantiate
     }
 
-    public static Entity create(GameContext context, Vec3i pos) {
-        var wasdController = new WasdController();
+    public static Entity createDebugMover(
+        GameContext context,
+        Vec3i pos,
+        int speed,
+        Color color
+    ) {
+        if (color == null) {
+            color = Color.WHITE;
+        }
         var entity = context.ecs().createEntity(
             // Display
-            GlyphRepo.PLAYER,
-            new Descriptor("The Player", "It's you!"),
+            GlyphRepo.S,
+            new Descriptor("Moving Sign", "Perhaps, there's many of them?"),
+            color,
 
             // Control
-            new CameraComp(),
-            wasdController,
-            new Speed(100),
+            new AiSeesawController(pos),
+            new Speed(speed),
 
             // Physics
             new Position(pos),
             new Velocity(),
-            COLLIDER,
-
-            // Extras
-            new Inventory()
+            COLLIDER
         );
-        context.inputMux().addProcessor(wasdController);
         context.pos().add(entity, pos);
+
         return entity;
     }
 }

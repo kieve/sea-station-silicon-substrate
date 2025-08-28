@@ -2,6 +2,7 @@ package ca.kieve.ssss.system;
 
 import ca.kieve.ssss.component.Descriptor;
 import ca.kieve.ssss.component.Position;
+import ca.kieve.ssss.component.Speed;
 import ca.kieve.ssss.component.Velocity;
 import ca.kieve.ssss.component.WasdController;
 import ca.kieve.ssss.context.GameContext;
@@ -18,6 +19,7 @@ public class InteractSystem extends System {
         var searchResults = m_gameContext.ecs().findEntitiesWith(
             Position.class,
             Velocity.class,
+            Speed.class,
             WasdController.class
         );
 
@@ -27,13 +29,17 @@ public class InteractSystem extends System {
         }
 
         var withResult = optionalResult.get();
+
+        var speed = withResult.comp3();
+        if (!speed.canAct) {
+            return;
+        }
+
         var pos = withResult.comp1().getPosition();
         var velocity = withResult.comp2();
         var instantVelocity = velocity.instant();
 
-        var newPos = pos.copy();
-        newPos.addMut(instantVelocity);
-
+        var newPos = pos.add(instantVelocity);
         var log = m_gameContext.log();
 
         var entities = m_gameContext.pos().getAt(newPos);

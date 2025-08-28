@@ -19,7 +19,14 @@ public class GlyphRepo {
         XIROD_32,
         '@',
         2.5f / TILE_SIZE,
-        1 + (-4.4f) / TILE_SIZE
+        1 + (-6f) / TILE_SIZE
+    );
+
+    public static final TileGlyph S = create(
+        XIROD_32,
+        'S',
+        2f / TILE_SIZE,
+        1 + (-6f) / TILE_SIZE
     );
 
     public static final TileGlyph POUND = create(

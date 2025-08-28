@@ -18,7 +18,6 @@ public class ClockContext {
         m_currentTime = currentTime;
     }
 
-
     public TickStage getTickStage() {
         return m_tickStage;
     }

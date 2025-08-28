@@ -4,10 +4,12 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
 import ca.kieve.ssss.REPLACE.MapModelBuilder;
+import ca.kieve.ssss.blueprint.ActorBlueprint;
 import ca.kieve.ssss.blueprint.PlayerBlueprint;
 import ca.kieve.ssss.blueprint.TileBlueprints;
 import ca.kieve.ssss.component.CameraComp;
 import ca.kieve.ssss.context.GameContext;
+import ca.kieve.ssss.system.AiSeesawSystem;
 import ca.kieve.ssss.system.CameraSystem;
 import ca.kieve.ssss.system.ClockSystem;
 import ca.kieve.ssss.system.InteractSystem;
@@ -70,6 +72,7 @@ public class GameWindow extends UiWindow {
         m_gameContext.updateSystems().addAll(List.of(
             new ClockSystem(m_gameContext),
             new WasdSystem(m_gameContext),
+            new AiSeesawSystem(m_gameContext),
             new VelocitySystem(m_gameContext),
             new CameraSystem(m_gameContext),
             new InteractSystem(m_gameContext),
@@ -89,7 +92,8 @@ public class GameWindow extends UiWindow {
     }
 
     private void createEntities() {
-        var mapModel = MapModelBuilder.build(64, 48, 16);
+//        var mapModel = MapModelBuilder.build(64, 48, 16);
+        var mapModel = MapModelBuilder.build(24, 24, 1);
         MapModelBuilder.Point firstRoomCenter = mapModel.rooms()[0].center();
 
         var playerPos = new Vec3i(firstRoomCenter.x(), firstRoomCenter.y(), 0);
@@ -118,5 +122,28 @@ public class GameWindow extends UiWindow {
                 }
             }
         }
+
+        // Let's place down some debug entities
+
+        ActorBlueprint.createDebugMover(m_gameContext,
+            // Move left 2 spaces
+            playerPos.add(Vec3i.X.product(-2)),
+            50,
+            Color.BLUE
+        );
+
+        ActorBlueprint.createDebugMover(m_gameContext,
+            // Move right 2 spaces
+            playerPos.add(Vec3i.X.product(2)),
+            100,
+            Color.WHITE
+        );
+
+        ActorBlueprint.createDebugMover(m_gameContext,
+            // Move right 4 spaces
+            playerPos.add(Vec3i.X.product(4)),
+            200,
+            Color.RED
+        );
     }
 }

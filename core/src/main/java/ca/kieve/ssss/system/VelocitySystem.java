@@ -23,33 +23,29 @@ public class VelocitySystem extends System {
             Velocity.class
         );
 
-        var optionalResult = searchResults.stream().findFirst();
-        if (optionalResult.isEmpty()) {
-            return;
-        }
+        searchResults.stream().forEach(withResult -> {
+            var pos = withResult.comp1().getPosition();
+            var velocity = withResult.comp2();
+            var instantVelocity = velocity.instant();
 
-        var withResult = optionalResult.get();
-        var pos = withResult.comp1().getPosition();
-        var velocity = withResult.comp2();
-        var instantVelocity = velocity.instant();
+            var oldPos = pos.copy();
+            var newPos = pos.copy();
 
-        var oldPos = pos.copy();
-        var newPos = pos.copy();
+            newPos.addMut(instantVelocity);
+            m_instantsToZero.add(instantVelocity);
 
-        newPos.addMut(instantVelocity);
-        m_instantsToZero.add(instantVelocity);
+            var entities = m_gameContext.pos().getAt(newPos);
+            var solid = entities.stream().anyMatch(entity -> {
+                var density = entity.get(Density.class);
+                return density == Density.SOLID;
+            });
+            if (solid) {
+                return;
+            }
 
-        var entities = m_gameContext.pos().getAt(newPos);
-        var solid = entities.stream().anyMatch(entity -> {
-            var density = entity.get(Density.class);
-            return density == Density.SOLID;
+            pos.set(newPos);
+            m_gameContext.pos().move(withResult.entity(), oldPos, pos);
         });
-        if (solid) {
-            return;
-        }
-
-        pos.set(newPos);
-        m_gameContext.pos().move(withResult.entity(), oldPos, pos);
     }
 
     @Override

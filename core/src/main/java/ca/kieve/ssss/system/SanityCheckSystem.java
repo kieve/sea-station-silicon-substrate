@@ -10,9 +10,14 @@ public class SanityCheckSystem extends System {
 
     @Override
     public void run() {
-        var z = Vec3i.ZERO;
-        if (z.x != 0 || z.y != 0 || z.z != 0) {
-            throw new RuntimeException("Vec3i.ZERO is no longer zero");
+        verifyStaticVec3i("Vec3i.ZERO", Vec3i.ZERO, 0, 0, 0);
+        verifyStaticVec3i("Vec3i.X", Vec3i.X, 1, 0, 0);
+        verifyStaticVec3i("Vec3i.Y", Vec3i.Y, 0, 1, 0);
+    }
+
+    private void verifyStaticVec3i(String label, Vec3i v, int x, int y, int z) {
+        if (v.x != x || v.y != y || v.z != z) {
+            throw new RuntimeException(label + " is no longer zero");
         }
     }
 }

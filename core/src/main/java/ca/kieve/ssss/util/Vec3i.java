@@ -4,6 +4,8 @@ import java.util.Objects;
 
 public class Vec3i {
     public static final Vec3i ZERO = new Vec3i(0, 0, 0);
+    public static final Vec3i X = new Vec3i(1, 0, 0);
+    public static final Vec3i Y = new Vec3i(0, 1, 0);
 
     public int x;
     public int y;
@@ -35,6 +37,24 @@ public class Vec3i {
         this.x += val.x;
         this.y += val.y;
         this.z += val.z;
+    }
+
+    public Vec3i add(Vec3i val) {
+        var result = copy();
+        result.addMut(val);
+        return result;
+    }
+
+    public void productMut(int value) {
+        this.x *= value;
+        this.y *= value;
+        this.z *= value;
+    }
+
+    public Vec3i product(int value) {
+        var result = copy();
+        result.productMut(value);
+        return result;
     }
 
     @Override

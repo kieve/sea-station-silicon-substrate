@@ -1,5 +1,7 @@
 package ca.kieve.ssss.system;
 
+import ca.kieve.ssss.component.Speed;
+import ca.kieve.ssss.component.WasdController;
 import ca.kieve.ssss.context.GameContext;
 
 import static ca.kieve.ssss.util.TickStage.AWAIT_INPUT;
@@ -29,6 +31,10 @@ public class ClockSystem extends System {
         super(gameContext);
     }
 
+    public static int getTicksToAct(int speed) {
+        return (100 * 100) / speed;
+    }
+
     @Override
     public void awaitingUserInput() {
         if (!m_clock.isUserInputRegistered()) {
@@ -36,14 +42,32 @@ public class ClockSystem extends System {
         }
         m_clock.setTickStage(PRE_TICK);
         m_clock.setUserInputRegistered(false);
+
+        // Set so the player can act.
+        m_gameContext.ecs().findEntitiesWith(
+            WasdController.class,
+            Speed.class
+        ).forEach(with2 -> with2.comp2().canAct = true);
     }
 
     @Override
     public void preTick() {
         m_clock.setTickStage(TICK);
-        // TODO: Process entities that can act, move time forward by their speed
-        //       Until then... just move time.
-        m_clock.setCurrentTime(m_clock.getTargetTime());
+
+        var currentTime = m_clock.getCurrentTime();
+        var withSpeeds = m_gameContext.ecs().findEntitiesWith(Speed.class);
+        for (var with : withSpeeds) {
+            var speed = with.comp();
+
+            // Can any entities now?
+            if (speed.canActAt <= currentTime) {
+                speed.canAct = true;
+                var ticksToAct = getTicksToAct(speed.val);
+                speed.canActAt = currentTime + ticksToAct;
+            } else {
+                speed.canAct = false;
+            }
+        }
     }
 
     @Override
@@ -53,8 +77,29 @@ public class ClockSystem extends System {
 
     @Override
     public void postTick() {
-        // TODO: Don't move to AWAIT_INPUT if we haven't reached the target time.
-        m_clock.setTickStage(AWAIT_INPUT);
+        var minNextAct = m_clock.getTargetTime();
+
+        var withSpeeds = m_gameContext.ecs().findEntitiesWith(Speed.class);
+        for (var with : withSpeeds) {
+            var speed = with.comp();
+
+            // Special case for the player...
+            if (with.entity().has(WasdController.class)) {
+                speed.canAct = false;
+                continue;
+            }
+            minNextAct = Math.min(minNextAct, speed.canActAt);
+        }
+
+        m_clock.setCurrentTime(minNextAct);
+        if (minNextAct < m_clock.getTargetTime()) {
+            // Let the non-player AI act
+            m_clock.setTickStage(PRE_TICK);
+        } else {
+            // Non-players have acted. Nothing can act again before the player.
+            // Wait for input.
+            m_clock.setTickStage(AWAIT_INPUT);
+        }
     }
 
     @Override

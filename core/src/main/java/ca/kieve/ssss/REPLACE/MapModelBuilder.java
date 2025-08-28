@@ -8,8 +8,10 @@ import java.util.Random;
  * A map builder able to build a dungeon with a given number of random rooms
  */
 public final class MapModelBuilder {
-    public final static int ROOM_MIN_SIDE_LENGTH = 4;
-    public final static int ROOM_MAX_SIDE_LENGTH = 10;
+//    public final static int ROOM_MIN_SIDE_LENGTH = 4;
+//    public final static int ROOM_MAX_SIDE_LENGTH = 10;
+    public final static int ROOM_MIN_SIDE_LENGTH = 20;
+    public final static int ROOM_MAX_SIDE_LENGTH = 21;
 
     private MapModelBuilder() {
     }

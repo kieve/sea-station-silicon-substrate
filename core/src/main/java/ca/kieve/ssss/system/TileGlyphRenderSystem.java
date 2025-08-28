@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
 import ca.kieve.ssss.component.CameraComp;
+import ca.kieve.ssss.component.Descriptor;
 import ca.kieve.ssss.component.Material;
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.component.TileGlyph;
@@ -42,8 +43,9 @@ public class TileGlyphRenderSystem extends System {
             // Get all the other entities at the same position
             var stack = m_gameContext.pos().getAt(position.getPosition());
             if (stack.size() > 1) {
-                boolean isPlayer = with.entity().has(CameraComp.class);
-                if (!isPlayer) {
+                // TODO: Come up with a better way of sorting stacked entities
+                boolean hasDescriptor = with.entity().has(Descriptor.class);
+                if (!hasDescriptor) {
                     return;
                 }
             }
@@ -58,6 +60,12 @@ public class TileGlyphRenderSystem extends System {
                 case STEEL -> Color.ORANGE;
                 case null -> Color.WHITE;
             };
+
+            var setColor = with.entity().get(Color.class);
+            if (setColor != null) {
+                color = setColor;
+            }
+
             font.setColor(color);
 
             font.draw(m_spriteBatch, "" + glyph.glyph(),
