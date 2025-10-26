@@ -36,6 +36,7 @@ public class GameWindow extends UiWindow {
         m_gameContext = gameContext;
         m_viewport.setUnitsPerPixel(TILE_SCALE);
 
+        // TODO: All this setup should be moved somewhere
         createSystems();
         createEntities();
     }
@@ -144,6 +145,12 @@ public class GameWindow extends UiWindow {
             playerPos.add(Vec3i.X.product(4)),
             200,
             Color.RED
+        );
+
+        // Test socket for taking over dead entities
+        ActorBlueprint.createDeadMech(m_gameContext,
+            new Vec3i(5, 5, 0),
+            Color.GOLD
         );
     }
 }

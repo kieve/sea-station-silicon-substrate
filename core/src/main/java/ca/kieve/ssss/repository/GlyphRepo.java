@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import ca.kieve.ssss.component.TileGlyph;
 
 import static ca.kieve.ssss.repository.FontRepo.UBUNTU_32;
+import static ca.kieve.ssss.repository.FontRepo.XIROD_24;
 import static ca.kieve.ssss.repository.FontRepo.XIROD_32;
 import static ca.kieve.ssss.ui.widget.GameWindow.TILE_SIZE;
 
@@ -20,6 +21,13 @@ public class GlyphRepo {
         '@',
         2.5f / TILE_SIZE,
         1 + (-6f) / TILE_SIZE
+    );
+
+    public static final TileGlyph M = create(
+        XIROD_24,
+        'M',
+        2.7f / TILE_SIZE,
+        1 + (-9f) / TILE_SIZE
     );
 
     public static final TileGlyph S = create(

@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
-import ca.kieve.ssss.component.CameraComp;
 import ca.kieve.ssss.component.Descriptor;
 import ca.kieve.ssss.component.Material;
 import ca.kieve.ssss.component.Position;

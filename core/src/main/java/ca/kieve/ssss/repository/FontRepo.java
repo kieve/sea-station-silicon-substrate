@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 
 import static ca.kieve.ssss.ui.widget.GameWindow.TILE_SCALE;
-import static ca.kieve.ssss.ui.widget.GameWindow.TILE_SIZE;
 import static com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.DEFAULT_CHARS;
 
 public class FontRepo {
@@ -15,15 +14,16 @@ public class FontRepo {
     }
 
     public static final BitmapFont XIROD_32;
+    public static final BitmapFont XIROD_24;
     public static final BitmapFont UBUNTU_32;
 
-    public static final BitmapFont UI_UBUNTU_32;
+    public static final BitmapFont UI_UBUNTU_24;
 
     static {
-        XIROD_32 = loadGameFont("fonts/Xirod.otf", TILE_SIZE);
-        UBUNTU_32 = loadGameFont("fonts/UbuntuMono-R.ttf", TILE_SIZE);
-
-        UI_UBUNTU_32 = loadUiFont("fonts/UbuntuMono-R.ttf", 24);
+        XIROD_32 = loadGameFont("fonts/Xirod.otf", 32);
+        XIROD_24 = loadGameFont("fonts/Xirod.otf", 24);
+        UBUNTU_32 = loadGameFont("fonts/UbuntuMono-R.ttf", 32);
+        UI_UBUNTU_24 = loadUiFont("fonts/UbuntuMono-R.ttf", 24);
     }
 
     private static BitmapFont loadGameFont(String path, int size) {

@@ -77,8 +77,8 @@ public class Text extends UiNode {
         var batch = renderContext.spriteBatch();
         batch.begin();
         batch.setProjectionMatrix(renderContext.camera().combined);
-        FontRepo.UI_UBUNTU_32.setColor(Color.BLACK);
-        FontRepo.UI_UBUNTU_32.draw(batch, m_text, pos.x() + 5, pos.y() + 5);
+        FontRepo.UI_UBUNTU_24.setColor(Color.BLACK);
+        FontRepo.UI_UBUNTU_24.draw(batch, m_text, pos.x() + 5, pos.y() + 5);
         batch.end();
     }
 }
