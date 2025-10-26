@@ -1,6 +1,8 @@
 package ca.kieve.ssss.repository;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
@@ -46,5 +48,13 @@ public class FontRepo {
         var result = generator.generateFont(parameter);
         generator.dispose();
         return result;
+    }
+
+    public static void setFontColor(BitmapFont font, Color color) {
+        font.setColor(color);
+    }
+
+    public static void draw(BitmapFont font, Batch batch, String text, float x, float y) {
+        font.draw(batch, text, x, y);
     }
 }

@@ -9,6 +9,8 @@ import ca.kieve.ssss.repository.FontRepo;
 import ca.kieve.ssss.ui.core.UiNode;
 import ca.kieve.ssss.ui.core.UiRenderContext;
 
+import static ca.kieve.ssss.repository.FontRepo.UI_UBUNTU_24;
+
 public class Text extends UiNode {
     private String m_text;
 
@@ -77,8 +79,8 @@ public class Text extends UiNode {
         var batch = renderContext.spriteBatch();
         batch.begin();
         batch.setProjectionMatrix(renderContext.camera().combined);
-        FontRepo.UI_UBUNTU_24.setColor(Color.BLACK);
-        FontRepo.UI_UBUNTU_24.draw(batch, m_text, pos.x() + 5, pos.y() + 5);
+        FontRepo.setFontColor(UI_UBUNTU_24, Color.BLACK);
+        FontRepo.draw(UI_UBUNTU_24, batch, m_text, pos.x() + 5, pos.y() + 5);
         batch.end();
     }
 }

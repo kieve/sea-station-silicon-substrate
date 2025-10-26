@@ -2,6 +2,9 @@
 
 apply plugin: 'jacoco'
 
+configurations {
+  mockitoAgent
+}
 dependencies {
   api "com.badlogicgames.gdx:gdx:$gdxVersion"
   api "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
@@ -11,8 +14,14 @@ dependencies {
   api "com.squidpony:squidcore:$squidSquadVersion"
   api "com.squidpony:squidsmooth:$squidSquadVersion"
 
-  testImplementation "org.junit.jupiter:junit-jupiter-api:5.10.2"
-  testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.10.2"
+  testImplementation platform("org.junit:junit-bom:$junitBomVersion")
+  testImplementation "org.junit.jupiter:junit-jupiter"
+  testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+  testImplementation "org.mockito:mockito-core:$mockitoVersion"
+  testImplementation "org.mockito:mockito-junit-jupiter:$mockitoVersion"
+  mockitoAgent("org.mockito:mockito-core:$mockitoVersion") {
+    transitive = false
+  }
 
   if (enableGraalNative == 'true') {
     implementation "io.github.berstanio:gdx-svmhelper-annotations:$graalHelperVersion"
@@ -21,10 +30,11 @@ dependencies {
 
 tasks.withType(Test).configureEach {
   useJUnitPlatform()
+  jvmArgs += "-javaagent:${configurations.mockitoAgent.asPath}"
 }
 
 jacoco {
-  toolVersion = '0.8.12'
+  toolVersion = jacocoVersion
 }
 
 tasks.named('test') {
