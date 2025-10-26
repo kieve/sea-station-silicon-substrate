@@ -1,2 +1,2 @@
 * text=auto eol=lf
-*.bat text=auto eol=crlf
+*.bat text=auto eol=lf

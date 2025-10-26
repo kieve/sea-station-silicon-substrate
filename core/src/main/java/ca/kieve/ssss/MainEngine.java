@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.screen.PlayScreen;
 import ca.kieve.ssss.ui.core.UiScreen;
+import ca.kieve.ssss.util.TickStage;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class MainEngine extends ApplicationAdapter {
@@ -50,6 +51,9 @@ public class MainEngine extends ApplicationAdapter {
     }
 
     private void render(float delta) {
+        if (m_gameContext.clock().getTickStage() != TickStage.AWAIT_INPUT) {
+            return;
+        }
         ScreenUtils.clear(Color.BLACK);
         m_currentScreen.render(delta);
     }

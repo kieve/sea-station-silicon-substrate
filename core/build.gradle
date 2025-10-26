@@ -1,5 +1,7 @@
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
+apply plugin: 'jacoco'
+
 dependencies {
   api "com.badlogicgames.gdx:gdx:$gdxVersion"
   api "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
@@ -9,7 +11,31 @@ dependencies {
   api "com.squidpony:squidcore:$squidSquadVersion"
   api "com.squidpony:squidsmooth:$squidSquadVersion"
 
+  testImplementation "org.junit.jupiter:junit-jupiter-api:5.10.2"
+  testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.10.2"
+
   if (enableGraalNative == 'true') {
     implementation "io.github.berstanio:gdx-svmhelper-annotations:$graalHelperVersion"
+  }
+}
+
+tasks.withType(Test).configureEach {
+  useJUnitPlatform()
+}
+
+jacoco {
+  toolVersion = '0.8.12'
+}
+
+tasks.named('test') {
+  finalizedBy(tasks.named('jacocoTestReport'))
+}
+
+tasks.named('jacocoTestReport') {
+  dependsOn(tasks.named('test'))
+  reports {
+    xml.required.set(false)
+    csv.required.set(false)
+    html.required.set(true)
   }
 }
