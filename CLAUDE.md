@@ -184,8 +184,8 @@ The game runs at a fixed 60 FPS (`TARGET_FPS = 60f` in MainEngine). Delta time a
 ### Rendering Only During AWAIT_INPUT
 The `MainEngine.render()` method only renders when `TickStage == AWAIT_INPUT`, preventing visual updates during turn processing.
 
-### Java 21
-The project uses Java 21 (`sourceCompatibility = 21`).
+### Java 25
+The project uses Java 25. Use `IO.println()` instead of `System.out.println()` for console output.
 
 ### Windows-Specific Paths
 This is a Windows development environment. Use backslash-escaped paths or forward slashes when working with file paths.
