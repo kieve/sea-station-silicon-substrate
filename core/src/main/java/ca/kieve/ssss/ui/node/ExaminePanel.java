@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
 import ca.kieve.ssss.component.Descriptor;
+import ca.kieve.ssss.context.ExamineContext;
 import ca.kieve.ssss.repository.FontRepo;
 import ca.kieve.ssss.ui.core.UiNode;
 import ca.kieve.ssss.ui.core.UiRenderContext;
@@ -47,10 +48,8 @@ public class ExaminePanel extends UiNode {
         var entities = gc.pos().getAt(crosshairPos);
 
         m_entityNames.clear();
-        entities.stream()
-            .map(entity -> entity.get(Descriptor.class))
-            .filter(descriptor -> descriptor != null)
-            .map(Descriptor::name)
+        ExamineContext.sortEntitiesByZIndex(entities).stream()
+            .map(entity -> entity.get(Descriptor.class).name())
             .forEach(m_entityNames::add);
     }
 

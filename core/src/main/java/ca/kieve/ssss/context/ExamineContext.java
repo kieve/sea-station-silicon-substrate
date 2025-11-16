@@ -1,6 +1,13 @@
 package ca.kieve.ssss.context;
 
+import ca.kieve.ssss.component.Descriptor;
+import ca.kieve.ssss.component.RenderingHint;
 import ca.kieve.ssss.util.Vec3i;
+import dev.dominion.ecs.api.Entity;
+
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class ExamineContext {
     private RenderContext m_renderContext;
@@ -8,6 +15,20 @@ public class ExamineContext {
     private Vec3i m_crosshairPos = new Vec3i(0, 0, 0);
     private boolean m_selectionMode = false;
     private int m_selectedIndex = 0;
+
+    /**
+     * Sorts entities by Z-index in descending order (highest Z-index first).
+     * Filters to only include entities with a Descriptor component.
+     */
+    public static List<Entity> sortEntitiesByZIndex(List<Entity> entities) {
+        return entities.stream()
+            .filter(entity -> entity.get(Descriptor.class) != null)
+            .sorted(Comparator.comparingInt(entity -> {
+                var hint = entity.get(RenderingHint.class);
+                return hint != null ? -hint.zIndex : 0;
+            }))
+            .collect(Collectors.toList());
+    }
 
     public void init(GameContext gameContext) {
         m_renderContext = gameContext.render();

@@ -4,6 +4,7 @@ import ca.kieve.ssss.component.Descriptor;
 import ca.kieve.ssss.component.PlayerController;
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.component.SocketPlug;
+import ca.kieve.ssss.context.ExamineContext;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.context.InputContext;
 import ca.kieve.ssss.context.InputContext.Mode;
@@ -14,7 +15,6 @@ import ca.kieve.ssss.util.Vec3i;
 import dev.dominion.ecs.api.Entity;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ExamineSystem extends System {
     private final InputContext m_input;
@@ -115,15 +115,12 @@ public class ExamineSystem extends System {
             .count();
     }
 
-    private void handleEnterKey(
-        ca.kieve.ssss.context.ExamineContext examineContext
-    ) {
+    private void handleEnterKey(ExamineContext examineContext) {
         var crosshairPos = examineContext.getCrosshairPos();
         var entities = m_gameContext.pos().getAt(crosshairPos);
 
-        List<Entity> entitiesWithDescriptor = entities.stream()
-            .filter(entity -> entity.get(Descriptor.class) != null)
-            .collect(Collectors.toList());
+        List<Entity> entitiesWithDescriptor =
+            ExamineContext.sortEntitiesByZIndex(entities);
 
         if (entitiesWithDescriptor.isEmpty()) {
             return;
