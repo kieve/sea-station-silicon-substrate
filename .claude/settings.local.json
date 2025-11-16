@@ -3,7 +3,9 @@
     "allow": [
       "Bash(./gradlew build:*)",
       "Bash(./gradlew core:compileJava:*)",
-      "Bash(./gradlew test:*)"
+      "Bash(./gradlew test:*)",
+      "Bash(./gradlew clean:*)",
+      "Bash(./gradlew:*)"
     ],
     "deny": [],
     "ask": []
