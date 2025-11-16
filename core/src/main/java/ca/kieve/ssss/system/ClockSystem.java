@@ -99,6 +99,8 @@ public class ClockSystem extends System {
             // Non-players have acted. Nothing can act again before the player.
             // Wait for input.
             m_clock.setTickStage(AWAIT_INPUT);
+            // Mark render dirty when entering AWAIT_INPUT so we redraw the final state
+            m_gameContext.render().markDirty();
         }
     }
 

@@ -100,7 +100,7 @@ public class EjectSystem extends System {
 
         // Enter eject mode
         m_input.setMode(Mode.EJECT);
-        m_ejectContext.enter(bodyPos.getPosition(), m_gameContext);
+        m_ejectContext.enter(bodyPos.getPosition());
         return true;
     }
 

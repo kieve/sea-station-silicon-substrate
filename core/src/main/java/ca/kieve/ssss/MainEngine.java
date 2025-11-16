@@ -9,7 +9,6 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.screen.PlayScreen;
 import ca.kieve.ssss.ui.core.UiScreen;
-import ca.kieve.ssss.util.TickStage;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class MainEngine extends ApplicationAdapter {
@@ -28,6 +27,10 @@ public class MainEngine extends ApplicationAdapter {
         Gdx.app.setLogLevel(Application.LOG_INFO);
 
         m_gameContext = new GameContext();
+        // Initialize contexts that need cross-references
+        m_gameContext.examine().init(m_gameContext);
+        m_gameContext.eject().init(m_gameContext);
+
         Gdx.input.setInputProcessor(m_gameContext.inputMux());
         m_currentScreen = new PlayScreen(m_gameContext);
     }
@@ -51,9 +54,7 @@ public class MainEngine extends ApplicationAdapter {
     }
 
     private void render(float delta) {
-        if (m_gameContext.clock().getTickStage() != TickStage.AWAIT_INPUT) {
-            return;
-        }
+        // Always clear and render - GameWindow handles caching internally
         ScreenUtils.clear(Color.BLACK);
         m_currentScreen.render(delta);
     }

@@ -181,8 +181,15 @@ Entity creation is handled via blueprint classes in `ca.kieve.ssss.blueprint.*`:
 ### Fixed Frame Rate
 The game runs at a fixed 60 FPS (`TARGET_FPS = 60f` in MainEngine). Delta time accumulates until a full frame is ready.
 
-### Rendering Only During AWAIT_INPUT
-The `MainEngine.render()` method only renders when `TickStage == AWAIT_INPUT`, preventing visual updates during turn processing.
+### Render Caching and Dirty Marking
+The game uses a FrameBuffer caching system in `GameWindow` to efficiently render only when necessary:
+- The game world is rendered to a FrameBuffer (texture) and cached
+- The cached frame is always drawn to screen, even during tick processing
+- Re-rendering only occurs when in `AWAIT_INPUT` stage AND the render is marked dirty
+- Contexts that change visual state (ExamineContext, EjectContext) automatically call `RenderContext.markDirty()` when their state changes
+- `ClockSystem.postTick()` marks dirty when transitioning back to `AWAIT_INPUT`
+
+This prevents intermediate game states from being rendered while ensuring the final state is always displayed.
 
 ### Java 25
 The project uses Java 25. Use `IO.println()` instead of `System.out.println()` for console output.
@@ -224,6 +231,40 @@ This pattern:
 - Keeps constructors consistent (always expect GameContext)
 - Allows components to access additional contexts later without signature changes
 - Makes dependencies on GameContext explicit and centralized
+
+### Context Initialization with init(GameContext)
+Since `GameContext` is a record that creates all context objects in a single constructor call, contexts that need references to other contexts cannot receive them during construction. Instead, use an `init(GameContext)` method that is called after `GameContext` is created.
+
+**Example:**
+```java
+public class MyContext {
+    private RenderContext m_renderContext;
+    private PositionContext m_positionContext;
+
+    public void init(GameContext gameContext) {
+        m_renderContext = gameContext.render();
+        m_positionContext = gameContext.pos();
+    }
+
+    public void doSomething() {
+        // Can now use m_renderContext.markDirty() etc.
+    }
+}
+```
+
+**In MainEngine.create():**
+```java
+m_gameContext = new GameContext();
+// Initialize contexts that need cross-references
+m_gameContext.examine().init(m_gameContext);
+m_gameContext.eject().init(m_gameContext);
+```
+
+This pattern:
+- Provides a single initialization point for each context
+- Allows contexts to cache references to other contexts they depend on
+- Keeps the initialization logic centralized in `MainEngine.create()`
+- Follows the same "pass GameContext" philosophy used elsewhere
 
 ### Early Exit Pattern
 Prefer to invert and early exit `if` statements to avoid unnecessary nesting and simplify reading code.

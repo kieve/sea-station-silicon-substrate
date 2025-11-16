@@ -21,6 +21,7 @@ public record GameContext(
     ExamineContext examine,
     EjectContext eject,
     EventContext events,
+    RenderContext render,
     List<System> updateSystems,
     List<System> renderSystems
 ) {
@@ -37,6 +38,7 @@ public record GameContext(
             new ExamineContext(),
             new EjectContext(),
             new EventContext(),
+            new RenderContext(),
             new ArrayList<>(),
             new ArrayList<>()
         );
