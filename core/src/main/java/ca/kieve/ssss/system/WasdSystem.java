@@ -59,11 +59,7 @@ public class WasdSystem extends System {
         }
 
         if (anyInput) {
-            m_clock.setUserInputRegistered(true);
-            m_clock.setTargetTime(
-                m_clock.getCurrentTime()
-                + ClockSystem.getTicksToAct(speed)
-            );
+            m_clock.processPlayerActed(speed);
         }
     }
 }

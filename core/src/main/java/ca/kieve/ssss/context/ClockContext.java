@@ -1,5 +1,6 @@
 package ca.kieve.ssss.context;
 
+import ca.kieve.ssss.system.ClockSystem;
 import ca.kieve.ssss.util.TickStage;
 
 import static ca.kieve.ssss.util.TickStage.AWAIT_INPUT;
@@ -40,5 +41,16 @@ public class ClockContext {
 
     public void setUserInputRegistered(boolean userInputRegistered) {
         m_userInputRegistered = userInputRegistered;
+    }
+
+    /**
+     * Called when the player has performed an action that should advance time.
+     * Sets the user input as registered and calculates the next time the player can act.
+     *
+     * @param speedVal the speed value of the acting entity
+     */
+    public void processPlayerActed(int speedVal) {
+        m_userInputRegistered = true;
+        m_targetTime = m_currentTime + ClockSystem.getTicksToAct(speedVal);
     }
 }

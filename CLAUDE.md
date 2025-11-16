@@ -125,6 +125,22 @@ The main screen is `PlayScreen` which uses a vertical layout with:
 
 **Important:** The UI system uses a **Y-down coordinate system** (y=0 at top, increases downward), which differs from libGDX's default Y-up coordinate system. This is configured in `UiWindow` by flipping the camera's up vector. When implementing layouts, position (0, 0) is the top-left corner.
 
+### Game World Coordinate System
+
+The game world uses a **Y-up coordinate system** where:
+- Positive X → Right (East)
+- Negative X → Left (West)
+- Positive Y → Up (North)
+- Negative Y → Down (South)
+
+**WASD Key Mapping:**
+- **W** → Y+ (North/Up on screen)
+- **A** → X- (West/Left on screen)
+- **S** → Y- (South/Down on screen)
+- **D** → X+ (East/Right on screen)
+
+This is consistent across all systems that handle directional input (WasdSystem, EjectSystem, ExamineSystem, etc.). Always use these mappings when implementing new directional features.
+
 ### Map Generation
 
 Map generation uses `MapModelBuilder` (core/src/main/java/ca/kieve/ssss/REPLACE/MapModelBuilder.java) to create cave-like structures with rooms and corridors.
@@ -238,5 +254,52 @@ public void process() {
         return;
     }
     // Do work
+}
+```
+
+### No Deprecation
+Never use `@Deprecated` annotations. This is not a library project. If a method should be deprecated, remove it entirely and update all usages to use the new method.
+
+### No Fully Qualified Class Names
+Never use fully qualified class names (e.g., `ca.kieve.ssss.context.ClockContext.method()`) unless there is a name collision. Always import the class and use the simple name.
+
+**Bad:**
+```java
+var result = ca.kieve.ssss.context.ClockContext.getTicksToAct(speed);
+```
+
+**Good:**
+```java
+import ca.kieve.ssss.context.ClockContext;
+// ...
+var result = ClockContext.getTicksToAct(speed);
+```
+
+### Method Ordering
+Within a class, methods should be ordered as follows:
+1. Fields (static fields first, then instance fields)
+2. Constructors (if any exist)
+3. Static methods
+4. Instance methods
+
+Constructors are optional. If a class uses the implicit default constructor, omit it. Only include explicit constructors when they perform initialization logic.
+
+**Example:**
+```java
+public class MyClass {
+    private static final int CONSTANT = 100;
+    private int m_value = 0;
+
+    public static int calculateSomething(int input) {
+        return input * CONSTANT;
+    }
+
+    public int getValue() {
+        return m_value;
+    }
+
+    public void setValue(int value) {
+        m_value = value;
+    }
 }
 ```

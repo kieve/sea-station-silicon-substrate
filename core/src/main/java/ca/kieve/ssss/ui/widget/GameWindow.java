@@ -9,11 +9,14 @@ import ca.kieve.ssss.blueprint.PlayerBlueprint;
 import ca.kieve.ssss.blueprint.TileBlueprints;
 import ca.kieve.ssss.component.CameraComp;
 import ca.kieve.ssss.context.GameContext;
+import ca.kieve.ssss.input.EjectInputController;
 import ca.kieve.ssss.input.ExamineInputController;
 import ca.kieve.ssss.system.AiSeesawSystem;
 import ca.kieve.ssss.system.CameraSystem;
 import ca.kieve.ssss.system.ClockSystem;
 import ca.kieve.ssss.system.DebugRectRenderSystem;
+import ca.kieve.ssss.system.EjectHighlightRenderSystem;
+import ca.kieve.ssss.system.EjectSystem;
 import ca.kieve.ssss.system.EventSystem;
 import ca.kieve.ssss.system.ExamineCrosshairRenderSystem;
 import ca.kieve.ssss.system.ExamineSystem;
@@ -80,11 +83,19 @@ public class GameWindow extends UiWindow {
         var examineInputController = new ExamineInputController(m_gameContext);
         m_gameContext.inputMux().addProcessor(0, examineInputController);
 
+        // Add eject input controller with high priority (0) to intercept keys
+        var ejectInputController = new EjectInputController(m_gameContext);
+        m_gameContext.inputMux().addProcessor(0, ejectInputController);
+
+        // Create SocketSystem separately so we can pass it to EjectSystem
+        var socketSystem = new SocketSystem(m_gameContext);
+
         m_gameContext.updateSystems().addAll(List.of(
             new ClockSystem(m_gameContext),
             new InteractSystem(m_gameContext),
-            new SocketSystem(m_gameContext),
+            socketSystem,
             new ExamineSystem(m_gameContext, examineInputController),
+            new EjectSystem(m_gameContext, ejectInputController, socketSystem),
             new WasdSystem(m_gameContext),
             new AiSeesawSystem(m_gameContext),
             new VelocitySystem(m_gameContext),
@@ -110,10 +121,16 @@ public class GameWindow extends UiWindow {
             m_shapeRenderer
         );
 
+        var ejectHighlightRenderSystem = new EjectHighlightRenderSystem(
+            m_gameContext,
+            m_shapeRenderer
+        );
+
         m_gameContext.renderSystems().addAll(List.of(
             tileGlyphRenderSystem,
             debugRectRenderSystem,
-            examineCrosshairRenderSystem
+            examineCrosshairRenderSystem,
+            ejectHighlightRenderSystem
         ));
     }
 

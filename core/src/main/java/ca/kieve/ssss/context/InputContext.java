@@ -4,6 +4,7 @@ public class InputContext {
     public enum Mode {
         NORMAL,
         EXAMINE,
+        EJECT,
     }
 
     private Mode m_currentMode = Mode.NORMAL;

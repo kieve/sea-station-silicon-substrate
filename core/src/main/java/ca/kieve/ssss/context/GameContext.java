@@ -19,6 +19,7 @@ public record GameContext(
     LogContext log,
     PlayerContext player,
     ExamineContext examine,
+    EjectContext eject,
     EventContext events,
     List<System> updateSystems,
     List<System> renderSystems
@@ -34,6 +35,7 @@ public record GameContext(
             new LogContext(),
             new PlayerContext(),
             new ExamineContext(),
+            new EjectContext(),
             new EventContext(),
             new ArrayList<>(),
             new ArrayList<>()

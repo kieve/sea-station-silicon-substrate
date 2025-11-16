@@ -133,7 +133,7 @@ public class SocketSystem extends System {
      * Ejects the player from a socketed body.
      * Restores control components and sprite to the player.
      */
-    private void ejectFromSocket(Entity playerEntity, SocketPlug socketPlug, Entity bodyEntity, Socket socket) {
+    public void ejectFromSocket(Entity playerEntity, SocketPlug socketPlug, Entity bodyEntity, Socket socket) {
         socket.socketedEntity = null;
         socketPlug.currentBody = null;
 

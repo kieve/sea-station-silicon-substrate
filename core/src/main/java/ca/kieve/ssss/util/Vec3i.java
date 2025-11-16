@@ -7,6 +7,11 @@ public class Vec3i {
     public static final Vec3i X = new Vec3i(1, 0, 0);
     public static final Vec3i Y = new Vec3i(0, 1, 0);
 
+    public static final Vec3i NORTH = new Vec3i(0, 1, 0);
+    public static final Vec3i SOUTH = new Vec3i(0, -1, 0);
+    public static final Vec3i EAST = new Vec3i(1, 0, 0);
+    public static final Vec3i WEST = new Vec3i(-1, 0, 0);
+
     public int x;
     public int y;
     public int z;

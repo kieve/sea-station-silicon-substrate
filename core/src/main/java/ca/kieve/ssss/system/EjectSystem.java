@@ -1,0 +1,157 @@
+package ca.kieve.ssss.system;
+
+import ca.kieve.ssss.component.Position;
+import ca.kieve.ssss.component.Socket;
+import ca.kieve.ssss.component.SocketPlug;
+import ca.kieve.ssss.component.Speed;
+import ca.kieve.ssss.context.EjectContext;
+import ca.kieve.ssss.context.GameContext;
+import ca.kieve.ssss.context.InputContext.Mode;
+import ca.kieve.ssss.input.EjectInputController;
+import ca.kieve.ssss.util.Vec3i;
+import dev.dominion.ecs.api.Entity;
+
+public class EjectSystem extends System {
+    private final EjectInputController m_inputController;
+    private final EjectContext m_ejectContext;
+    private final SocketSystem m_socketSystem;
+
+    public EjectSystem(
+        GameContext gameContext,
+        EjectInputController inputController,
+        SocketSystem socketSystem
+    ) {
+        super(gameContext);
+        m_inputController = inputController;
+        m_ejectContext = gameContext.eject();
+        m_socketSystem = socketSystem;
+    }
+
+    @Override
+    public void awaitingUserInput() {
+        var inputContext = m_gameContext.input();
+
+        // Handle Q key to toggle eject mode
+        if (m_inputController.consumeEjectKey()) {
+            if (inputContext.isMode(Mode.EJECT)) {
+                // Cancel eject mode
+                inputContext.setMode(Mode.NORMAL);
+                m_ejectContext.exit();
+                return;
+            }
+
+            // Try to enter eject mode - only if socketed
+            if (!tryEnterEjectMode()) {
+                return;
+            }
+            return;
+        }
+
+        if (!inputContext.isMode(Mode.EJECT)) {
+            return;
+        }
+
+        // Handle direction selection
+        Vec3i selectedDirection = null;
+        if (m_inputController.consumeW()) {
+            selectedDirection = Vec3i.NORTH;
+        } else if (m_inputController.consumeA()) {
+            selectedDirection = Vec3i.WEST;
+        } else if (m_inputController.consumeS()) {
+            selectedDirection = Vec3i.SOUTH;
+        } else if (m_inputController.consumeD()) {
+            selectedDirection = Vec3i.EAST;
+        }
+
+        if (selectedDirection == null) {
+            return;
+        }
+
+        // Attempt to eject in the selected direction
+        if (!m_ejectContext.isDirectionValid(selectedDirection)) {
+            m_gameContext.log().log("There's no room for you there.");
+            return;
+        }
+
+        // Perform the eject
+        performEject(selectedDirection);
+    }
+
+    private boolean tryEnterEjectMode() {
+        // Find the player entity
+        var playerResults = m_gameContext.ecs().findEntitiesWith(
+            SocketPlug.class,
+            Position.class
+        );
+
+        var optionalPlayer = playerResults.stream().findFirst();
+        if (optionalPlayer.isEmpty()) {
+            return false;
+        }
+
+        var playerWith = optionalPlayer.get();
+        var socketPlug = playerWith.comp1();
+
+        // Check if player is socketed
+        if (socketPlug.currentBody == null) {
+            return false;
+        }
+
+        // Get the body's position
+        var bodyPos = socketPlug.currentBody.get(Position.class);
+        if (bodyPos == null) {
+            return false;
+        }
+
+        // Enter eject mode
+        m_gameContext.input().setMode(Mode.EJECT);
+        m_ejectContext.enter(bodyPos.getPosition(), m_gameContext);
+        return true;
+    }
+
+    private void performEject(Vec3i direction) {
+        // Find the player entity
+        var playerResults = m_gameContext.ecs().findEntitiesWith(
+            SocketPlug.class,
+            Position.class
+        );
+
+        var optionalPlayer = playerResults.stream().findFirst();
+        if (optionalPlayer.isEmpty()) {
+            return;
+        }
+
+        var playerWith = optionalPlayer.get();
+        var playerEntity = playerWith.entity();
+        var socketPlug = playerWith.comp1();
+        var playerPos = playerWith.comp2();
+
+        Entity bodyEntity = socketPlug.currentBody;
+        if (bodyEntity == null) {
+            return;
+        }
+
+        var socket = bodyEntity.get(Socket.class);
+        if (socket == null) {
+            return;
+        }
+
+        // Get speed before ejecting (from the body)
+        var bodySpeed = bodyEntity.get(Speed.class);
+        int speedVal = bodySpeed != null ? bodySpeed.val : 100;
+
+        // Eject from the socket
+        m_socketSystem.ejectFromSocket(playerEntity, socketPlug, bodyEntity, socket);
+
+        // Move player to the eject position
+        Vec3i newPos = m_ejectContext.getCurrentPos().add(direction);
+        playerPos.setPosition(m_gameContext, playerEntity, newPos);
+
+        // Exit eject mode
+        m_gameContext.input().setMode(Mode.NORMAL);
+        m_ejectContext.exit();
+
+        // Advance time
+        m_clock.processPlayerActed(speedVal);
+    }
+}
