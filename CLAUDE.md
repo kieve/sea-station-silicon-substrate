@@ -51,9 +51,40 @@ Output is at `lwjgl3/build/libs/`
 
 The project uses Dominion ECS (`dev.dominion.ecs`) for entity management. All components implement the `Component` interface (core/src/main/java/ca/kieve/ssss/component/Component.java).
 
-- **GameContext** (`ca.kieve.ssss.context.GameContext`): Central record holding the ECS instance (`Dominion`), along with specialized contexts (Clock, Position, Log), input multiplexer, Random, and system lists.
+- **GameContext** (`ca.kieve.ssss.context.GameContext`): Central record holding the ECS instance (`Dominion`), along with specialized contexts (Clock, Position, Log, Player), input multiplexer, Random, and system lists.
 - **Components**: Interfaces/classes in `ca.kieve.ssss.component.*` that represent data attached to entities (Position, Velocity, Health, Speed, etc.)
 - **Systems**: Classes extending `ca.kieve.ssss.system.System` that contain game logic
+
+#### Dominion ECS API
+
+**Adding components to entities:**
+```java
+entity.add(new Position(x, y, z));  // Add component instance
+```
+
+**Removing components from entities:**
+```java
+entity.removeType(TileGlyph.class);  // Remove by type (preferred)
+entity.remove(componentInstance);     // Remove specific instance
+```
+
+**Important:** Use `removeType(Class)` not `remove(Class)` when removing by type. The `remove()` method expects the actual component instance, not the class.
+
+**Querying entities:**
+```java
+var results = dominion.findEntitiesWith(Position.class, Velocity.class);
+results.forEach(with -> {
+    var pos = with.comp1();      // First component
+    var vel = with.comp2();      // Second component
+    var entity = with.entity();  // The entity itself
+});
+```
+
+**Checking for components:**
+```java
+entity.has(TileGlyph.class);  // Returns boolean
+entity.get(Speed.class);      // Returns component or null
+```
 
 ### Turn-Based Clock System
 
@@ -138,3 +169,37 @@ The project uses Java 21 (`sourceCompatibility = 21`).
 
 ### Windows-Specific Paths
 This is a Windows development environment. Use backslash-escaped paths or forward slashes when working with file paths.
+
+## Coding Style Rules
+
+### Early Exit Pattern
+Prefer to invert and early exit `if` statements to avoid unnecessary nesting and simplify reading code.
+
+**Bad:**
+```java
+public void process() {
+    if (condition1) {
+        if (condition2) {
+            if (condition3) {
+                // Do work
+            }
+        }
+    }
+}
+```
+
+**Good:**
+```java
+public void process() {
+    if (!condition1) {
+        return;
+    }
+    if (!condition2) {
+        return;
+    }
+    if (!condition3) {
+        return;
+    }
+    // Do work
+}
+```

@@ -3,9 +3,11 @@ package ca.kieve.ssss.blueprint;
 import dev.dominion.ecs.api.Entity;
 
 import ca.kieve.ssss.component.CameraComp;
+import ca.kieve.ssss.component.DebugRect;
 import ca.kieve.ssss.component.Descriptor;
 import ca.kieve.ssss.component.Inventory;
 import ca.kieve.ssss.component.Position;
+import ca.kieve.ssss.component.SocketPlug;
 import ca.kieve.ssss.component.Speed;
 import ca.kieve.ssss.component.Velocity;
 import ca.kieve.ssss.component.WasdController;
@@ -26,11 +28,13 @@ public class PlayerBlueprint {
             // Display
             GlyphRepo.PLAYER,
             new Descriptor("The Player", "It's you!"),
+            new DebugRect(),
 
             // Control
             new CameraComp(),
             wasdController,
             new Speed(100),
+            new SocketPlug(),
 
             // Physics
             new Position(pos),

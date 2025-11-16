@@ -16,6 +16,7 @@ public record GameContext(
     PositionContext pos,
     InputMultiplexer inputMux,
     LogContext log,
+    PlayerContext player,
     List<System> updateSystems,
     List<System> renderSystems
 ) {
@@ -27,6 +28,7 @@ public record GameContext(
             new PositionContext(),
             new InputMultiplexer(),
             new LogContext(),
+            new PlayerContext(),
             new ArrayList<>(),
             new ArrayList<>()
         );
