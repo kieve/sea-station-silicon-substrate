@@ -19,6 +19,7 @@ public record GameContext(
     LogContext log,
     PlayerContext player,
     ExamineContext examine,
+    EventContext events,
     List<System> updateSystems,
     List<System> renderSystems
 ) {
@@ -33,6 +34,7 @@ public record GameContext(
             new LogContext(),
             new PlayerContext(),
             new ExamineContext(),
+            new EventContext(),
             new ArrayList<>(),
             new ArrayList<>()
         );

@@ -5,6 +5,7 @@ import dev.dominion.ecs.api.Entity;
 
 import ca.kieve.ssss.component.Descriptor;
 import ca.kieve.ssss.component.Health;
+import ca.kieve.ssss.component.InteractComponent;
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.component.RenderingHint;
 import ca.kieve.ssss.component.Socket;
@@ -12,6 +13,7 @@ import ca.kieve.ssss.component.Speed;
 import ca.kieve.ssss.component.Velocity;
 import ca.kieve.ssss.component.ai.AiSeesawController;
 import ca.kieve.ssss.context.GameContext;
+import ca.kieve.ssss.event.EventType;
 import ca.kieve.ssss.repository.GlyphRepo;
 import ca.kieve.ssss.util.Vec3i;
 
@@ -70,6 +72,7 @@ public class ActorBlueprint {
 
             // Control?
             new Socket(),
+            new InteractComponent(EventType.SOCKET),
 
             // Physics
             new Position(pos),

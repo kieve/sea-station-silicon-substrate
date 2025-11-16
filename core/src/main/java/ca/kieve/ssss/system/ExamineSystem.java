@@ -6,6 +6,7 @@ import ca.kieve.ssss.component.SocketPlug;
 import ca.kieve.ssss.component.WasdController;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.context.InputContext.Mode;
+import ca.kieve.ssss.event.EventType;
 import ca.kieve.ssss.input.ExamineInputController;
 import ca.kieve.ssss.util.Vec3i;
 
@@ -88,6 +89,18 @@ public class ExamineSystem extends System {
         // Handle Enter key for selection
         if (m_inputController.consumeEnterKey()) {
             handleEnterKey(examineContext);
+        }
+    }
+
+    @Override
+    public void postTick() {
+        // Consume EXAMINE events and log their descriptions
+        var examineEvents = m_gameContext.events().getEvents(EventType.EXAMINE);
+        for (var entity : examineEvents) {
+            var descriptor = entity.get(Descriptor.class);
+            if (descriptor != null) {
+                m_gameContext.log().log(descriptor.description());
+            }
         }
     }
 

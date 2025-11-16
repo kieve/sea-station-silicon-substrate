@@ -14,6 +14,7 @@ import ca.kieve.ssss.system.AiSeesawSystem;
 import ca.kieve.ssss.system.CameraSystem;
 import ca.kieve.ssss.system.ClockSystem;
 import ca.kieve.ssss.system.DebugRectRenderSystem;
+import ca.kieve.ssss.system.EventSystem;
 import ca.kieve.ssss.system.ExamineCrosshairRenderSystem;
 import ca.kieve.ssss.system.ExamineSystem;
 import ca.kieve.ssss.system.InteractSystem;
@@ -81,14 +82,15 @@ public class GameWindow extends UiWindow {
 
         m_gameContext.updateSystems().addAll(List.of(
             new ClockSystem(m_gameContext),
+            new InteractSystem(m_gameContext),
+            new SocketSystem(m_gameContext),
             new ExamineSystem(m_gameContext, examineInputController),
             new WasdSystem(m_gameContext),
             new AiSeesawSystem(m_gameContext),
-            new SocketSystem(m_gameContext),
             new VelocitySystem(m_gameContext),
             new CameraSystem(m_gameContext),
-            new InteractSystem(m_gameContext),
-            new SanityCheckSystem(m_gameContext)
+            new SanityCheckSystem(m_gameContext),
+            new EventSystem(m_gameContext)
         ));
 
         var tileGlyphRenderSystem = new TileGlyphRenderSystem(

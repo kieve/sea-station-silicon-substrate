@@ -10,7 +10,7 @@ import ca.kieve.ssss.component.TileGlyph;
 import ca.kieve.ssss.component.Velocity;
 import ca.kieve.ssss.component.WasdController;
 import ca.kieve.ssss.context.GameContext;
-import ca.kieve.ssss.util.Vec3i;
+import ca.kieve.ssss.event.EventType;
 import dev.dominion.ecs.api.Entity;
 
 /**
@@ -25,12 +25,16 @@ public class SocketSystem extends System {
 
     @Override
     public void tick() {
+        // Check for SOCKET events from InteractSystem
+        var socketEvents = m_gameContext.events().getEvents(EventType.SOCKET);
+        if (socketEvents.isEmpty()) {
+            return;
+        }
+
         // Find the player entity
         var playerResults = m_gameContext.ecs().findEntitiesWith(
             SocketPlug.class,
-            Position.class,
-            Velocity.class,
-            Speed.class
+            Position.class
         );
 
         var optionalPlayer = playerResults.stream().findFirst();
@@ -41,26 +45,9 @@ public class SocketSystem extends System {
         var playerWith = optionalPlayer.get();
         var playerEntity = playerWith.entity();
         var socketPlug = playerWith.comp1();
-        var playerPos = playerWith.comp2().getPosition();
-        var playerVelocity = playerWith.comp3();
-        var playerSpeed = playerWith.comp4();
 
-        if (!playerSpeed.canAct) {
-            return;
-        }
-
-        var instantVelocity = playerVelocity.instant();
-
-        // Only check for socket swap if player is trying to move
-        if (instantVelocity.equals(Vec3i.ZERO)) {
-            return;
-        }
-
-        var targetPos = playerPos.add(instantVelocity);
-        var entitiesAtTarget = m_gameContext.pos().getAt(targetPos);
-
-        // Check if there's a dead socketed robot at the target position
-        for (var entity : entitiesAtTarget) {
+        // Process each socket event
+        for (var entity : socketEvents) {
             var socket = entity.get(Socket.class);
             if (socket == null) {
                 continue;
@@ -77,9 +64,6 @@ public class SocketSystem extends System {
 
             // Found a dead socketed robot - swap into it
             handleSocketSwap(playerEntity, socketPlug, entity, socket);
-
-            // Cancel the movement by zeroing velocity
-            instantVelocity.set(Vec3i.ZERO);
 
             // Log the swap
             m_gameContext.log().log("You jack into the robotic body!");
