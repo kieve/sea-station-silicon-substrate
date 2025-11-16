@@ -37,6 +37,11 @@ public class EjectSystem extends System {
                 return;
             }
 
+            // Only enter eject mode from normal mode
+            if (!m_input.isMode(Mode.NORMAL)) {
+                return;
+            }
+
             // Try to enter eject mode - only if socketed
             if (!tryEnterEjectMode()) {
                 return;

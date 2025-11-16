@@ -111,6 +111,61 @@ Systems extend the abstract `System` class and override lifecycle methods:
 
 All systems are registered in `GameWindow.createSystems()` (core/src/main/java/ca/kieve/ssss/ui/widget/GameWindow.java) as either update systems or render systems.
 
+### Input Modes and Modal Systems
+
+The game uses `InputContext.Mode` to manage mutually exclusive input modes. Each mode corresponds to a system that handles input for that mode:
+
+- **NORMAL**: Default mode for standard gameplay (WasdSystem handles movement)
+- **EXAMINE**: Examine mode for inspecting tiles (ExamineSystem)
+- **EJECT**: Eject mode for leaving a socketed body (EjectSystem)
+
+**Pattern for Modal Systems:**
+
+Systems that manage input modes must follow this pattern in `awaitingUserInput()`:
+
+1. **Handle toggle key**: Check if the mode's activation key was pressed
+2. **Exit if already in mode**: If currently in this mode, return to NORMAL
+3. **Guard against wrong mode**: Only enter the mode from NORMAL mode
+4. **Process mode-specific input**: After guards, process input only when in the correct mode
+
+```java
+@Override
+public void awaitingUserInput() {
+    // Handle activation key to toggle mode
+    if (m_input.consume(InputAction.MY_MODE_KEY)) {
+        if (m_input.isMode(Mode.MY_MODE)) {
+            // Already in this mode - exit to normal
+            m_input.setMode(Mode.NORMAL);
+            m_myContext.exit();
+            return;
+        }
+
+        // Only enter this mode from NORMAL mode
+        if (!m_input.isMode(Mode.NORMAL)) {
+            return;
+        }
+
+        // Enter the mode
+        m_input.setMode(Mode.MY_MODE);
+        m_myContext.enter(startPos);
+        return;
+    }
+
+    // Early exit if not in this mode
+    if (!m_input.isMode(Mode.MY_MODE)) {
+        return;
+    }
+
+    // Handle mode-specific input (only reaches here when in MY_MODE)
+    // ...
+}
+```
+
+This pattern ensures:
+- Modes can only be entered from NORMAL mode (prevents mode stacking)
+- Each mode can always be exited back to NORMAL
+- Systems don't interfere with each other's input handling
+
 ### UI System
 
 Custom UI framework built on libGDX with:

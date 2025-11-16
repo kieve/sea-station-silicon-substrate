@@ -34,6 +34,11 @@ public class ExamineSystem extends System {
                 return;
             }
 
+            // Only enter examine mode from normal mode
+            if (!m_input.isMode(Mode.NORMAL)) {
+                return;
+            }
+
             // Enter examine mode - start at player position
             var playerPos = getPlayerPosition();
             if (playerPos != null) {
