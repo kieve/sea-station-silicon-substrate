@@ -3,6 +3,7 @@ package ca.kieve.ssss.blueprint;
 import com.badlogic.gdx.graphics.Color;
 import dev.dominion.ecs.api.Entity;
 
+import ca.kieve.ssss.component.ColorComp;
 import ca.kieve.ssss.component.Descriptor;
 import ca.kieve.ssss.component.Equipment;
 import ca.kieve.ssss.component.Health;
@@ -38,7 +39,7 @@ public class ActorBlueprint {
             // Display
             GlyphRepo.S,
             new Descriptor("Moving Sign", "Perhaps, there's many of them?"),
-            color,
+            new ColorComp(color),
             new RenderingHint(1),
 
             // Control
@@ -69,7 +70,7 @@ public class ActorBlueprint {
             GlyphRepo.M,
             new Descriptor("A Mech",
                 "It might be dead, but I haven't implemented Dynamic descriptions yet tho."),
-            color,
+            new ColorComp(color),
             new RenderingHint(1),
 
             // Control?
@@ -102,7 +103,7 @@ public class ActorBlueprint {
             // Display
             GlyphRepo.T,
             new Descriptor("Training Dummy", "Go on, hit me"),
-            color,
+            new ColorComp(color),
             new RenderingHint(1),
 
             // Interaction

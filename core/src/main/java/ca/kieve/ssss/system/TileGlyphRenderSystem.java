@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
+import ca.kieve.ssss.component.ColorComp;
 import ca.kieve.ssss.component.Material;
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.component.RenderingHint;
@@ -87,9 +88,9 @@ public class TileGlyphRenderSystem extends System {
                 case null -> Color.WHITE;
             };
 
-            var setColor = entity.get(Color.class);
-            if (setColor != null) {
-                color = setColor;
+            var colorComp = entity.get(ColorComp.class);
+            if (colorComp != null) {
+                color = colorComp.color;
             }
 
             font.setColor(color);

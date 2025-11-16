@@ -1,5 +1,8 @@
 package ca.kieve.ssss.system;
 
+import com.badlogic.gdx.graphics.Color;
+
+import ca.kieve.ssss.component.ColorComp;
 import ca.kieve.ssss.component.Damage;
 import ca.kieve.ssss.component.Descriptor;
 import ca.kieve.ssss.component.Equipment;
@@ -62,6 +65,9 @@ public class AttackSystem extends System {
             if (targetHealth == null) {
                 continue;
             }
+            if (targetHealth.hp <= 0) {
+                continue;
+            }
 
             targetHealth.hp -= damage;
             if (targetHealth.hp < 0) {
@@ -79,6 +85,10 @@ public class AttackSystem extends System {
 
             if (targetHealth.hp == 0) {
                 m_gameContext.log().log(targetName + " is destroyed!");
+                var colorComp = targetEntity.get(ColorComp.class);
+                if (colorComp != null) {
+                    colorComp.color = Color.MAROON;
+                }
             }
         }
     }
