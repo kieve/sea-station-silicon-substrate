@@ -6,6 +6,7 @@ import dev.dominion.ecs.api.Entity;
 import ca.kieve.ssss.component.Descriptor;
 import ca.kieve.ssss.component.Health;
 import ca.kieve.ssss.component.Position;
+import ca.kieve.ssss.component.RenderingHint;
 import ca.kieve.ssss.component.Socket;
 import ca.kieve.ssss.component.Speed;
 import ca.kieve.ssss.component.Velocity;
@@ -35,6 +36,7 @@ public class ActorBlueprint {
             GlyphRepo.S,
             new Descriptor("Moving Sign", "Perhaps, there's many of them?"),
             color,
+            new RenderingHint(1),
 
             // Control
             new AiSeesawController(pos),
@@ -64,6 +66,7 @@ public class ActorBlueprint {
             new Descriptor("A Mech",
                 "It might be dead, but I haven't implemented Dynamic descriptions yet tho."),
             color,
+            new RenderingHint(1),
 
             // Control?
             new Socket(),

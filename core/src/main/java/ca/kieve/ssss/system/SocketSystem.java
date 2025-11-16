@@ -2,6 +2,7 @@ package ca.kieve.ssss.system;
 
 import ca.kieve.ssss.component.Health;
 import ca.kieve.ssss.component.Position;
+import ca.kieve.ssss.component.RenderingHint;
 import ca.kieve.ssss.component.Socket;
 import ca.kieve.ssss.component.SocketPlug;
 import ca.kieve.ssss.component.Speed;
@@ -173,6 +174,12 @@ public class SocketSystem extends System {
             playerContext.tileGlyph = null;
         }
 
+        // Reset body's zIndex back to non-player level (1)
+        var bodyHint = bodyEntity.get(RenderingHint.class);
+        if (bodyHint != null) {
+            bodyHint.zIndex = 1;
+        }
+
         m_gameContext.log().log("You disconnect from the robotic body.");
     }
 
@@ -211,6 +218,12 @@ public class SocketSystem extends System {
         }
         if (!bodyEntity.has(Velocity.class)) {
             bodyEntity.add(new Velocity());
+        }
+
+        // Update body's zIndex to player level (2)
+        var bodyHint = bodyEntity.get(RenderingHint.class);
+        if (bodyHint != null) {
+            bodyHint.zIndex = 2;
         }
     }
 

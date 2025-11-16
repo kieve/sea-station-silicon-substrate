@@ -7,6 +7,7 @@ import ca.kieve.ssss.component.DebugRect;
 import ca.kieve.ssss.component.Descriptor;
 import ca.kieve.ssss.component.Inventory;
 import ca.kieve.ssss.component.Position;
+import ca.kieve.ssss.component.RenderingHint;
 import ca.kieve.ssss.component.SocketPlug;
 import ca.kieve.ssss.component.Speed;
 import ca.kieve.ssss.component.Velocity;
@@ -29,6 +30,7 @@ public class PlayerBlueprint {
             GlyphRepo.PLAYER,
             new Descriptor("The Player", "It's you!"),
             new DebugRect(),
+            new RenderingHint(2),
 
             // Control
             new CameraComp(),

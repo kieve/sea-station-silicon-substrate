@@ -4,6 +4,7 @@ import dev.dominion.ecs.api.Entity;
 
 import ca.kieve.ssss.component.Descriptor;
 import ca.kieve.ssss.component.Position;
+import ca.kieve.ssss.component.RenderingHint;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.repository.GlyphRepo;
 import ca.kieve.ssss.util.Vec3i;
@@ -22,6 +23,7 @@ public class TileBlueprints {
             GlyphRepo.POUND,
             new Position(pos),
             new Descriptor("Stone wall", "It's a stone wall."),
+            new RenderingHint(1),
             MaterialBlueprint.createStoneComponents()
         );
     }
@@ -33,6 +35,7 @@ public class TileBlueprints {
             GlyphRepo.INTERPUNCT,
             new Position(pos),
             new Descriptor("Wood floor", "It's a wood floor."),
+            new RenderingHint(0),
             MaterialBlueprint.createWoodComponents()
         );
     }
@@ -44,6 +47,7 @@ public class TileBlueprints {
             GlyphRepo.SOLID,
             new Position(pos),
             new Descriptor("Steel wall", "It's a steel wall."),
+            new RenderingHint(1),
             MaterialBlueprint.createSteelComponents()
         );
     }
