@@ -9,7 +9,9 @@ import ca.kieve.ssss.context.InputContext;
 import ca.kieve.ssss.context.InputContext.Mode;
 import ca.kieve.ssss.event.EventType;
 import ca.kieve.ssss.input.InputAction;
+import ca.kieve.ssss.util.DescriptionComposer;
 import ca.kieve.ssss.util.Vec3i;
+import dev.dominion.ecs.api.Entity;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -101,7 +103,7 @@ public class ExamineSystem extends System {
         for (var entity : examineEvents) {
             var descriptor = entity.get(Descriptor.class);
             if (descriptor != null) {
-                m_gameContext.log().log(descriptor.description());
+                logDescription(entity);
             }
         }
     }
@@ -119,20 +121,19 @@ public class ExamineSystem extends System {
         var crosshairPos = examineContext.getCrosshairPos();
         var entities = m_gameContext.pos().getAt(crosshairPos);
 
-        List<Descriptor> descriptors = entities.stream()
-            .map(entity -> entity.get(Descriptor.class))
-            .filter(descriptor -> descriptor != null)
+        List<Entity> entitiesWithDescriptor = entities.stream()
+            .filter(entity -> entity.get(Descriptor.class) != null)
             .collect(Collectors.toList());
 
-        if (descriptors.isEmpty()) {
+        if (entitiesWithDescriptor.isEmpty()) {
             return;
         }
 
         if (!examineContext.isSelectionMode()) {
             // Not in selection mode
-            if (descriptors.size() == 1) {
+            if (entitiesWithDescriptor.size() == 1) {
                 // Single entity - auto-select and log (stay in examine mode)
-                logDescription(descriptors.get(0));
+                logDescription(entitiesWithDescriptor.get(0));
             } else {
                 // Multiple entities - enter selection mode
                 examineContext.enterSelectionMode();
@@ -142,14 +143,14 @@ public class ExamineSystem extends System {
 
         // In selection mode - confirm selection (exit selection mode, stay in examine)
         int selectedIndex = examineContext.getSelectedIndex();
-        if (selectedIndex < descriptors.size()) {
-            logDescription(descriptors.get(selectedIndex));
+        if (selectedIndex < entitiesWithDescriptor.size()) {
+            logDescription(entitiesWithDescriptor.get(selectedIndex));
             examineContext.exitSelectionMode();
         }
     }
 
-    private void logDescription(Descriptor descriptor) {
-        m_gameContext.log().log(descriptor.description());
+    private void logDescription(Entity entity) {
+        m_gameContext.log().log(DescriptionComposer.compose(entity));
     }
 
     private Vec3i getPlayerPosition() {

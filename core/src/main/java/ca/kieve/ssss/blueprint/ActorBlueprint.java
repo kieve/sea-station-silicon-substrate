@@ -68,8 +68,7 @@ public class ActorBlueprint {
         var entity = context.ecs().createEntity(
             // Display
             GlyphRepo.M,
-            new Descriptor("A Mech",
-                "It might be dead, but I haven't implemented Dynamic descriptions yet tho."),
+            new Descriptor("Mech", "Beep Boop."),
             new ColorComp(color),
             new RenderingHint(1),
 
@@ -102,7 +101,7 @@ public class ActorBlueprint {
         var entity = context.ecs().createEntity(
             // Display
             GlyphRepo.T,
-            new Descriptor("Training Dummy", "Go on, hit me"),
+            new Descriptor("Training Dummy", "Go on, hit me."),
             new ColorComp(color),
             new RenderingHint(1),
 

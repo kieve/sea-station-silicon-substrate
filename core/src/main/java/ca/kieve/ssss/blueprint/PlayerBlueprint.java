@@ -29,7 +29,7 @@ public class PlayerBlueprint {
         var entity = context.ecs().createEntity(
             // Display
             GlyphRepo.PLAYER,
-            new Descriptor("The Player", "It's you!"),
+            new Descriptor("Player", "It's you!"),
             new DebugRect(),
             new RenderingHint(2),
 

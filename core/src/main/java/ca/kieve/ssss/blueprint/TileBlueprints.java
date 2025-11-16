@@ -24,7 +24,7 @@ public class TileBlueprints {
             pos,
             GlyphRepo.POUND,
             new Position(pos),
-            new Descriptor("Stone wall", "It's a stone wall."),
+            new Descriptor("Wall", "Sturdy."),
             new RenderingHint(1),
             new InteractComponent(EventType.EXAMINE),
             MaterialBlueprint.createStoneComponents()
@@ -37,7 +37,7 @@ public class TileBlueprints {
             pos,
             GlyphRepo.INTERPUNCT,
             new Position(pos),
-            new Descriptor("Wood floor", "It's a wood floor."),
+            new Descriptor("Floor", "For walking."),
             new RenderingHint(0),
             MaterialBlueprint.createWoodComponents()
         );
@@ -49,7 +49,7 @@ public class TileBlueprints {
             pos,
             GlyphRepo.SOLID,
             new Position(pos),
-            new Descriptor("Steel wall", "It's a steel wall."),
+            new Descriptor("Wall", "It's even shiny."),
             new RenderingHint(1),
             new InteractComponent(EventType.EXAMINE),
             MaterialBlueprint.createSteelComponents()
