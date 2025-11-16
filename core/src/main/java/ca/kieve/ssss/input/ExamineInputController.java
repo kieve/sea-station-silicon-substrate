@@ -3,6 +3,7 @@ package ca.kieve.ssss.input;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputAdapter;
 
+import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.context.InputContext;
 import ca.kieve.ssss.context.InputContext.Mode;
 
@@ -17,8 +18,8 @@ public class ExamineInputController extends InputAdapter {
     private final KeyState m_sKey = new KeyState(Keys.S);
     private final KeyState m_dKey = new KeyState(Keys.D);
 
-    public ExamineInputController(InputContext inputContext) {
-        m_inputContext = inputContext;
+    public ExamineInputController(GameContext gameContext) {
+        m_inputContext = gameContext.input();
     }
 
     public boolean consumeExamineKey() {

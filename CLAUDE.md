@@ -179,6 +179,36 @@ This is a Windows development environment. Use backslash-escaped paths or forwar
 ### Line Length
 Maximum line length is 100 characters. Break long lines at logical points.
 
+### Pass GameContext, Not Individual Contexts
+When a system or component needs access to context objects, pass `GameContext` rather than individual context objects. The receiving class should locally cache references to the specific contexts it needs.
+
+**Bad:**
+```java
+public class MyInputController extends InputAdapter {
+    private final InputContext m_inputContext;
+
+    public MyInputController(InputContext inputContext) {
+        m_inputContext = inputContext;  // Passing individual context
+    }
+}
+```
+
+**Good:**
+```java
+public class MyInputController extends InputAdapter {
+    private final InputContext m_inputContext;
+
+    public MyInputController(GameContext gameContext) {
+        m_inputContext = gameContext.input();  // Cache locally from GameContext
+    }
+}
+```
+
+This pattern:
+- Keeps constructors consistent (always expect GameContext)
+- Allows components to access additional contexts later without signature changes
+- Makes dependencies on GameContext explicit and centralized
+
 ### Early Exit Pattern
 Prefer to invert and early exit `if` statements to avoid unnecessary nesting and simplify reading code.
 

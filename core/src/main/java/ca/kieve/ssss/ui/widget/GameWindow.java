@@ -76,9 +76,7 @@ public class GameWindow extends UiWindow {
 
     private void createSystems() {
         // Add examine input controller with high priority (0) to intercept keys
-        var examineInputController = new ExamineInputController(
-            m_gameContext.input()
-        );
+        var examineInputController = new ExamineInputController(m_gameContext);
         m_gameContext.inputMux().addProcessor(0, examineInputController);
 
         m_gameContext.updateSystems().addAll(List.of(
