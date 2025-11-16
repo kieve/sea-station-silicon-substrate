@@ -1,5 +1,6 @@
 package ca.kieve.ssss.ui.core;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -69,7 +70,13 @@ public class UiWindow extends UiLayout {
         var h = m_size.h();
         var upp = m_viewport.getUnitsPerPixel();
 
-        m_viewport.setScreenBounds(x, y, w, h);
+        // Convert from Y-down UI coordinates to Y-up libGDX screen coordinates
+        // In Y-down: y=0 is top, y increases downward
+        // In Y-up (libGDX): y=0 is bottom, y increases upward
+        var screenHeight = Gdx.graphics.getHeight();
+        var libGdxY = screenHeight - y - h;
+
+        m_viewport.setScreenBounds(x, libGdxY, w, h);
         m_viewport.setWorldSize(w * upp, h * upp);
     }
 

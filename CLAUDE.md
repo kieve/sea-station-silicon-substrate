@@ -116,10 +116,14 @@ All systems are registered in `GameWindow.createSystems()` (core/src/main/java/c
 Custom UI framework built on libGDX with:
 - **UiWindow**: Root container with viewport and camera
 - **UiNode**: Base class for UI elements with layout support
-- **Layout Types**: StackLayout, HorizontalLayout (in `ca.kieve.ssss.ui.layout.*`)
+- **Layout Types**: StackLayout, HorizontalLayout, VerticalLayout (in `ca.kieve.ssss.ui.layout.*`)
 - **GameWindow**: The main game viewport (extends UiWindow), renders at TILE_SIZE=32 pixels per tile
 
-The main screen is `PlayScreen` which uses a horizontal layout with the game window and a right sidebar.
+The main screen is `PlayScreen` which uses a vertical layout with:
+- Top section: HorizontalLayout containing game window and right sidebar
+- Bottom section: Log panel (150px fixed height)
+
+**Important:** The UI system uses a **Y-down coordinate system** (y=0 at top, increases downward), which differs from libGDX's default Y-up coordinate system. This is configured in `UiWindow` by flipping the camera's up vector. When implementing layouts, position (0, 0) is the top-left corner.
 
 ### Map Generation
 
@@ -171,6 +175,9 @@ The project uses Java 21 (`sourceCompatibility = 21`).
 This is a Windows development environment. Use backslash-escaped paths or forward slashes when working with file paths.
 
 ## Coding Style Rules
+
+### Line Length
+Maximum line length is 100 characters. Break long lines at logical points.
 
 ### Early Exit Pattern
 Prefer to invert and early exit `if` statements to avoid unnecessary nesting and simplify reading code.

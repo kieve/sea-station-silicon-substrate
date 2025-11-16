@@ -7,8 +7,9 @@ import ca.kieve.ssss.ui.core.UiScreen;
 import ca.kieve.ssss.ui.core.UiSize;
 import ca.kieve.ssss.ui.core.UiWindow;
 import ca.kieve.ssss.ui.layout.HorizontalLayout;
-import ca.kieve.ssss.ui.layout.HorizontalLayout.LayoutParams;
 import ca.kieve.ssss.ui.layout.StackLayout;
+import ca.kieve.ssss.ui.layout.VerticalLayout;
+import ca.kieve.ssss.ui.node.LogPanel;
 import ca.kieve.ssss.ui.node.Text;
 import ca.kieve.ssss.ui.widget.GameWindow;
 
@@ -21,22 +22,35 @@ public class PlayScreen implements UiScreen {
         var h = Gdx.graphics.getHeight();
         m_mainUiWindow.setSize(new UiSize(w, h));
 
-        var layout = new HorizontalLayout();
-        m_mainUiWindow.add(layout);
+        // Root vertical layout: top section + bottom log panel
+        var rootLayout = new VerticalLayout();
+        m_mainUiWindow.add(rootLayout);
+        rootLayout.setParentWindow(m_mainUiWindow);
+
+        // Top section: game window + right panel (horizontal layout)
+        var topLayout = new HorizontalLayout();
+        rootLayout.add(topLayout);
 
         // Have to explicitly set the parent so it can reapply the viewport
         // after it renders the GameWindow
-        layout.setParentWindow(m_mainUiWindow);
+        topLayout.setParentWindow(m_mainUiWindow);
 
         var gameWindow = new GameWindow(gameContext);
-        layout.add(gameWindow);
+        topLayout.add(gameWindow);
 
         var rightLayout = new StackLayout();
-        layout.add(rightLayout, new LayoutParams(300));
+        topLayout.add(rightLayout, new HorizontalLayout.LayoutParams(300));
 
-        // Testing label?
-        var text = new Text("This is a test.");
+        // Testing label in right panel
+        var text = new Text("Right Panel");
         rightLayout.add(text);
+
+        // Bottom panel for log output
+        var bottomLayout = new StackLayout();
+        rootLayout.add(bottomLayout, new VerticalLayout.LayoutParams(150));
+
+        var logPanel = new LogPanel();
+        bottomLayout.add(logPanel);
     }
 
     @Override

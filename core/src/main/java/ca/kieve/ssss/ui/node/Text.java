@@ -55,9 +55,6 @@ public class Text extends UiNode {
             .append("Time: ")
             .append(currentTime);
 
-        var logMessages = gc.log().getMessages();
-        logMessages.forEach(message -> textBuilder.append("\n").append(message));
-
         m_text = textBuilder.toString();
     }
 
