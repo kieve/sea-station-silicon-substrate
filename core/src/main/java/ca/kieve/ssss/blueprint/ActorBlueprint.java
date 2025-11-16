@@ -3,19 +3,19 @@ package ca.kieve.ssss.blueprint;
 import com.badlogic.gdx.graphics.Color;
 import dev.dominion.ecs.api.Entity;
 
+import ca.kieve.ssss.component.Attackable;
 import ca.kieve.ssss.component.ColorComp;
 import ca.kieve.ssss.component.Descriptor;
 import ca.kieve.ssss.component.Equipment;
 import ca.kieve.ssss.component.Health;
-import ca.kieve.ssss.component.InteractComponent;
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.component.RenderingHint;
 import ca.kieve.ssss.component.Socket;
+import ca.kieve.ssss.component.Socketable;
 import ca.kieve.ssss.component.Speed;
 import ca.kieve.ssss.component.Velocity;
 import ca.kieve.ssss.component.ai.AiSeesawController;
 import ca.kieve.ssss.context.GameContext;
-import ca.kieve.ssss.event.EventType;
 import ca.kieve.ssss.repository.GlyphRepo;
 import ca.kieve.ssss.util.Vec3i;
 
@@ -74,7 +74,7 @@ public class ActorBlueprint {
 
             // Control?
             new Socket(),
-            new InteractComponent(EventType.SOCKET),
+            new Socketable(),
 
             // Physics
             new Position(pos),
@@ -106,14 +106,16 @@ public class ActorBlueprint {
             new RenderingHint(1),
 
             // Interaction
-            new InteractComponent(EventType.ATTACK),
+            new Attackable(),
+            new Socketable(),
 
             // Physics
             new Position(pos),
             COLLIDER,
 
             // Stats
-            new Health(20)
+            new Health(20),
+            new Socket()
         );
         context.pos().add(entity, pos);
 

@@ -1,15 +1,23 @@
 package ca.kieve.ssss.system;
 
-import ca.kieve.ssss.component.InteractComponent;
+import ca.kieve.ssss.component.Attackable;
+import ca.kieve.ssss.component.Examinable;
+import ca.kieve.ssss.component.Health;
 import ca.kieve.ssss.component.Position;
+import ca.kieve.ssss.component.Socketable;
 import ca.kieve.ssss.component.SocketPlug;
 import ca.kieve.ssss.component.Velocity;
 import ca.kieve.ssss.context.GameContext;
+import ca.kieve.ssss.event.EventType;
 import ca.kieve.ssss.util.Vec3i;
+import dev.dominion.ecs.api.Entity;
 
 /**
  * System that detects when the player bumps into interactable entities
  * and creates events for other systems to consume.
+ *
+ * Uses marker components (Attackable, Socketable, Examinable) to dynamically
+ * determine available interactions based on entity state.
  */
 public class InteractSystem extends System {
     public InteractSystem(GameContext gameContext) {
@@ -56,23 +64,50 @@ public class InteractSystem extends System {
         boolean shouldBlockMovement = false;
 
         for (var entity : entitiesAtTarget) {
-            var interact = entity.get(InteractComponent.class);
-            if (interact == null) {
+            var interaction = resolveInteraction(entity);
+            if (interaction == null) {
                 continue;
             }
 
             // Create event for this interaction
-            eventContext.addEvent(interact.eventType, entity);
+            eventContext.addEvent(interaction, entity);
 
-            // Track if any interaction blocks movement
-            if (interact.blocksMovement) {
-                shouldBlockMovement = true;
-            }
+            // All resolved interactions block movement
+            shouldBlockMovement = true;
         }
 
         // Cancel movement if blocked by any interaction
         if (shouldBlockMovement) {
             instantVelocity.set(Vec3i.ZERO);
         }
+    }
+
+    /**
+     * Resolves which interaction should occur based on the entity's components and state.
+     * Priority order: Attack (if alive) > Socket (if dead or no health) > Examine
+     */
+    private EventType resolveInteraction(Entity entity) {
+        // Check attackable first - only if entity has health and is alive
+        if (entity.has(Attackable.class)) {
+            var health = entity.get(Health.class);
+            if (health != null && health.hp > 0) {
+                return EventType.ATTACK;
+            }
+        }
+
+        // Check socketable - for dead entities or entities without health
+        if (entity.has(Socketable.class)) {
+            var health = entity.get(Health.class);
+            if (health == null || health.hp <= 0) {
+                return EventType.SOCKET;
+            }
+        }
+
+        // Check examinable - lowest priority
+        if (entity.has(Examinable.class)) {
+            return EventType.EXAMINE;
+        }
+
+        return null;
     }
 }
