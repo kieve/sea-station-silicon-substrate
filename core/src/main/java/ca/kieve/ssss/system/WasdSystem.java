@@ -4,6 +4,7 @@ import ca.kieve.ssss.component.Speed;
 import ca.kieve.ssss.component.Velocity;
 import ca.kieve.ssss.component.WasdController;
 import ca.kieve.ssss.context.GameContext;
+import ca.kieve.ssss.context.InputContext.Mode;
 
 import static ca.kieve.ssss.input.InputAction.A;
 import static ca.kieve.ssss.input.InputAction.D;
@@ -17,6 +18,11 @@ public class WasdSystem extends System {
 
     @Override
     public void awaitingUserInput() {
+        // Only process WASD for player movement in NORMAL mode
+        if (!m_gameContext.input().isMode(Mode.NORMAL)) {
+            return;
+        }
+
         var searchResults = m_gameContext.ecs().findEntitiesWith(
             WasdController.class,
             Velocity.class,

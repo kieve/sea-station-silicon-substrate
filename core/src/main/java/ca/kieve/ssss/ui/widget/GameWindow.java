@@ -9,10 +9,13 @@ import ca.kieve.ssss.blueprint.PlayerBlueprint;
 import ca.kieve.ssss.blueprint.TileBlueprints;
 import ca.kieve.ssss.component.CameraComp;
 import ca.kieve.ssss.context.GameContext;
+import ca.kieve.ssss.input.ExamineInputController;
 import ca.kieve.ssss.system.AiSeesawSystem;
 import ca.kieve.ssss.system.CameraSystem;
 import ca.kieve.ssss.system.ClockSystem;
 import ca.kieve.ssss.system.DebugRectRenderSystem;
+import ca.kieve.ssss.system.ExamineCrosshairRenderSystem;
+import ca.kieve.ssss.system.ExamineSystem;
 import ca.kieve.ssss.system.InteractSystem;
 import ca.kieve.ssss.system.SanityCheckSystem;
 import ca.kieve.ssss.system.SocketSystem;
@@ -72,8 +75,15 @@ public class GameWindow extends UiWindow {
     }
 
     private void createSystems() {
+        // Add examine input controller with high priority (0) to intercept keys
+        var examineInputController = new ExamineInputController(
+            m_gameContext.input()
+        );
+        m_gameContext.inputMux().addProcessor(0, examineInputController);
+
         m_gameContext.updateSystems().addAll(List.of(
             new ClockSystem(m_gameContext),
+            new ExamineSystem(m_gameContext, examineInputController),
             new WasdSystem(m_gameContext),
             new AiSeesawSystem(m_gameContext),
             new SocketSystem(m_gameContext),
@@ -95,9 +105,15 @@ public class GameWindow extends UiWindow {
             m_shapeRenderer
         );
 
+        var examineCrosshairRenderSystem = new ExamineCrosshairRenderSystem(
+            m_gameContext,
+            m_shapeRenderer
+        );
+
         m_gameContext.renderSystems().addAll(List.of(
             tileGlyphRenderSystem,
-            debugRectRenderSystem
+            debugRectRenderSystem,
+            examineCrosshairRenderSystem
         ));
     }
 

@@ -15,8 +15,10 @@ public record GameContext(
     ClockContext clock,
     PositionContext pos,
     InputMultiplexer inputMux,
+    InputContext input,
     LogContext log,
     PlayerContext player,
+    ExamineContext examine,
     List<System> updateSystems,
     List<System> renderSystems
 ) {
@@ -27,8 +29,10 @@ public record GameContext(
             new ClockContext(),
             new PositionContext(),
             new InputMultiplexer(),
+            new InputContext(),
             new LogContext(),
             new PlayerContext(),
+            new ExamineContext(),
             new ArrayList<>(),
             new ArrayList<>()
         );

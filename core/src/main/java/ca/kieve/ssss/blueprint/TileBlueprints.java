@@ -32,6 +32,7 @@ public class TileBlueprints {
             pos,
             GlyphRepo.INTERPUNCT,
             new Position(pos),
+            new Descriptor("Wood floor", "It's a wood floor."),
             MaterialBlueprint.createWoodComponents()
         );
     }
