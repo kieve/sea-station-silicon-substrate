@@ -5,9 +5,11 @@ import ca.kieve.ssss.component.Socket;
 import ca.kieve.ssss.component.SocketPlug;
 import ca.kieve.ssss.component.Speed;
 import ca.kieve.ssss.context.EjectContext;
+import ca.kieve.ssss.context.EventContext;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.context.InputContext;
 import ca.kieve.ssss.context.InputContext.Mode;
+import ca.kieve.ssss.event.EjectEvent;
 import ca.kieve.ssss.input.InputAction;
 import ca.kieve.ssss.util.Vec3i;
 import dev.dominion.ecs.api.Entity;
@@ -15,13 +17,13 @@ import dev.dominion.ecs.api.Entity;
 public class EjectSystem extends System {
     private final InputContext m_input;
     private final EjectContext m_ejectContext;
-    private final SocketSystem m_socketSystem;
+    private final EventContext m_eventContext;
 
-    public EjectSystem(GameContext gameContext, SocketSystem socketSystem) {
+    public EjectSystem(GameContext gameContext) {
         super(gameContext);
         m_input = gameContext.input();
         m_ejectContext = gameContext.eject();
-        m_socketSystem = socketSystem;
+        m_eventContext = gameContext.events();
     }
 
     @Override
@@ -135,8 +137,16 @@ public class EjectSystem extends System {
         var bodySpeed = bodyEntity.get(Speed.class);
         int speedVal = bodySpeed != null ? bodySpeed.val : 100;
 
-        // Eject from the socket
-        m_socketSystem.ejectFromSocket(playerEntity, socketPlug, bodyEntity, socket);
+        // Create eject event for SocketSystem to process
+        var ejectEvent = new EjectEvent(playerEntity, socketPlug, bodyEntity, socket);
+        m_eventContext.addSystemEvent(ejectEvent);
+
+        // Restore player's TileGlyph immediately so they appear without delay
+        var playerContext = m_gameContext.player();
+        if (playerContext.tileGlyph != null) {
+            playerEntity.add(playerContext.tileGlyph);
+            playerContext.tileGlyph = null;
+        }
 
         // Move player to the eject position
         Vec3i newPos = m_ejectContext.getCurrentPos().add(direction);

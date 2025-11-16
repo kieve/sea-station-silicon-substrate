@@ -141,16 +141,13 @@ public class GameWindow extends UiWindow {
         var inputActionController = new InputActionController(m_gameContext);
         m_gameContext.inputMux().addProcessor(0, inputActionController);
 
-        // Create SocketSystem separately so we can pass it to EjectSystem
-        var socketSystem = new SocketSystem(m_gameContext);
-
         m_gameContext.updateSystems().addAll(List.of(
             new ClockSystem(m_gameContext),
             new InteractSystem(m_gameContext),
-            socketSystem,
+            new SocketSystem(m_gameContext),
             new AttackSystem(m_gameContext),
             new ExamineSystem(m_gameContext),
-            new EjectSystem(m_gameContext, socketSystem),
+            new EjectSystem(m_gameContext),
             new WasdSystem(m_gameContext),
             new AiSeesawSystem(m_gameContext),
             new VelocitySystem(m_gameContext),

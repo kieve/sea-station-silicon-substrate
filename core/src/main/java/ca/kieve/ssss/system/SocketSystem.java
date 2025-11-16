@@ -10,6 +10,7 @@ import ca.kieve.ssss.component.TileGlyph;
 import ca.kieve.ssss.component.Velocity;
 import ca.kieve.ssss.component.PlayerController;
 import ca.kieve.ssss.context.GameContext;
+import ca.kieve.ssss.event.EjectEvent;
 import ca.kieve.ssss.event.EventType;
 import dev.dominion.ecs.api.Entity;
 
@@ -21,6 +22,20 @@ import dev.dominion.ecs.api.Entity;
 public class SocketSystem extends System {
     public SocketSystem(GameContext gameContext) {
         super(gameContext);
+    }
+
+    @Override
+    public void preTick() {
+        // Process eject events from EjectSystem
+        var ejectEvents = m_gameContext.events().getSystemEvents(EjectEvent.class);
+        for (var event : ejectEvents) {
+            ejectFromSocket(
+                event.playerEntity(),
+                event.socketPlug(),
+                event.bodyEntity(),
+                event.socket()
+            );
+        }
     }
 
     @Override
