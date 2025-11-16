@@ -1,30 +1,29 @@
 package ca.kieve.ssss.system;
 
+import ca.kieve.ssss.component.PlayerController;
 import ca.kieve.ssss.component.Speed;
 import ca.kieve.ssss.component.Velocity;
-import ca.kieve.ssss.component.WasdController;
 import ca.kieve.ssss.context.GameContext;
+import ca.kieve.ssss.context.InputContext;
 import ca.kieve.ssss.context.InputContext.Mode;
-
-import static ca.kieve.ssss.input.InputAction.A;
-import static ca.kieve.ssss.input.InputAction.D;
-import static ca.kieve.ssss.input.InputAction.S;
-import static ca.kieve.ssss.input.InputAction.W;
+import ca.kieve.ssss.input.InputAction;
 
 public class WasdSystem extends System {
+    private final InputContext m_input;
+
     public WasdSystem(GameContext gameContext) {
         super(gameContext);
+        m_input = gameContext.input();
     }
 
     @Override
     public void awaitingUserInput() {
-        // Only process WASD for player movement in NORMAL mode
-        if (!m_gameContext.input().isMode(Mode.NORMAL)) {
+        if (!m_input.isMode(Mode.NORMAL)) {
             return;
         }
 
         var searchResults = m_gameContext.ecs().findEntitiesWith(
-            WasdController.class,
+            PlayerController.class,
             Velocity.class,
             Speed.class
         );
@@ -35,25 +34,24 @@ public class WasdSystem extends System {
         }
 
         var withResult = optionalResult.get();
-        var wasdController = withResult.comp1();
         var velocity = withResult.comp2();
         var instantVelocity = velocity.instant();
         var speed = withResult.comp3().val;
 
         boolean anyInput = false;
-        if (wasdController.consume(W)) {
+        if (m_input.consume(InputAction.UP)) {
             instantVelocity.y++;
             anyInput = true;
         }
-        if (wasdController.consume(A)) {
+        if (m_input.consume(InputAction.LEFT)) {
             instantVelocity.x--;
             anyInput = true;
         }
-        if (wasdController.consume(S)) {
+        if (m_input.consume(InputAction.DOWN)) {
             instantVelocity.y--;
             anyInput = true;
         }
-        if (wasdController.consume(D)) {
+        if (m_input.consume(InputAction.RIGHT)) {
             instantVelocity.x++;
             anyInput = true;
         }

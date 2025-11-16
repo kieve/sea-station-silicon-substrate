@@ -3,8 +3,8 @@ package ca.kieve.ssss.ui.node;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
+import ca.kieve.ssss.component.PlayerController;
 import ca.kieve.ssss.component.Position;
-import ca.kieve.ssss.component.WasdController;
 import ca.kieve.ssss.repository.FontRepo;
 import ca.kieve.ssss.ui.core.UiNode;
 import ca.kieve.ssss.ui.core.UiRenderContext;
@@ -27,7 +27,7 @@ public class Text extends UiNode {
         var gc = renderContext.gameContext();
         var searchResults = gc.ecs().findEntitiesWith(
             Position.class,
-            WasdController.class
+            PlayerController.class
         );
 
         var optionalResults = searchResults.stream().findFirst();

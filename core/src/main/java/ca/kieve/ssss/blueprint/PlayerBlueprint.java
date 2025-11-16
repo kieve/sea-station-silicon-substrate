@@ -6,12 +6,12 @@ import ca.kieve.ssss.component.CameraComp;
 import ca.kieve.ssss.component.DebugRect;
 import ca.kieve.ssss.component.Descriptor;
 import ca.kieve.ssss.component.Inventory;
+import ca.kieve.ssss.component.PlayerController;
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.component.RenderingHint;
 import ca.kieve.ssss.component.SocketPlug;
 import ca.kieve.ssss.component.Speed;
 import ca.kieve.ssss.component.Velocity;
-import ca.kieve.ssss.component.WasdController;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.repository.GlyphRepo;
 import ca.kieve.ssss.util.Vec3i;
@@ -24,7 +24,6 @@ public class PlayerBlueprint {
     }
 
     public static Entity create(GameContext context, Vec3i pos) {
-        var wasdController = new WasdController();
         var entity = context.ecs().createEntity(
             // Display
             GlyphRepo.PLAYER,
@@ -34,7 +33,7 @@ public class PlayerBlueprint {
 
             // Control
             new CameraComp(),
-            wasdController,
+            new PlayerController(),
             new Speed(100),
             new SocketPlug(),
 
@@ -46,7 +45,6 @@ public class PlayerBlueprint {
             // Extras
             new Inventory()
         );
-        context.inputMux().addProcessor(wasdController);
         context.pos().add(entity, pos);
         return entity;
     }

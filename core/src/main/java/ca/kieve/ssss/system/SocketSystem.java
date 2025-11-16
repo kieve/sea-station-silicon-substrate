@@ -8,7 +8,7 @@ import ca.kieve.ssss.component.SocketPlug;
 import ca.kieve.ssss.component.Speed;
 import ca.kieve.ssss.component.TileGlyph;
 import ca.kieve.ssss.component.Velocity;
-import ca.kieve.ssss.component.WasdController;
+import ca.kieve.ssss.component.PlayerController;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.event.EventType;
 import dev.dominion.ecs.api.Entity;
@@ -138,14 +138,14 @@ public class SocketSystem extends System {
         socketPlug.currentBody = null;
 
         // Remove control components from the old body and transfer back to player
-        var wasdController = bodyEntity.get(WasdController.class);
+        var playerController = bodyEntity.get(PlayerController.class);
         var bodySpeed = bodyEntity.get(Speed.class);
 
         removeControlFromBody(bodyEntity);
 
         // Restore control components to player
-        if (wasdController != null && !playerEntity.has(WasdController.class)) {
-            playerEntity.add(wasdController);
+        if (playerController != null && !playerEntity.has(PlayerController.class)) {
+            playerEntity.add(playerController);
         }
         if (bodySpeed != null && !playerEntity.has(Speed.class)) {
             playerEntity.add(new Speed(bodySpeed.val));
@@ -168,12 +168,12 @@ public class SocketSystem extends System {
     }
 
     /**
-     * Transfers control components (WasdController, Speed) from player to the body.
+     * Transfers control components (PlayerController, Speed) from player to the body.
      * Also hides the player sprite by removing TileGlyph.
      */
     private void transferControlToBody(Entity playerEntity, SocketPlug socketPlug, Entity bodyEntity) {
-        var wasdController = playerEntity.get(WasdController.class);
-        if (wasdController == null) {
+        var playerController = playerEntity.get(PlayerController.class);
+        if (playerController == null) {
             return;
         }
 
@@ -188,14 +188,14 @@ public class SocketSystem extends System {
         }
 
         // Remove control components from player
-        playerEntity.removeType(WasdController.class);
+        playerEntity.removeType(PlayerController.class);
         if (playerSpeed != null) {
             playerEntity.removeType(Speed.class);
         }
 
         // Add control components to the body if it doesn't have them
-        if (!bodyEntity.has(WasdController.class)) {
-            bodyEntity.add(wasdController);
+        if (!bodyEntity.has(PlayerController.class)) {
+            bodyEntity.add(playerController);
         }
         if (!bodyEntity.has(Speed.class) && playerSpeed != null) {
             bodyEntity.add(new Speed(playerSpeed.val));
@@ -215,9 +215,9 @@ public class SocketSystem extends System {
      * Removes control components from a body when the player ejects.
      */
     private void removeControlFromBody(Entity bodyEntity) {
-        // Remove WasdController if present
-        if (bodyEntity.has(WasdController.class)) {
-            bodyEntity.removeType(WasdController.class);
+        // Remove PlayerController if present
+        if (bodyEntity.has(PlayerController.class)) {
+            bodyEntity.removeType(PlayerController.class);
         }
 
         // Keep Speed component but mark as unable to act

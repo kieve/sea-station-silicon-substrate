@@ -1,7 +1,7 @@
 package ca.kieve.ssss.system;
 
+import ca.kieve.ssss.component.PlayerController;
 import ca.kieve.ssss.component.Speed;
-import ca.kieve.ssss.component.WasdController;
 import ca.kieve.ssss.context.GameContext;
 
 import static ca.kieve.ssss.util.TickStage.AWAIT_INPUT;
@@ -45,7 +45,7 @@ public class ClockSystem extends System {
 
         // Set so the player can act.
         m_gameContext.ecs().findEntitiesWith(
-            WasdController.class,
+            PlayerController.class,
             Speed.class
         ).forEach(with2 -> with2.comp2().canAct = true);
     }
@@ -84,7 +84,7 @@ public class ClockSystem extends System {
             var speed = with.comp();
 
             // Special case for the player...
-            if (with.entity().has(WasdController.class)) {
+            if (with.entity().has(PlayerController.class)) {
                 speed.canAct = false;
                 continue;
             }

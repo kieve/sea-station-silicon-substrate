@@ -9,8 +9,7 @@ import ca.kieve.ssss.blueprint.PlayerBlueprint;
 import ca.kieve.ssss.blueprint.TileBlueprints;
 import ca.kieve.ssss.component.CameraComp;
 import ca.kieve.ssss.context.GameContext;
-import ca.kieve.ssss.input.EjectInputController;
-import ca.kieve.ssss.input.ExamineInputController;
+import ca.kieve.ssss.input.InputActionController;
 import ca.kieve.ssss.system.AiSeesawSystem;
 import ca.kieve.ssss.system.CameraSystem;
 import ca.kieve.ssss.system.ClockSystem;
@@ -79,13 +78,9 @@ public class GameWindow extends UiWindow {
     }
 
     private void createSystems() {
-        // Add examine input controller with high priority (0) to intercept keys
-        var examineInputController = new ExamineInputController(m_gameContext);
-        m_gameContext.inputMux().addProcessor(0, examineInputController);
-
-        // Add eject input controller with high priority (0) to intercept keys
-        var ejectInputController = new EjectInputController(m_gameContext);
-        m_gameContext.inputMux().addProcessor(0, ejectInputController);
+        // Add input action controller to handle all key input
+        var inputActionController = new InputActionController(m_gameContext);
+        m_gameContext.inputMux().addProcessor(0, inputActionController);
 
         // Create SocketSystem separately so we can pass it to EjectSystem
         var socketSystem = new SocketSystem(m_gameContext);
@@ -94,8 +89,8 @@ public class GameWindow extends UiWindow {
             new ClockSystem(m_gameContext),
             new InteractSystem(m_gameContext),
             socketSystem,
-            new ExamineSystem(m_gameContext, examineInputController),
-            new EjectSystem(m_gameContext, ejectInputController, socketSystem),
+            new ExamineSystem(m_gameContext),
+            new EjectSystem(m_gameContext, socketSystem),
             new WasdSystem(m_gameContext),
             new AiSeesawSystem(m_gameContext),
             new VelocitySystem(m_gameContext),
