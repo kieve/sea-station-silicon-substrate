@@ -11,6 +11,7 @@ import ca.kieve.ssss.component.CameraComp;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.input.InputActionController;
 import ca.kieve.ssss.system.AiSeesawSystem;
+import ca.kieve.ssss.system.AttackSystem;
 import ca.kieve.ssss.system.CameraSystem;
 import ca.kieve.ssss.system.ClockSystem;
 import ca.kieve.ssss.system.DebugRectRenderSystem;
@@ -89,6 +90,7 @@ public class GameWindow extends UiWindow {
             new ClockSystem(m_gameContext),
             new InteractSystem(m_gameContext),
             socketSystem,
+            new AttackSystem(m_gameContext),
             new ExamineSystem(m_gameContext),
             new EjectSystem(m_gameContext, socketSystem),
             new WasdSystem(m_gameContext),
@@ -188,6 +190,12 @@ public class GameWindow extends UiWindow {
         ActorBlueprint.createDeadMech(m_gameContext,
             new Vec3i(5, 5, 0),
             Color.GOLD
+        );
+
+        // Training dummy for combat testing
+        ActorBlueprint.createTrainingDummy(m_gameContext,
+            new Vec3i(20, 3, 0),
+            Color.PINK
         );
     }
 }

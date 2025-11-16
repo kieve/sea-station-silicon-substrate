@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import dev.dominion.ecs.api.Entity;
 
 import ca.kieve.ssss.component.Descriptor;
+import ca.kieve.ssss.component.Equipment;
 import ca.kieve.ssss.component.Health;
 import ca.kieve.ssss.component.InteractComponent;
 import ca.kieve.ssss.component.Position;
@@ -62,6 +63,7 @@ public class ActorBlueprint {
         if (color == null) {
             color = Color.WHITE;
         }
+        var powerFist = WeaponBlueprints.createPowerFist(context);
         var entity = context.ecs().createEntity(
             // Display
             GlyphRepo.M,
@@ -80,7 +82,38 @@ public class ActorBlueprint {
             COLLIDER,
 
             // Stats?
-            new Health(100, 0)
+            new Health(100, 0),
+            new Equipment(powerFist)
+        );
+        context.pos().add(entity, pos);
+
+        return entity;
+    }
+
+    public static Entity createTrainingDummy(
+        GameContext context,
+        Vec3i pos,
+        Color color
+    ) {
+        if (color == null) {
+            color = Color.WHITE;
+        }
+        var entity = context.ecs().createEntity(
+            // Display
+            GlyphRepo.T,
+            new Descriptor("Training Dummy", "Go on, hit me"),
+            color,
+            new RenderingHint(1),
+
+            // Interaction
+            new InteractComponent(EventType.ATTACK),
+
+            // Physics
+            new Position(pos),
+            COLLIDER,
+
+            // Stats
+            new Health(20)
         );
         context.pos().add(entity, pos);
 

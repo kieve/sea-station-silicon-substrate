@@ -5,6 +5,7 @@ import dev.dominion.ecs.api.Entity;
 import ca.kieve.ssss.component.CameraComp;
 import ca.kieve.ssss.component.DebugRect;
 import ca.kieve.ssss.component.Descriptor;
+import ca.kieve.ssss.component.Equipment;
 import ca.kieve.ssss.component.Inventory;
 import ca.kieve.ssss.component.PlayerController;
 import ca.kieve.ssss.component.Position;
@@ -24,6 +25,7 @@ public class PlayerBlueprint {
     }
 
     public static Entity create(GameContext context, Vec3i pos) {
+        var chipClaws = WeaponBlueprints.createChipClaws(context);
         var entity = context.ecs().createEntity(
             // Display
             GlyphRepo.PLAYER,
@@ -43,7 +45,8 @@ public class PlayerBlueprint {
             COLLIDER,
 
             // Extras
-            new Inventory()
+            new Inventory(),
+            new Equipment(chipClaws)
         );
         context.pos().add(entity, pos);
         return entity;

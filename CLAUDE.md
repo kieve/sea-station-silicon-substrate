@@ -260,6 +260,13 @@ public void process() {
 ### No Deprecation
 Never use `@Deprecated` annotations. This is not a library project. If a method should be deprecated, remove it entirely and update all usages to use the new method.
 
+### Remove Dead Code
+Always remove dead code immediately. When refactoring or replacing functionality, delete the old files, methods, and classes that are no longer used. Do not leave unused code in the codebase. This includes:
+- Unused classes and interfaces
+- Unused methods and fields
+- Unused imports
+- Commented-out code blocks
+
 ### No Fully Qualified Class Names
 Never use fully qualified class names (e.g., `ca.kieve.ssss.context.ClockContext.method()`) unless there is a name collision. Always import the class and use the simple name.
 
