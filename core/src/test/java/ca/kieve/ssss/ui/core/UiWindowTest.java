@@ -1,11 +1,15 @@
 package ca.kieve.ssss.ui.core;
 
 import ca.kieve.ssss.context.GameContext;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedConstruction;
 
@@ -18,6 +22,16 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class UiWindowTest {
+    @BeforeEach
+    void setUp() {
+        Gdx.graphics = mock(Graphics.class);
+        when(Gdx.graphics.getHeight()).thenReturn(600);
+    }
+
+    @AfterEach
+    void tearDown() {
+        Gdx.graphics = null;
+    }
     private static class TestNode extends UiNode {
         UiRenderContext lastUpdateContext;
         float lastUpdateDelta;
@@ -111,7 +125,9 @@ class UiWindowTest {
 
         window.setPosition(new UiPosition(10, 20));
 
-        verify(ctx.viewport()).setScreenBounds(10, 20, 40, 30);
+        // Y coordinate is converted from Y-down UI coords to Y-up libGDX coords
+        // libGdxY = screenHeight - y - h = 600 - 20 - 30 = 550
+        verify(ctx.viewport()).setScreenBounds(10, 550, 40, 30);
         verify(ctx.viewport()).setWorldSize(40 * unitsPerPixel, 30 * unitsPerPixel);
     }
 
