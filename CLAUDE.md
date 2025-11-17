@@ -212,7 +212,7 @@ Entity creation is handled via blueprint classes in `ca.kieve.ssss.blueprint.*`:
 
 - **libGDX** (`$gdxVersion`): Core game framework
 - **Dominion ECS** (`$dominionEcsVersion`): Entity Component System
-- **SquidSquad** (`$squidSquadVersion`): Roguelike utilities (squidcore, squidsmooth)
+- **SquidSquad** (`$squidSquadVersion`): Roguelike utilities (squidcore, squidsmooth). See [SquidSquad.md](SquidSquad.md) for detailed API documentation and usage examples.
 - **JUnit 5**: Testing framework
 - **Mockito**: Mocking framework for tests
 - **JaCoCo**: Code coverage tool
