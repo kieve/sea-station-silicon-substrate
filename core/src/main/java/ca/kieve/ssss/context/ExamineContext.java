@@ -57,6 +57,20 @@ public class ExamineContext {
         return m_crosshairPos;
     }
 
+    /**
+     * Gets the position of the floor (block below the crosshair).
+     */
+    public Vec3i getFloorPos() {
+        return new Vec3i(m_crosshairPos.x, m_crosshairPos.y, m_crosshairPos.z - 1);
+    }
+
+    /**
+     * Gets the position of the ceiling (block above the crosshair).
+     */
+    public Vec3i getCeilingPos() {
+        return new Vec3i(m_crosshairPos.x, m_crosshairPos.y, m_crosshairPos.z + 1);
+    }
+
     public void moveCrosshair(Vec3i delta) {
         m_crosshairPos.addMut(delta);
         markDirty();

@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import ca.kieve.ssss.component.Descriptor;
 import ca.kieve.ssss.context.ExamineContext;
 import ca.kieve.ssss.repository.FontRepo;
+import ca.kieve.ssss.system.ExamineSystem.ExamineItem;
 import ca.kieve.ssss.ui.core.UiNode;
 import ca.kieve.ssss.ui.core.UiRenderContext;
 
@@ -43,14 +44,41 @@ public class ExaminePanel extends UiNode {
         m_selectionMode = examineContext.isSelectionMode();
         m_selectedIndex = examineContext.getSelectedIndex();
 
-        // Get entities at crosshair position
-        var crosshairPos = examineContext.getCrosshairPos();
-        var entities = gc.pos().getAt(crosshairPos);
+        // Build the list of examine items (main level + ceiling + floor)
+        var items = new ArrayList<ExamineItem>();
 
+        // Get entities at main level (crosshair position)
+        var mainPos = examineContext.getCrosshairPos();
+        var mainEntities = ExamineContext.sortEntitiesByZIndex(gc.pos().getAt(mainPos));
+        for (var entity : mainEntities) {
+            items.add(new ExamineItem(entity, ExamineItem.ItemType.MAIN));
+        }
+
+        // Get entities at ceiling level (z+1)
+        var ceilingPos = examineContext.getCeilingPos();
+        var ceilingEntities = ExamineContext.sortEntitiesByZIndex(gc.pos().getAt(ceilingPos));
+        for (var entity : ceilingEntities) {
+            items.add(new ExamineItem(entity, ExamineItem.ItemType.CEILING));
+        }
+
+        // Get entities at floor level (z-1)
+        var floorPos = examineContext.getFloorPos();
+        var floorEntities = ExamineContext.sortEntitiesByZIndex(gc.pos().getAt(floorPos));
+        for (var entity : floorEntities) {
+            items.add(new ExamineItem(entity, ExamineItem.ItemType.FLOOR));
+        }
+
+        // Convert items to display names
         m_entityNames.clear();
-        ExamineContext.sortEntitiesByZIndex(entities).stream()
-            .map(entity -> entity.get(Descriptor.class).name())
-            .forEach(m_entityNames::add);
+        for (var item : items) {
+            var name = item.entity().get(Descriptor.class).name();
+            String displayName = switch (item.type()) {
+                case MAIN -> name;
+                case FLOOR -> name + " (Floor)";
+                case CEILING -> name + " (Ceiling)";
+            };
+            m_entityNames.add(displayName);
+        }
     }
 
     @Override

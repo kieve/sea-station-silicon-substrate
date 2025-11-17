@@ -14,10 +14,23 @@ import ca.kieve.ssss.util.DescriptionComposer;
 import ca.kieve.ssss.util.Vec3i;
 import dev.dominion.ecs.api.Entity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ExamineSystem extends System {
     private final InputContext m_input;
+
+    /**
+     * Represents an item in the examine selection list.
+     * Can be an entity at main level, floor level, or ceiling level.
+     */
+    public record ExamineItem(Entity entity, ItemType type) {
+        public enum ItemType {
+            MAIN,
+            FLOOR,
+            CEILING
+        }
+    }
 
     public ExamineSystem(GameContext gameContext) {
         super(gameContext);
@@ -64,12 +77,12 @@ public class ExamineSystem extends System {
         // Handle WASD based on current mode
         if (examineContext.isSelectionMode()) {
             // In selection mode, W/S controls the selector
-            int entityCount = getDescriptorCount(examineContext.getCrosshairPos());
+            int itemCount = getExamineItems(examineContext).size();
             if (m_input.consume(InputAction.UP)) {
-                examineContext.decrementSelectedIndex(entityCount);
+                examineContext.decrementSelectedIndex(itemCount);
             }
             if (m_input.consume(InputAction.DOWN)) {
-                examineContext.incrementSelectedIndex(entityCount);
+                examineContext.incrementSelectedIndex(itemCount);
             }
             // Consume LEFT and RIGHT to prevent them from doing anything
             m_input.consume(InputAction.LEFT);
@@ -108,31 +121,53 @@ public class ExamineSystem extends System {
         }
     }
 
-    private int getDescriptorCount(Vec3i pos) {
-        var entities = m_gameContext.pos().getAt(pos);
-        return (int) entities.stream()
-            .filter(entity -> entity.get(Descriptor.class) != null)
-            .count();
+    private List<ExamineItem> getExamineItems(ExamineContext examineContext) {
+        var items = new ArrayList<ExamineItem>();
+
+        // Get entities at main level (crosshair position)
+        var mainPos = examineContext.getCrosshairPos();
+        var mainEntities = ExamineContext.sortEntitiesByZIndex(
+            m_gameContext.pos().getAt(mainPos)
+        );
+        for (var entity : mainEntities) {
+            items.add(new ExamineItem(entity, ExamineItem.ItemType.MAIN));
+        }
+
+        // Get entities at ceiling level (z+1)
+        var ceilingPos = examineContext.getCeilingPos();
+        var ceilingEntities = ExamineContext.sortEntitiesByZIndex(
+            m_gameContext.pos().getAt(ceilingPos)
+        );
+        for (var entity : ceilingEntities) {
+            items.add(new ExamineItem(entity, ExamineItem.ItemType.CEILING));
+        }
+
+        // Get entities at floor level (z-1)
+        var floorPos = examineContext.getFloorPos();
+        var floorEntities = ExamineContext.sortEntitiesByZIndex(
+            m_gameContext.pos().getAt(floorPos)
+        );
+        for (var entity : floorEntities) {
+            items.add(new ExamineItem(entity, ExamineItem.ItemType.FLOOR));
+        }
+
+        return items;
     }
 
     private void handleEnterKey(ExamineContext examineContext) {
-        var crosshairPos = examineContext.getCrosshairPos();
-        var entities = m_gameContext.pos().getAt(crosshairPos);
+        var items = getExamineItems(examineContext);
 
-        List<Entity> entitiesWithDescriptor =
-            ExamineContext.sortEntitiesByZIndex(entities);
-
-        if (entitiesWithDescriptor.isEmpty()) {
+        if (items.isEmpty()) {
             return;
         }
 
         if (!examineContext.isSelectionMode()) {
             // Not in selection mode
-            if (entitiesWithDescriptor.size() == 1) {
-                // Single entity - auto-select and log (stay in examine mode)
-                logDescription(entitiesWithDescriptor.get(0));
+            if (items.size() == 1) {
+                // Single item - auto-select and log (stay in examine mode)
+                logExamineItem(items.get(0));
             } else {
-                // Multiple entities - enter selection mode
+                // Multiple items - enter selection mode
                 examineContext.enterSelectionMode();
             }
             return;
@@ -140,10 +175,19 @@ public class ExamineSystem extends System {
 
         // In selection mode - confirm selection (exit selection mode, stay in examine)
         int selectedIndex = examineContext.getSelectedIndex();
-        if (selectedIndex < entitiesWithDescriptor.size()) {
-            logDescription(entitiesWithDescriptor.get(selectedIndex));
+        if (selectedIndex < items.size()) {
+            logExamineItem(items.get(selectedIndex));
             examineContext.exitSelectionMode();
         }
+    }
+
+    private void logExamineItem(ExamineItem item) {
+        String prefix = switch (item.type()) {
+            case MAIN -> "";
+            case FLOOR -> "[Floor] ";
+            case CEILING -> "[Ceiling] ";
+        };
+        m_gameContext.log().log(prefix + DescriptionComposer.compose(item.entity()));
     }
 
     private void logDescription(Entity entity) {

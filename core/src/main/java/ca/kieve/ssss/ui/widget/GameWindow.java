@@ -8,11 +8,11 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
-import ca.kieve.ssss.REPLACE.MapModelBuilder;
 import ca.kieve.ssss.blueprint.ActorBlueprint;
 import ca.kieve.ssss.blueprint.PlayerBlueprint;
-import ca.kieve.ssss.blueprint.TileBlueprints;
 import ca.kieve.ssss.component.CameraComp;
+import ca.kieve.ssss.world.StaticTestMapGenerator;
+import ca.kieve.ssss.world.WorldEntityFactory;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.input.InputActionController;
 import ca.kieve.ssss.system.AiSeesawSystem;
@@ -187,69 +187,53 @@ public class GameWindow extends UiWindow {
     }
 
     private void createEntities() {
-//        var mapModel = MapModelBuilder.build(64, 48, 16);
-        var mapModel = MapModelBuilder.build(24, 24, 1);
-        MapModelBuilder.Point firstRoomCenter = mapModel.rooms()[0].center();
+        // Generate the world using the new 3D voxel system
+        var mapGenerator = new StaticTestMapGenerator();
+        var worldModel = mapGenerator.generate();
+        var playerSpawn = mapGenerator.getPlayerSpawn();
 
-        var playerPos = new Vec3i(firstRoomCenter.x(), firstRoomCenter.y(), 0);
-        var player = PlayerBlueprint.create(m_gameContext, playerPos);
+        // Create block entities from the world model
+        WorldEntityFactory.createEntities(m_gameContext, worldModel);
+
+        // Create player at the spawn position (Z=1, standing on Z=0 blocks)
+        var player = PlayerBlueprint.create(m_gameContext, playerSpawn);
 
         var camera = player.get(CameraComp.class);
         camera.setGdx(m_camera);
 
-        var rand = m_gameContext.random();
-
-        for (int y = 0; y < mapModel.height(); y++) {
-            for (int x = 0; x < mapModel.width(); x++) {
-                var pos = new Vec3i(x, y, 0);
-                switch(mapModel.map()[y][x]) {
-                case WALL -> {
-                    if (rand.nextInt(100) < 10) {
-                        TileBlueprints.createSteelWall(m_gameContext, pos);
-                    } else {
-                        TileBlueprints.createWall(m_gameContext, pos);
-                    }
-                }
-                case FLOOR ->  TileBlueprints.createFloor(m_gameContext, pos);
-                case null -> {
-                    // Do nothing
-                }
-                }
-            }
-        }
-
         // Let's place down some debug entities
+        // Adjust Z to 1 since entities now exist at Z=1
 
         ActorBlueprint.createDebugMover(m_gameContext,
             // Move left 2 spaces
-            playerPos.add(Vec3i.X.product(-2)),
+            playerSpawn.add(Vec3i.X.product(-2)),
             50,
             Color.BLUE
         );
 
         ActorBlueprint.createDebugMover(m_gameContext,
             // Move right 2 spaces
-            playerPos.add(Vec3i.X.product(2)),
+            playerSpawn.add(Vec3i.X.product(2)),
             100,
             Color.WHITE
         );
 
         ActorBlueprint.createDebugMover(m_gameContext,
             // Move right 4 spaces
-            playerPos.add(Vec3i.X.product(4)),
+            playerSpawn.add(Vec3i.X.product(4)),
             200,
             Color.RED
         );
 
         // Test socket for taking over dead entities
         ActorBlueprint.createDeadMech(m_gameContext,
-            new Vec3i(5, 5, 0),
+            new Vec3i(5, 5, 1),
             Color.GOLD
         );
 
-        // Training dummy for combat testing
+        // Training dummy for combat testing (in room 2)
         ActorBlueprint.createTrainingDummy(m_gameContext,
-            new Vec3i(20, 3, 0),
+            new Vec3i(26, 11, 1),
             Color.PINK
         );
     }

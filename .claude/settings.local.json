@@ -5,7 +5,8 @@
       "Bash(./gradlew core:compileJava:*)",
       "Bash(./gradlew test:*)",
       "Bash(./gradlew clean:*)",
-      "Bash(./gradlew:*)"
+      "Bash(./gradlew:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []
