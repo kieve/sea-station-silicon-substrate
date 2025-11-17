@@ -64,7 +64,7 @@ public class InteractSystem extends System {
         boolean shouldBlockMovement = false;
 
         for (var entity : entitiesAtTarget) {
-            var interaction = resolveInteraction(entity);
+            var interaction = resolveInteraction(socketPlug, entity);
             if (interaction == null) {
                 continue;
             }
@@ -86,7 +86,7 @@ public class InteractSystem extends System {
      * Resolves which interaction should occur based on the entity's components and state.
      * Priority order: Attack (if alive) > Socket (if dead or no health) > Examine
      */
-    private EventType resolveInteraction(Entity entity) {
+    private EventType resolveInteraction(SocketPlug socketPlug, Entity entity) {
         // Check attackable first - only if entity has health and is alive
         if (entity.has(Attackable.class)) {
             var health = entity.get(Health.class);
@@ -96,7 +96,8 @@ public class InteractSystem extends System {
         }
 
         // Check socketable - for dead entities or entities without health
-        if (entity.has(Socketable.class)) {
+        // Only allow socketing if player is not already socketed
+        if (entity.has(Socketable.class) && socketPlug.currentBody == null) {
             var health = entity.get(Health.class);
             if (health == null || health.hp <= 0) {
                 return EventType.SOCKET;
