@@ -1,7 +1,7 @@
 package ca.kieve.ssss.system;
 
-import ca.kieve.ssss.component.Density;
 import ca.kieve.ssss.component.Position;
+import ca.kieve.ssss.component.Solid;
 import ca.kieve.ssss.component.Velocity;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.util.Vec3i;
@@ -35,10 +35,7 @@ public class VelocitySystem extends System {
             m_instantsToZero.add(instantVelocity);
 
             var entities = m_gameContext.pos().getAt(newPos);
-            var solid = entities.stream().anyMatch(entity -> {
-                var density = entity.get(Density.class);
-                return density == Density.SOLID;
-            });
+            var solid = entities.stream().anyMatch(entity -> entity.has(Solid.class));
             if (solid) {
                 return;
             }

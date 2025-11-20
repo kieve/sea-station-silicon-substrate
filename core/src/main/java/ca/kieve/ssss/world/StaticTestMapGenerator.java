@@ -1,68 +1,55 @@
 package ca.kieve.ssss.world;
 
+import com.badlogic.gdx.Gdx;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+
+import ca.kieve.ssss.content.BlockTypeFactory;
+import ca.kieve.ssss.content.MapBlockDefinition;
+import ca.kieve.ssss.content.MapDefinition;
 import ca.kieve.ssss.util.Vec3i;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
- * A simple static map generator for testing purposes.
- * Creates two rooms connected by a short hallway.
- *
- * Layout (top-down view at Z=1, where entities exist):
- *
- * Room 1 (5x5 interior):     Room 2 (5x5 interior):
- * #######                    #######
- * #.....#                    #.....#
- * #.....#  ##                #.....#
- * #.....####..####           #.....#
- * #.....#        #############.....#
- * #.....####..####           #.....#
- * #.....#  ##                #.....#
- * #######                    #######
- *
- * Where:
- * # = Stone wall (solid block from Z=0 to Z=2)
- * . = Open space (wood floor at Z=0, air at Z=1)
+ * A static map generator that loads map layout from YAML.
+ * The map layout uses character-based representation for each Z-level,
+ * with block type mappings defined in the YAML file.
  */
 public class StaticTestMapGenerator implements MapGenerator {
 
-    private static final int WORLD_WIDTH = 40;
-    private static final int WORLD_HEIGHT = 25;
-    private static final int WORLD_DEPTH = 4;
+    private static final String MAP_FILE = "content/static_test_map.yaml";
 
-    // Room 1 position (top-left corner of interior)
-    private static final int ROOM1_X = 1;
-    private static final int ROOM1_Y = 4;
-    private static final int ROOM1_WIDTH = 15;
-    private static final int ROOM1_HEIGHT = 15;
-
-    // Room 2 position (top-left corner of interior)
-    private static final int ROOM2_X = 24;
-    private static final int ROOM2_Y = 9;
-    private static final int ROOM2_WIDTH = 5;
-    private static final int ROOM2_HEIGHT = 5;
-
-    // Hallway connects the rooms
-    private static final int HALLWAY_Y = 11;
-    private static final int HALLWAY_HEIGHT = 2;
-
+    private MapDefinition m_mapDefinition;
+    private Map<Character, String> m_charToBlockType;
     private Vec3i m_playerSpawn;
 
     @Override
-    public WorldModel generate() {
-        var world = new WorldModel(WORLD_WIDTH, WORLD_HEIGHT, WORLD_DEPTH);
+    public WorldModel generate(BlockTypeFactory blockTypeFactory) {
+        loadMapDefinition();
+        buildCharacterMapping();
 
-        // Create room 1
-        createRoom(world, ROOM1_X, ROOM1_Y, ROOM1_WIDTH, ROOM1_HEIGHT);
+        int width = m_mapDefinition.size().x();
+        int height = m_mapDefinition.size().y();
+        int depth = m_mapDefinition.layers().size();
 
-        // Create room 2
-        createRoom(world, ROOM2_X, ROOM2_Y, ROOM2_WIDTH, ROOM2_HEIGHT);
+        WorldModel world = new WorldModel(width, height, depth, blockTypeFactory);
 
-        // Create hallway connecting the rooms
-        createHallway(world);
+        // Parse each layer and populate the world
+        for (Map.Entry<String, String> layerEntry : m_mapDefinition.layers().entrySet()) {
+            int z = Integer.parseInt(layerEntry.getKey());
+            String layerData = layerEntry.getValue();
+            parseLayer(world, layerData, z);
+        }
 
-        // Set player spawn to center of room 1
-        int spawnX = ROOM1_X + ROOM1_WIDTH / 2;
-        int spawnY = ROOM1_Y + ROOM1_HEIGHT / 2;
-        m_playerSpawn = new Vec3i(spawnX, spawnY, 1);
+        // Set player spawn position
+        m_playerSpawn = new Vec3i(
+            m_mapDefinition.playerSpawnX(),
+            m_mapDefinition.playerSpawnY(),
+            m_mapDefinition.playerSpawnZ()
+        );
 
         return world;
     }
@@ -72,68 +59,38 @@ public class StaticTestMapGenerator implements MapGenerator {
         return m_playerSpawn;
     }
 
-    private void createRoom(WorldModel world, int x, int y, int width, int height) {
-        // Create floor (Z=0) with wood blocks for the entire room including walls
-        for (int dx = -1; dx <= width; dx++) {
-            for (int dy = -1; dy <= height; dy++) {
-                world.setBlock(x + dx, y + dy, 0, BlockData.WOOD);
-            }
-        }
-
-        // Create walls (Z=0, 1, 2) around the perimeter
-        // Top and bottom walls
-        for (int dx = -1; dx <= width; dx++) {
-            // Top wall (y - 1)
-            setWallColumn(world, x + dx, y - 1);
-            // Bottom wall (y + height)
-            setWallColumn(world, x + dx, y + height);
-        }
-
-        // Left and right walls
-        for (int dy = 0; dy < height; dy++) {
-            // Left wall (x - 1)
-            setWallColumn(world, x - 1, y + dy);
-            // Right wall (x + width)
-            setWallColumn(world, x + width, y + dy);
-        }
-
-        // Interior is already air (default), but ensure it's clear at Z=1
-        for (int dx = 0; dx < width; dx++) {
-            for (int dy = 0; dy < height; dy++) {
-                world.setBlock(x + dx, y + dy, 1, BlockData.AIR);
-            }
+    private void loadMapDefinition() {
+        try {
+            ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+            mapper.findAndRegisterModules();
+            String yamlContent = Gdx.files.internal(MAP_FILE).readString();
+            m_mapDefinition = mapper.readValue(yamlContent, MapDefinition.class);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load map file: " + MAP_FILE, e);
         }
     }
 
-    private void createHallway(WorldModel world) {
-        // Hallway runs from right edge of room 1 to left edge of room 2
-        int hallwayStartX = ROOM1_X + ROOM1_WIDTH;
-        int hallwayEndX = ROOM2_X - 1;
-
-        // Create hallway floor and clear interior
-        for (int hx = hallwayStartX; hx <= hallwayEndX; hx++) {
-            for (int dy = 0; dy < HALLWAY_HEIGHT; dy++) {
-                int hy = HALLWAY_Y + dy;
-                // Floor at Z=0
-                world.setBlock(hx, hy, 0, BlockData.WOOD);
-                // Clear space at Z=1
-                world.setBlock(hx, hy, 1, BlockData.AIR);
-            }
-        }
-
-        // Create hallway walls (top and bottom of hallway)
-        for (int hx = hallwayStartX; hx <= hallwayEndX; hx++) {
-            // Top wall of hallway
-            setWallColumn(world, hx, HALLWAY_Y - 1);
-            // Bottom wall of hallway
-            setWallColumn(world, hx, HALLWAY_Y + HALLWAY_HEIGHT);
+    private void buildCharacterMapping() {
+        m_charToBlockType = new HashMap<>();
+        for (Map.Entry<String, MapBlockDefinition> entry
+                : m_mapDefinition.blocks().entrySet()) {
+            MapBlockDefinition blockDef = entry.getValue();
+            m_charToBlockType.put(blockDef.layoutChar(), blockDef.type());
         }
     }
 
-    private void setWallColumn(WorldModel world, int x, int y) {
-        // Walls are stone blocks from Z=0 to Z=2 (3 blocks tall)
-        world.setBlock(x, y, 0, BlockData.STONE);
-        world.setBlock(x, y, 1, BlockData.STONE);
-        world.setBlock(x, y, 2, BlockData.STONE);
+    private void parseLayer(WorldModel world, String layerData, int z) {
+        String[] lines = layerData.split("\n");
+
+        for (int y = 0; y < lines.length && y < world.getHeight(); y++) {
+            String line = lines[y];
+            for (int x = 0; x < line.length() && x < world.getWidth(); x++) {
+                char c = line.charAt(x);
+                String blockType = m_charToBlockType.get(c);
+                if (blockType != null) {
+                    world.setBlock(x, y, z, blockType);
+                }
+            }
+        }
     }
 }

@@ -1,6 +1,5 @@
 package ca.kieve.ssss.world;
 
-import ca.kieve.ssss.blueprint.BlockBlueprints;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.util.Vec3i;
 
@@ -25,14 +24,15 @@ public class WorldEntityFactory {
      */
     public static int createEntities(GameContext context, WorldModel world) {
         int count = 0;
+        var factory = context.entityFactory();
 
         for (int x = 0; x < world.getWidth(); x++) {
             for (int y = 0; y < world.getHeight(); y++) {
                 for (int z = 0; z < world.getDepth(); z++) {
-                    var block = world.getBlock(x, y, z);
+                    String blockTypeId = world.getBlock(x, y, z);
 
                     // Skip air blocks - they don't have entities
-                    if (block.isAir()) {
+                    if (world.isAir(x, y, z)) {
                         continue;
                     }
 
@@ -42,7 +42,7 @@ public class WorldEntityFactory {
                     }
 
                     var pos = new Vec3i(x, y, z);
-                    var entity = BlockBlueprints.createBlock(context, pos, block.type());
+                    var entity = factory.createBlock(context, pos, blockTypeId);
 
                     if (entity != null) {
                         count++;
@@ -65,19 +65,20 @@ public class WorldEntityFactory {
      */
     public static int createAllEntities(GameContext context, WorldModel world) {
         int count = 0;
+        var factory = context.entityFactory();
 
         for (int x = 0; x < world.getWidth(); x++) {
             for (int y = 0; y < world.getHeight(); y++) {
                 for (int z = 0; z < world.getDepth(); z++) {
-                    var block = world.getBlock(x, y, z);
+                    String blockTypeId = world.getBlock(x, y, z);
 
                     // Skip air blocks
-                    if (block.isAir()) {
+                    if (world.isAir(x, y, z)) {
                         continue;
                     }
 
                     var pos = new Vec3i(x, y, z);
-                    var entity = BlockBlueprints.createBlock(context, pos, block.type());
+                    var entity = factory.createBlock(context, pos, blockTypeId);
 
                     if (entity != null) {
                         count++;

@@ -8,9 +8,8 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
-import ca.kieve.ssss.blueprint.ActorBlueprint;
-import ca.kieve.ssss.blueprint.PlayerBlueprint;
 import ca.kieve.ssss.component.CameraComp;
+import ca.kieve.ssss.content.EntityFactory;
 import ca.kieve.ssss.world.StaticTestMapGenerator;
 import ca.kieve.ssss.world.WorldEntityFactory;
 import ca.kieve.ssss.context.GameContext;
@@ -189,14 +188,15 @@ public class GameWindow extends UiWindow {
     private void createEntities() {
         // Generate the world using the new 3D voxel system
         var mapGenerator = new StaticTestMapGenerator();
-        var worldModel = mapGenerator.generate();
+        var worldModel = mapGenerator.generate(m_gameContext.blockTypes());
         var playerSpawn = mapGenerator.getPlayerSpawn();
 
         // Create block entities from the world model
         WorldEntityFactory.createEntities(m_gameContext, worldModel);
 
         // Create player at the spawn position (Z=1, standing on Z=0 blocks)
-        var player = PlayerBlueprint.create(m_gameContext, playerSpawn);
+        EntityFactory factory = m_gameContext.entityFactory();
+        var player = factory.createEntity(m_gameContext, "player", playerSpawn);
 
         var camera = player.get(CameraComp.class);
         camera.setGdx(m_camera);
@@ -204,21 +204,21 @@ public class GameWindow extends UiWindow {
         // Let's place down some debug entities
         // Adjust Z to 1 since entities now exist at Z=1
 
-        ActorBlueprint.createDebugMover(m_gameContext,
+        factory.createDebugMover(m_gameContext,
             // Move left 2 spaces
             playerSpawn.add(Vec3i.X.product(-2)),
             50,
             Color.BLUE
         );
 
-        ActorBlueprint.createDebugMover(m_gameContext,
+        factory.createDebugMover(m_gameContext,
             // Move right 2 spaces
             playerSpawn.add(Vec3i.X.product(2)),
             100,
             Color.WHITE
         );
 
-        ActorBlueprint.createDebugMover(m_gameContext,
+        factory.createDebugMover(m_gameContext,
             // Move right 4 spaces
             playerSpawn.add(Vec3i.X.product(4)),
             200,
@@ -226,13 +226,15 @@ public class GameWindow extends UiWindow {
         );
 
         // Test socket for taking over dead entities
-        ActorBlueprint.createDeadMech(m_gameContext,
+        factory.createEntity(m_gameContext,
+            "deadMech",
             new Vec3i(5, 5, 1),
             Color.GOLD
         );
 
         // Training dummy for combat testing (in room 2)
-        ActorBlueprint.createTrainingDummy(m_gameContext,
+        factory.createEntity(m_gameContext,
+            "trainingDummy",
             new Vec3i(26, 11, 1),
             Color.PINK
         );

@@ -1,0 +1,10 @@
+fonts:
+  xirod_32:
+    path: "fonts/Xirod.otf"
+    size: 32
+  xirod_24:
+    path: "fonts/Xirod.otf"
+    size: 24
+  ubuntu_32:
+    path: "fonts/UbuntuMono-R.ttf"
+    size: 32

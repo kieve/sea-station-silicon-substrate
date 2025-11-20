@@ -7,14 +7,11 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
 import ca.kieve.ssss.component.CameraComp;
 import ca.kieve.ssss.component.ColorComp;
-import ca.kieve.ssss.component.Material;
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.component.RenderingHint;
 import ca.kieve.ssss.component.SocketPlug;
 import ca.kieve.ssss.component.TileGlyph;
 import ca.kieve.ssss.context.GameContext;
-import ca.kieve.ssss.repository.GlyphRepo;
-import ca.kieve.ssss.util.Vec3i;
 
 import dev.dominion.ecs.api.Entity;
 
@@ -24,6 +21,7 @@ import java.util.Map;
 public class TileGlyphRenderSystem extends System {
     private final SpriteBatch m_spriteBatch;
     private final ShapeRenderer m_shapeRenderer;
+    private final TileGlyph m_floorGlyph;
 
     private boolean m_debugGrid = false;
 
@@ -35,6 +33,7 @@ public class TileGlyphRenderSystem extends System {
         super(gameContext);
         m_spriteBatch = spriteBatch;
         m_shapeRenderer = shapeRenderer;
+        m_floorGlyph = gameContext.entityFactory().getGlyphFactory().getGlyph("interpunct");
     }
 
     public void setDebugGrid(boolean debugGrid) {
@@ -106,18 +105,11 @@ public class TileGlyphRenderSystem extends System {
             // Choose glyph based on relative Z-level
             // relativeZ == -1: floor level, use floor glyph
             // relativeZ == 0: current level, use entity's normal glyph
-            TileGlyph renderGlyph = (relativeZ == -1) ? GlyphRepo.INTERPUNCT : glyph;
+            TileGlyph renderGlyph = (relativeZ == -1) ? m_floorGlyph : glyph;
 
             var font = renderGlyph.font();
 
-            var material = entity.get(Material.class);
-            var color = switch (material) {
-                case WOOD -> Color.BROWN;
-                case STONE -> Color.GRAY;
-                case STEEL -> Color.ORANGE;
-                case null -> Color.WHITE;
-            };
-
+            var color = Color.WHITE;
             var colorComp = entity.get(ColorComp.class);
             if (colorComp != null) {
                 color = colorComp.color;

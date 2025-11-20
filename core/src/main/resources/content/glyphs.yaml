@@ -1,0 +1,36 @@
+glyphs:
+  player:
+    font: xirod_32
+    character: '@'
+    offsetX: 2.5
+    offsetY: -6.0
+  M:
+    font: xirod_24
+    character: 'M'
+    offsetX: 2.7
+    offsetY: -9.0
+  S:
+    font: xirod_32
+    character: 'S'
+    offsetX: 2.0
+    offsetY: -6.0
+  T:
+    font: xirod_32
+    character: 'T'
+    offsetX: 2.0
+    offsetY: -6.0
+  pound:
+    font: xirod_32
+    character: '#'
+    offsetX: 7.0
+    offsetY: -5.0
+  interpunct:
+    font: xirod_32
+    character: '·'
+    offsetX: 13.0
+    offsetY: -7.25
+  solid:
+    font: ubuntu_32
+    character: '█'
+    offsetX: 7.0
+    offsetY: -7.0

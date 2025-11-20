@@ -1,0 +1,75 @@
+---
+components:
+  - type: Identifier
+    key: player
+  - type: TileGlyph
+    glyphId: player
+  - type: Descriptor
+    name: Player
+    description: "It's you!"
+  - type: DebugRect
+  - type: RenderingHint
+    zIndex: 2
+  - type: CameraComp
+  - type: PlayerController
+  - type: Speed
+    val: 100
+  - type: SocketPlug
+  - type: Velocity
+  - type: Collider
+  - type: Inventory
+  - type: Equipment
+    weaponId: chip_claws
+
+---
+components:
+  - type: Identifier
+    key: debugMover
+  - type: TileGlyph
+    glyphId: S
+  - type: Descriptor
+    name: Moving Sign
+    description: "Perhaps, there's many of them?"
+  - type: RenderingHint
+    zIndex: 1
+  - type: Velocity
+  - type: Collider
+
+---
+components:
+  - type: Identifier
+    key: deadMech
+  - type: TileGlyph
+    glyphId: M
+  - type: Descriptor
+    name: Mech
+    description: "Beep Boop."
+  - type: RenderingHint
+    zIndex: 1
+  - type: Socket
+  - type: Socketable
+  - type: Velocity
+  - type: Collider
+  - type: Health
+    maxHp: 100
+    hp: 0
+  - type: Equipment
+    weaponId: power_fist
+
+---
+components:
+  - type: Identifier
+    key: trainingDummy
+  - type: TileGlyph
+    glyphId: T
+  - type: Descriptor
+    name: Training Dummy
+    description: "Go on, hit me."
+  - type: RenderingHint
+    zIndex: 1
+  - type: Attackable
+  - type: Socketable
+  - type: Collider
+  - type: Health
+    maxHp: 20
+  - type: Socket

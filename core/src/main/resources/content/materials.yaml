@@ -1,0 +1,29 @@
+---
+components:
+  - type: Identifier
+    key: material_wood
+  - type: Descriptor
+    name: Wood
+    description: A natural, organic material
+  - type: Opaque
+  - type: Solid
+
+---
+components:
+  - type: Identifier
+    key: material_stone
+  - type: Descriptor
+    name: Stone
+    description: A hard, durable mineral
+  - type: Opaque
+  - type: Solid
+
+---
+components:
+  - type: Identifier
+    key: material_steel
+  - type: Descriptor
+    name: Steel
+    description: A strong, refined metal alloy
+  - type: Opaque
+  - type: Solid

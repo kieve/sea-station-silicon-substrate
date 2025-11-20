@@ -99,10 +99,13 @@ class DescriptionComposerTest {
     @Test
     void composeIncludesMaterialDescription() {
         Entity entity = mock(Entity.class);
+        Entity materialEntity = mock(Entity.class);
         var descriptor = new Descriptor("Door", "A sturdy barrier.");
+        var materialDescriptor = new Descriptor("Wood", "A natural, organic material");
+        when(materialEntity.get(Descriptor.class)).thenReturn(materialDescriptor);
         when(entity.get(Descriptor.class)).thenReturn(descriptor);
         when(entity.get(Health.class)).thenReturn(null);
-        when(entity.get(Material.class)).thenReturn(Material.WOOD);
+        when(entity.get(Material.class)).thenReturn(new Material(materialEntity));
         when(entity.get(Socket.class)).thenReturn(null);
 
         String result = DescriptionComposer.compose(entity);
@@ -188,12 +191,15 @@ class DescriptionComposerTest {
     @Test
     void composeIncludesAllComponentsInCorrectOrder() {
         Entity entity = mock(Entity.class);
+        Entity materialEntity = mock(Entity.class);
         var descriptor = new Descriptor("Mech", "A giant robot.");
+        var materialDescriptor = new Descriptor("Steel", "A strong, refined metal alloy");
         var health = new Health(200, 200);
         var socket = new Socket();
+        when(materialEntity.get(Descriptor.class)).thenReturn(materialDescriptor);
         when(entity.get(Descriptor.class)).thenReturn(descriptor);
         when(entity.get(Health.class)).thenReturn(health);
-        when(entity.get(Material.class)).thenReturn(Material.STEEL);
+        when(entity.get(Material.class)).thenReturn(new Material(materialEntity));
         when(entity.get(Socket.class)).thenReturn(socket);
 
         String result = DescriptionComposer.compose(entity);

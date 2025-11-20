@@ -1,18 +1,22 @@
 package ca.kieve.ssss.world;
 
+import ca.kieve.ssss.content.BlockTypeFactory;
 import ca.kieve.ssss.util.Vec3i;
 
 /**
  * Represents a 3D voxel world as a grid of blocks.
- * Each position in the world contains a BlockData instance.
+ * Each position in the world contains a block type ID string.
  * Uses x-then-y-then-z indexing: blocks[x][y][z]
  */
 public class WorldModel {
 
+    private static final String AIR = "air";
+
     private final int m_width;
     private final int m_height;
     private final int m_depth;
-    private final BlockData[][][] m_blocks;
+    private final String[][][] m_blocks;
+    private final BlockTypeFactory m_blockTypeFactory;
 
     /**
      * Creates a new world filled with air.
@@ -20,38 +24,40 @@ public class WorldModel {
      * @param width  The size in the X direction
      * @param height The size in the Y direction
      * @param depth  The size in the Z direction (number of vertical levels)
+     * @param blockTypeFactory Factory for querying block type properties
      */
-    public WorldModel(int width, int height, int depth) {
+    public WorldModel(int width, int height, int depth, BlockTypeFactory blockTypeFactory) {
         m_width = width;
         m_height = height;
         m_depth = depth;
-        m_blocks = new BlockData[width][height][depth];
+        m_blockTypeFactory = blockTypeFactory;
+        m_blocks = new String[width][height][depth];
 
         // Initialize all blocks to air
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 for (int z = 0; z < depth; z++) {
-                    m_blocks[x][y][z] = BlockData.AIR;
+                    m_blocks[x][y][z] = AIR;
                 }
             }
         }
     }
 
     /**
-     * Gets the block at the specified position.
-     * Returns AIR if the position is out of bounds.
+     * Gets the block type ID at the specified position.
+     * Returns "air" if the position is out of bounds.
      */
-    public BlockData getBlock(Vec3i pos) {
+    public String getBlock(Vec3i pos) {
         return getBlock(pos.x, pos.y, pos.z);
     }
 
     /**
-     * Gets the block at the specified coordinates.
-     * Returns AIR if the position is out of bounds.
+     * Gets the block type ID at the specified coordinates.
+     * Returns "air" if the position is out of bounds.
      */
-    public BlockData getBlock(int x, int y, int z) {
+    public String getBlock(int x, int y, int z) {
         if (!isInBounds(x, y, z)) {
-            return BlockData.AIR;
+            return AIR;
         }
         return m_blocks[x][y][z];
     }
@@ -60,19 +66,19 @@ public class WorldModel {
      * Sets the block at the specified position.
      * Does nothing if the position is out of bounds.
      */
-    public void setBlock(Vec3i pos, BlockData block) {
-        setBlock(pos.x, pos.y, pos.z, block);
+    public void setBlock(Vec3i pos, String blockTypeId) {
+        setBlock(pos.x, pos.y, pos.z, blockTypeId);
     }
 
     /**
      * Sets the block at the specified coordinates.
      * Does nothing if the position is out of bounds.
      */
-    public void setBlock(int x, int y, int z, BlockData block) {
+    public void setBlock(int x, int y, int z, String blockTypeId) {
         if (!isInBounds(x, y, z)) {
             return;
         }
-        m_blocks[x][y][z] = block;
+        m_blocks[x][y][z] = blockTypeId;
     }
 
     /**
@@ -104,7 +110,7 @@ public class WorldModel {
      * Returns true if the block at pos is not solid (e.g., air).
      */
     public boolean isPassable(int x, int y, int z) {
-        return !getBlock(x, y, z).isSolid();
+        return !isSolid(x, y, z);
     }
 
     /**
@@ -118,7 +124,15 @@ public class WorldModel {
      * Checks if the block at the given position is solid.
      */
     public boolean isSolid(int x, int y, int z) {
-        return getBlock(x, y, z).isSolid();
+        String blockTypeId = getBlock(x, y, z);
+        return m_blockTypeFactory.isSolid(blockTypeId);
+    }
+
+    /**
+     * Returns true if the block at the given position is air.
+     */
+    public boolean isAir(int x, int y, int z) {
+        return AIR.equals(getBlock(x, y, z));
     }
 
     /**

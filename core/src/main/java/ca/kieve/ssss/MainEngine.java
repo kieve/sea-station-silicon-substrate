@@ -6,6 +6,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.ScreenUtils;
 
+import ca.kieve.ssss.content.ContentLoader;
+import ca.kieve.ssss.content.ContentRegistry;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.screen.PlayScreen;
 import ca.kieve.ssss.ui.core.UiScreen;
@@ -26,7 +28,10 @@ public class MainEngine extends ApplicationAdapter {
     public void create() {
         Gdx.app.setLogLevel(Application.LOG_INFO);
 
-        m_gameContext = new GameContext();
+        ContentLoader contentLoader = new ContentLoader();
+        ContentRegistry content = contentLoader.loadAll();
+
+        m_gameContext = new GameContext(content);
         // Initialize contexts that need cross-references
         m_gameContext.examine().init(m_gameContext);
         m_gameContext.eject().init(m_gameContext);

@@ -1,0 +1,57 @@
+---
+components:
+  - type: Identifier
+    key: block
+  - type: TileGlyph
+    glyphId: pound
+  - type: Descriptor
+    name: Block
+    description: Probably pretty solid.
+  - type: Examinable
+  - type: RenderingHint
+    zIndex: 1
+
+---
+parent: block
+components:
+  - type: Identifier
+    key: block_wood
+  - type: Material
+    id: material_wood
+  - type: ColorComp
+    color: "#8B4513FF"
+  - type: Opaque
+  - type: Solid
+
+---
+parent: block
+components:
+  - type: Identifier
+    key: block_stone
+  - type: Material
+    id: material_stone
+  - type: ColorComp
+    color: "#808080FF"
+  - type: Opaque
+  - type: Solid
+
+---
+parent: block
+components:
+  - type: Identifier
+    key: block_steel
+  - type: Material
+    id: material_steel
+  - type: ColorComp
+    color: "#FFA500FF"
+  - type: Opaque
+  - type: Solid
+
+---
+components:
+  - type: Identifier
+    key: air
+  - type: TileGlyph
+    glyphId: interpunct
+  - type: RenderingHint
+    zIndex: 0

@@ -11,6 +11,8 @@ import static ca.kieve.ssss.ui.widget.GameWindow.TILE_SCALE;
 import static com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.DEFAULT_CHARS;
 
 public class FontRepo {
+    private static final String EXTRA_CHARS = "█";
+
     private FontRepo() {
         // Do not instantiate
     }
@@ -32,7 +34,7 @@ public class FontRepo {
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal(path));
         FreeTypeFontParameter parameter = new FreeTypeFontParameter();
         parameter.size = size;
-        parameter.characters = DEFAULT_CHARS + GlyphRepo.EXTRA_CHARS;
+        parameter.characters = DEFAULT_CHARS + EXTRA_CHARS;
         var result = generator.generateFont(parameter);
         result.getData().setScale(TILE_SCALE);
         result.setUseIntegerPositions(false);

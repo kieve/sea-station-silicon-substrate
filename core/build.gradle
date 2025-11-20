@@ -1,5 +1,9 @@
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs << '-parameters'
+}
+
 apply plugin: 'jacoco'
 
 configurations {
@@ -13,6 +17,9 @@ dependencies {
 
   api "com.squidpony:squidcore:$squidSquadVersion"
   api "com.squidpony:squidsmooth:$squidSquadVersion"
+
+  api "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVersion"
+  api "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
 
   testImplementation platform("org.junit:junit-bom:$junitBomVersion")
   testImplementation "org.junit.jupiter:junit-jupiter"

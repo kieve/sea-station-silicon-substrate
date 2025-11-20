@@ -1,0 +1,19 @@
+---
+components:
+  - type: Identifier
+    key: chip_claws
+  - type: Descriptor
+    name: "Chip Claws"
+    description: "They almost hurt"
+  - type: Damage
+    value: 1
+
+---
+components:
+  - type: Identifier
+    key: power_fist
+  - type: Descriptor
+    name: "Power Fist"
+    description: "POW"
+  - type: Damage
+    value: 10

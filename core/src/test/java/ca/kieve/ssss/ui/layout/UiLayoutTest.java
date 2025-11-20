@@ -19,9 +19,9 @@ import static org.mockito.Mockito.verify;
 
 class UiLayoutTest {
     private static class RenderCountingUiNode extends UiNode {
-        private int renderCount = 0;
-        private UiRenderContext lastRenderContext;
-        private float lastDelta;
+        private int m_renderCount = 0;
+        private UiRenderContext m_lastRenderContext;
+        private float m_lastDelta;
 
         @Override
         public void update(UiRenderContext renderContext, float delta) {
@@ -30,38 +30,38 @@ class UiLayoutTest {
 
         @Override
         public void render(UiRenderContext renderContext, float delta) {
-            renderCount++;
-            lastRenderContext = renderContext;
-            lastDelta = delta;
+            m_renderCount++;
+            m_lastRenderContext = renderContext;
+            m_lastDelta = delta;
         }
 
         int getRenderCount() {
-            return renderCount;
+            return m_renderCount;
         }
 
         UiRenderContext getLastRenderContext() {
-            return lastRenderContext;
+            return m_lastRenderContext;
         }
 
         float getLastDelta() {
-            return lastDelta;
+            return m_lastDelta;
         }
     }
 
     private static class TestUiLayout extends UiLayout {
-        private int layoutCallCount = 0;
+        private int m_layoutCallCount = 0;
 
         @Override
         public void layout() {
-            layoutCallCount++;
+            m_layoutCallCount++;
         }
 
         void resetLayoutCallCount() {
-            layoutCallCount = 0;
+            m_layoutCallCount = 0;
         }
 
         int getLayoutCallCount() {
-            return layoutCallCount;
+            return m_layoutCallCount;
         }
 
         int getChildCount() {

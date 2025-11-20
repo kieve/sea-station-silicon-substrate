@@ -32,7 +32,10 @@ public class DescriptionComposer {
         // Material
         var material = entity.get(Material.class);
         if (material != null) {
-            builder.append("It's made from ").append(material.description()).append(". ");
+            var materialDescriptor = material.entity().get(Descriptor.class);
+            if (materialDescriptor != null) {
+                builder.append("It's made from ").append(materialDescriptor.name()).append(". ");
+            }
         }
 
         // Socket status (only if entity has Socket component)
@@ -67,5 +70,12 @@ public class DescriptionComposer {
         } else {
             return "It looks nearly dead.";
         }
+    }
+
+    private static String capitalizeFirst(String str) {
+        if (str == null || str.isEmpty()) {
+            return str;
+        }
+        return str.substring(0, 1).toUpperCase() + str.substring(1);
     }
 }

@@ -200,19 +200,109 @@ This is consistent across all systems that handle directional input (WasdSystem,
 
 Map generation uses `MapModelBuilder` (core/src/main/java/ca/kieve/ssss/REPLACE/MapModelBuilder.java) to create cave-like structures with rooms and corridors.
 
-### Blueprints
+### Data-Driven Content System
 
-Entity creation is handled via blueprint classes in `ca.kieve.ssss.blueprint.*`:
-- `PlayerBlueprint`: Creates the player entity
-- `ActorBlueprint`: Creates AI-controlled entities
-- `TileBlueprints`: Creates wall/floor tiles
-- `MaterialBlueprint`: Creates material definitions
+Entity and content definitions are loaded from YAML files using Jackson, enabling data-driven game content without code changes.
+
+**Content Loading Architecture:**
+- `ContentLoader`: Loads YAML files from `core/src/main/resources/content/`
+- `ContentRegistry`: Central registry for all loaded definitions
+- `EntityFactory`: Creates entities from YAML definitions using reflection
+- `ComponentFactory`: Instantiates components via reflection based on YAML specs
+
+**YAML Content Files:**
+- `entities.yaml`: Entity definitions (player, enemies, etc.) with component lists
+- `weapons.yaml`: Weapon definitions (name, description, damage)
+- `materials.yaml`: Material entity definitions with component composition
+- `glyphs.yaml`: Visual representations (fonts, characters, offsets)
+- `blocks.yaml`: Block entity definitions with parent inheritance and component composition
+
+**Creating Entities from YAML:**
+```java
+// Access factory from GameContext
+EntityFactory factory = context.entityFactory();
+
+// Create entity by ID
+Entity player = factory.createEntity(context, "player", spawnPos);
+Entity dummy = factory.createEntity(context, "trainingDummy", pos, Color.PINK);
+Entity block = factory.createBlock(context, pos, BlockType.STONE);
+```
+
+**Adding New Content:**
+1. Define entity in `entities.yaml`:
+```yaml
+entities:
+  newEnemy:
+    glyph: M
+    components:
+      - type: Descriptor
+        args: ["Enemy Name", "Description"]
+      - type: Health
+        args: [50]
+      - type: Speed
+        args: [100]
+      - type: Collider
+    defaultWeapon: power_fist
+```
+
+2. Reference in code:
+```java
+factory.createEntity(context, "newEnemy", pos, Color.RED);
+```
+
+**Component Reflection:**
+- Components are instantiated by class name (e.g., `type: Speed` → `ca.kieve.ssss.component.Speed`)
+- Constructor arguments match by type and count
+- Marker components (no args) use default constructors
+- Enum components are supported via `valueOf()`
+
+**Component Composition with Parent Inheritance:**
+
+Entity definitions support a `parent` field that enables component inheritance and composition. When an entity specifies a parent, it inherits all components from the parent definition. Child components with the same type override parent components.
+
+**YAML Format:**
+- Entities are defined as separate YAML documents using `---` separators
+- No root object - each document is a standalone entity definition
+- Entity ID is determined by the `Identifier` component's `key` field
+- Component properties are specified directly (not nested under `properties:`)
+
+Example in `blocks.yaml`:
+```yaml
+---
+components:
+  - type: Identifier
+    key: block
+  - type: TileGlyph
+    glyphId: pound
+  - type: Descriptor
+    name: Block
+    description: A block
+  - type: Examinable
+
+---
+parent: block
+components:
+  - type: Identifier
+    key: block_wood
+  - type: Descriptor
+    name: Wooden Block
+    description: A sturdy wooden block
+  - type: Material
+    id: material_wood
+  - type: ColorComp
+    color: "#8B4513FF"
+  - type: Opaque
+  - type: Solid
+```
+
+In this example, `block_wood` inherits `TileGlyph` and `Examinable` from `block`, but overrides the `Descriptor` component with its own version. Component replacement is determined by component type - if both parent and child define a component with the same `type`, the child's version is used.
 
 ## Key Dependencies
 
 - **libGDX** (`$gdxVersion`): Core game framework
 - **Dominion ECS** (`$dominionEcsVersion`): Entity Component System
 - **SquidSquad** (`$squidSquadVersion`): Roguelike utilities (squidcore, squidsmooth). See [SquidSquad.md](SquidSquad.md) for detailed API documentation and usage examples.
+- **Jackson** (`$jacksonVersion`): YAML parsing for data-driven content
 - **JUnit 5**: Testing framework
 - **Mockito**: Mocking framework for tests
 - **JaCoCo**: Code coverage tool
@@ -224,10 +314,16 @@ Entity creation is handled via blueprint classes in `ca.kieve.ssss.blueprint.*`:
     - `component/`: ECS components
     - `system/`: ECS systems
     - `context/`: Context objects (GameContext, ClockContext, etc.)
-    - `blueprint/`: Entity factory classes
+    - `content/`: Data-driven content loading (EntityFactory, ContentRegistry, etc.)
     - `ui/`: Custom UI framework
     - `screen/`: Game screens
     - `util/`: Utility classes
+  - `src/main/resources/content/`: YAML content definitions
+    - `entities.yaml`: Entity templates
+    - `weapons.yaml`: Weapon definitions
+    - `materials.yaml`: Material entity definitions
+    - `glyphs.yaml`: Font and glyph definitions
+    - `blocks.yaml`: Block entity definitions
 - `lwjgl3/`: Desktop launcher (LWJGL3 backend)
 - `assets/`: Game assets (automatically indexed via `generateAssetList` task)
 
@@ -256,6 +352,43 @@ This is a Windows development environment. Use backslash-escaped paths or forwar
 
 ### Line Length
 Maximum line length is 100 characters. Break long lines at logical points.
+
+### Member Variable Naming Convention
+All non-constant, non-static member variables must be prefixed with `m_`. Constants (static final fields) should use SCREAMING_SNAKE_CASE without the prefix.
+
+**In constructors and methods, never use `this.property = property`**. Instead, use the `m_` prefix to distinguish member variables from parameters.
+
+**Bad:**
+```java
+public class MyClass {
+    private String name;
+    private int value;
+
+    public MyClass(String name, int value) {
+        this.name = name;      // Using 'this' to distinguish
+        this.value = value;
+    }
+}
+```
+
+**Good:**
+```java
+public class MyClass {
+    private static final int MAX_VALUE = 100;  // Constants don't use m_ prefix
+    private String m_name;
+    private int m_value;
+
+    public MyClass(String name, int value) {
+        m_name = name;         // No 'this' needed
+        m_value = value;
+    }
+}
+```
+
+This pattern:
+- Makes member variables immediately distinguishable from local variables and parameters
+- Eliminates the need for `this` keyword in most cases
+- Improves code readability by making scope explicit
 
 ### Pass GameContext, Not Individual Contexts
 When a system or component needs access to context objects, pass `GameContext` rather than individual context objects. The receiving class should locally cache references to the specific contexts it needs.

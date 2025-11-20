@@ -3,6 +3,9 @@ package ca.kieve.ssss.context;
 import com.badlogic.gdx.InputMultiplexer;
 import dev.dominion.ecs.api.Dominion;
 
+import ca.kieve.ssss.content.BlockTypeFactory;
+import ca.kieve.ssss.content.ContentRegistry;
+import ca.kieve.ssss.content.EntityFactory;
 import ca.kieve.ssss.system.System;
 
 import java.util.ArrayList;
@@ -22,10 +25,13 @@ public record GameContext(
     EjectContext eject,
     EventContext events,
     RenderContext render,
+    ContentRegistry content,
+    EntityFactory entityFactory,
+    BlockTypeFactory blockTypes,
     List<System> updateSystems,
     List<System> renderSystems
 ) {
-    public GameContext() {
+    public GameContext(ContentRegistry content) {
         this(
             new Random(),
             Dominion.create(),
@@ -39,6 +45,9 @@ public record GameContext(
             new EjectContext(),
             new EventContext(),
             new RenderContext(),
+            content,
+            new EntityFactory(content),
+            content.getBlockTypeFactory(),
             new ArrayList<>(),
             new ArrayList<>()
         );

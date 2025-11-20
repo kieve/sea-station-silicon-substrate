@@ -1,7 +1,7 @@
 package ca.kieve.ssss.context;
 
-import ca.kieve.ssss.component.Density;
 import ca.kieve.ssss.component.Socket;
+import ca.kieve.ssss.component.Solid;
 import ca.kieve.ssss.util.Vec3i;
 
 import java.util.HashMap;
@@ -66,8 +66,7 @@ public class EjectContext {
             var entities = m_positionContext.getAt(targetPos);
             var blocked = entities.stream().anyMatch(entity -> {
                 // Block if solid (walls, etc.)
-                var density = entity.get(Density.class);
-                if (density == Density.SOLID) {
+                if (entity.has(Solid.class)) {
                     return true;
                 }
                 // Block if another body (dead mech, etc.) occupies the space
