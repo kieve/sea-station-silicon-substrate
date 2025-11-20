@@ -24,7 +24,6 @@ public class StaticTestMapGenerator implements MapGenerator {
 
     private MapDefinition m_mapDefinition;
     private Map<Character, String> m_charToBlockType;
-    private Vec3i m_playerSpawn;
 
     @Override
     public WorldModel generate(BlockTypeFactory blockTypeFactory) {
@@ -44,19 +43,17 @@ public class StaticTestMapGenerator implements MapGenerator {
             parseLayer(world, layerData, z);
         }
 
-        // Set player spawn position
-        m_playerSpawn = new Vec3i(
-            m_mapDefinition.playerSpawnX(),
-            m_mapDefinition.playerSpawnY(),
-            m_mapDefinition.playerSpawnZ()
-        );
-
         return world;
     }
 
     @Override
     public Vec3i getPlayerSpawn() {
-        return m_playerSpawn;
+        return m_mapDefinition.playerSpawn();
+    }
+
+    @Override
+    public String getFloorGlyphId() {
+        return m_mapDefinition.floorGlyph();
     }
 
     private void loadMapDefinition() {

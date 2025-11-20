@@ -28,12 +28,13 @@ public class TileGlyphRenderSystem extends System {
     public TileGlyphRenderSystem(
         GameContext gameContext,
         SpriteBatch spriteBatch,
-        ShapeRenderer shapeRenderer
+        ShapeRenderer shapeRenderer,
+        String floorGlyphId
     ) {
         super(gameContext);
         m_spriteBatch = spriteBatch;
         m_shapeRenderer = shapeRenderer;
-        m_floorGlyph = gameContext.entityFactory().getGlyphFactory().getGlyph("interpunct");
+        m_floorGlyph = gameContext.entityFactory().getGlyphFactory().getGlyph(floorGlyphId);
     }
 
     public void setDebugGrid(boolean debugGrid) {

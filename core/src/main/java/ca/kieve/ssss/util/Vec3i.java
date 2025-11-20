@@ -16,6 +16,10 @@ public class Vec3i {
     public int y;
     public int z;
 
+    public Vec3i() {
+        // Default constructor for Jackson deserialization
+    }
+
     public Vec3i(int x, int y, int z) {
         this.x = x;
         this.y = y;

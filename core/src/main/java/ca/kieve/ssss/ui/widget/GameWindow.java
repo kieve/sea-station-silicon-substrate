@@ -10,8 +10,10 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
 import ca.kieve.ssss.component.CameraComp;
 import ca.kieve.ssss.content.EntityFactory;
+import ca.kieve.ssss.world.MapGenerator;
 import ca.kieve.ssss.world.StaticTestMapGenerator;
 import ca.kieve.ssss.world.WorldEntityFactory;
+import ca.kieve.ssss.world.WorldModel;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.input.InputActionController;
 import ca.kieve.ssss.system.AiSeesawSystem;
@@ -44,6 +46,8 @@ public class GameWindow extends UiWindow {
     public static final float TILE_SCALE = (float) 1 / TILE_SIZE;
 
     private final GameContext m_gameContext;
+    private final MapGenerator m_mapGenerator;
+    private final WorldModel m_worldModel;
     private FrameBuffer m_frameBuffer;
     private int m_lastWidth = 0;
     private int m_lastHeight = 0;
@@ -54,6 +58,8 @@ public class GameWindow extends UiWindow {
         m_viewport.setUnitsPerPixel(TILE_SCALE);
 
         // TODO: All this setup should be moved somewhere
+        m_mapGenerator = new StaticTestMapGenerator();
+        m_worldModel = m_mapGenerator.generate(m_gameContext.blockTypes());
         createSystems();
         createEntities();
     }
@@ -158,7 +164,8 @@ public class GameWindow extends UiWindow {
         var tileGlyphRenderSystem = new TileGlyphRenderSystem(
             m_gameContext,
             m_spriteBatch,
-            m_shapeRenderer
+            m_shapeRenderer,
+            m_mapGenerator.getFloorGlyphId()
         );
         tileGlyphRenderSystem.setDebugGrid(DEBUG_GRID);
 
@@ -186,13 +193,10 @@ public class GameWindow extends UiWindow {
     }
 
     private void createEntities() {
-        // Generate the world using the new 3D voxel system
-        var mapGenerator = new StaticTestMapGenerator();
-        var worldModel = mapGenerator.generate(m_gameContext.blockTypes());
-        var playerSpawn = mapGenerator.getPlayerSpawn();
+        var playerSpawn = m_mapGenerator.getPlayerSpawn();
 
         // Create block entities from the world model
-        WorldEntityFactory.createEntities(m_gameContext, worldModel);
+        WorldEntityFactory.createEntities(m_gameContext, m_worldModel);
 
         // Create player at the spawn position (Z=1, standing on Z=0 blocks)
         EntityFactory factory = m_gameContext.entityFactory();

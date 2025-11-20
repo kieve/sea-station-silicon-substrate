@@ -26,4 +26,11 @@ public interface MapGenerator {
      * @return The suggested player spawn position
      */
     Vec3i getPlayerSpawn();
+
+    /**
+     * Returns the glyph ID to use for rendering floor tiles.
+     *
+     * @return The glyph identifier for floor rendering
+     */
+    String getFloorGlyphId();
 }

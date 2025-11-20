@@ -13,9 +13,12 @@ size:
   x: 28
   y: 17
 
-playerSpawnX: 2
-playerSpawnY: 2
-playerSpawnZ: 1
+playerSpawn:
+  x: 2
+  y: 2
+  z: 1
+
+floorGlyph: interpunct
 
 layers:
   '0': |
