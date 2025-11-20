@@ -239,7 +239,7 @@ public class GameWindow extends UiWindow {
         // Training dummy for combat testing (in room 2)
         factory.createEntity(m_gameContext,
             "trainingDummy",
-            new Vec3i(26, 11, 1),
+            new Vec3i(23, 7, 1),
             Color.PINK
         );
     }

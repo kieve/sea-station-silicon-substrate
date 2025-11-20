@@ -14,8 +14,8 @@ size:
   y: 17
 
 playerSpawn:
-  x: 2
-  y: 2
+  x: 6
+  y: 6
   z: 1
 
 floorGlyph: interpunct

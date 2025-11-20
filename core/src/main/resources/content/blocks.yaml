@@ -9,7 +9,7 @@ components:
     description: Probably pretty solid.
   - type: Examinable
   - type: RenderingHint
-    zIndex: 1
+    zIndex: 0
 
 ---
 parent: block
