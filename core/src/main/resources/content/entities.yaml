@@ -21,6 +21,8 @@ components:
   - type: Inventory
   - type: Equipment
     weaponId: chip_claws
+  - type: Health
+    maxHp: 100
 
 ---
 components:

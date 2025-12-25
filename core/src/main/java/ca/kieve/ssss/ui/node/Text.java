@@ -3,6 +3,7 @@ package ca.kieve.ssss.ui.node;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
+import ca.kieve.ssss.component.Health;
 import ca.kieve.ssss.component.PlayerController;
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.repository.FontRepo;
@@ -39,6 +40,17 @@ public class Text extends UiNode {
         StringBuilder textBuilder = new StringBuilder();
 
         var withResult = optionalResults.get();
+        var entity = withResult.entity();
+        var health = entity.get(Health.class);
+
+        if (health != null) {
+            textBuilder.append("HP: ")
+                .append(health.hp)
+                .append("/")
+                .append(health.maxHp)
+                .append("\n");
+        }
+
         var pos = withResult.comp1().getPosition();
 
         textBuilder.append("Position: { ")
