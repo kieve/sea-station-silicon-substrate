@@ -16,6 +16,9 @@ dependencies {
   api "dev.dominion.ecs:dominion-ecs-engine:$dominionEcsVersion"
 
   api "com.squidpony:squidcore:$squidSquadVersion"
+  api "com.squidpony:squidgrid:$squidSquadVersion"
+  api "com.squidpony:squidplace:$squidSquadVersion"
+  api "com.squidpony:squidpath:$squidSquadVersion"
   api "com.squidpony:squidsmooth:$squidSquadVersion"
 
   api "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVersion"

@@ -9,6 +9,8 @@ import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
 import ca.kieve.ssss.component.CameraComp;
+import ca.kieve.ssss.component.Speed;
+import ca.kieve.ssss.component.Velocity;
 import ca.kieve.ssss.content.EntityFactory;
 import ca.kieve.ssss.world.MapGenerator;
 import ca.kieve.ssss.world.StaticTestMapGenerator;
@@ -16,7 +18,9 @@ import ca.kieve.ssss.world.WorldEntityFactory;
 import ca.kieve.ssss.world.WorldModel;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.input.InputActionController;
-import ca.kieve.ssss.system.AiSeesawSystem;
+import ca.kieve.ssss.component.ai.AiChaser;
+import ca.kieve.ssss.system.AiChaserSystem;
+import ca.kieve.ssss.system.ai.AiSeesawSystem;
 import ca.kieve.ssss.system.AttackSystem;
 import ca.kieve.ssss.system.CameraSystem;
 import ca.kieve.ssss.system.ClockSystem;
@@ -155,6 +159,7 @@ public class GameWindow extends UiWindow {
             new EjectSystem(m_gameContext),
             new WasdSystem(m_gameContext),
             new AiSeesawSystem(m_gameContext),
+            new AiChaserSystem(m_gameContext),
             new VelocitySystem(m_gameContext),
             new CameraSystem(m_gameContext),
             new SanityCheckSystem(m_gameContext),
@@ -242,5 +247,15 @@ public class GameWindow extends UiWindow {
             new Vec3i(23, 7, 1),
             Color.PINK
         );
+
+        // Chaser AI test
+        var chaser = factory.createEntity(m_gameContext,
+            "trainingDummy",
+            playerSpawn.add(new Vec3i(5, 5, 0)),
+            Color.ORANGE
+        );
+        chaser.add(new Speed(100));
+        chaser.add(new Velocity());
+        chaser.add(new AiChaser());
     }
 }

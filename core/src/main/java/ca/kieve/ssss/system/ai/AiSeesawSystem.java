@@ -1,10 +1,11 @@
-package ca.kieve.ssss.system;
+package ca.kieve.ssss.system.ai;
 
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.component.Speed;
 import ca.kieve.ssss.component.Velocity;
 import ca.kieve.ssss.component.ai.AiSeesawController;
 import ca.kieve.ssss.context.GameContext;
+import ca.kieve.ssss.system.System;
 import ca.kieve.ssss.util.Vec3i;
 
 public class AiSeesawSystem extends System {

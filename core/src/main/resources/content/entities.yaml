@@ -17,6 +17,7 @@ components:
   - type: SocketPlug
   - type: Velocity
   - type: Collider
+  - type: Solid
   - type: Inventory
   - type: Equipment
     weaponId: chip_claws
@@ -50,6 +51,7 @@ components:
   - type: Socketable
   - type: Velocity
   - type: Collider
+  - type: Solid
   - type: Health
     maxHp: 100
     hp: 0
@@ -70,6 +72,7 @@ components:
   - type: Attackable
   - type: Socketable
   - type: Collider
+  - type: Solid
   - type: Health
     maxHp: 20
   - type: Socket
