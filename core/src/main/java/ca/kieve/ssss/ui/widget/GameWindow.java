@@ -19,7 +19,7 @@ import ca.kieve.ssss.world.WorldModel;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.input.InputActionController;
 import ca.kieve.ssss.component.ai.AiChaser;
-import ca.kieve.ssss.system.AiChaserSystem;
+import ca.kieve.ssss.system.ai.AiChaserSystem;
 import ca.kieve.ssss.system.ai.AiSeesawSystem;
 import ca.kieve.ssss.system.AttackSystem;
 import ca.kieve.ssss.system.CameraSystem;

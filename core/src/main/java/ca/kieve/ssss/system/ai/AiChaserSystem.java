@@ -1,4 +1,4 @@
-package ca.kieve.ssss.system;
+package ca.kieve.ssss.system.ai;
 
 import ca.kieve.ssss.component.PlayerController;
 import ca.kieve.ssss.component.Position;
@@ -7,6 +7,7 @@ import ca.kieve.ssss.component.Speed;
 import ca.kieve.ssss.component.Velocity;
 import ca.kieve.ssss.component.ai.AiChaser;
 import ca.kieve.ssss.context.GameContext;
+import ca.kieve.ssss.system.System;
 import ca.kieve.ssss.util.Vec3i;
 import com.github.yellowstonegames.grid.Coord;
 import com.github.yellowstonegames.path.DijkstraMap;
@@ -46,7 +47,7 @@ public class AiChaserSystem extends System {
         var chasers = m_gameContext.ecs().findEntitiesWith(AiChaser.class, Position.class, Velocity.class, Speed.class);
 
         // 1. Update grid based on Solid entities
-        // Reset grid to '.' 
+        // Reset grid to '.'
         for (int x = 0; x < MAP_SIZE; x++) {
             for (int y = 0; y < MAP_SIZE; y++) {
                 m_grid[x][y] = '.';
@@ -61,7 +62,7 @@ public class AiChaserSystem extends System {
                 m_grid[pos.x][pos.y] = '#';
             }
         });
-        
+
         // Ensure player pos is passable so we can path to it
         // (Player is likely Solid, so it was marked # above)
         if (playerPos.x >= 0 && playerPos.x < MAP_SIZE && playerPos.y >= 0 && playerPos.y < MAP_SIZE) {
@@ -69,7 +70,7 @@ public class AiChaserSystem extends System {
         }
 
         m_dijkstraMap.initialize(m_grid);
-        
+
         // 2. Update DijkstraMap with player as target
         Coord target = Coord.get(playerPos.x, playerPos.y);
         m_dijkstraMap.setGoal(target);
@@ -86,7 +87,7 @@ public class AiChaserSystem extends System {
             if (!speed.canAct) {
                 return;
             }
-            
+
             if (pos.z != playerPos.z) {
                 return; // Different floor
             }
@@ -102,20 +103,20 @@ public class AiChaserSystem extends System {
             }
 
             Coord start = Coord.get(pos.x, pos.y);
-            
+
             // Find next step
             // We want a path of length 1 (just the next step)
             var path = m_dijkstraMap.findPath(1, null, null, start, target);
             if (path.isEmpty()) {
                 return;
             }
-            
+
             Coord next = path.get(0);
-            
+
             // Determine direction
             int dx = next.x - pos.x;
             int dy = next.y - pos.y;
-            
+
             if (dx != 0 || dy != 0) {
                  velocity.instant().set(new Vec3i(dx, dy, 0));
             }
