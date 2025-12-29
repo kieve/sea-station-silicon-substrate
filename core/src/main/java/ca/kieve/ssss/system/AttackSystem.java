@@ -1,6 +1,7 @@
 package ca.kieve.ssss.system;
 
 import com.badlogic.gdx.graphics.Color;
+import dev.dominion.ecs.api.Entity;
 
 import ca.kieve.ssss.component.ColorComp;
 import ca.kieve.ssss.component.Damage;
@@ -11,7 +12,6 @@ import ca.kieve.ssss.component.PlayerController;
 import ca.kieve.ssss.component.SocketPlug;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.event.AttackEvent;
-import dev.dominion.ecs.api.Entity;
 
 public class AttackSystem extends System {
     public AttackSystem(GameContext gameContext) {
@@ -20,11 +20,7 @@ public class AttackSystem extends System {
 
     @Override
     public void tick() {
-        var attackEvents = m_gameContext.events().getSystemEvents(AttackEvent.class);
-        if (attackEvents.isEmpty()) {
-            return;
-        }
-
+        var attackEvents = m_gameContext.events().getEvents(AttackEvent.class);
         for (var event : attackEvents) {
             processAttack(event.attacker(), event.target());
         }

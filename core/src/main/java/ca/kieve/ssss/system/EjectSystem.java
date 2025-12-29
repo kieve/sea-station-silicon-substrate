@@ -143,8 +143,7 @@ public class EjectSystem extends System {
         int speedVal = bodySpeed != null ? bodySpeed.val : 100;
 
         // Create eject event for SocketSystem to process
-        var ejectEvent = new EjectEvent(playerEntity, socketPlug, bodyEntity, socket);
-        m_eventContext.addSystemEvent(ejectEvent);
+        m_eventContext.addEvent(new EjectEvent(playerEntity, socketPlug, bodyEntity, socket));
 
         // Restore player's TileGlyph immediately so they appear without delay
         var playerContext = m_gameContext.player();

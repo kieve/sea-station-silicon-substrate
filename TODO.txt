@@ -1,5 +1,0 @@
-- EventContext uses "Object" instead of actual type
-- In the InteractSystem.java there is a line
-    `var interaction = resolveInteraction(socketPlug, entity);`
-    But an if statement below that chooses what object to make, it should need to do that.
-    Refactor the event context to allow storing data alongside the event

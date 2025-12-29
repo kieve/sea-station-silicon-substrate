@@ -9,7 +9,9 @@ import ca.kieve.ssss.component.SocketPlug;
 import ca.kieve.ssss.component.Velocity;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.event.AttackEvent;
-import ca.kieve.ssss.event.EventType;
+import ca.kieve.ssss.event.Event;
+import ca.kieve.ssss.event.ExamineEvent;
+import ca.kieve.ssss.event.SocketEvent;
 import ca.kieve.ssss.util.Vec3i;
 import dev.dominion.ecs.api.Entity;
 
@@ -65,20 +67,12 @@ public class InteractSystem extends System {
         boolean shouldBlockMovement = false;
 
         for (var entity : entitiesAtTarget) {
-            var interaction = resolveInteraction(socketPlug, entity);
-            if (interaction == null) {
+            var event = resolveInteraction(controlledEntity, socketPlug, entity);
+            if (event == null) {
                 continue;
             }
 
-            // Create event for this interaction
-            if (interaction == EventType.ATTACK) {
-                // Use AttackEvent for attacks to include attacker information
-                eventContext.addSystemEvent(new AttackEvent(controlledEntity, entity));
-            } else {
-                eventContext.addEvent(interaction, entity);
-            }
-
-            // All resolved interactions block movement
+            eventContext.addEvent(event);
             shouldBlockMovement = true;
         }
 
@@ -92,27 +86,27 @@ public class InteractSystem extends System {
      * Resolves which interaction should occur based on the entity's components and state.
      * Priority order: Attack (if alive) > Socket (if dead or no health) > Examine
      */
-    private EventType resolveInteraction(SocketPlug socketPlug, Entity entity) {
+    private Event resolveInteraction(Entity controlledEntity, SocketPlug socketPlug, Entity target) {
         // Check attackable first - only if entity has health and is alive
-        if (entity.has(Attackable.class)) {
-            var health = entity.get(Health.class);
+        if (target.has(Attackable.class)) {
+            var health = target.get(Health.class);
             if (health != null && health.hp > 0) {
-                return EventType.ATTACK;
+                return new AttackEvent(controlledEntity, target);
             }
         }
 
         // Check socketable - for dead entities or entities without health
         // Only allow socketing if player is not already socketed
-        if (entity.has(Socketable.class) && socketPlug.currentBody == null) {
-            var health = entity.get(Health.class);
+        if (target.has(Socketable.class) && socketPlug.currentBody == null) {
+            var health = target.get(Health.class);
             if (health == null || health.hp <= 0) {
-                return EventType.SOCKET;
+                return new SocketEvent(target);
             }
         }
 
         // Check examinable - lowest priority
-        if (entity.has(Examinable.class)) {
-            return EventType.EXAMINE;
+        if (target.has(Examinable.class)) {
+            return new ExamineEvent(target);
         }
 
         return null;

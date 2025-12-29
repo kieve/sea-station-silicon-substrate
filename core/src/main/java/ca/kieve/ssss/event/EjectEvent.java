@@ -5,7 +5,7 @@ import ca.kieve.ssss.component.SocketPlug;
 import dev.dominion.ecs.api.Entity;
 
 /**
- * Event for system-to-system communication when a player ejects from a socketed body.
+ * Event data for EJECT events.
  * Created by EjectSystem, consumed by SocketSystem.
  */
 public record EjectEvent(
@@ -13,4 +13,4 @@ public record EjectEvent(
     SocketPlug socketPlug,
     Entity bodyEntity,
     Socket socket
-) implements SystemEvent {}
+) implements Event {}

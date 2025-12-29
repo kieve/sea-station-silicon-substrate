@@ -1,6 +1,9 @@
 package ca.kieve.ssss.system;
 
+import dev.dominion.ecs.api.Entity;
+
 import ca.kieve.ssss.component.Health;
+import ca.kieve.ssss.component.PlayerController;
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.component.RenderingHint;
 import ca.kieve.ssss.component.Socket;
@@ -8,11 +11,9 @@ import ca.kieve.ssss.component.SocketPlug;
 import ca.kieve.ssss.component.Speed;
 import ca.kieve.ssss.component.TileGlyph;
 import ca.kieve.ssss.component.Velocity;
-import ca.kieve.ssss.component.PlayerController;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.event.EjectEvent;
-import ca.kieve.ssss.event.EventType;
-import dev.dominion.ecs.api.Entity;
+import ca.kieve.ssss.event.SocketEvent;
 
 /**
  * Handles the Socket mechanic where the player (a "microchip") can swap control
@@ -27,7 +28,7 @@ public class SocketSystem extends System {
     @Override
     public void preTick() {
         // Process eject events from EjectSystem
-        var ejectEvents = m_gameContext.events().getSystemEvents(EjectEvent.class);
+        var ejectEvents = m_gameContext.events().getEvents(EjectEvent.class);
         for (var event : ejectEvents) {
             ejectFromSocket(
                 event.playerEntity(),
@@ -41,7 +42,7 @@ public class SocketSystem extends System {
     @Override
     public void tick() {
         // Check for SOCKET events from InteractSystem
-        var socketEvents = m_gameContext.events().getEvents(EventType.SOCKET);
+        var socketEvents = m_gameContext.events().getEvents(SocketEvent.class);
         if (socketEvents.isEmpty()) {
             return;
         }
@@ -62,7 +63,8 @@ public class SocketSystem extends System {
         var socketPlug = playerWith.comp1();
 
         // Process each socket event
-        for (var entity : socketEvents) {
+        for (var event : socketEvents) {
+            var entity = event.target();
             var socket = entity.get(Socket.class);
             if (socket == null) {
                 continue;

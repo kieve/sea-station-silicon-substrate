@@ -8,7 +8,7 @@ import ca.kieve.ssss.context.ExamineContext;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.context.InputContext;
 import ca.kieve.ssss.context.InputContext.Mode;
-import ca.kieve.ssss.event.EventType;
+import ca.kieve.ssss.event.ExamineEvent;
 import ca.kieve.ssss.input.InputAction;
 import ca.kieve.ssss.util.DescriptionComposer;
 import ca.kieve.ssss.util.Vec3i;
@@ -112,8 +112,9 @@ public class ExamineSystem extends System {
     @Override
     public void postTick() {
         // Consume EXAMINE events and log their descriptions
-        var examineEvents = m_gameContext.events().getEvents(EventType.EXAMINE);
-        for (var entity : examineEvents) {
+        var examineEvents = m_gameContext.events().getEvents(ExamineEvent.class);
+        for (var event : examineEvents) {
+            var entity = event.target();
             var descriptor = entity.get(Descriptor.class);
             if (descriptor != null) {
                 logDescription(entity);

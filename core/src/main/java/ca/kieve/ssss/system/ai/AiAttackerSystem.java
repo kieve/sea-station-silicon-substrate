@@ -61,7 +61,7 @@ public class AiAttackerSystem extends System {
             }
 
             // Create attack event
-            m_gameContext.events().addSystemEvent(new AttackEvent(result.entity(), player));
+            m_gameContext.events().addEvent(new AttackEvent(result.entity(), player));
         });
     }
 
