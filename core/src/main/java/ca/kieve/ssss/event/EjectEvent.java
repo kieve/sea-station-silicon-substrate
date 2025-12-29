@@ -13,4 +13,4 @@ public record EjectEvent(
     SocketPlug socketPlug,
     Entity bodyEntity,
     Socket socket
-) {}
+) implements SystemEvent {}

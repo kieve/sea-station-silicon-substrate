@@ -7,4 +7,4 @@ import dev.dominion.ecs.api.Entity;
  * Created by InteractSystem (player attacks) or AI systems (AI attacks).
  * Consumed by AttackSystem.
  */
-public record AttackEvent(Entity attacker, Entity target) {}
+public record AttackEvent(Entity attacker, Entity target) implements SystemEvent {}

@@ -1,6 +1,7 @@
 package ca.kieve.ssss.context;
 
 import ca.kieve.ssss.event.EventType;
+import ca.kieve.ssss.event.SystemEvent;
 import dev.dominion.ecs.api.Entity;
 
 import java.util.ArrayList;
@@ -18,7 +19,7 @@ import java.util.Set;
  */
 public class EventContext {
     private final Map<EventType, List<Entity>> m_events = new HashMap<>();
-    private final Set<Object> m_systemEvents = new HashSet<>();
+    private final Set<SystemEvent> m_systemEvents = new HashSet<>();
 
     public void addEvent(EventType type, Entity entity) {
         m_events.computeIfAbsent(type, _ -> new ArrayList<>()).add(entity);
@@ -32,11 +33,11 @@ public class EventContext {
         return Collections.unmodifiableList(events);
     }
 
-    public void addSystemEvent(Object event) {
+    public void addSystemEvent(SystemEvent event) {
         m_systemEvents.add(event);
     }
 
-    public <T> List<T> getSystemEvents(Class<T> type) {
+    public <T extends SystemEvent> List<T> getSystemEvents(Class<T> type) {
         var result = new ArrayList<T>();
         for (var event : m_systemEvents) {
             if (type.isInstance(event)) {
