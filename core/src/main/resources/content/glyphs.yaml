@@ -19,6 +19,11 @@ glyphs:
     character: 'T'
     offsetX: 2.0
     offsetY: -6.0
+  A:
+    font: xirod_32
+    character: 'A'
+    offsetX: 2.0
+    offsetY: -6.0
   pound:
     font: xirod_32
     character: '#'

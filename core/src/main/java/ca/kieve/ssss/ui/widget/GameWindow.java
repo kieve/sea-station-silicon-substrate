@@ -18,7 +18,9 @@ import ca.kieve.ssss.world.WorldEntityFactory;
 import ca.kieve.ssss.world.WorldModel;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.input.InputActionController;
+import ca.kieve.ssss.component.ai.AiAttacker;
 import ca.kieve.ssss.component.ai.AiChaser;
+import ca.kieve.ssss.system.ai.AiAttackerSystem;
 import ca.kieve.ssss.system.ai.AiChaserSystem;
 import ca.kieve.ssss.system.ai.AiSeesawSystem;
 import ca.kieve.ssss.system.AttackSystem;
@@ -154,12 +156,13 @@ public class GameWindow extends UiWindow {
             new ClockSystem(m_gameContext),
             new InteractSystem(m_gameContext),
             new SocketSystem(m_gameContext),
-            new AttackSystem(m_gameContext),
             new ExamineSystem(m_gameContext),
             new EjectSystem(m_gameContext),
             new WasdSystem(m_gameContext),
             new AiSeesawSystem(m_gameContext),
             new AiChaserSystem(m_gameContext),
+            new AiAttackerSystem(m_gameContext),
+            new AttackSystem(m_gameContext),
             new VelocitySystem(m_gameContext),
             new CameraSystem(m_gameContext),
             new SanityCheckSystem(m_gameContext),
@@ -257,5 +260,14 @@ public class GameWindow extends UiWindow {
         chaser.add(new Speed(100));
         chaser.add(new Velocity());
         chaser.add(new AiChaser());
+
+        // Attacker AI test (attacks when adjacent)
+        var attacker = factory.createEntity(m_gameContext,
+            "aiAttacker",
+            playerSpawn.add(new Vec3i(3, 0, 0)),
+            Color.SCARLET
+        );
+        attacker.add(new Velocity());
+        attacker.add(new AiAttacker());
     }
 }

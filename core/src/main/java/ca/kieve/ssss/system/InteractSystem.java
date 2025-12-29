@@ -8,6 +8,7 @@ import ca.kieve.ssss.component.Socketable;
 import ca.kieve.ssss.component.SocketPlug;
 import ca.kieve.ssss.component.Velocity;
 import ca.kieve.ssss.context.GameContext;
+import ca.kieve.ssss.event.AttackEvent;
 import ca.kieve.ssss.event.EventType;
 import ca.kieve.ssss.util.Vec3i;
 import dev.dominion.ecs.api.Entity;
@@ -70,7 +71,12 @@ public class InteractSystem extends System {
             }
 
             // Create event for this interaction
-            eventContext.addEvent(interaction, entity);
+            if (interaction == EventType.ATTACK) {
+                // Use AttackEvent for attacks to include attacker information
+                eventContext.addSystemEvent(new AttackEvent(controlledEntity, entity));
+            } else {
+                eventContext.addEvent(interaction, entity);
+            }
 
             // All resolved interactions block movement
             shouldBlockMovement = true;

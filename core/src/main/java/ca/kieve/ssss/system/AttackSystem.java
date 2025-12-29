@@ -7,10 +7,11 @@ import ca.kieve.ssss.component.Damage;
 import ca.kieve.ssss.component.Descriptor;
 import ca.kieve.ssss.component.Equipment;
 import ca.kieve.ssss.component.Health;
-import ca.kieve.ssss.component.Position;
+import ca.kieve.ssss.component.PlayerController;
 import ca.kieve.ssss.component.SocketPlug;
 import ca.kieve.ssss.context.GameContext;
-import ca.kieve.ssss.event.EventType;
+import ca.kieve.ssss.event.AttackEvent;
+import dev.dominion.ecs.api.Entity;
 
 public class AttackSystem extends System {
     public AttackSystem(GameContext gameContext) {
@@ -19,30 +20,17 @@ public class AttackSystem extends System {
 
     @Override
     public void tick() {
-        var attackEvents = m_gameContext.events().getEvents(EventType.ATTACK);
+        var attackEvents = m_gameContext.events().getSystemEvents(AttackEvent.class);
         if (attackEvents.isEmpty()) {
             return;
         }
 
-        var playerResults = m_gameContext.ecs().findEntitiesWith(
-            SocketPlug.class,
-            Position.class
-        );
-
-        var optionalPlayer = playerResults.stream().findFirst();
-        if (optionalPlayer.isEmpty()) {
-            return;
+        for (var event : attackEvents) {
+            processAttack(event.attacker(), event.target());
         }
+    }
 
-        var playerWith = optionalPlayer.get();
-        var playerEntity = playerWith.entity();
-        var socketPlug = playerWith.comp1();
-
-        var attackerEntity = playerEntity;
-        if (socketPlug.currentBody != null) {
-            attackerEntity = socketPlug.currentBody;
-        }
-
+    private void processAttack(Entity attackerEntity, Entity targetEntity) {
         var equipment = attackerEntity.get(Equipment.class);
         if (equipment == null || equipment.weapon == null) {
             return;
@@ -54,42 +42,60 @@ public class AttackSystem extends System {
             return;
         }
 
+        var targetHealth = targetEntity.get(Health.class);
+        if (targetHealth == null || targetHealth.hp <= 0) {
+            return;
+        }
+
         var weaponDescriptor = weaponEntity.get(Descriptor.class);
         var weaponName = weaponDescriptor != null
             ? weaponDescriptor.name()
             : "unknown weapon";
         var damage = weaponDamage.value;
 
-        for (var targetEntity : attackEvents) {
-            var targetHealth = targetEntity.get(Health.class);
-            if (targetHealth == null) {
-                continue;
-            }
-            if (targetHealth.hp <= 0) {
-                continue;
-            }
+        targetHealth.hp -= damage;
+        if (targetHealth.hp < 0) {
+            targetHealth.hp = 0;
+        }
 
-            targetHealth.hp -= damage;
-            if (targetHealth.hp < 0) {
-                targetHealth.hp = 0;
-            }
+        var attackerName = getEntityName(attackerEntity);
+        var targetName = getEntityName(targetEntity);
 
-            var targetDescriptor = targetEntity.get(Descriptor.class);
-            var targetName = targetDescriptor != null
-                ? targetDescriptor.name()
-                : "something";
+        m_gameContext.log().log(
+            attackerName + " hit " + targetName + " for " + damage
+                + " damage with " + weaponName + "!"
+        );
 
-            m_gameContext.log().log(
-                "You hit " + targetName + " for " + damage + " damage with " + weaponName + "!"
-            );
-
-            if (targetHealth.hp == 0) {
-                m_gameContext.log().log(targetName + " is destroyed!");
-                var colorComp = targetEntity.get(ColorComp.class);
-                if (colorComp != null) {
-                    colorComp.color = Color.MAROON;
-                }
+        if (targetHealth.hp == 0) {
+            m_gameContext.log().log(targetName + " is destroyed!");
+            var colorComp = targetEntity.get(ColorComp.class);
+            if (colorComp != null) {
+                colorComp.color = Color.MAROON;
             }
         }
+    }
+
+    private String getEntityName(Entity entity) {
+        // Check if this is the player (either directly or via socketed body)
+        if (entity.has(PlayerController.class) || entity.has(SocketPlug.class)) {
+            return "You";
+        }
+
+        // Check if this entity is currently being controlled by the player
+        var playerResults = m_gameContext.ecs().findEntitiesWith(SocketPlug.class);
+        for (var result : playerResults) {
+            var socketPlug = result.comp();
+            if (socketPlug.currentBody == entity) {
+                return "You";
+            }
+        }
+
+        // Otherwise use the entity's descriptor name
+        var descriptor = entity.get(Descriptor.class);
+        if (descriptor != null) {
+            return descriptor.name();
+        }
+
+        return "something";
     }
 }

@@ -78,3 +78,25 @@ components:
   - type: Health
     maxHp: 20
   - type: Socket
+
+---
+components:
+  - type: Identifier
+    key: aiAttacker
+  - type: TileGlyph
+    glyphId: A
+  - type: Descriptor
+    name: Attacker
+    description: "A hostile attacker"
+  - type: RenderingHint
+    zIndex: 1
+  - type: Health
+    maxHp: 20
+  - type: Speed
+    val: 100
+  - type: Equipment
+    weaponId: chip_claws
+  - type: Attackable
+  - type: Collider
+  - type: Solid
+  - type: Examinable

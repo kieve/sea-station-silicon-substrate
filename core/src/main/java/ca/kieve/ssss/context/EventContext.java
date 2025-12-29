@@ -21,7 +21,7 @@ public class EventContext {
     private final Set<Object> m_systemEvents = new HashSet<>();
 
     public void addEvent(EventType type, Entity entity) {
-        m_events.computeIfAbsent(type, k -> new ArrayList<>()).add(entity);
+        m_events.computeIfAbsent(type, _ -> new ArrayList<>()).add(entity);
     }
 
     public List<Entity> getEvents(EventType type) {
