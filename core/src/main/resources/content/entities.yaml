@@ -37,6 +37,8 @@ components:
     zIndex: 1
   - type: Velocity
   - type: Collider
+  - type: Behavior
+    id: wanderer
 
 ---
 components:
@@ -99,4 +101,7 @@ components:
   - type: Attackable
   - type: Collider
   - type: Solid
+  - type: Velocity
   - type: Examinable
+  - type: Behavior
+    id: player_hunter

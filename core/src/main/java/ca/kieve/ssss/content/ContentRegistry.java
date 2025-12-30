@@ -1,5 +1,7 @@
 package ca.kieve.ssss.content;
 
+import ca.kieve.ssss.ai.behavior.BehaviorDefinition;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -7,6 +9,7 @@ public class ContentRegistry {
     private final Map<String, EntityDefinition> m_entityDefinitions = new HashMap<>();
     private final Map<String, GlyphDefinition> m_glyphDefinitions = new HashMap<>();
     private final Map<String, FontDefinition> m_fontDefinitions = new HashMap<>();
+    private final Map<String, BehaviorDefinition> m_behaviorDefinitions = new HashMap<>();
 
     private final ComponentFactory m_componentFactory;
     private BlockTypeFactory m_blockTypeFactory;
@@ -30,6 +33,10 @@ public class ContentRegistry {
 
     public void registerFont(String id, FontDefinition definition) {
         m_fontDefinitions.put(id, definition);
+    }
+
+    public void registerBehavior(String id, BehaviorDefinition definition) {
+        m_behaviorDefinitions.put(id, definition);
     }
 
     public EntityDefinition getEntityDefinition(String id) {
@@ -56,6 +63,14 @@ public class ContentRegistry {
         return def;
     }
 
+    public BehaviorDefinition getBehaviorDefinition(String id) {
+        BehaviorDefinition def = m_behaviorDefinitions.get(id);
+        if (def == null) {
+            throw new IllegalArgumentException("Unknown behavior: " + id);
+        }
+        return def;
+    }
+
     public ComponentFactory getComponentFactory() {
         return m_componentFactory;
     }
@@ -70,5 +85,9 @@ public class ContentRegistry {
 
     public boolean hasFont(String id) {
         return m_fontDefinitions.containsKey(id);
+    }
+
+    public boolean hasBehavior(String id) {
+        return m_behaviorDefinitions.containsKey(id);
     }
 }

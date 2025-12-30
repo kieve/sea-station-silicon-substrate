@@ -5,17 +5,31 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 
 import java.io.IOException;
+import java.util.List;
 
 public class ComponentTypeDeserializer extends JsonDeserializer<Class<?>> {
-    private static final String COMPONENT_PACKAGE = "ca.kieve.ssss.component.";
+    private static final List<String> PACKAGES = List.of(
+            "ca.kieve.ssss.component.",
+            "ca.kieve.ssss.ai.behavior."
+    );
+
+    private static Class<?> tryLoadClass(String packagePrefix, String typeName) {
+        try {
+            return Class.forName(packagePrefix + typeName);
+        } catch (ClassNotFoundException e) {
+            return null;
+        }
+    }
 
     @Override
     public Class<?> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
         String typeName = p.getText();
-        try {
-            return Class.forName(COMPONENT_PACKAGE + typeName);
-        } catch (ClassNotFoundException e) {
-            throw new IOException("Failed to load component class: " + typeName, e);
+        for (String pkg : PACKAGES) {
+            Class<?> clazz = tryLoadClass(pkg, typeName);
+            if (clazz != null) {
+                return clazz;
+            }
         }
+        throw new IOException("Failed to load component class: " + typeName);
     }
 }

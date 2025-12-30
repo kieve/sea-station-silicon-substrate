@@ -3,10 +3,11 @@ package ca.kieve.ssss.content;
 import com.badlogic.gdx.graphics.Color;
 import dev.dominion.ecs.api.Entity;
 
+import ca.kieve.ssss.ai.behavior.AiController;
+import ca.kieve.ssss.ai.behavior.Behavior;
 import ca.kieve.ssss.component.ColorComp;
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.component.Speed;
-import ca.kieve.ssss.component.ai.AiSeesawController;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.util.Vec3i;
 
@@ -39,6 +40,12 @@ public class EntityFactory {
 
         components.addAll(def.instantiateComponents(m_registry));
 
+        // Auto-add AiController when Behavior is present
+        boolean hasBehavior = components.stream().anyMatch(c -> c instanceof Behavior);
+        if (hasBehavior) {
+            components.add(new AiController());
+        }
+
         components.add(new Position(pos));
 
         Entity entity = context.ecs().createEntity(components.toArray());
@@ -61,25 +68,8 @@ public class EntityFactory {
         int speed,
         Color color
     ) {
-        if (color == null) {
-            color = Color.WHITE;
-        }
-
-        EntityDefinition def = m_registry.getEntityDefinition("debugMover");
-        List<Object> components = new ArrayList<>();
-
-        // Set GameContext so ComponentFactory can create special components
-        m_registry.getComponentFactory().setGameContext(context);
-
-        components.add(new ColorComp(color));
-        components.addAll(def.instantiateComponents(m_registry));
-        components.add(new AiSeesawController(pos));
-        components.add(new Speed(speed));
-        components.add(new Position(pos));
-
-        Entity entity = context.ecs().createEntity(components.toArray());
-        context.pos().add(entity, pos);
-
+        Entity entity = createEntity(context, "debugMover", pos, color);
+        entity.add(new Speed(speed));
         return entity;
     }
 

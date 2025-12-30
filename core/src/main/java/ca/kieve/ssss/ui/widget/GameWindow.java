@@ -9,8 +9,6 @@ import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
 import ca.kieve.ssss.component.CameraComp;
-import ca.kieve.ssss.component.Speed;
-import ca.kieve.ssss.component.Velocity;
 import ca.kieve.ssss.content.EntityFactory;
 import ca.kieve.ssss.world.MapGenerator;
 import ca.kieve.ssss.world.StaticTestMapGenerator;
@@ -18,11 +16,7 @@ import ca.kieve.ssss.world.WorldEntityFactory;
 import ca.kieve.ssss.world.WorldModel;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.input.InputActionController;
-import ca.kieve.ssss.component.ai.AiAttacker;
-import ca.kieve.ssss.component.ai.AiChaser;
-import ca.kieve.ssss.system.ai.AiAttackerSystem;
-import ca.kieve.ssss.system.ai.AiChaserSystem;
-import ca.kieve.ssss.system.ai.AiSeesawSystem;
+import ca.kieve.ssss.system.ai.BehaviorSystem;
 import ca.kieve.ssss.system.AttackSystem;
 import ca.kieve.ssss.system.CameraSystem;
 import ca.kieve.ssss.system.ClockSystem;
@@ -159,9 +153,7 @@ public class GameWindow extends UiWindow {
             new ExamineSystem(m_gameContext),
             new EjectSystem(m_gameContext),
             new WasdSystem(m_gameContext),
-            new AiSeesawSystem(m_gameContext),
-            new AiChaserSystem(m_gameContext),
-            new AiAttackerSystem(m_gameContext),
+            new BehaviorSystem(m_gameContext),
             new AttackSystem(m_gameContext),
             new VelocitySystem(m_gameContext),
             new CameraSystem(m_gameContext),
@@ -251,23 +243,11 @@ public class GameWindow extends UiWindow {
             Color.PINK
         );
 
-        // Chaser AI test
-        var chaser = factory.createEntity(m_gameContext,
-            "trainingDummy",
-            playerSpawn.add(new Vec3i(5, 5, 0)),
-            Color.ORANGE
-        );
-        chaser.add(new Speed(100));
-        chaser.add(new Velocity());
-        chaser.add(new AiChaser());
-
-        // Attacker AI test (attacks when adjacent)
-        var attacker = factory.createEntity(m_gameContext,
+        // Attacker AI test - now uses Behavior component from YAML
+        factory.createEntity(m_gameContext,
             "aiAttacker",
             playerSpawn.add(new Vec3i(3, 0, 0)),
             Color.SCARLET
         );
-        attacker.add(new Velocity());
-        attacker.add(new AiAttacker());
     }
 }

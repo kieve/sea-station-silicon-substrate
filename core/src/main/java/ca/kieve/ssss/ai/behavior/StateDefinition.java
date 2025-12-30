@@ -1,0 +1,33 @@
+package ca.kieve.ssss.ai.behavior;
+
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * YAML-loaded state definition within a behavior.
+ */
+public record StateDefinition(
+        String state,
+        int priority,
+        List<ConditionDefinition> conditions,
+        Map<String, Object> properties
+) {
+    @JsonCreator
+    public StateDefinition(
+            @JsonProperty("state") String state,
+            @JsonProperty("priority") int priority,
+            @JsonProperty("conditions") List<ConditionDefinition> conditions
+    ) {
+        this(state, priority, conditions, new HashMap<>());
+    }
+
+    @JsonAnySetter
+    public void setProperty(String key, Object value) {
+        properties.put(key, value);
+    }
+}

@@ -1,5 +1,6 @@
 package ca.kieve.ssss.content;
 
+import ca.kieve.ssss.ai.behavior.BehaviorDefinition;
 import ca.kieve.ssss.component.Identifier;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -14,6 +15,7 @@ public class ContentLoader {
     private static final String CONTENT_PATH = "content/";
     private static final String FONTS_FILE = "fonts.yaml";
     private static final String GLYPHS_FILE = "glyphs.yaml";
+    private static final String BEHAVIORS_FILE = "behaviors.yaml";
     private static final String MATERIALS_FILE = "materials.yaml";
     private static final String BLOCKS_FILE = "blocks.yaml";
     private static final String WEAPONS_FILE = "weapons.yaml";
@@ -31,6 +33,7 @@ public class ContentLoader {
     public ContentRegistry loadAll() {
         loadFonts();
         loadGlyphs();
+        loadBehaviors();
         loadEntityFiles(MATERIALS_FILE, BLOCKS_FILE, WEAPONS_FILE, ENTITIES_FILE);
         return m_registry;
     }
@@ -72,6 +75,27 @@ public class ContentLoader {
             }
         } catch (IOException e) {
             throw new RuntimeException("Failed to load " + GLYPHS_FILE, e);
+        }
+    }
+
+    private void loadBehaviors() {
+        FileHandle file = Gdx.files.internal(CONTENT_PATH + BEHAVIORS_FILE);
+        if (!file.exists()) {
+            return;
+        }
+
+        try {
+            var iterator = m_yamlMapper.readValues(
+                m_yamlMapper.getFactory().createParser(file.readString()),
+                BehaviorDefinition.class
+            );
+
+            while (iterator.hasNext()) {
+                BehaviorDefinition def = iterator.next();
+                m_registry.registerBehavior(def.id(), def);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load " + BEHAVIORS_FILE, e);
         }
     }
 

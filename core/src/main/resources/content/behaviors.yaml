@@ -1,0 +1,31 @@
+---
+id: player_hunter
+states:
+  - state: AttackState
+    priority: 1
+    conditions:
+      - type: DistanceToEntity
+        target: PLAYER
+        distance: 1
+      - type: HasWeapon
+  - state: ChaseState
+    priority: 2
+    conditions:
+      - type: DistanceToEntity
+        target: PLAYER
+        distance: 20
+  - state: IdleState
+    priority: 3
+
+---
+id: wanderer
+states:
+  - state: WanderState
+    priority: 1
+    range: 5
+
+---
+id: idler
+states:
+  - state: IdleState
+    priority: 1

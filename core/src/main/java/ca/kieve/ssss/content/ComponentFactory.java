@@ -1,5 +1,6 @@
 package ca.kieve.ssss.content;
 
+import ca.kieve.ssss.ai.behavior.Behavior;
 import ca.kieve.ssss.component.Equipment;
 import ca.kieve.ssss.component.Material;
 import ca.kieve.ssss.component.TileGlyph;
@@ -38,6 +39,10 @@ public class ComponentFactory {
 
             if (componentType == Material.class) {
                 return createMaterial(properties);
+            }
+
+            if (componentType == Behavior.class) {
+                return createBehavior(properties);
             }
 
             if (properties == null || properties.isEmpty()) {
@@ -103,6 +108,14 @@ public class ComponentFactory {
         Entity materialEntity = m_gameContext.ecs().createEntity(components.toArray());
 
         return new Material(materialEntity);
+    }
+
+    private Behavior createBehavior(Map<String, Object> properties) {
+        if (properties == null || !properties.containsKey("id")) {
+            throw new IllegalArgumentException("Behavior component requires id property");
+        }
+        String behaviorId = properties.get("id").toString();
+        return new Behavior(behaviorId);
     }
 
     private Object createNoArgComponent(Class<?> componentClass) throws Exception {
