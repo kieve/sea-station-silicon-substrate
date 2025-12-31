@@ -1,0 +1,44 @@
+# =============================================================================
+# Base Entity Definitions
+# =============================================================================
+
+---
+# Base for all non-player entities - provides common rendering and interaction
+components:
+  - type: Identifier
+    key: base_entity
+  - type: RenderingHint
+    zIndex: 1
+  - type: Examinable
+
+---
+# Physics - entities that can move and participate in collision detection
+components:
+  - type: Identifier
+    key: physics
+  - type: Velocity
+  - type: Collider
+
+---
+# Solid - entities that block movement
+components:
+  - type: Identifier
+    key: solid
+  - type: Solid
+
+---
+# Combatant - entities that can be attacked and take damage
+components:
+  - type: Identifier
+    key: combatant
+  - type: Health
+    maxHp: 100
+  - type: Attackable
+
+---
+# Socketable - entities that can be possessed/socketed into
+components:
+  - type: Identifier
+    key: socketable
+  - type: Socket
+  - type: Socketable

@@ -19,6 +19,7 @@ public class ContentLoader {
     private static final String MATERIALS_FILE = "materials.yaml";
     private static final String BLOCKS_FILE = "blocks.yaml";
     private static final String WEAPONS_FILE = "weapons.yaml";
+    private static final String ENTITIES_BASE_FILE = "entities_base.yaml";
     private static final String ENTITIES_FILE = "entities.yaml";
 
     private final ObjectMapper m_yamlMapper;
@@ -34,7 +35,12 @@ public class ContentLoader {
         loadFonts();
         loadGlyphs();
         loadBehaviors();
-        loadEntityFiles(MATERIALS_FILE, BLOCKS_FILE, WEAPONS_FILE, ENTITIES_FILE);
+        loadEntityFiles(
+            MATERIALS_FILE,
+            BLOCKS_FILE,
+            WEAPONS_FILE,
+            ENTITIES_BASE_FILE,
+            ENTITIES_FILE);
         return m_registry;
     }
 
