@@ -35,6 +35,7 @@ public class MainEngine extends ApplicationAdapter {
         // Initialize contexts that need cross-references
         m_gameContext.examine().init(m_gameContext);
         m_gameContext.eject().init(m_gameContext);
+        m_gameContext.pathing().init(m_gameContext);
 
         Gdx.input.setInputProcessor(m_gameContext.inputMux());
         m_currentScreen = new PlayScreen(m_gameContext);

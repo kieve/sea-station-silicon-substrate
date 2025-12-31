@@ -27,6 +27,7 @@ import ca.kieve.ssss.system.EventSystem;
 import ca.kieve.ssss.system.ExamineCrosshairRenderSystem;
 import ca.kieve.ssss.system.ExamineSystem;
 import ca.kieve.ssss.system.InteractSystem;
+import ca.kieve.ssss.system.PathingSystem;
 import ca.kieve.ssss.system.SanityCheckSystem;
 import ca.kieve.ssss.system.SocketSystem;
 import ca.kieve.ssss.system.TileGlyphRenderSystem;
@@ -153,6 +154,7 @@ public class GameWindow extends UiWindow {
             new ExamineSystem(m_gameContext),
             new EjectSystem(m_gameContext),
             new WasdSystem(m_gameContext),
+            new PathingSystem(m_gameContext),
             new AiControllerSystem(m_gameContext),
             new AttackSystem(m_gameContext),
             new VelocitySystem(m_gameContext),
