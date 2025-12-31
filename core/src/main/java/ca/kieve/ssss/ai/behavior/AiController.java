@@ -2,7 +2,6 @@ package ca.kieve.ssss.ai.behavior;
 
 import ca.kieve.ssss.ai.state.AiState;
 import ca.kieve.ssss.component.Component;
-import ca.kieve.ssss.util.Vec3i;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -10,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Runtime state for AI behavior. Holds instantiated states and state-specific data.
+ * Runtime state for AI behavior. Holds instantiated states.
  */
 public class AiController implements Component {
     private final List<StateDefinition> m_stateDefinitions;
@@ -29,10 +28,6 @@ public class AiController implements Component {
         return m_stateDefinitions;
     }
 
-    // State-specific persistent data
-    private Vec3i m_wanderInitialPos;
-    private boolean m_wanderGoingUp = true;
-
     public AiState getState(String stateId) {
         return m_states.get(stateId);
     }
@@ -47,22 +42,5 @@ public class AiController implements Component {
 
     public void setCurrentStateId(String stateId) {
         m_currentStateId = stateId;
-    }
-
-    // WanderState data accessors
-    public Vec3i getWanderInitialPos() {
-        return m_wanderInitialPos;
-    }
-
-    public void setWanderInitialPos(Vec3i pos) {
-        m_wanderInitialPos = pos.copy();
-    }
-
-    public boolean isWanderGoingUp() {
-        return m_wanderGoingUp;
-    }
-
-    public void setWanderGoingUp(boolean goingUp) {
-        m_wanderGoingUp = goingUp;
     }
 }

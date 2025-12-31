@@ -11,21 +11,22 @@ import ca.kieve.ssss.util.Vec3i;
 public class WanderState extends AiState {
     private static final int DEFAULT_RANGE = 5;
 
+    private Vec3i m_initialPos;
+    private boolean m_goingUp = true;
+
     @Override
     public void onEnter(StateContext context) {
-        // Capture initial position when first entering this state
-        var controller = context.controller();
-        if (controller.getWanderInitialPos() == null) {
-            var posComp = context.entity().get(Position.class);
-            if (posComp != null) {
-                controller.setWanderInitialPos(posComp.getPosition());
-            }
+        if (m_initialPos != null) {
+            return;
+        }
+        var posComp = context.entity().get(Position.class);
+        if (posComp != null) {
+            m_initialPos = posComp.getPosition().copy();
         }
     }
 
     @Override
     public void execute(StateContext context) {
-        var controller = context.controller();
         var posComp = context.entity().get(Position.class);
         var velocity = context.entity().get(Velocity.class);
 
@@ -34,8 +35,7 @@ public class WanderState extends AiState {
         }
 
         Vec3i pos = posComp.getPosition();
-        Vec3i initialPos = controller.getWanderInitialPos();
-        if (initialPos == null) {
+        if (m_initialPos == null) {
             return;
         }
 
@@ -45,15 +45,13 @@ public class WanderState extends AiState {
         }
 
         // Check bounds and potentially reverse direction
-        boolean goingUp = controller.isWanderGoingUp();
-        if (goingUp && pos.y >= initialPos.y + range
-                || !goingUp && pos.y <= initialPos.y - range) {
-            goingUp = !goingUp;
-            controller.setWanderGoingUp(goingUp);
+        if (m_goingUp && pos.y >= m_initialPos.y + range
+                || !m_goingUp && pos.y <= m_initialPos.y - range) {
+            m_goingUp = !m_goingUp;
         }
 
         Vec3i dv = Vec3i.Y.copy();
-        if (!goingUp) {
+        if (!m_goingUp) {
             dv.productMut(-1);
         }
 
