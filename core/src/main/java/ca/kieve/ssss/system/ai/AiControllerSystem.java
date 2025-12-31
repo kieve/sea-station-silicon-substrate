@@ -11,8 +11,10 @@ import ca.kieve.ssss.ai.state.StateContext;
 import ca.kieve.ssss.component.PlayerController;
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.component.Speed;
+import ca.kieve.ssss.context.AiControllerContext;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.system.System;
+import dev.dominion.ecs.api.Dominion;
 import dev.dominion.ecs.api.Entity;
 
 import java.util.Comparator;
@@ -22,16 +24,20 @@ import java.util.List;
  * AI system that evaluates state definitions and executes states.
  */
 public class AiControllerSystem extends System {
+    private final Dominion m_ecs;
+    private final AiControllerContext m_aiControllerContext;
     private final BehaviorFactory m_behaviorFactory;
 
     public AiControllerSystem(GameContext gameContext) {
         super(gameContext);
+        m_ecs = gameContext.ecs();
+        m_aiControllerContext = gameContext.aiController();
         m_behaviorFactory = new BehaviorFactory();
     }
 
     @Override
     public void tick() {
-        var entities = m_gameContext.ecs().findEntitiesWith(
+        var entities = m_ecs.findEntitiesWith(
             AiController.class,
             Position.class,
             Speed.class
@@ -111,7 +117,7 @@ public class AiControllerSystem extends System {
         ConditionContext condContext = new ConditionContext(m_gameContext, entity);
 
         for (ConditionDefinition condDef : conditions) {
-            Condition condition = m_behaviorFactory.createCondition(condDef);
+            Condition condition = m_aiControllerContext.getCondition(condDef);
             if (!condition.evaluate(condContext)) {
                 return false;  // AND logic: all must pass
             }
@@ -136,7 +142,7 @@ public class AiControllerSystem extends System {
     }
 
     private Entity findPlayer() {
-        var results = m_gameContext.ecs().findEntitiesWith(PlayerController.class);
+        var results = m_ecs.findEntitiesWith(PlayerController.class);
         var it = results.iterator();
         if (it.hasNext()) {
             return it.next().entity();

@@ -1,6 +1,5 @@
 package ca.kieve.ssss.ai.behavior;
 
-import ca.kieve.ssss.ai.condition.Condition;
 import ca.kieve.ssss.ai.state.AiState;
 
 /**
@@ -8,7 +7,6 @@ import ca.kieve.ssss.ai.state.AiState;
  */
 public class BehaviorFactory {
     private static final String STATE_PACKAGE = "ca.kieve.ssss.ai.state.";
-    private static final String CONDITION_PACKAGE = "ca.kieve.ssss.ai.condition.";
 
     public AiState createState(StateDefinition definition) {
         try {
@@ -19,23 +17,6 @@ public class BehaviorFactory {
         } catch (Exception e) {
             throw new RuntimeException(
                 "Failed to create state: " + definition.state(), e);
-        }
-    }
-
-    public Condition createCondition(ConditionDefinition definition) {
-        try {
-            String className = definition.type();
-            if (!className.endsWith("Condition")) {
-                className += "Condition";
-            }
-            Class<?> conditionClass = Class.forName(CONDITION_PACKAGE + className);
-            Condition condition = (Condition) conditionClass
-                .getDeclaredConstructor().newInstance();
-            condition.initialize(definition.properties());
-            return condition;
-        } catch (Exception e) {
-            throw new RuntimeException(
-                "Failed to create condition: " + definition.type(), e);
         }
     }
 }
