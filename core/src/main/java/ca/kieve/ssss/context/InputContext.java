@@ -35,6 +35,7 @@ public class InputContext {
         setKeyMapping(InputAction.CONFIRM, Keys.ENTER);
         setKeyMapping(InputAction.CANCEL, Keys.ESCAPE);
         setKeyMapping(InputAction.EJECT, Keys.Q);
+        setKeyMapping(InputAction.WAIT, Keys.SPACE);
     }
 
     public void setKeyMapping(InputAction action, int keycode) {

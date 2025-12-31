@@ -55,6 +55,9 @@ public class WasdSystem extends System {
             instantVelocity.x++;
             anyInput = true;
         }
+        if (m_input.consume(InputAction.WAIT)) {
+            anyInput = true;
+        }
 
         if (anyInput) {
             m_clock.processPlayerActed(speed);

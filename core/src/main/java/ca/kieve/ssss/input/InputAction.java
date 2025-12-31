@@ -8,5 +8,6 @@ public enum InputAction {
     EXAMINE,
     CONFIRM,
     CANCEL,
-    EJECT
+    EJECT,
+    WAIT
 }
