@@ -25,6 +25,8 @@ public class LogContext {
     }
 
     public void log(String message) {
+        IO.println("[LOG] " + message);
+
         // Check if the last message is the same
         if (!m_messages.isEmpty()) {
             var last = ((LinkedList<LogEntry>) m_messages).getLast();

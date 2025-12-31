@@ -1,6 +1,13 @@
 ---
 id: player_hunter
 states:
+  - state: AnnounceDeathState
+    priority: 0
+    conditions:
+      - type: IsDead
+      - type: MaxTimes
+        maxTimes: 1
+    message: "The attacker curses you as it falls."
   - state: AttackState
     priority: 1
     conditions:

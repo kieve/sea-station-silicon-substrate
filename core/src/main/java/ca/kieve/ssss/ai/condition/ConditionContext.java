@@ -1,5 +1,6 @@
 package ca.kieve.ssss.ai.condition;
 
+import ca.kieve.ssss.ai.state.AiState;
 import ca.kieve.ssss.context.GameContext;
 import dev.dominion.ecs.api.Entity;
 
@@ -8,5 +9,7 @@ import dev.dominion.ecs.api.Entity;
  */
 public record ConditionContext(
     GameContext gameContext,
-    Entity entity
+    Entity entity,
+    AiState state,
+    int statePriority
 ) {}

@@ -1,5 +1,8 @@
 package ca.kieve.ssss.ai.state;
 
+import ca.kieve.ssss.ai.condition.data.ConditionData;
+
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -7,6 +10,7 @@ import java.util.Map;
  */
 public abstract class AiState {
     protected Map<String, Object> m_properties;
+    private final Map<Integer, ConditionData> m_conditionData = new HashMap<>();
 
     public void initialize(Map<String, Object> properties) {
         m_properties = properties;
@@ -26,4 +30,12 @@ public abstract class AiState {
      * Execute this state's behavior.
      */
     public abstract void execute(StateContext context);
+
+    public ConditionData getConditionData(int priority) {
+        return m_conditionData.get(priority);
+    }
+
+    public void setConditionData(int priority, ConditionData data) {
+        m_conditionData.put(priority, data);
+    }
 }
