@@ -3,8 +3,6 @@ package ca.kieve.ssss.content;
 import com.badlogic.gdx.graphics.Color;
 import dev.dominion.ecs.api.Entity;
 
-import ca.kieve.ssss.ai.behavior.AiController;
-import ca.kieve.ssss.ai.behavior.Behavior;
 import ca.kieve.ssss.component.ColorComp;
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.component.Speed;
@@ -39,13 +37,6 @@ public class EntityFactory {
         }
 
         components.addAll(def.instantiateComponents(m_registry));
-
-        // Auto-add AiController when Behavior is present
-        boolean hasBehavior = components.stream().anyMatch(c -> c instanceof Behavior);
-        if (hasBehavior) {
-            components.add(new AiController());
-        }
-
         components.add(new Position(pos));
 
         Entity entity = context.ecs().createEntity(components.toArray());

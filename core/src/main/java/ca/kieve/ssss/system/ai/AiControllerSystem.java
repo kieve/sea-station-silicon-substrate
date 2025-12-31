@@ -1,8 +1,6 @@
 package ca.kieve.ssss.system.ai;
 
 import ca.kieve.ssss.ai.behavior.AiController;
-import ca.kieve.ssss.ai.behavior.Behavior;
-import ca.kieve.ssss.ai.behavior.BehaviorDefinition;
 import ca.kieve.ssss.ai.behavior.BehaviorFactory;
 import ca.kieve.ssss.ai.behavior.ConditionDefinition;
 import ca.kieve.ssss.ai.behavior.StateDefinition;
@@ -21,12 +19,12 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * Unified AI system that evaluates behavior definitions and executes states.
+ * AI system that evaluates state definitions and executes states.
  */
-public class BehaviorSystem extends System {
+public class AiControllerSystem extends System {
     private final BehaviorFactory m_behaviorFactory;
 
-    public BehaviorSystem(GameContext gameContext) {
+    public AiControllerSystem(GameContext gameContext) {
         super(gameContext);
         m_behaviorFactory = new BehaviorFactory();
     }
@@ -34,39 +32,32 @@ public class BehaviorSystem extends System {
     @Override
     public void tick() {
         var entities = m_gameContext.ecs().findEntitiesWith(
-            Behavior.class,
             AiController.class,
             Position.class,
             Speed.class
         );
 
         entities.forEach(result -> {
-            var behavior = result.comp1();
-            var controller = result.comp2();
-            var speed = result.comp4();
+            var controller = result.comp1();
+            var speed = result.comp3();
             Entity entity = result.entity();
 
             if (!speed.canAct) {
                 return;
             }
 
-            processBehavior(entity, behavior, controller);
+            processController(entity, controller);
         });
     }
 
-    private void processBehavior(
-        Entity entity,
-        Behavior behavior,
-        AiController controller
-    ) {
-        BehaviorDefinition definition = m_gameContext.content()
-            .getBehaviorDefinition(behavior.behaviorId());
-        if (definition == null) {
+    private void processController(Entity entity, AiController controller) {
+        List<StateDefinition> stateDefinitions = controller.getStateDefinitions();
+        if (stateDefinitions == null || stateDefinitions.isEmpty()) {
             return;
         }
 
         // Sort states by priority (lower = higher priority, checked first)
-        List<StateDefinition> sortedStates = definition.states().stream()
+        List<StateDefinition> sortedStates = stateDefinitions.stream()
             .sorted(Comparator.comparingInt(StateDefinition::priority))
             .toList();
 

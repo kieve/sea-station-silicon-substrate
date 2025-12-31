@@ -4,15 +4,30 @@ import ca.kieve.ssss.ai.state.AiState;
 import ca.kieve.ssss.component.Component;
 import ca.kieve.ssss.util.Vec3i;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
  * Runtime state for AI behavior. Holds instantiated states and state-specific data.
  */
 public class AiController implements Component {
+    private final List<StateDefinition> m_stateDefinitions;
     private final Map<String, AiState> m_states = new HashMap<>();
     private String m_currentStateId;
+
+    public AiController() {
+        m_stateDefinitions = Collections.emptyList();
+    }
+
+    public AiController(List<StateDefinition> stateDefinitions) {
+        m_stateDefinitions = stateDefinitions;
+    }
+
+    public List<StateDefinition> getStateDefinitions() {
+        return m_stateDefinitions;
+    }
 
     // State-specific persistent data
     private Vec3i m_wanderInitialPos;

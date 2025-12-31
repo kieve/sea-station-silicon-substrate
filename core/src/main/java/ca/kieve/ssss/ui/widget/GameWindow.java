@@ -16,7 +16,7 @@ import ca.kieve.ssss.world.WorldEntityFactory;
 import ca.kieve.ssss.world.WorldModel;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.input.InputActionController;
-import ca.kieve.ssss.system.ai.BehaviorSystem;
+import ca.kieve.ssss.system.ai.AiControllerSystem;
 import ca.kieve.ssss.system.AttackSystem;
 import ca.kieve.ssss.system.CameraSystem;
 import ca.kieve.ssss.system.ClockSystem;
@@ -153,7 +153,7 @@ public class GameWindow extends UiWindow {
             new ExamineSystem(m_gameContext),
             new EjectSystem(m_gameContext),
             new WasdSystem(m_gameContext),
-            new BehaviorSystem(m_gameContext),
+            new AiControllerSystem(m_gameContext),
             new AttackSystem(m_gameContext),
             new VelocitySystem(m_gameContext),
             new CameraSystem(m_gameContext),

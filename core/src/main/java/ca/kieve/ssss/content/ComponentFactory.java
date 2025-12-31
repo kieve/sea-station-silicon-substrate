@@ -1,6 +1,7 @@
 package ca.kieve.ssss.content;
 
-import ca.kieve.ssss.ai.behavior.Behavior;
+import ca.kieve.ssss.ai.behavior.AiController;
+import ca.kieve.ssss.ai.behavior.BehaviorDefinition;
 import ca.kieve.ssss.component.Equipment;
 import ca.kieve.ssss.component.Material;
 import ca.kieve.ssss.component.TileGlyph;
@@ -41,8 +42,8 @@ public class ComponentFactory {
                 return createMaterial(properties);
             }
 
-            if (componentType == Behavior.class) {
-                return createBehavior(properties);
+            if (componentType == AiController.class) {
+                return createAiController(properties);
             }
 
             if (properties == null || properties.isEmpty()) {
@@ -110,12 +111,19 @@ public class ComponentFactory {
         return new Material(materialEntity);
     }
 
-    private Behavior createBehavior(Map<String, Object> properties) {
-        if (properties == null || !properties.containsKey("id")) {
-            throw new IllegalArgumentException("Behavior component requires id property");
+    private AiController createAiController(Map<String, Object> properties) {
+        if (properties == null || !properties.containsKey("behavior")) {
+            return new AiController();
         }
-        String behaviorId = properties.get("id").toString();
-        return new Behavior(behaviorId);
+
+        String behaviorId = properties.get("behavior").toString();
+        BehaviorDefinition behaviorDef = m_registry.getBehaviorDefinition(behaviorId);
+        if (behaviorDef == null) {
+            throw new IllegalArgumentException(
+                "Unknown behavior: " + behaviorId);
+        }
+
+        return new AiController(behaviorDef.states());
     }
 
     private Object createNoArgComponent(Class<?> componentClass) throws Exception {
