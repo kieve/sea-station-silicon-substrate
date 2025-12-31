@@ -3,7 +3,6 @@
 - Maybe rename "StateContext"
 
 # From Testing
-- Attack state still hits you when it's dead.
 
 # Eventually
 

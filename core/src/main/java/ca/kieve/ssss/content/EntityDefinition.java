@@ -5,7 +5,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public record EntityDefinition(String parent, List<ComponentDefinition> components) {
+public record EntityDefinition(List<String> parents, List<ComponentDefinition> components) {
+    public EntityDefinition {
+        parents = parents != null ? parents : List.of();
+        components = components != null ? components : List.of();
+    }
+
     public List<Object> instantiateComponents(ContentRegistry registry) {
         List<ComponentDefinition> allComponents = resolveComponents(registry);
         List<Object> result = new ArrayList<>();
@@ -19,9 +24,9 @@ public record EntityDefinition(String parent, List<ComponentDefinition> componen
     public List<ComponentDefinition> resolveComponents(ContentRegistry registry) {
         Map<Class<?>, ComponentDefinition> componentMap = new HashMap<>();
 
-        // First, add parent components if parent exists
-        if (parent != null && !parent.isEmpty()) {
-            EntityDefinition parentDef = registry.getEntityDefinition(parent);
+        // First, add parent components in order (later parents override earlier ones)
+        for (String parentId : parents) {
+            EntityDefinition parentDef = registry.getEntityDefinition(parentId);
             List<ComponentDefinition> parentComponents = parentDef.resolveComponents(registry);
             for (ComponentDefinition compDef : parentComponents) {
                 componentMap.put(compDef.type(), compDef);

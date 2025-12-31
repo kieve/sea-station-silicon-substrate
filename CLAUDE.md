@@ -231,18 +231,22 @@ Entity block = factory.createBlock(context, pos, BlockType.STONE);
 **Adding New Content:**
 1. Define entity in `entities.yaml`:
 ```yaml
-entities:
-  newEnemy:
-    glyph: M
-    components:
-      - type: Descriptor
-        args: ["Enemy Name", "Description"]
-      - type: Health
-        args: [50]
-      - type: Speed
-        args: [100]
-      - type: Collider
-    defaultWeapon: power_fist
+---
+parents: [base_entity, physics, solid, combatant]
+components:
+  - type: Identifier
+    key: newEnemy
+  - type: TileGlyph
+    glyphId: M
+  - type: Descriptor
+    name: Enemy Name
+    description: A dangerous foe
+  - type: Health
+    maxHp: 50
+  - type: Speed
+    val: 100
+  - type: Equipment
+    weaponId: power_fist
 ```
 
 2. Reference in code:
@@ -258,7 +262,7 @@ factory.createEntity(context, "newEnemy", pos, Color.RED);
 
 **Component Composition with Parent Inheritance:**
 
-Entity definitions support a `parent` field that enables component inheritance and composition. When an entity specifies a parent, it inherits all components from the parent definition. Child components with the same type override parent components.
+Entity definitions support a `parents` field (list of strings) that enables component inheritance and composition from multiple parents. Components are merged in order: first parent → second parent → ... → explicit components. Later items override earlier ones when they have the same component type.
 
 **YAML Format:**
 - Entities are defined as separate YAML documents using `---` separators
@@ -266,36 +270,38 @@ Entity definitions support a `parent` field that enables component inheritance a
 - Entity ID is determined by the `Identifier` component's `key` field
 - Component properties are specified directly (not nested under `properties:`)
 
-Example in `blocks.yaml`:
+**Base Entity Definitions:**
+
+`entities.yaml` defines reusable base entities that can be composed together:
+- `base_entity`: RenderingHint (zIndex: 1), Examinable
+- `physics`: Velocity, Collider
+- `solid`: Solid
+- `combatant`: Health (maxHp: 100), Attackable
+- `socketable`: Socket, Socketable
+
+Example with multiple parents:
 ```yaml
 ---
+parents: [base_entity, physics, solid, combatant]
 components:
   - type: Identifier
-    key: block
+    key: aiAttacker
   - type: TileGlyph
-    glyphId: pound
+    glyphId: A
   - type: Descriptor
-    name: Block
-    description: A block
-  - type: Examinable
-
----
-parent: block
-components:
-  - type: Identifier
-    key: block_wood
-  - type: Descriptor
-    name: Wooden Block
-    description: A sturdy wooden block
-  - type: Material
-    id: material_wood
-  - type: ColorComp
-    color: "#8B4513FF"
-  - type: Opaque
-  - type: Solid
+    name: Attacker
+    description: "A hostile attacker"
+  - type: Health
+    maxHp: 20  # Override default 100 from combatant
+  - type: Speed
+    val: 100
+  - type: Equipment
+    weaponId: chip_claws
+  - type: AiController
+    behavior: player_hunter
 ```
 
-In this example, `block_wood` inherits `TileGlyph` and `Examinable` from `block`, but overrides the `Descriptor` component with its own version. Component replacement is determined by component type - if both parent and child define a component with the same `type`, the child's version is used.
+In this example, `aiAttacker` inherits from four base definitions and overrides `Health` with a lower `maxHp`. Component replacement is determined by component type - if multiple parents or the child define a component with the same `type`, the last one wins.
 
 ## Key Dependencies
 
@@ -419,6 +425,37 @@ This pattern:
 - Keeps constructors consistent (always expect GameContext)
 - Allows components to access additional contexts later without signature changes
 - Makes dependencies on GameContext explicit and centralized
+
+### Collections Are Never Null
+Collections should never be null. Always use an empty collection instead of null. This eliminates null checks and makes code cleaner.
+
+**Bad:**
+```java
+public record EntityDefinition(List<String> parents) {
+    public void process() {
+        if (parents != null) {  // Unnecessary null check
+            for (String parent : parents) {
+                // ...
+            }
+        }
+    }
+}
+```
+
+**Good:**
+```java
+public record EntityDefinition(List<String> parents) {
+    public EntityDefinition {
+        parents = parents != null ? parents : List.of();  // Normalize in constructor
+    }
+
+    public void process() {
+        for (String parent : parents) {  // No null check needed
+            // ...
+        }
+    }
+}
+```
 
 ### Context Initialization with init(GameContext)
 Since `GameContext` is a record that creates all context objects in a single constructor call, contexts that need references to other contexts cannot receive them during construction. Instead, use an `init(GameContext)` method that is called after `GameContext` is created.

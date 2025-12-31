@@ -12,7 +12,7 @@ components:
     zIndex: 0
 
 ---
-parent: block
+parents: [block]
 components:
   - type: Identifier
     key: block_wood
@@ -24,7 +24,7 @@ components:
   - type: Solid
 
 ---
-parent: block
+parents: [block]
 components:
   - type: Identifier
     key: block_stone
@@ -36,7 +36,7 @@ components:
   - type: Solid
 
 ---
-parent: block
+parents: [block]
 components:
   - type: Identifier
     key: block_steel

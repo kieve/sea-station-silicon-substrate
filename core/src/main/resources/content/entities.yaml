@@ -1,3 +1,52 @@
+# =============================================================================
+# Base Definitions
+# =============================================================================
+
+---
+# Base for all non-player entities - provides common rendering and interaction
+components:
+  - type: Identifier
+    key: base_entity
+  - type: RenderingHint
+    zIndex: 1
+  - type: Examinable
+
+---
+# Physics - entities that can move and participate in collision detection
+components:
+  - type: Identifier
+    key: physics
+  - type: Velocity
+  - type: Collider
+
+---
+# Solid - entities that block movement
+components:
+  - type: Identifier
+    key: solid
+  - type: Solid
+
+---
+# Combatant - entities that can be attacked and take damage
+components:
+  - type: Identifier
+    key: combatant
+  - type: Health
+    maxHp: 100
+  - type: Attackable
+
+---
+# Socketable - entities that can be possessed/socketed into
+components:
+  - type: Identifier
+    key: socketable
+  - type: Socket
+  - type: Socketable
+
+# =============================================================================
+# Game Entities
+# =============================================================================
+
 ---
 components:
   - type: Identifier
@@ -25,6 +74,7 @@ components:
     maxHp: 100
 
 ---
+parents: [base_entity, physics]
 components:
   - type: Identifier
     key: debugMover
@@ -33,14 +83,11 @@ components:
   - type: Descriptor
     name: Moving Sign
     description: "Perhaps, there's many of them?"
-  - type: RenderingHint
-    zIndex: 1
-  - type: Velocity
-  - type: Collider
   - type: AiController
     behavior: wanderer
 
 ---
+parents: [base_entity, physics, solid, socketable]
 components:
   - type: Identifier
     key: deadMech
@@ -49,13 +96,6 @@ components:
   - type: Descriptor
     name: Mech
     description: "Beep Boop."
-  - type: RenderingHint
-    zIndex: 1
-  - type: Socket
-  - type: Socketable
-  - type: Velocity
-  - type: Collider
-  - type: Solid
   - type: Health
     maxHp: 100
     hp: 0
@@ -63,6 +103,7 @@ components:
     weaponId: power_fist
 
 ---
+parents: [base_entity, solid, combatant, socketable]
 components:
   - type: Identifier
     key: trainingDummy
@@ -71,17 +112,12 @@ components:
   - type: Descriptor
     name: Training Dummy
     description: "Go on, hit me."
-  - type: RenderingHint
-    zIndex: 1
-  - type: Attackable
-  - type: Socketable
   - type: Collider
-  - type: Solid
   - type: Health
     maxHp: 20
-  - type: Socket
 
 ---
+parents: [base_entity, physics, solid, combatant]
 components:
   - type: Identifier
     key: aiAttacker
@@ -90,18 +126,11 @@ components:
   - type: Descriptor
     name: Attacker
     description: "A hostile attacker"
-  - type: RenderingHint
-    zIndex: 1
   - type: Health
     maxHp: 20
   - type: Speed
     val: 100
   - type: Equipment
     weaponId: chip_claws
-  - type: Attackable
-  - type: Collider
-  - type: Solid
-  - type: Velocity
-  - type: Examinable
   - type: AiController
     behavior: player_hunter
