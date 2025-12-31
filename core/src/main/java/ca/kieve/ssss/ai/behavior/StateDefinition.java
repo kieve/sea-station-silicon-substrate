@@ -17,6 +17,8 @@ public record StateDefinition(
         List<ConditionDefinition> conditions,
         Map<String, Object> properties
 ) {
+    private static final String IS_DEAD_CONDITION = "IsDead";
+
     @JsonCreator
     public StateDefinition(
             @JsonProperty("state") String state,
@@ -29,5 +31,13 @@ public record StateDefinition(
     @JsonAnySetter
     public void setProperty(String key, Object value) {
         properties.put(key, value);
+    }
+
+    public boolean hasIsDeadCondition() {
+        if (conditions == null) {
+            return false;
+        }
+        return conditions.stream()
+            .anyMatch(c -> IS_DEAD_CONDITION.equals(c.type()));
     }
 }

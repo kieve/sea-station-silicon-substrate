@@ -53,11 +53,6 @@ public class AiControllerSystem extends System {
                 return;
             }
 
-            Health health = entity.get(Health.class);
-            if (health != null && health.hp <= 0) {
-                return;
-            }
-
             processController(entity, controller);
         });
     }
@@ -68,8 +63,14 @@ public class AiControllerSystem extends System {
             return;
         }
 
+        // Check if entity is dead
+        Health health = entity.get(Health.class);
+        boolean isDead = health != null && health.hp <= 0;
+
         // Sort states by priority (lower = higher priority, checked first)
+        // Dead entities can only run states that have an IsDead condition
         List<StateDefinition> sortedStates = stateDefinitions.stream()
+            .filter(s -> !isDead || s.hasIsDeadCondition())
             .sorted(Comparator.comparingInt(StateDefinition::priority))
             .toList();
 
