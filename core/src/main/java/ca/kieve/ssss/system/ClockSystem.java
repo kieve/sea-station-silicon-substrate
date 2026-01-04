@@ -8,6 +8,8 @@ import static ca.kieve.ssss.util.TickStage.AWAIT_INPUT;
 import static ca.kieve.ssss.util.TickStage.POST_TICK;
 import static ca.kieve.ssss.util.TickStage.PRE_TICK;
 import static ca.kieve.ssss.util.TickStage.TICK;
+import static ca.kieve.ssss.util.TurnPhase.AI;
+import static ca.kieve.ssss.util.TurnPhase.PLAYER;
 
 /*
  * The general formula for speed is as follows:
@@ -16,15 +18,19 @@ import static ca.kieve.ssss.util.TickStage.TICK;
  * 100 * 100 / 50 = 200 ticks to act
  * 100 * 100 / 200  = 50 ticks to act
  *
- * Further, Systems tick in 3 stages:
- * preTick -> Internal processing, external pre-processing that affects the world
- *      Example: I want to move left
- * tick -> Processing in response to preTick events and state
- *      Example: Attempting to move there results in mining the block. Or, if empty, you move there.
- * postTick -> Processing that changes state that the tick state would have depended on
- *      Example: There was a wall, or you moved. But your velocity is back to zero
+ * Systems tick in 4 stages:
+ * AWAIT_INPUT -> Game waits for player input. Rendering only occurs here.
+ * PRE_TICK -> Entities signal intent (e.g., "I want to move left")
+ * TICK -> Processing based on preTick events (e.g., collision, mining, movement)
+ * POST_TICK -> State finalization (e.g., velocity reset to zero)
  *
- * Time effectively pauses when waiting for the user's input.
+ * Turns are processed in two phases:
+ * PLAYER phase -> Player completes a full turn (PRE_TICK -> TICK -> POST_TICK)
+ *      AI entities cannot act during this phase.
+ * AI phase -> AI entities catch up to current time (PRE_TICK -> TICK -> POST_TICK loops)
+ *      Player cannot act during this phase.
+ *
+ * After AI phase completes, returns to AWAIT_INPUT for the next player turn.
  */
 public class ClockSystem extends System {
     public ClockSystem(GameContext gameContext) {
@@ -40,6 +46,7 @@ public class ClockSystem extends System {
         if (!m_clock.isUserInputRegistered()) {
             return;
         }
+        m_clock.setTurnPhase(PLAYER);
         m_clock.setTickStage(PRE_TICK);
         m_clock.setUserInputRegistered(false);
 
@@ -54,12 +61,23 @@ public class ClockSystem extends System {
     public void preTick() {
         m_clock.setTickStage(TICK);
 
+        // During player's turn, player's canAct was already set in awaitingUserInput.
+        if (m_clock.isPlayerTurn()) {
+            return;
+        }
+
+        updateCanAct();
+    }
+
+    private void updateCanAct() {
         var currentTime = m_clock.getCurrentTime();
         var withSpeeds = m_gameContext.ecs().findEntitiesWith(Speed.class);
         for (var with : withSpeeds) {
-            var speed = with.comp();
+            if (with.entity().has(PlayerController.class)) {
+                continue;
+            }
 
-            // Can any entities now?
+            var speed = with.comp();
             if (speed.canActAt <= currentTime) {
                 speed.canAct = true;
                 var ticksToAct = getTicksToAct(speed.val);
@@ -77,29 +95,41 @@ public class ClockSystem extends System {
 
     @Override
     public void postTick() {
-        var minNextAct = m_clock.getTargetTime();
+        if (m_clock.isPlayerTurn()) {
+            playerPostTick();
+        } else {
+            aiPostTick();
+        }
+    }
 
+    private void playerPostTick() {
+        m_gameContext.ecs().findEntitiesWith(
+            PlayerController.class,
+            Speed.class
+        ).forEach(with2 -> with2.comp2().canAct = false);
+
+        m_clock.setTurnPhase(AI);
+        m_clock.setTickStage(PRE_TICK);
+    }
+
+    private void aiPostTick() {
+        var minNextAct = m_clock.getTargetTime();
         var withSpeeds = m_gameContext.ecs().findEntitiesWith(Speed.class);
         for (var with : withSpeeds) {
-            var speed = with.comp();
-
-            // Special case for the player...
             if (with.entity().has(PlayerController.class)) {
-                speed.canAct = false;
                 continue;
             }
-            minNextAct = Math.min(minNextAct, speed.canActAt);
+            minNextAct = Math.min(minNextAct, with.comp().canActAt);
         }
 
         m_clock.setCurrentTime(minNextAct);
         if (minNextAct < m_clock.getTargetTime()) {
-            // Let the non-player AI act
+            // More AI needs to act
             m_clock.setTickStage(PRE_TICK);
         } else {
-            // Non-players have acted. Nothing can act again before the player.
-            // Wait for input.
+            // All AI have acted, return to waiting for player input
+            m_clock.setTurnPhase(PLAYER);
             m_clock.setTickStage(AWAIT_INPUT);
-            // Mark render dirty when entering AWAIT_INPUT so we redraw the final state
             m_gameContext.render().markDirty();
         }
     }

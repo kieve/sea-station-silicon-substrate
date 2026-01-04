@@ -2,11 +2,14 @@ package ca.kieve.ssss.context;
 
 import ca.kieve.ssss.system.ClockSystem;
 import ca.kieve.ssss.util.TickStage;
+import ca.kieve.ssss.util.TurnPhase;
 
 import static ca.kieve.ssss.util.TickStage.AWAIT_INPUT;
+import static ca.kieve.ssss.util.TurnPhase.PLAYER;
 
 public class ClockContext {
     private long m_currentTime = 0;
+    private TurnPhase m_turnPhase = PLAYER;
     private TickStage m_tickStage = AWAIT_INPUT;
     private long m_targetTime = 0;
     private boolean m_userInputRegistered = false;
@@ -17,6 +20,18 @@ public class ClockContext {
 
     public void setCurrentTime(long currentTime) {
         m_currentTime = currentTime;
+    }
+
+    public TurnPhase getTurnPhase() {
+        return m_turnPhase;
+    }
+
+    public void setTurnPhase(TurnPhase turnPhase) {
+        m_turnPhase = turnPhase;
+    }
+
+    public boolean isPlayerTurn() {
+        return m_turnPhase == PLAYER;
     }
 
     public TickStage getTickStage() {

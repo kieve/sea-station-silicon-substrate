@@ -21,8 +21,11 @@ states:
       - type: DistanceToEntity
         target: PLAYER
         distance: 20
-  - state: IdleState
+  - state: WanderState
     priority: 3
+    range: 5
+  - state: IdleState
+    priority: 4
 
 ---
 id: wanderer
