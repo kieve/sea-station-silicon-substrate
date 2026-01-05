@@ -13,9 +13,7 @@ import ca.kieve.ssss.screen.PlayScreen;
 import ca.kieve.ssss.ui.core.UiScreen;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
-public class MainEngine extends ApplicationAdapter {
-    public static final boolean DEBUG_GRID = false;
-
+public class Main extends ApplicationAdapter {
     private static final float TARGET_FPS = 60f;
     private static final float TARGET_FRAME_TIME_MS = 1000f / TARGET_FPS;
 
@@ -33,6 +31,7 @@ public class MainEngine extends ApplicationAdapter {
 
         m_gameContext = new GameContext(content);
         // Initialize contexts that need cross-references
+        m_gameContext.gameEngine().init(m_gameContext);
         m_gameContext.examine().init(m_gameContext);
         m_gameContext.eject().init(m_gameContext);
         m_gameContext.pathing().init(m_gameContext);

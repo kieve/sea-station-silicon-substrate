@@ -1,12 +1,14 @@
 package ca.kieve.ssss.world;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import ca.kieve.ssss.content.BlockTypeFactory;
 import ca.kieve.ssss.content.MapBlockDefinition;
 import ca.kieve.ssss.content.MapDefinition;
+import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.util.Vec3i;
 
 import java.io.IOException;
@@ -89,5 +91,50 @@ public class StaticTestMapGenerator implements MapGenerator {
                 }
             }
         }
+    }
+
+    @Override
+    public void createEntities(GameContext context, Vec3i playerSpawn) {
+        var factory = context.entityFactory();
+
+        // Debug movers with different speeds
+        factory.createDebugMover(context,
+            playerSpawn.add(Vec3i.X.product(-2)),
+            50,
+            Color.BLUE
+        );
+
+        factory.createDebugMover(context,
+            playerSpawn.add(Vec3i.X.product(2)),
+            100,
+            Color.WHITE
+        );
+
+        factory.createDebugMover(context,
+            playerSpawn.add(Vec3i.X.product(4)),
+            200,
+            Color.RED
+        );
+
+        // Test socket for taking over dead entities
+        factory.createEntity(context,
+            "deadMech",
+            new Vec3i(5, 5, 1),
+            Color.GOLD
+        );
+
+        // Training dummy for combat testing (in room 2)
+        factory.createEntity(context,
+            "trainingDummy",
+            new Vec3i(23, 7, 1),
+            Color.PINK
+        );
+
+        // Attacker AI test
+        factory.createEntity(context,
+            "aiAttacker",
+            playerSpawn.add(new Vec3i(3, 0, 0)),
+            Color.SCARLET
+        );
     }
 }

@@ -336,7 +336,7 @@ In this example, `aiAttacker` inherits from four base definitions and overrides 
 ## Development Notes
 
 ### Fixed Frame Rate
-The game runs at a fixed 60 FPS (`TARGET_FPS = 60f` in MainEngine). Delta time accumulates until a full frame is ready.
+The game runs at a fixed 60 FPS (`TARGET_FPS = 60f` in Main). Delta time accumulates until a full frame is ready.
 
 ### Render Caching and Dirty Marking
 The game uses a FrameBuffer caching system in `GameWindow` to efficiently render only when necessary:
@@ -477,7 +477,7 @@ public class MyContext {
 }
 ```
 
-**In MainEngine.create():**
+**In Main.create():**
 ```java
 m_gameContext = new GameContext();
 // Initialize contexts that need cross-references
@@ -488,7 +488,7 @@ m_gameContext.eject().init(m_gameContext);
 This pattern:
 - Provides a single initialization point for each context
 - Allows contexts to cache references to other contexts they depend on
-- Keeps the initialization logic centralized in `MainEngine.create()`
+- Keeps the initialization logic centralized in `Main.create()`
 - Follows the same "pass GameContext" philosophy used elsewhere
 
 ### Early Exit Pattern

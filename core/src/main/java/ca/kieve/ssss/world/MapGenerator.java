@@ -1,6 +1,7 @@
 package ca.kieve.ssss.world;
 
 import ca.kieve.ssss.content.BlockTypeFactory;
+import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.util.Vec3i;
 
 /**
@@ -33,4 +34,15 @@ public interface MapGenerator {
      * @return The glyph identifier for floor rendering
      */
     String getFloorGlyphId();
+
+    /**
+     * Creates entities for this map.
+     * Default implementation does nothing.
+     *
+     * @param context The game context
+     * @param playerSpawn The player's spawn position
+     */
+    default void createEntities(GameContext context, Vec3i playerSpawn) {
+        // Do nothing
+    }
 }

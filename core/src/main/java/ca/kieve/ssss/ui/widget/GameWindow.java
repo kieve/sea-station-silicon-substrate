@@ -8,47 +8,16 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
-import ca.kieve.ssss.component.CameraComp;
-import ca.kieve.ssss.content.EntityFactory;
-import ca.kieve.ssss.world.MapGenerator;
-import ca.kieve.ssss.world.StaticTestMapGenerator;
-import ca.kieve.ssss.world.WorldEntityFactory;
-import ca.kieve.ssss.world.WorldModel;
 import ca.kieve.ssss.context.GameContext;
-import ca.kieve.ssss.input.InputActionController;
-import ca.kieve.ssss.system.ai.AiControllerSystem;
-import ca.kieve.ssss.system.AttackSystem;
-import ca.kieve.ssss.system.CameraSystem;
-import ca.kieve.ssss.system.ClockSystem;
-import ca.kieve.ssss.system.DebugRectRenderSystem;
-import ca.kieve.ssss.system.EjectHighlightRenderSystem;
-import ca.kieve.ssss.system.EjectSystem;
-import ca.kieve.ssss.system.EventSystem;
-import ca.kieve.ssss.system.ExamineCrosshairRenderSystem;
-import ca.kieve.ssss.system.ExamineSystem;
-import ca.kieve.ssss.system.InteractSystem;
-import ca.kieve.ssss.system.PathingSystem;
-import ca.kieve.ssss.system.SanityCheckSystem;
-import ca.kieve.ssss.system.SocketSystem;
-import ca.kieve.ssss.system.TileGlyphRenderSystem;
-import ca.kieve.ssss.system.VelocitySystem;
-import ca.kieve.ssss.system.WasdSystem;
 import ca.kieve.ssss.ui.core.UiRenderContext;
 import ca.kieve.ssss.ui.core.UiWindow;
 import ca.kieve.ssss.util.TickStage;
-import ca.kieve.ssss.util.Vec3i;
-
-import java.util.List;
-
-import static ca.kieve.ssss.MainEngine.DEBUG_GRID;
 
 public class GameWindow extends UiWindow {
     public static final int TILE_SIZE = 32;
     public static final float TILE_SCALE = (float) 1 / TILE_SIZE;
 
     private final GameContext m_gameContext;
-    private final MapGenerator m_mapGenerator;
-    private final WorldModel m_worldModel;
     private FrameBuffer m_frameBuffer;
     private int m_lastWidth = 0;
     private int m_lastHeight = 0;
@@ -58,11 +27,7 @@ public class GameWindow extends UiWindow {
         m_gameContext = gameContext;
         m_viewport.setUnitsPerPixel(TILE_SCALE);
 
-        // TODO: All this setup should be moved somewhere
-        m_mapGenerator = new StaticTestMapGenerator();
-        m_worldModel = m_mapGenerator.generate(m_gameContext.blockTypes());
-        createSystems();
-        createEntities();
+        m_gameContext.gameEngine().initializeRenderSystems(m_spriteBatch, m_shapeRenderer, m_camera);
     }
 
     @Override
@@ -140,116 +105,5 @@ public class GameWindow extends UiWindow {
             false, true  // flipX = false, flipY = true
         );
         m_spriteBatch.end();
-    }
-
-    private void createSystems() {
-        // Add input action controller to handle all key input
-        var inputActionController = new InputActionController(m_gameContext);
-        m_gameContext.inputMux().addProcessor(0, inputActionController);
-
-        m_gameContext.updateSystems().addAll(List.of(
-            new ClockSystem(m_gameContext),
-            new InteractSystem(m_gameContext),
-            new SocketSystem(m_gameContext),
-            new ExamineSystem(m_gameContext),
-            new EjectSystem(m_gameContext),
-            new WasdSystem(m_gameContext),
-            new PathingSystem(m_gameContext),
-            new AiControllerSystem(m_gameContext),
-            new AttackSystem(m_gameContext),
-            new VelocitySystem(m_gameContext),
-            new CameraSystem(m_gameContext),
-            new SanityCheckSystem(m_gameContext),
-            new EventSystem(m_gameContext)
-        ));
-
-        var tileGlyphRenderSystem = new TileGlyphRenderSystem(
-            m_gameContext,
-            m_spriteBatch,
-            m_shapeRenderer,
-            m_mapGenerator.getFloorGlyphId()
-        );
-        tileGlyphRenderSystem.setDebugGrid(DEBUG_GRID);
-
-        var debugRectRenderSystem = new DebugRectRenderSystem(
-            m_gameContext,
-            m_shapeRenderer
-        );
-
-        var examineCrosshairRenderSystem = new ExamineCrosshairRenderSystem(
-            m_gameContext,
-            m_shapeRenderer
-        );
-
-        var ejectHighlightRenderSystem = new EjectHighlightRenderSystem(
-            m_gameContext,
-            m_shapeRenderer
-        );
-
-        m_gameContext.renderSystems().addAll(List.of(
-            tileGlyphRenderSystem,
-            debugRectRenderSystem,
-            examineCrosshairRenderSystem,
-            ejectHighlightRenderSystem
-        ));
-    }
-
-    private void createEntities() {
-        var playerSpawn = m_mapGenerator.getPlayerSpawn();
-
-        // Create block entities from the world model
-        WorldEntityFactory.createEntities(m_gameContext, m_worldModel);
-
-        // Create player at the spawn position (Z=1, standing on Z=0 blocks)
-        EntityFactory factory = m_gameContext.entityFactory();
-        var player = factory.createEntity(m_gameContext, "player", playerSpawn);
-
-        var camera = player.get(CameraComp.class);
-        camera.setGdx(m_camera);
-
-        // Let's place down some debug entities
-        // Adjust Z to 1 since entities now exist at Z=1
-
-        factory.createDebugMover(m_gameContext,
-            // Move left 2 spaces
-            playerSpawn.add(Vec3i.X.product(-2)),
-            50,
-            Color.BLUE
-        );
-
-        factory.createDebugMover(m_gameContext,
-            // Move right 2 spaces
-            playerSpawn.add(Vec3i.X.product(2)),
-            100,
-            Color.WHITE
-        );
-
-        factory.createDebugMover(m_gameContext,
-            // Move right 4 spaces
-            playerSpawn.add(Vec3i.X.product(4)),
-            200,
-            Color.RED
-        );
-
-        // Test socket for taking over dead entities
-        factory.createEntity(m_gameContext,
-            "deadMech",
-            new Vec3i(5, 5, 1),
-            Color.GOLD
-        );
-
-        // Training dummy for combat testing (in room 2)
-        factory.createEntity(m_gameContext,
-            "trainingDummy",
-            new Vec3i(23, 7, 1),
-            Color.PINK
-        );
-
-        // Attacker AI test - now uses Behavior component from YAML
-        factory.createEntity(m_gameContext,
-            "aiAttacker",
-            playerSpawn.add(new Vec3i(3, 0, 0)),
-            Color.SCARLET
-        );
     }
 }

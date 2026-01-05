@@ -3,6 +3,7 @@ package ca.kieve.ssss.context;
 import com.badlogic.gdx.InputMultiplexer;
 import dev.dominion.ecs.api.Dominion;
 
+import ca.kieve.ssss.GameEngine;
 import ca.kieve.ssss.content.BlockTypeFactory;
 import ca.kieve.ssss.content.ContentRegistry;
 import ca.kieve.ssss.content.EntityFactory;
@@ -31,7 +32,8 @@ public record GameContext(
     EntityFactory entityFactory,
     BlockTypeFactory blockTypes,
     List<System> updateSystems,
-    List<System> renderSystems
+    List<System> renderSystems,
+    GameEngine gameEngine
 ) {
     public GameContext(ContentRegistry content) {
         this(
@@ -53,7 +55,8 @@ public record GameContext(
             new EntityFactory(content),
             content.getBlockTypeFactory(),
             new ArrayList<>(),
-            new ArrayList<>()
+            new ArrayList<>(),
+            new GameEngine()
         );
     }
 }
