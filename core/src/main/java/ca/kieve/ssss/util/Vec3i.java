@@ -66,6 +66,46 @@ public class Vec3i {
         return result;
     }
 
+    /** Returns true if all components are greater than or equal to the other vector's. */
+    public boolean gte(Vec3i other) {
+        return x >= other.x && y >= other.y && z >= other.z;
+    }
+
+    /** Returns true if all components are greater than or equal to the given values. */
+    public boolean gte(int x, int y, int z) {
+        return this.x >= x && this.y >= y && this.z >= z;
+    }
+
+    /** Returns true if all components are greater than the other vector's. */
+    public boolean gt(Vec3i other) {
+        return x > other.x && y > other.y && z > other.z;
+    }
+
+    /** Returns true if all components are greater than the given values. */
+    public boolean gt(int x, int y, int z) {
+        return this.x > x && this.y > y && this.z > z;
+    }
+
+    /** Returns true if all components are less than or equal to the other vector's. */
+    public boolean lte(Vec3i other) {
+        return x <= other.x && y <= other.y && z <= other.z;
+    }
+
+    /** Returns true if all components are less than or equal to the given values. */
+    public boolean lte(int x, int y, int z) {
+        return this.x <= x && this.y <= y && this.z <= z;
+    }
+
+    /** Returns true if all components are less than the other vector's. */
+    public boolean lt(Vec3i other) {
+        return x < other.x && y < other.y && z < other.z;
+    }
+
+    /** Returns true if all components are less than the given values. */
+    public boolean lt(int x, int y, int z) {
+        return this.x < x && this.y < y && this.z < z;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof Vec3i vec3i)) return false;

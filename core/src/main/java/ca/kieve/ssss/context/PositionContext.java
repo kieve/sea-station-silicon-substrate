@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static ca.kieve.ssss.util.Vec3i.ZERO;
+
 public class PositionContext {
     private static final int XY_SIZE = 200;
     private static final int Z_SIZE = 20;
@@ -58,11 +60,18 @@ public class PositionContext {
 
     public List<Entity> getAt(Vec3i pos) {
         if (pos == null) throw new IllegalArgumentException("pos cannot be null");
+        if (!isInBounds(pos)) {
+            return Collections.emptyList();
+        }
         var results = getList(pos);
         if (results == null) {
             return Collections.emptyList();
         }
         return Collections.unmodifiableList(results);
+    }
+
+    public boolean isInBounds(Vec3i pos) {
+        return pos.gte(ZERO) && pos.lt(XY_SIZE, XY_SIZE, Z_SIZE);
     }
 
     private List<Entity> getList(Vec3i pos) {
