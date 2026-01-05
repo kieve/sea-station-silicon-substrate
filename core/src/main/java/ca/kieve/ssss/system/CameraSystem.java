@@ -2,11 +2,15 @@ package ca.kieve.ssss.system;
 
 import ca.kieve.ssss.component.CameraComp;
 import ca.kieve.ssss.component.Position;
+import ca.kieve.ssss.context.ExamineContext;
 import ca.kieve.ssss.context.GameContext;
 
 public class CameraSystem extends System {
+    private final ExamineContext m_examineContext;
+
     public CameraSystem(GameContext gameContext) {
         super(gameContext);
+        m_examineContext = gameContext.examine();
     }
 
     @Override
@@ -23,9 +27,12 @@ public class CameraSystem extends System {
 
         var withResult = optionalResults.get();
         var camera = withResult.comp1();
-        var pos =  withResult.comp2();
 
-        camera.setPosition(pos);
+        if (m_examineContext.isActive()) {
+            camera.setPosition(m_examineContext.getCrosshairPos());
+        } else {
+            camera.setPosition(withResult.comp2());
+        }
         camera.gdx().update();
     }
 }
