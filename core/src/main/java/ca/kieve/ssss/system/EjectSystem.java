@@ -1,5 +1,7 @@
 package ca.kieve.ssss.system;
 
+import dev.dominion.ecs.api.Entity;
+
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.component.Socket;
 import ca.kieve.ssss.component.SocketPlug;
@@ -8,11 +10,20 @@ import ca.kieve.ssss.context.EjectContext;
 import ca.kieve.ssss.context.EventContext;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.context.InputContext;
-import ca.kieve.ssss.context.InputContext.Mode;
 import ca.kieve.ssss.event.EjectEvent;
-import ca.kieve.ssss.input.InputAction;
 import ca.kieve.ssss.util.Vec3i;
-import dev.dominion.ecs.api.Entity;
+
+import static ca.kieve.ssss.context.InputContext.Mode.MODE_EJECT;
+import static ca.kieve.ssss.context.InputContext.Mode.MODE_NORMAL;
+import static ca.kieve.ssss.input.InputAction.DOWN;
+import static ca.kieve.ssss.input.InputAction.EJECT;
+import static ca.kieve.ssss.input.InputAction.LEFT;
+import static ca.kieve.ssss.input.InputAction.RIGHT;
+import static ca.kieve.ssss.input.InputAction.UP;
+import static ca.kieve.ssss.util.Vec3i.EAST;
+import static ca.kieve.ssss.util.Vec3i.NORTH;
+import static ca.kieve.ssss.util.Vec3i.SOUTH;
+import static ca.kieve.ssss.util.Vec3i.WEST;
 
 public class EjectSystem extends System {
     private final InputContext m_input;
@@ -29,16 +40,16 @@ public class EjectSystem extends System {
     @Override
     public void awaitingUserInput() {
         // Handle Q key to toggle eject mode
-        if (m_input.consume(InputAction.EJECT)) {
-            if (m_input.isMode(Mode.EJECT)) {
+        if (m_input.consume(EJECT)) {
+            if (m_input.isMode(MODE_EJECT)) {
                 // Cancel eject mode
-                m_input.setMode(Mode.NORMAL);
+                m_input.setMode(MODE_NORMAL);
                 m_ejectContext.exit();
                 return;
             }
 
             // Only enter eject mode from normal mode
-            if (!m_input.isMode(Mode.NORMAL)) {
+            if (!m_input.isMode(MODE_NORMAL)) {
                 return;
             }
 
@@ -49,38 +60,35 @@ public class EjectSystem extends System {
             return;
         }
 
-        if (!m_input.isMode(Mode.EJECT)) {
+        if (!m_input.isMode(MODE_EJECT)) {
             return;
         }
 
         // Handle direction selection
         Vec3i selectedDirection = null;
-        if (m_input.consume(InputAction.UP)) {
-            selectedDirection = Vec3i.NORTH;
-        } else if (m_input.consume(InputAction.LEFT)) {
-            selectedDirection = Vec3i.WEST;
-        } else if (m_input.consume(InputAction.DOWN)) {
-            selectedDirection = Vec3i.SOUTH;
-        } else if (m_input.consume(InputAction.RIGHT)) {
-            selectedDirection = Vec3i.EAST;
+        if (m_input.consume(UP)) {
+            selectedDirection = NORTH;
+        } else if (m_input.consume(LEFT)) {
+            selectedDirection = WEST;
+        } else if (m_input.consume(DOWN)) {
+            selectedDirection = SOUTH;
+        } else if (m_input.consume(RIGHT)) {
+            selectedDirection = EAST;
         }
 
         if (selectedDirection == null) {
             return;
         }
 
-        // Attempt to eject in the selected direction
         if (!m_ejectContext.isDirectionValid(selectedDirection)) {
             m_gameContext.log().log("There's no room for you there.");
             return;
         }
 
-        // Perform the eject
         performEject(selectedDirection);
     }
 
     private boolean tryEnterEjectMode() {
-        // Find the player entity
         var playerResults = m_gameContext.ecs().findEntitiesWith(
             SocketPlug.class,
             Position.class
@@ -94,25 +102,21 @@ public class EjectSystem extends System {
         var playerWith = optionalPlayer.get();
         var socketPlug = playerWith.comp1();
 
-        // Check if player is socketed
         if (socketPlug.currentBody == null) {
             return false;
         }
 
-        // Get the body's position
         var bodyPos = socketPlug.currentBody.get(Position.class);
         if (bodyPos == null) {
             return false;
         }
 
-        // Enter eject mode
-        m_input.setMode(Mode.EJECT);
+        m_input.setMode(MODE_EJECT);
         m_ejectContext.enter(bodyPos.getPosition());
         return true;
     }
 
     private void performEject(Vec3i direction) {
-        // Find the player entity
         var playerResults = m_gameContext.ecs().findEntitiesWith(
             SocketPlug.class,
             Position.class
@@ -138,11 +142,9 @@ public class EjectSystem extends System {
             return;
         }
 
-        // Get speed before ejecting (from the body)
         var bodySpeed = bodyEntity.get(Speed.class);
         int speedVal = bodySpeed != null ? bodySpeed.val : 100;
 
-        // Create eject event for SocketSystem to process
         m_eventContext.addEvent(new EjectEvent(playerEntity, socketPlug, bodyEntity, socket));
 
         // Restore player's TileGlyph immediately so they appear without delay
@@ -152,15 +154,12 @@ public class EjectSystem extends System {
             playerContext.tileGlyph = null;
         }
 
-        // Move player to the eject position
         Vec3i newPos = m_ejectContext.getCurrentPos().add(direction);
         playerPos.setPosition(m_gameContext, playerEntity, newPos);
 
-        // Exit eject mode
-        m_input.setMode(Mode.NORMAL);
+        m_input.setMode(MODE_NORMAL);
         m_ejectContext.exit();
 
-        // Advance time
         m_clock.processPlayerActed(speedVal);
     }
 }

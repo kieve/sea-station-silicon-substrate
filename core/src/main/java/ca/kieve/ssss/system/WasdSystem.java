@@ -5,8 +5,13 @@ import ca.kieve.ssss.component.Speed;
 import ca.kieve.ssss.component.Velocity;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.context.InputContext;
-import ca.kieve.ssss.context.InputContext.Mode;
-import ca.kieve.ssss.input.InputAction;
+
+import static ca.kieve.ssss.context.InputContext.Mode.MODE_NORMAL;
+import static ca.kieve.ssss.input.InputAction.DOWN;
+import static ca.kieve.ssss.input.InputAction.LEFT;
+import static ca.kieve.ssss.input.InputAction.RIGHT;
+import static ca.kieve.ssss.input.InputAction.UP;
+import static ca.kieve.ssss.input.InputAction.WAIT;
 
 public class WasdSystem extends System {
     private final InputContext m_input;
@@ -18,7 +23,7 @@ public class WasdSystem extends System {
 
     @Override
     public void awaitingUserInput() {
-        if (!m_input.isMode(Mode.NORMAL)) {
+        if (!m_input.isMode(MODE_NORMAL)) {
             return;
         }
 
@@ -39,23 +44,23 @@ public class WasdSystem extends System {
         var speed = withResult.comp3().val;
 
         boolean anyInput = false;
-        if (m_input.consume(InputAction.UP)) {
+        if (m_input.consume(UP)) {
             instantVelocity.y++;
             anyInput = true;
         }
-        if (m_input.consume(InputAction.LEFT)) {
+        if (m_input.consume(LEFT)) {
             instantVelocity.x--;
             anyInput = true;
         }
-        if (m_input.consume(InputAction.DOWN)) {
+        if (m_input.consume(DOWN)) {
             instantVelocity.y--;
             anyInput = true;
         }
-        if (m_input.consume(InputAction.RIGHT)) {
+        if (m_input.consume(RIGHT)) {
             instantVelocity.x++;
             anyInput = true;
         }
-        if (m_input.consume(InputAction.WAIT)) {
+        if (m_input.consume(WAIT)) {
             anyInput = true;
         }
 

@@ -20,7 +20,7 @@ import java.util.Map;
  */
 public class StaticTestMapGenerator implements MapGenerator {
 
-    private static final String MAP_FILE = "content/static_test_map.yaml";
+    private static final String MAP_FILE = "content/maps/static_test_map.yaml";
 
     private MapDefinition m_mapDefinition;
     private Map<Character, String> m_charToBlockType;

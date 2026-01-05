@@ -9,5 +9,6 @@ public enum InputAction {
     CONFIRM,
     CANCEL,
     EJECT,
-    WAIT
+    WAIT,
+    EXIT_GAME
 }

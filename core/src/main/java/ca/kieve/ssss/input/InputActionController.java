@@ -1,5 +1,6 @@
 package ca.kieve.ssss.input;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
 
 import ca.kieve.ssss.context.GameContext;
@@ -14,31 +15,42 @@ public class InputActionController extends InputAdapter {
 
     @Override
     public boolean keyDown(int keycode) {
-        InputAction action = m_inputContext.getActionForKeycode(keycode);
-        if (action == null) {
-            return false;
+        if (handleGlobalActions(keycode)) {
+            return true;
         }
 
-        KeyState state = m_inputContext.getKeyState(action);
-        if (state == null) {
-            return false;
+        boolean handled = false;
+        for (InputAction action : InputAction.values()) {
+            if (!m_inputContext.isActionActiveInCurrentMode(action)) {
+                continue;
+            }
+            KeyState state = m_inputContext.getKeyState(action);
+            if (state != null && state.handleKeyDown(keycode)) {
+                handled = true;
+            }
         }
-
-        return state.handleKeyDown(keycode);
+        return handled;
     }
 
     @Override
     public boolean keyUp(int keycode) {
-        InputAction action = m_inputContext.getActionForKeycode(keycode);
-        if (action == null) {
-            return false;
+        // Update all KeyStates for keyUp (held flag persists across mode changes)
+        boolean handled = false;
+        for (InputAction action : InputAction.values()) {
+            KeyState state = m_inputContext.getKeyState(action);
+            if (state != null && state.handleKeyUp(keycode)) {
+                handled = true;
+            }
         }
+        return handled;
+    }
 
-        KeyState state = m_inputContext.getKeyState(action);
-        if (state == null) {
-            return false;
+    private boolean handleGlobalActions(int keycode) {
+        KeyState exitState = m_inputContext.getKeyState(InputAction.EXIT_GAME);
+        if (exitState != null && exitState.keycode == keycode) {
+            Gdx.app.exit();
+            return true;
         }
-
-        return state.handleKeyUp(keycode);
+        return false;
     }
 }
