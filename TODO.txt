@@ -1,0 +1,11 @@
+- Create a "Scurry" AI for a mouse running around
+    - Follows walls in a clockwise / counterclockwise way
+    - "Fight Back" AI behavior, where it scurries, but if it's attacked it switches to chase and
+      Attack behaviors
+- A tiny mech mouse
+- A size component to determine entity sizes
+- A "mouse hole" that only the tiny mouse can go in
+- An inventory system
+- Key item on the ground inside hole
+- Interactable lock to unlock a door
+- Connect two maps together
