@@ -37,8 +37,9 @@ public class GameWindow extends UiWindow {
 
     @Override
     public void render(UiRenderContext dnu, float delta) {
-        int screenWidth = Gdx.graphics.getWidth();
-        int screenHeight = Gdx.graphics.getHeight();
+        // Use back buffer dimensions for proper HiDPI/Retina support
+        int screenWidth = Gdx.graphics.getBackBufferWidth();
+        int screenHeight = Gdx.graphics.getBackBufferHeight();
 
         // Recreate FrameBuffer if size changed
         if (m_frameBuffer == null
