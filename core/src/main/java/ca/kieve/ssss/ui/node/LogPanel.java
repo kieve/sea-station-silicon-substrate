@@ -8,6 +8,7 @@ import ca.kieve.ssss.repository.FontRepo;
 import ca.kieve.ssss.ui.core.UiNode;
 import ca.kieve.ssss.ui.core.UiRenderContext;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static ca.kieve.ssss.repository.FontRepo.UI_UBUNTU_24;
@@ -54,29 +55,46 @@ public class LogPanel extends UiNode {
 
         // Calculate how many lines can fit (only top padding affects this)
         int maxLines = (size.h() - PADDING) / LINE_HEIGHT;
-
-        // Take only the most recent messages that fit
-        int startIndex = Math.max(0, m_messages.size() - maxLines);
-        var visibleMessages = m_messages.subList(startIndex, m_messages.size());
+        float availableWidth = size.w() - (2 * PADDING);
 
         // Calculate width needed for line numbers based on total count
         int maxLineNumber = Math.max(1, m_totalMessageCount);
         int digitWidth = String.valueOf(maxLineNumber).length();
-        String formatString = "[%" + digitWidth + "d] %s";
+        String formatString = "[%" + digitWidth + "d] ";
 
-        // Build text with line numbers, newest at bottom
+        // Create indent string that matches the prefix width (e.g., "[  1] " -> "      ")
+        String indent = " ".repeat(digitWidth + 3); // "[" + digits + "] "
+
+        // Wrap all messages and collect wrapped lines with their message index
+        List<String> allWrappedLines = new ArrayList<>();
+        for (int i = 0; i < m_messages.size(); i++) {
+            var entry = m_messages.get(i);
+            int lineNumber = m_firstMessageNumber + i;
+
+            String prefix = String.format(formatString, lineNumber);
+            String message = entry.message();
+            if (entry.count() > 1) {
+                message += " (x" + entry.count() + ")";
+            }
+
+            // Wrap the message (first line includes prefix, continuation lines get indent)
+            String fullLine = prefix + message;
+            List<String> wrapped =
+                FontRepo.wrapText(UI_UBUNTU_24, fullLine, availableWidth, indent);
+            allWrappedLines.addAll(wrapped);
+        }
+
+        // Take only the most recent lines that fit
+        int startIndex = Math.max(0, allWrappedLines.size() - maxLines);
+        var visibleLines = allWrappedLines.subList(startIndex, allWrappedLines.size());
+
+        // Build final text
         var textBuilder = new StringBuilder();
-        int lineNumber = m_firstMessageNumber + startIndex;
-        for (var entry : visibleMessages) {
+        for (String line : visibleLines) {
             if (!textBuilder.isEmpty()) {
                 textBuilder.append("\n");
             }
-            String line = String.format(formatString, lineNumber, entry.message());
-            if (entry.count() > 1) {
-                line += " (x" + entry.count() + ")";
-            }
             textBuilder.append(line);
-            lineNumber++;
         }
 
         var batch = renderContext.spriteBatch();
