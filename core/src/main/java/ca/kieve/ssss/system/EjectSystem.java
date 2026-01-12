@@ -2,6 +2,8 @@ package ca.kieve.ssss.system;
 
 import dev.dominion.ecs.api.Entity;
 
+import ca.kieve.ssss.component.Hidden;
+import ca.kieve.ssss.component.Player;
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.component.Socket;
 import ca.kieve.ssss.component.SocketPlug;
@@ -89,20 +91,17 @@ public class EjectSystem extends System {
     }
 
     private boolean tryEnterEjectMode() {
-        var playerResults = m_gameContext.ecs().findEntitiesWith(
-            SocketPlug.class,
-            Position.class
-        );
-
+        var playerResults = m_gameContext.ecs().findEntitiesWith(Player.class, Position.class);
         var optionalPlayer = playerResults.stream().findFirst();
         if (optionalPlayer.isEmpty()) {
             return false;
         }
 
         var playerWith = optionalPlayer.get();
-        var socketPlug = playerWith.comp1();
+        var playerEntity = playerWith.entity();
+        var socketPlug = playerEntity.get(SocketPlug.class);
 
-        if (socketPlug.currentBody == null) {
+        if (socketPlug == null || socketPlug.currentBody == null) {
             return false;
         }
 
@@ -117,11 +116,7 @@ public class EjectSystem extends System {
     }
 
     private void performEject(Vec3i direction) {
-        var playerResults = m_gameContext.ecs().findEntitiesWith(
-            SocketPlug.class,
-            Position.class
-        );
-
+        var playerResults = m_gameContext.ecs().findEntitiesWith(Player.class, Position.class);
         var optionalPlayer = playerResults.stream().findFirst();
         if (optionalPlayer.isEmpty()) {
             return;
@@ -129,13 +124,14 @@ public class EjectSystem extends System {
 
         var playerWith = optionalPlayer.get();
         var playerEntity = playerWith.entity();
-        var socketPlug = playerWith.comp1();
+        var socketPlug = playerEntity.get(SocketPlug.class);
         var playerPos = playerWith.comp2();
 
-        Entity bodyEntity = socketPlug.currentBody;
-        if (bodyEntity == null) {
+        if (socketPlug == null || socketPlug.currentBody == null) {
             return;
         }
+
+        Entity bodyEntity = socketPlug.currentBody;
 
         var socket = bodyEntity.get(Socket.class);
         if (socket == null) {
@@ -147,11 +143,9 @@ public class EjectSystem extends System {
 
         m_eventContext.addEvent(new EjectEvent(playerEntity, socketPlug, bodyEntity, socket));
 
-        // Restore player's TileGlyph immediately so they appear without delay
-        var playerContext = m_gameContext.player();
-        if (playerContext.tileGlyph != null) {
-            playerEntity.add(playerContext.tileGlyph);
-            playerContext.tileGlyph = null;
+        // Show player sprite immediately by removing Hidden marker
+        if (playerEntity.has(Hidden.class)) {
+            playerEntity.removeType(Hidden.class);
         }
 
         Vec3i newPos = m_ejectContext.getCurrentPos().add(direction);

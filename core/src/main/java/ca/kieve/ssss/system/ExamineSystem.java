@@ -3,6 +3,7 @@ package ca.kieve.ssss.system;
 import dev.dominion.ecs.api.Entity;
 
 import ca.kieve.ssss.component.Descriptor;
+import ca.kieve.ssss.component.Player;
 import ca.kieve.ssss.component.PlayerController;
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.component.SocketPlug;
@@ -193,31 +194,25 @@ public class ExamineSystem extends System {
     }
 
     private Vec3i getPlayerPosition() {
-        var plugResults = m_gameContext.ecs().findEntitiesWith(
-            SocketPlug.class,
-            Position.class
-        );
-
-        var plugResult = plugResults.stream().findFirst();
-        if (plugResult.isPresent()) {
-            var socketPlug = plugResult.get().comp1();
-            if (socketPlug.currentBody != null) {
-                var bodyPos = socketPlug.currentBody.get(Position.class);
-                if (bodyPos != null) {
-                    return bodyPos.getPosition().copy();
-                }
-            }
-            return plugResult.get().comp2().getPosition().copy();
+        var playerResults = m_gameContext.ecs().findEntitiesWith(Player.class, Position.class);
+        var playerResult = playerResults.stream().findFirst();
+        if (playerResult.isEmpty()) {
+            return null;
         }
 
-        var playerResults = m_gameContext.ecs().findEntitiesWith(
-            PlayerController.class,
-            Position.class
-        );
+        var playerWith = playerResult.get();
+        var playerEntity = playerWith.entity();
+        var socketPlug = playerEntity.get(SocketPlug.class);
 
-        var playerResult = playerResults.stream().findFirst();
-        return playerResult
-            .map(result -> result.comp2().getPosition().copy())
-            .orElse(null);
+        // If socketed, return the body's position
+        if (socketPlug != null && socketPlug.currentBody != null) {
+            var bodyPos = socketPlug.currentBody.get(Position.class);
+            if (bodyPos != null) {
+                return bodyPos.getPosition().copy();
+            }
+        }
+
+        // Return the player's position
+        return playerWith.comp2().getPosition().copy();
     }
 }

@@ -7,6 +7,8 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
 import ca.kieve.ssss.component.CameraComp;
 import ca.kieve.ssss.component.ColorComp;
+import ca.kieve.ssss.component.Hidden;
+import ca.kieve.ssss.component.Player;
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.component.RenderingHint;
 import ca.kieve.ssss.component.SocketPlug;
@@ -57,6 +59,11 @@ public class TileGlyphRenderSystem extends System {
             var position = with.comp1();
             var pos = position.getPosition();
             var entity = with.entity();
+
+            // Skip hidden entities (e.g., player while socketed into a body)
+            if (entity.has(Hidden.class)) {
+                return;
+            }
 
             // Only render entities within camera's Z range
             int relativeZ = pos.z - cameraZ;
@@ -141,23 +148,30 @@ public class TileGlyphRenderSystem extends System {
 
     private int getCameraZ() {
         // Get the camera Z-level from the player's current body
-        var plugResults = m_gameContext.ecs().findEntitiesWith(
-            SocketPlug.class,
-            CameraComp.class
-        );
+        var playerResults = m_gameContext.ecs().findEntitiesWith(Player.class, CameraComp.class);
+        var playerResult = playerResults.stream().findFirst();
+        if (playerResult.isEmpty()) {
+            return 1;
+        }
 
-        var plugResult = plugResults.stream().findFirst();
-        if (plugResult.isPresent()) {
-            var socketPlug = plugResult.get().comp1();
-            if (socketPlug.currentBody != null) {
-                var bodyPos = socketPlug.currentBody.get(Position.class);
-                if (bodyPos != null) {
-                    return bodyPos.getPosition().z;
-                }
+        var playerEntity = playerResult.get().entity();
+        var socketPlug = playerEntity.get(SocketPlug.class);
+
+        // If socketed, use body's position for camera Z
+        if (socketPlug != null && socketPlug.currentBody != null) {
+            var bodyPos = socketPlug.currentBody.get(Position.class);
+            if (bodyPos != null) {
+                return bodyPos.getPosition().z;
             }
         }
 
-        // Default to Z=1 if no player found
+        // Use player's position for camera Z
+        var playerPos = playerEntity.get(Position.class);
+        if (playerPos != null) {
+            return playerPos.getPosition().z;
+        }
+
+        // Default to Z=1 if no position found
         return 1;
     }
 }

@@ -8,3 +8,9 @@
 - Key item on the ground inside hole
 - Interactable lock to unlock a door
 - Connect two maps together
+
+
+
+
+- Attack system is checking where the damage should go. Really these should be damage events and
+  some other system selects the correct HP pool to apply it to

@@ -3,17 +3,21 @@ package ca.kieve.ssss.system;
 import dev.dominion.ecs.api.Entity;
 
 import ca.kieve.ssss.component.Health;
+import ca.kieve.ssss.component.Hidden;
+import ca.kieve.ssss.component.Player;
 import ca.kieve.ssss.component.PlayerController;
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.component.RenderingHint;
 import ca.kieve.ssss.component.Socket;
 import ca.kieve.ssss.component.SocketPlug;
+import ca.kieve.ssss.component.Solid;
 import ca.kieve.ssss.component.Speed;
-import ca.kieve.ssss.component.TileGlyph;
 import ca.kieve.ssss.component.Velocity;
 import ca.kieve.ssss.context.GameContext;
+import ca.kieve.ssss.context.PositionContext;
 import ca.kieve.ssss.event.EjectEvent;
 import ca.kieve.ssss.event.SocketEvent;
+import ca.kieve.ssss.util.Vec3i;
 
 /**
  * Handles the Socket mechanic where the player (a "microchip") can swap control
@@ -21,22 +25,24 @@ import ca.kieve.ssss.event.SocketEvent;
  * dead (Health.hp == 0) to be entered.
  */
 public class SocketSystem extends System {
+    private static final Vec3i[] CARDINAL_DIRECTIONS = {
+        Vec3i.NORTH, Vec3i.EAST, Vec3i.SOUTH, Vec3i.WEST
+    };
+    private static final Vec3i[] DIAGONAL_DIRECTIONS = {
+        Vec3i.NORTHEAST, Vec3i.NORTHWEST, Vec3i.SOUTHEAST, Vec3i.SOUTHWEST
+    };
+
+    private final PositionContext m_positionContext;
+
     public SocketSystem(GameContext gameContext) {
         super(gameContext);
+        m_positionContext = gameContext.pos();
     }
 
     @Override
     public void preTick() {
-        // Process eject events from EjectSystem
-        var ejectEvents = m_gameContext.events().getEvents(EjectEvent.class);
-        for (var event : ejectEvents) {
-            ejectFromSocket(
-                event.playerEntity(),
-                event.socketPlug(),
-                event.bodyEntity(),
-                event.socket()
-            );
-        }
+        // Eject events are processed in postTick() to ensure they're handled
+        // in the same tick cycle as the attack that caused them.
     }
 
     @Override
@@ -48,11 +54,7 @@ public class SocketSystem extends System {
         }
 
         // Find the player entity
-        var playerResults = m_gameContext.ecs().findEntitiesWith(
-            SocketPlug.class,
-            Position.class
-        );
-
+        var playerResults = m_gameContext.ecs().findEntitiesWith(Player.class, Position.class);
         var optionalPlayer = playerResults.stream().findFirst();
         if (optionalPlayer.isEmpty()) {
             return;
@@ -60,7 +62,10 @@ public class SocketSystem extends System {
 
         var playerWith = optionalPlayer.get();
         var playerEntity = playerWith.entity();
-        var socketPlug = playerWith.comp1();
+        var socketPlug = playerEntity.get(SocketPlug.class);
+        if (socketPlug == null) {
+            return;
+        }
 
         // Process each socket event
         for (var event : socketEvents) {
@@ -90,12 +95,20 @@ public class SocketSystem extends System {
 
     @Override
     public void postTick() {
-        // Update player position to follow their socketed body
-        var playerResults = m_gameContext.ecs().findEntitiesWith(
-            SocketPlug.class,
-            Position.class
-        );
+        // Process eject events first - must happen before position sync
+        // This ensures forced ejects from AttackSystem are handled in the same tick
+        var ejectEvents = m_gameContext.events().getEvents(EjectEvent.class);
+        for (var event : ejectEvents) {
+            ejectFromSocket(
+                event.playerEntity(),
+                event.socketPlug(),
+                event.bodyEntity(),
+                event.socket()
+            );
+        }
 
+        // Update player position to follow their socketed body
+        var playerResults = m_gameContext.ecs().findEntitiesWith(Player.class, Position.class);
         var optionalPlayer = playerResults.stream().findFirst();
         if (optionalPlayer.isEmpty()) {
             return;
@@ -103,10 +116,10 @@ public class SocketSystem extends System {
 
         var playerWith = optionalPlayer.get();
         var playerEntity = playerWith.entity();
-        var socketPlug = playerWith.comp1();
+        var socketPlug = playerEntity.get(SocketPlug.class);
 
         // Check if player is socketed into a body
-        if (socketPlug.currentBody == null) {
+        if (socketPlug == null || socketPlug.currentBody == null) {
             return;
         }
 
@@ -148,33 +161,35 @@ public class SocketSystem extends System {
 
     /**
      * Ejects the player from a socketed body.
-     * Restores control components and sprite to the player.
+     * Restores visibility and PlayerController to the player.
+     * Player's Speed component is never transferred, so no restoration needed.
+     *
+     * For forced ejects (when socket.destroyed is true), this method also handles
+     * positioning the player in a valid adjacent tile.
      */
-    public void ejectFromSocket(Entity playerEntity, SocketPlug socketPlug, Entity bodyEntity, Socket socket) {
+    public void ejectFromSocket(
+            Entity playerEntity,
+            SocketPlug socketPlug,
+            Entity bodyEntity,
+            Socket socket
+    ) {
+        // Handle forced eject positioning before clearing socket state
+        if (socket.destroyed) {
+            positionPlayerForForcedEject(playerEntity, bodyEntity);
+        }
+
         socket.socketedEntity = null;
         socketPlug.currentBody = null;
 
-        // Remove control components from the old body and transfer back to player
-        var playerController = bodyEntity.get(PlayerController.class);
-
+        // Remove PlayerController from body and restore to player
         removeControlFromBody(bodyEntity);
-
-        // Restore control components to player
-        if (playerController != null && !playerEntity.has(PlayerController.class)) {
-            playerEntity.add(playerController);
+        if (!playerEntity.has(PlayerController.class)) {
+            playerEntity.add(new PlayerController());
         }
 
-        // Restore player's original speed from cache
-        var playerContext = m_gameContext.player();
-        if (playerContext.originalSpeed >= 0 && !playerEntity.has(Speed.class)) {
-            playerEntity.add(new Speed(playerContext.originalSpeed));
-            playerContext.originalSpeed = -1;
-        }
-
-        // Restore TileGlyph to make player visible again
-        if (playerContext.tileGlyph != null) {
-            playerEntity.add(playerContext.tileGlyph);
-            playerContext.tileGlyph = null;
+        // Show player sprite again by removing Hidden marker
+        if (playerEntity.has(Hidden.class)) {
+            playerEntity.removeType(Hidden.class);
         }
 
         // Reset body's zIndex back to non-player level (1)
@@ -187,8 +202,62 @@ public class SocketSystem extends System {
     }
 
     /**
-     * Transfers control components (PlayerController, Speed) from player to the body.
-     * Also hides the player sprite by removing TileGlyph.
+     * Finds a valid position for the player during a forced eject.
+     * Tries cardinal directions first, then diagonals, then allows overlap.
+     */
+    private void positionPlayerForForcedEject(Entity playerEntity, Entity bodyEntity) {
+        var bodyPos = bodyEntity.get(Position.class);
+        var playerPos = playerEntity.get(Position.class);
+        if (bodyPos == null || playerPos == null) {
+            return;
+        }
+
+        Vec3i bodyPosition = bodyPos.getPosition();
+
+        // Try cardinal directions first
+        for (Vec3i dir : CARDINAL_DIRECTIONS) {
+            Vec3i targetPos = bodyPosition.add(dir);
+            if (isPositionValidForEject(targetPos)) {
+                playerPos.setPosition(m_gameContext, playerEntity, targetPos);
+                return;
+            }
+        }
+
+        // Try diagonal directions
+        for (Vec3i dir : DIAGONAL_DIRECTIONS) {
+            Vec3i targetPos = bodyPosition.add(dir);
+            if (isPositionValidForEject(targetPos)) {
+                playerPos.setPosition(m_gameContext, playerEntity, targetPos);
+                return;
+            }
+        }
+
+        // No valid position found - allow overlap with the dead mech
+        // Player stays at the mech's position (already synced via postTick)
+        m_gameContext.log().log("You're trapped in the wreckage!");
+    }
+
+    /**
+     * Checks if a position is valid for ejecting to.
+     * A position is invalid if it contains a solid entity or another Socket body.
+     */
+    private boolean isPositionValidForEject(Vec3i pos) {
+        var entities = m_positionContext.getAt(pos);
+        for (var entity : entities) {
+            if (entity.has(Solid.class)) {
+                return false;
+            }
+            if (entity.has(Socket.class)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Transfers PlayerController from player to the body.
+     * Hides the player sprite by adding Hidden marker.
+     * Player's Speed is NOT transferred - systems query the controlled entity instead.
      */
     private void transferControlToBody(Entity playerEntity, SocketPlug socketPlug, Entity bodyEntity) {
         var playerController = playerEntity.get(PlayerController.class);
@@ -196,32 +265,20 @@ public class SocketSystem extends System {
             return;
         }
 
-        var playerSpeed = playerEntity.get(Speed.class);
-
-        // Cache and remove TileGlyph from player to hide the sprite
-        // Keep DebugRect visible so we can see where the player entity is
-        var playerGlyph = playerEntity.get(TileGlyph.class);
-        if (playerGlyph != null) {
-            m_gameContext.player().tileGlyph = playerGlyph;
-            playerEntity.removeType(TileGlyph.class);
+        // Hide player sprite by adding Hidden marker
+        if (!playerEntity.has(Hidden.class)) {
+            playerEntity.add(new Hidden());
         }
 
-        // Cache and remove Speed from player
-        if (playerSpeed != null) {
-            m_gameContext.player().originalSpeed = playerSpeed.val;
-            playerEntity.removeType(Speed.class);
-        }
-
-        // Remove control components from player
+        // Remove PlayerController from player
         playerEntity.removeType(PlayerController.class);
 
-        // Add control components to the body if it doesn't have them
+        // Add PlayerController to body (needed for ECS queries like ClockSystem)
         if (!bodyEntity.has(PlayerController.class)) {
             bodyEntity.add(playerController);
         }
-        if (!bodyEntity.has(Speed.class) && playerSpeed != null) {
-            bodyEntity.add(new Speed(playerSpeed.val));
-        }
+
+        // Ensure body has Velocity for movement
         if (!bodyEntity.has(Velocity.class)) {
             bodyEntity.add(new Velocity());
         }

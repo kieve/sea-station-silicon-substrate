@@ -3,7 +3,9 @@ package ca.kieve.ssss.system;
 import ca.kieve.ssss.component.Attackable;
 import ca.kieve.ssss.component.Examinable;
 import ca.kieve.ssss.component.Health;
+import ca.kieve.ssss.component.Player;
 import ca.kieve.ssss.component.Position;
+import ca.kieve.ssss.component.Socket;
 import ca.kieve.ssss.component.Socketable;
 import ca.kieve.ssss.component.SocketPlug;
 import ca.kieve.ssss.component.Velocity;
@@ -30,23 +32,20 @@ public class InteractSystem extends System {
     @Override
     public void tick() {
         // Find the player entity
-        var playerResults = m_gameContext.ecs().findEntitiesWith(
-            SocketPlug.class,
-            Position.class
-        );
-
+        var playerResults = m_gameContext.ecs().findEntitiesWith(Player.class, Position.class);
         var optionalPlayer = playerResults.stream().findFirst();
         if (optionalPlayer.isEmpty()) {
             return;
         }
 
         var playerWith = optionalPlayer.get();
-        var socketPlug = playerWith.comp1();
+        var playerEntity = playerWith.entity();
+        var socketPlug = playerEntity.get(SocketPlug.class);
 
         // Determine which entity to check for velocity (player or socketed body)
-        var controlledEntity = socketPlug.currentBody != null
+        var controlledEntity = (socketPlug != null && socketPlug.currentBody != null)
             ? socketPlug.currentBody
-            : playerWith.entity();
+            : playerEntity;
 
         var velocity = controlledEntity.get(Velocity.class);
         var position = controlledEntity.get(Position.class);
@@ -98,9 +97,15 @@ public class InteractSystem extends System {
         // Check socketable - for dead entities or entities without health
         // Only allow socketing if player is not already socketed
         if (target.has(Socketable.class) && socketPlug.currentBody == null) {
-            var health = target.get(Health.class);
-            if (health == null || health.hp <= 0) {
-                return new SocketEvent(target);
+            // Cannot socket into a destroyed mech
+            var socket = target.get(Socket.class);
+            if (socket != null && socket.destroyed) {
+                // Fall through to examine instead
+            } else {
+                var health = target.get(Health.class);
+                if (health == null || health.hp <= 0) {
+                    return new SocketEvent(target);
+                }
             }
         }
 

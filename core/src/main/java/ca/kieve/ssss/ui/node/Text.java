@@ -4,8 +4,10 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
 import ca.kieve.ssss.component.Health;
-import ca.kieve.ssss.component.PlayerController;
+import ca.kieve.ssss.component.Player;
 import ca.kieve.ssss.component.Position;
+import ca.kieve.ssss.component.Socket;
+import ca.kieve.ssss.component.SocketPlug;
 import ca.kieve.ssss.repository.FontRepo;
 import ca.kieve.ssss.ui.core.UiNode;
 import ca.kieve.ssss.ui.core.UiRenderContext;
@@ -26,39 +28,59 @@ public class Text extends UiNode {
     @Override
     public void update(UiRenderContext renderContext, float delta) {
         var gc = renderContext.gameContext();
-        var searchResults = gc.ecs().findEntitiesWith(
-            Position.class,
-            PlayerController.class
-        );
 
-        var optionalResults = searchResults.stream().findFirst();
-        if (optionalResults.isEmpty()) {
+        // Find the player entity (microchip with Player marker)
+        var playerResults = gc.ecs().findEntitiesWith(Player.class, Position.class);
+        var optionalPlayer = playerResults.stream().findFirst();
+        if (optionalPlayer.isEmpty()) {
             m_text = "Can't find the player?";
             return;
         }
 
+        var playerWith = optionalPlayer.get();
+        var playerEntity = playerWith.entity();
+        var socketPlug = playerEntity.get(SocketPlug.class);
+        var playerHealth = playerEntity.get(Health.class);
+
         StringBuilder textBuilder = new StringBuilder();
 
-        var withResult = optionalResults.get();
-        var entity = withResult.entity();
-        var health = entity.get(Health.class);
-
-        if (health != null) {
+        // Always show the player's HP (the microchip's HP)
+        if (playerHealth != null) {
             textBuilder.append("HP: ")
-                .append(health.hp)
+                .append(playerHealth.hp)
                 .append("/")
-                .append(health.maxHp)
+                .append(playerHealth.maxHp)
                 .append("\n");
         }
 
-        var pos = withResult.comp1().getPosition();
+        // If socketed, also show the mech's HP
+        if (socketPlug != null && socketPlug.currentBody != null) {
+            var socket = socketPlug.currentBody.get(Socket.class);
+            if (socket != null) {
+                textBuilder.append("Mech HP: ")
+                    .append(socket.socketedHp)
+                    .append("/")
+                    .append(socket.socketedMaxHp)
+                    .append("\n");
+            }
+        }
 
-        textBuilder.append("Position: { ")
-            .append(pos.x)
-            .append(", ")
-            .append(pos.y)
-            .append(" }");
+        // Get position from controlled entity (body if socketed, player otherwise)
+        Position posComp;
+        if (socketPlug != null && socketPlug.currentBody != null) {
+            posComp = socketPlug.currentBody.get(Position.class);
+        } else {
+            posComp = playerWith.comp2();
+        }
 
+        if (posComp != null) {
+            var pos = posComp.getPosition();
+            textBuilder.append("Position: { ")
+                .append(pos.x)
+                .append(", ")
+                .append(pos.y)
+                .append(" }");
+        }
 
         var clock = gc.clock();
         var currentTime = clock.getCurrentTime();

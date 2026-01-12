@@ -6,6 +6,7 @@
 components:
   - type: Identifier
     key: player
+  - type: Player
   - type: TileGlyph
     glyphId: player
   - type: Descriptor
@@ -54,6 +55,8 @@ components:
   - type: Health
     maxHp: 100
     hp: 0
+  - type: Speed
+    val: 100
   - type: Equipment
     weaponId: power_fist
 
@@ -70,6 +73,8 @@ components:
   - type: Collider
   - type: Health
     maxHp: 20
+  - type: Speed
+    val: 50
 
 ---
 parents: [base_entity, physics, solid, combatant]
@@ -86,7 +91,7 @@ components:
   - type: Speed
     val: 100
   - type: Equipment
-    weaponId: chip_claws
+    weaponId: power_fist
   - type: AiController
     behavior: player_hunter
 

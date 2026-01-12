@@ -37,8 +37,11 @@ components:
 
 ---
 # Socketable - entities that can be possessed/socketed into
+# Socket has socketedMaxHp and socketedHp for the HP pool used when controlling this body
 components:
   - type: Identifier
     key: socketable
   - type: Socket
+    socketedMaxHp: 50
+    socketedHp: 50
   - type: Socketable
