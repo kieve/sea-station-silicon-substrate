@@ -156,7 +156,6 @@ public class SocketSystem extends System {
 
         // Remove control components from the old body and transfer back to player
         var playerController = bodyEntity.get(PlayerController.class);
-        var bodySpeed = bodyEntity.get(Speed.class);
 
         removeControlFromBody(bodyEntity);
 
@@ -164,12 +163,15 @@ public class SocketSystem extends System {
         if (playerController != null && !playerEntity.has(PlayerController.class)) {
             playerEntity.add(playerController);
         }
-        if (bodySpeed != null && !playerEntity.has(Speed.class)) {
-            playerEntity.add(new Speed(bodySpeed.val));
+
+        // Restore player's original speed from cache
+        var playerContext = m_gameContext.player();
+        if (playerContext.originalSpeed >= 0 && !playerEntity.has(Speed.class)) {
+            playerEntity.add(new Speed(playerContext.originalSpeed));
+            playerContext.originalSpeed = -1;
         }
 
         // Restore TileGlyph to make player visible again
-        var playerContext = m_gameContext.player();
         if (playerContext.tileGlyph != null) {
             playerEntity.add(playerContext.tileGlyph);
             playerContext.tileGlyph = null;
@@ -204,11 +206,14 @@ public class SocketSystem extends System {
             playerEntity.removeType(TileGlyph.class);
         }
 
-        // Remove control components from player
-        playerEntity.removeType(PlayerController.class);
+        // Cache and remove Speed from player
         if (playerSpeed != null) {
+            m_gameContext.player().originalSpeed = playerSpeed.val;
             playerEntity.removeType(Speed.class);
         }
+
+        // Remove control components from player
+        playerEntity.removeType(PlayerController.class);
 
         // Add control components to the body if it doesn't have them
         if (!bodyEntity.has(PlayerController.class)) {

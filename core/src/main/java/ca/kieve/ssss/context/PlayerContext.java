@@ -11,4 +11,10 @@ public class PlayerContext {
      * The player's TileGlyph, stored when socketed and restored when ejected.
      */
     public TileGlyph tileGlyph;
+
+    /**
+     * The player's original speed value, stored when socketed and restored when ejected.
+     * -1 indicates no speed is cached.
+     */
+    public int originalSpeed = -1;
 }

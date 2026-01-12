@@ -1,3 +1,6 @@
+- Possibly refactor socket/unsocket system to fix problem, like speed?
+- Investigate performance issue with turns
+
 - "Flee" AI state, where it runs away from a specific entity.
 - A size component to determine entity sizes
 - A "mouse hole" that only the tiny mouse can go in
