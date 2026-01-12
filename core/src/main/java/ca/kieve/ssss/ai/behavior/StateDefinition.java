@@ -40,4 +40,13 @@ public record StateDefinition(
         return conditions.stream()
             .anyMatch(c -> IS_DEAD_CONDITION.equals(c.type()));
     }
+
+    /**
+     * Gets the target type for this state.
+     * Defaults to PLAYER if not specified.
+     */
+    public TargetType target() {
+        String targetStr = (String) properties.get("target");
+        return targetStr != null ? TargetType.valueOf(targetStr) : TargetType.PLAYER;
+    }
 }

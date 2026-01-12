@@ -1,7 +1,6 @@
 package ca.kieve.ssss.ai.condition;
 
 import ca.kieve.ssss.ai.behavior.TargetType;
-import ca.kieve.ssss.component.PlayerController;
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.util.Vec3i;
 import dev.dominion.ecs.api.Entity;
@@ -50,16 +49,10 @@ public class DistanceToEntityCondition implements Condition {
     }
 
     private Entity resolveTarget(ConditionContext context) {
-        if (m_targetType != TargetType.PLAYER) {
-            return null;
-        }
-
-        var results = context.gameContext().ecs()
-            .findEntitiesWith(PlayerController.class);
-        var it = results.iterator();
-        if (!it.hasNext()) {
-            return null;
-        }
-        return it.next().entity();
+        return context.gameContext().aiController().resolveTarget(
+            context.entity(),
+            m_targetType,
+            context.gameContext().ecs()
+        );
     }
 }

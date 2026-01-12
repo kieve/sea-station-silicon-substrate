@@ -9,7 +9,6 @@ import ca.kieve.ssss.ai.condition.ConditionContext;
 import ca.kieve.ssss.ai.state.AiState;
 import ca.kieve.ssss.ai.state.StateContext;
 import ca.kieve.ssss.component.Health;
-import ca.kieve.ssss.component.PlayerController;
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.component.Speed;
 import ca.kieve.ssss.context.AiControllerContext;
@@ -95,25 +94,27 @@ public class AiControllerSystem extends System {
         String newStateId = selectedState.state();
         String currentStateId = controller.getCurrentStateId();
 
+        StateContext stateContext = createStateContext(entity, controller, selectedState);
+
         if (!newStateId.equals(currentStateId)) {
             // Exit old state
             if (currentStateId != null) {
                 AiState oldState = controller.getState(currentStateId);
                 if (oldState != null) {
-                    oldState.onExit(createStateContext(entity, controller));
+                    oldState.onExit(stateContext);
                 }
             }
 
             // Enter new state
             AiState newState = controller.getState(newStateId);
-            newState.onEnter(createStateContext(entity, controller));
+            newState.onEnter(stateContext);
             controller.setCurrentStateId(newStateId);
         }
 
         // Execute current state
         AiState currentState = controller.getState(newStateId);
         if (currentState != null) {
-            currentState.execute(createStateContext(entity, controller));
+            currentState.execute(stateContext);
         }
     }
 
@@ -172,17 +173,13 @@ public class AiControllerSystem extends System {
         return state;
     }
 
-    private StateContext createStateContext(Entity entity, AiController controller) {
-        Entity player = findPlayer();
-        return new StateContext(m_gameContext, entity, controller, player);
-    }
-
-    private Entity findPlayer() {
-        var results = m_ecs.findEntitiesWith(PlayerController.class);
-        var it = results.iterator();
-        if (it.hasNext()) {
-            return it.next().entity();
-        }
-        return null;
+    private StateContext createStateContext(
+            Entity entity,
+            AiController controller,
+            StateDefinition stateDef
+    ) {
+        Entity target = m_aiControllerContext.resolveTarget(
+            entity, stateDef.target(), m_ecs);
+        return new StateContext(m_gameContext, entity, controller, target);
     }
 }

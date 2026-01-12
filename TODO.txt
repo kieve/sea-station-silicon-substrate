@@ -1,5 +1,4 @@
-- "Fight Back" AI behavior, where it scurries, but if it's attacked it switches to chase and
-  Attack behaviors
+- "Flee" AI state, where it runs away from a specific entity.
 - A size component to determine entity sizes
 - A "mouse hole" that only the tiny mouse can go in
 - An inventory system

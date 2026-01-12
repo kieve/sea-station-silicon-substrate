@@ -8,6 +8,7 @@ import ca.kieve.ssss.component.Damage;
 import ca.kieve.ssss.component.Descriptor;
 import ca.kieve.ssss.component.Equipment;
 import ca.kieve.ssss.component.Health;
+import ca.kieve.ssss.component.LastAttacker;
 import ca.kieve.ssss.component.PlayerController;
 import ca.kieve.ssss.component.SocketPlug;
 import ca.kieve.ssss.context.GameContext;
@@ -52,6 +53,14 @@ public class AttackSystem extends System {
         targetHealth.hp -= damage;
         if (targetHealth.hp < 0) {
             targetHealth.hp = 0;
+        }
+
+        // Track who attacked this entity for use in AI behaviors
+        var lastAttacker = targetEntity.get(LastAttacker.class);
+        if (lastAttacker == null) {
+            targetEntity.add(new LastAttacker(attackerEntity));
+        } else {
+            lastAttacker.attacker = attackerEntity;
         }
 
         var attackerName = getEntityName(attackerEntity);
