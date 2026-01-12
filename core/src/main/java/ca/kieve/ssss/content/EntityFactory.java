@@ -5,6 +5,7 @@ import dev.dominion.ecs.api.Entity;
 
 import ca.kieve.ssss.component.ColorComp;
 import ca.kieve.ssss.component.Position;
+import ca.kieve.ssss.component.ScurryConfig;
 import ca.kieve.ssss.component.Speed;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.util.Vec3i;
@@ -61,6 +62,18 @@ public class EntityFactory {
     ) {
         Entity entity = createEntity(context, "debugMover", pos, color);
         entity.add(new Speed(speed));
+        return entity;
+    }
+
+    public Entity createRoboMouse(
+        GameContext context,
+        Vec3i pos,
+        boolean clockwise,
+        Vec3i initialDirection,
+        Color color
+    ) {
+        Entity entity = createEntity(context, "roboMouse", pos, color);
+        entity.add(new ScurryConfig(clockwise, initialDirection));
         return entity;
     }
 

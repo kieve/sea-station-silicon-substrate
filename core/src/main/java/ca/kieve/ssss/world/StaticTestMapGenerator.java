@@ -136,5 +136,10 @@ public class StaticTestMapGenerator implements MapGenerator {
             playerSpawn.add(new Vec3i(3, 0, 0)),
             Color.SCARLET
         );
+
+        // Spawn RoboMouse away from walls with random CW/CCW and random direction
+        Vec3i mouseSpawn = new Vec3i(8, 8, 1);
+        boolean clockwise = context.random().nextBoolean();
+        factory.createRoboMouse(context, mouseSpawn, clockwise, null, Color.GRAY);
     }
 }

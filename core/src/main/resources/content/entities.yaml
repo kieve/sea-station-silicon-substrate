@@ -89,3 +89,20 @@ components:
     weaponId: chip_claws
   - type: AiController
     behavior: player_hunter
+
+---
+parents: [base_entity, physics, solid, combatant, socketable]
+components:
+  - type: Identifier
+    key: roboMouse
+  - type: TileGlyph
+    glyphId: mouse
+  - type: Descriptor
+    name: Robo Mouse
+    description: "A small robotic mouse that scurries along walls."
+  - type: Health
+    maxHp: 2
+  - type: Speed
+    val: 150
+  - type: AiController
+    behavior: scurry

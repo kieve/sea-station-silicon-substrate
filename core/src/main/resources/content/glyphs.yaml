@@ -39,3 +39,8 @@ glyphs:
     character: '█'
     offsetX: 7.0
     offsetY: -7.0
+  mouse:
+    font: xirod_24
+    character: 'm'
+    offsetX: 4.0
+    offsetY: -9.0

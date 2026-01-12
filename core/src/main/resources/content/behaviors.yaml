@@ -39,3 +39,9 @@ id: idler
 states:
   - state: IdleState
     priority: 1
+
+---
+id: scurry
+states:
+  - state: ScurryState
+    priority: 1
