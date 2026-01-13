@@ -2,7 +2,6 @@ package ca.kieve.ssss.system.ai;
 
 import ca.kieve.ssss.ai.StateEvaluator;
 import ca.kieve.ssss.ai.behavior.AiController;
-import ca.kieve.ssss.ai.behavior.BehaviorFactory;
 import ca.kieve.ssss.ai.behavior.StateDefinition;
 import ca.kieve.ssss.ai.state.AiState;
 import ca.kieve.ssss.ai.state.StateContext;
@@ -24,13 +23,13 @@ import java.util.List;
 public class AiControllerSystem extends System {
     private final Dominion m_ecs;
     private final AiControllerContext m_aiControllerContext;
-    private final BehaviorFactory m_behaviorFactory;
+    private final StateEvaluator m_stateEvaluator;
 
     public AiControllerSystem(GameContext gameContext) {
         super(gameContext);
         m_ecs = gameContext.ecs();
         m_aiControllerContext = gameContext.aiController();
-        m_behaviorFactory = new BehaviorFactory();
+        m_stateEvaluator = new StateEvaluator(gameContext);
     }
 
     @Override
@@ -72,9 +71,8 @@ public class AiControllerSystem extends System {
             .toList();
 
         // Find first state whose conditions all pass
-        StateDefinition selectedState = StateEvaluator.selectState(
-            m_gameContext, m_aiControllerContext, entity, controller,
-            sortedStates, m_behaviorFactory);
+        StateDefinition selectedState = m_stateEvaluator.selectState(
+            entity, controller, sortedStates);
 
         if (selectedState == null) {
             return;
@@ -82,9 +80,8 @@ public class AiControllerSystem extends System {
 
         // Notify conditions that this state was selected
         AiState selectedAiState = controller.getState(selectedState.state());
-        StateEvaluator.notifyConditionsOfSelection(
-            m_gameContext, m_aiControllerContext, entity,
-            selectedAiState, selectedState);
+        m_stateEvaluator.notifyConditionsOfSelection(
+            entity, selectedAiState, selectedState);
 
         // Handle state transitions
         String newStateId = selectedState.state();

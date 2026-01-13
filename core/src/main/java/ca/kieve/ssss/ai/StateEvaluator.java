@@ -14,29 +14,24 @@ import dev.dominion.ecs.api.Entity;
 import java.util.List;
 
 /**
- * Utility class providing shared state evaluation logic.
+ * Provides shared state evaluation logic.
  * Used by both AiControllerSystem and RandomBranchState.
  */
-public final class StateEvaluator {
-    private StateEvaluator() {}
+public class StateEvaluator {
+    private final GameContext m_gameContext;
+    private final AiControllerContext m_aiContext;
+    private final BehaviorFactory m_behaviorFactory;
+
+    public StateEvaluator(GameContext gameContext) {
+        m_gameContext = gameContext;
+        m_aiContext = gameContext.aiController();
+        m_behaviorFactory = new BehaviorFactory();
+    }
 
     /**
      * Evaluates conditions for a state definition. Returns true if all pass.
-     *
-     * @param gameContext The game context
-     * @param aiContext The AI controller context for condition resolution
-     * @param entity The entity being evaluated
-     * @param state The AI state instance
-     * @param stateDef The state definition containing conditions
-     * @return true if all conditions pass (or no conditions defined)
      */
-    public static boolean evaluateConditions(
-            GameContext gameContext,
-            AiControllerContext aiContext,
-            Entity entity,
-            AiState state,
-            StateDefinition stateDef
-    ) {
+    public boolean evaluateConditions(Entity entity, AiState state, StateDefinition stateDef) {
         List<ConditionDefinition> conditions = stateDef.conditions();
         if (conditions == null || conditions.isEmpty()) {
             return true;
@@ -44,10 +39,10 @@ public final class StateEvaluator {
 
         int priority = stateDef.priority();
         ConditionContext condContext = new ConditionContext(
-            gameContext, entity, state, priority);
+            m_gameContext, entity, state, priority);
 
         for (ConditionDefinition condDef : conditions) {
-            Condition condition = aiContext.getCondition(condDef);
+            Condition condition = m_aiContext.getCondition(condDef);
             if (!condition.evaluate(condContext)) {
                 return false;
             }
@@ -59,26 +54,15 @@ public final class StateEvaluator {
     /**
      * Finds the first state whose conditions pass.
      * States should be pre-sorted by priority.
-     *
-     * @param gameContext The game context
-     * @param aiContext The AI controller context
-     * @param entity The entity being evaluated
-     * @param controller The AI controller component
-     * @param sortedStates States sorted by priority (lowest first)
-     * @param factory The behavior factory for creating states
-     * @return The first state definition whose conditions pass, or null if none match
      */
-    public static StateDefinition selectState(
-            GameContext gameContext,
-            AiControllerContext aiContext,
+    public StateDefinition selectState(
             Entity entity,
             AiController controller,
-            List<StateDefinition> sortedStates,
-            BehaviorFactory factory
+            List<StateDefinition> sortedStates
     ) {
         for (StateDefinition stateDef : sortedStates) {
-            AiState state = getOrCreateState(controller, stateDef, factory);
-            if (evaluateConditions(gameContext, aiContext, entity, state, stateDef)) {
+            AiState state = getOrCreateState(controller, stateDef);
+            if (evaluateConditions(entity, state, stateDef)) {
                 return stateDef;
             }
         }
@@ -88,16 +72,8 @@ public final class StateEvaluator {
     /**
      * Notifies all conditions of a state that it was selected.
      * Called after state selection to allow conditions to update their state.
-     *
-     * @param gameContext The game context
-     * @param aiContext The AI controller context
-     * @param entity The entity
-     * @param state The AI state instance
-     * @param stateDef The selected state definition
      */
-    public static void notifyConditionsOfSelection(
-            GameContext gameContext,
-            AiControllerContext aiContext,
+    public void notifyConditionsOfSelection(
             Entity entity,
             AiState state,
             StateDefinition stateDef
@@ -109,31 +85,22 @@ public final class StateEvaluator {
 
         int priority = stateDef.priority();
         ConditionContext condContext = new ConditionContext(
-            gameContext, entity, state, priority);
+            m_gameContext, entity, state, priority);
 
         for (ConditionDefinition condDef : conditions) {
-            Condition condition = aiContext.getCondition(condDef);
+            Condition condition = m_aiContext.getCondition(condDef);
             condition.onStateSelected(condContext);
         }
     }
 
     /**
      * Gets or creates an AiState for a definition.
-     *
-     * @param controller The AI controller component
-     * @param definition The state definition
-     * @param factory The behavior factory for creating new states
-     * @return The existing or newly created state
      */
-    public static AiState getOrCreateState(
-            AiController controller,
-            StateDefinition definition,
-            BehaviorFactory factory
-    ) {
+    public AiState getOrCreateState(AiController controller, StateDefinition definition) {
         String stateId = definition.state();
         AiState state = controller.getState(stateId);
         if (state == null) {
-            state = factory.createState(definition);
+            state = m_behaviorFactory.createState(definition);
             controller.setState(stateId, state);
         }
         return state;

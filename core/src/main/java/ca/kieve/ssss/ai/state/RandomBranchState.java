@@ -7,7 +7,6 @@ import ca.kieve.ssss.ai.behavior.BranchDefinition;
 import ca.kieve.ssss.ai.behavior.StateDefinition;
 import ca.kieve.ssss.ai.reset.ResetCondition;
 import ca.kieve.ssss.ai.reset.ResetContext;
-import ca.kieve.ssss.context.AiControllerContext;
 import ca.kieve.ssss.context.GameContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dominion.ecs.api.Entity;
@@ -35,6 +34,7 @@ public class RandomBranchState extends AiState {
     private List<BranchDefinition> m_branches;
     private final BehaviorFactory m_behaviorFactory = new BehaviorFactory();
     private final Map<String, Map<String, AiState>> m_nestedStates = new HashMap<>();
+    private StateEvaluator m_stateEvaluator;
 
     @Override
     @SuppressWarnings("unchecked")
@@ -65,6 +65,11 @@ public class RandomBranchState extends AiState {
         AiController controller = context.controller();
         Entity entity = context.entity();
         GameContext gameContext = context.gameContext();
+
+        // Lazily initialize state evaluator
+        if (m_stateEvaluator == null) {
+            m_stateEvaluator = new StateEvaluator(gameContext);
+        }
 
         // Get or create per-entity branch data
         RandomBranchData data = controller.getBranchData(m_priority);
@@ -99,7 +104,6 @@ public class RandomBranchState extends AiState {
 
     private void executeNestedStates(StateContext parentContext, BranchDefinition branch) {
         GameContext gameContext = parentContext.gameContext();
-        AiControllerContext aiContext = gameContext.aiController();
         Entity entity = parentContext.entity();
         AiController controller = parentContext.controller();
 
@@ -119,8 +123,7 @@ public class RandomBranchState extends AiState {
         for (StateDefinition stateDef : sortedStates) {
             AiState state = branchStates.get(stateDef.state());
             if (state != null &&
-                StateEvaluator.evaluateConditions(
-                    gameContext, aiContext, entity, state, stateDef)) {
+                m_stateEvaluator.evaluateConditions(entity, state, stateDef)) {
                 selectedState = stateDef;
                 selectedAiState = state;
                 break;
@@ -132,11 +135,10 @@ public class RandomBranchState extends AiState {
         }
 
         // Notify conditions and execute
-        StateEvaluator.notifyConditionsOfSelection(
-            gameContext, aiContext, entity, selectedAiState, selectedState);
+        m_stateEvaluator.notifyConditionsOfSelection(entity, selectedAiState, selectedState);
 
         // Resolve target for the nested state
-        Entity target = aiContext.resolveTarget(
+        Entity target = gameContext.aiController().resolveTarget(
             entity, selectedState.target(), gameContext.ecs());
         StateContext nestedContext = new StateContext(
             gameContext, entity, controller, target);

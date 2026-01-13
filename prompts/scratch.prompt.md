@@ -7,9 +7,6 @@
 
 --------
 
-For the StateEvaluator, I wonder if it would make sense to initialize it with the common unchanging
-parameters (like game context), then have methods that can be called only passing minimal parameters
-Rather than using static methods where all parameters need to always be passed.
 
 
 
