@@ -15,7 +15,8 @@ import java.util.Map;
  * The map is rebuilt once per tick by PathingSystem.
  */
 public class PathingContext {
-    private static final int MAP_SIZE = 200;
+    private static final int MAP_WIDTH = 28;
+    private static final int MAP_HEIGHT = 17;
     private static final char PASSABLE = '.';
     private static final char BLOCKED = '#';
 
@@ -28,24 +29,31 @@ public class PathingContext {
     // Track which Z-levels need rebuilding
     private final Map<Integer, Boolean> m_dirty = new HashMap<>();
 
+    // Track the last scanned goal per Z-level for caching
+    private final Map<Integer, Coord> m_lastGoal = new HashMap<>();
+
     public void init(GameContext gameContext) {
         m_ecs = gameContext.ecs();
     }
 
     /**
      * Marks all Z-levels as dirty, forcing a rebuild on next update.
+     * Also clears the goal cache since entity positions may have changed.
      */
     public void markAllDirty() {
         for (var entry : m_dirty.entrySet()) {
             entry.setValue(true);
         }
+        m_lastGoal.clear();
     }
 
     /**
      * Marks a specific Z-level as dirty.
+     * Also clears the goal cache for that level.
      */
     public void markDirty(int zLevel) {
         m_dirty.put(zLevel, true);
+        m_lastGoal.remove(zLevel);
     }
 
     /**
@@ -63,6 +71,9 @@ public class PathingContext {
     /**
      * Finds a path from start to goal on the same Z-level.
      * Returns the next step coordinate, or null if no path exists.
+     *
+     * Uses caching: if the goal hasn't changed since the last scan,
+     * the expensive scan() is skipped and only findPath() is called.
      */
     public Coord findNextStep(Vec3i start, Vec3i goal) {
         if (start.z != goal.z) {
@@ -72,35 +83,43 @@ public class PathingContext {
         int zLevel = start.z;
         ensureMapExists(zLevel);
 
+        // Rebuild grid if dirty (entity positions changed)
+        updateIfDirty(zLevel);
+
         DijkstraMap dijkstra = m_dijkstraMaps.get(zLevel);
         char[][] grid = m_grids.get(zLevel);
 
-        // Ensure goal is passable for pathfinding
+        Coord goalCoord = Coord.get(goal.x, goal.y);
+
+        // Check if goal is blocked and needs temporary unblocking
         boolean goalWasBlocked = false;
-        if (goal.x >= 0 && goal.x < MAP_SIZE && goal.y >= 0 && goal.y < MAP_SIZE) {
+        if (goal.x >= 0 && goal.x < MAP_WIDTH && goal.y >= 0 && goal.y < MAP_HEIGHT) {
             if (grid[goal.x][goal.y] == BLOCKED) {
                 grid[goal.x][goal.y] = PASSABLE;
                 goalWasBlocked = true;
+                dijkstra.initialize(grid);
+                // Invalidate cache since we modified the grid
+                m_lastGoal.remove(zLevel);
             }
         }
 
-        // Reinitialize if goal was blocked (temporary modification)
-        if (goalWasBlocked) {
-            dijkstra.initialize(grid);
+        // Only scan if goal changed or cache is empty for this level
+        Coord cachedGoal = m_lastGoal.get(zLevel);
+        if (cachedGoal == null || !cachedGoal.equals(goalCoord)) {
+            dijkstra.setGoal(goalCoord);
+            dijkstra.scan(null);
+            m_lastGoal.put(zLevel, goalCoord);
         }
 
         Coord startCoord = Coord.get(start.x, start.y);
-        Coord goalCoord = Coord.get(goal.x, goal.y);
-
-        dijkstra.setGoal(goalCoord);
-        dijkstra.scan(null);
-
         var path = dijkstra.findPath(1, null, null, startCoord, goalCoord);
 
         // Restore grid if we modified it
         if (goalWasBlocked) {
             grid[goal.x][goal.y] = BLOCKED;
             dijkstra.initialize(grid);
+            // Invalidate cache since grid is restored
+            m_lastGoal.remove(zLevel);
         }
 
         if (path.isEmpty()) {
@@ -112,9 +131,9 @@ public class PathingContext {
 
     private void ensureMapExists(int zLevel) {
         if (!m_grids.containsKey(zLevel)) {
-            char[][] grid = new char[MAP_SIZE][MAP_SIZE];
-            for (int x = 0; x < MAP_SIZE; x++) {
-                for (int y = 0; y < MAP_SIZE; y++) {
+            char[][] grid = new char[MAP_WIDTH][MAP_HEIGHT];
+            for (int x = 0; x < MAP_WIDTH; x++) {
+                for (int y = 0; y < MAP_HEIGHT; y++) {
                     grid[x][y] = PASSABLE;
                 }
             }
@@ -130,8 +149,8 @@ public class PathingContext {
         char[][] grid = m_grids.get(zLevel);
 
         // Reset grid to passable
-        for (int x = 0; x < MAP_SIZE; x++) {
-            for (int y = 0; y < MAP_SIZE; y++) {
+        for (int x = 0; x < MAP_WIDTH; x++) {
+            for (int y = 0; y < MAP_HEIGHT; y++) {
                 grid[x][y] = PASSABLE;
             }
         }
@@ -141,8 +160,8 @@ public class PathingContext {
         solids.forEach(result -> {
             var pos = result.comp2().getPosition();
             if (pos.z == zLevel
-                    && pos.x >= 0 && pos.x < MAP_SIZE
-                    && pos.y >= 0 && pos.y < MAP_SIZE) {
+                    && pos.x >= 0 && pos.x < MAP_WIDTH
+                    && pos.y >= 0 && pos.y < MAP_HEIGHT) {
                 grid[pos.x][pos.y] = BLOCKED;
             }
         });
