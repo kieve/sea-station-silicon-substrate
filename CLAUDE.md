@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+**Important:** If you notice any discrepancies between this documentation and the actual code, offer to update CLAUDE.md to reflect the current state of the codebase.
+
 ## Project Overview
 
 Sea Station Silicon Substrate is a roguelike game built with libGDX (Java game framework). It uses an Entity Component System (ECS) architecture via Dominion ECS, and implements a turn-based game loop with a custom clock system.
@@ -54,6 +56,7 @@ The project uses Dominion ECS (`dev.dominion.ecs`) for entity management. All co
 - **GameContext** (`ca.kieve.ssss.context.GameContext`): Central record holding the ECS instance (`Dominion`), along with specialized contexts (Clock, Position, Log, Player), input multiplexer, Random, and system lists.
 - **Components**: Interfaces/classes in `ca.kieve.ssss.component.*` that represent data attached to entities (Position, Velocity, Health, Speed, etc.)
 - **Systems**: Classes extending `ca.kieve.ssss.system.System` that contain game logic
+- **Player Component**: The `Player` marker component identifies the player entity. Query with `dominion.findEntitiesWith(Player.class)` to find the player.
 
 #### Dominion ECS API
 
@@ -109,7 +112,9 @@ Systems extend the abstract `System` class and override lifecycle methods:
 - `tick()`: Main processing phase
 - `postTick()`: Post-processing phase
 
-All systems are registered in `GameWindow.createSystems()` (core/src/main/java/ca/kieve/ssss/ui/widget/GameWindow.java) as either update systems or render systems.
+All systems are registered in `GameEngine` (core/src/main/java/ca/kieve/ssss/GameEngine.java):
+- Update systems: `createUpdateSystems()` - logic systems (ClockSystem, WasdSystem, VelocitySystem, etc.)
+- Render systems: `initializeRenderSystems()` - visual systems (TileGlyphRenderSystem, ExamineCrosshairRenderSystem, etc.)
 
 ### Input Modes and Modal Systems
 
@@ -198,7 +203,120 @@ This is consistent across all systems that handle directional input (WasdSystem,
 
 ### Map Generation
 
-Map generation uses `MapModelBuilder` (core/src/main/java/ca/kieve/ssss/REPLACE/MapModelBuilder.java) to create cave-like structures with rooms and corridors.
+Map generation is handled by the `world` package (`ca.kieve.ssss.world`):
+
+- **MapGenerator**: Interface defining map generation contract
+- **StaticTestMapGenerator**: Implementation that loads maps from YAML files
+- **WorldModel**: 3D voxel representation using x-then-y-then-z indexing
+- **WorldEntityFactory**: Creates block entities from WorldModel
+
+**YAML Map Format:**
+Maps are defined in `core/src/main/resources/content/maps/` using character-based layer definitions:
+
+```yaml
+blocks:
+  floor:
+    type: wood
+    layoutChar: '+'
+  wall:
+    type: stone
+    layoutChar: '#'
+  air:
+    type: air
+    layoutChar: '.'
+
+size:
+  x: 28
+  y: 17
+
+playerSpawn:
+  x: 6
+  y: 6
+  z: 1
+
+floorGlyph: interpunct
+
+layers:
+  '0': |
+    #################
+    #+++++++++++++++#
+    ...
+  '1': |
+    #################
+    #...............#
+    ...
+```
+
+**Integration:**
+In `GameEngine.init()`:
+1. MapGenerator creates WorldModel: `m_worldModel = m_mapGenerator.generate(blockTypes)`
+2. Block entities created: `WorldEntityFactory.createEntities(context, worldModel)`
+3. Player spawned at designated location
+4. Additional entities created via `m_mapGenerator.createEntities()`
+
+### AI System
+
+The AI system uses a data-driven behavior tree architecture defined in `behaviors.yaml`.
+
+**Core Components:**
+- `AiController` component: Attaches behavior to entities via `behavior` ID
+- `AiControllerSystem`: Evaluates conditions and executes state logic each tick
+- `BehaviorFactory`: Loads and instantiates behaviors from YAML
+
+**AI States** (in `ca.kieve.ssss.ai.state`):
+- `IdleState`: Do nothing
+- `WanderState`: Move randomly within a range
+- `ChaseState`: Pathfind toward a target entity
+- `AttackState`: Attack an adjacent target
+- `ScurryState`: Move along walls
+- `AnnounceDeathState`: Log a message on death
+
+**Conditions** (in `ca.kieve.ssss.ai.condition`):
+- `IsDeadCondition`: Check if entity's HP <= 0
+- `HasWeaponCondition`: Check if entity has equipped weapon
+- `DistanceToEntityCondition`: Check distance to target (PLAYER, LAST_ATTACKER)
+- `WasAttackedCondition`: Check if entity was recently attacked
+- `MaxTimesCondition`: Limit state execution count
+
+**Behavior YAML Format:**
+```yaml
+---
+id: player_hunter
+states:
+  - state: AnnounceDeathState
+    priority: 0
+    conditions:
+      - type: IsDead
+      - type: MaxTimes
+        maxTimes: 1
+    message: "The attacker curses you as it falls."
+  - state: AttackState
+    priority: 1
+    conditions:
+      - type: DistanceToEntity
+        target: PLAYER
+        distance: 1
+      - type: HasWeapon
+  - state: ChaseState
+    priority: 2
+    conditions:
+      - type: DistanceToEntity
+        target: PLAYER
+        distance: 20
+  - state: WanderState
+    priority: 3
+    range: 5
+  - state: IdleState
+    priority: 4
+```
+
+States are evaluated by priority (lowest first). The first state whose conditions all pass is executed.
+
+**Adding AI to Entities:**
+```yaml
+- type: AiController
+  behavior: player_hunter
+```
 
 ### Data-Driven Content System
 
@@ -211,11 +329,15 @@ Entity and content definitions are loaded from YAML files using Jackson, enablin
 - `ComponentFactory`: Instantiates components via reflection based on YAML specs
 
 **YAML Content Files:**
+- `entities_base.yaml`: Base entity templates (base_entity, physics, solid, combatant, socketable)
 - `entities.yaml`: Entity definitions (player, enemies, etc.) with component lists
+- `behaviors.yaml`: AI behavior definitions with state machines and conditions
 - `weapons.yaml`: Weapon definitions (name, description, damage)
 - `materials.yaml`: Material entity definitions with component composition
 - `glyphs.yaml`: Visual representations (fonts, characters, offsets)
+- `fonts.yaml`: Font definitions for rendering
 - `blocks.yaml`: Block entity definitions with parent inheritance and component composition
+- `maps/`: Directory containing static map YAML files (static_test_map.yaml, damaged_sub.yaml)
 
 **Creating Entities from YAML:**
 ```java
@@ -272,12 +394,12 @@ Entity definitions support a `parents` field (list of strings) that enables comp
 
 **Base Entity Definitions:**
 
-`entities.yaml` defines reusable base entities that can be composed together:
+`entities_base.yaml` defines reusable base entities that can be composed together:
 - `base_entity`: RenderingHint (zIndex: 1), Examinable
 - `physics`: Velocity, Collider
 - `solid`: Solid
 - `combatant`: Health (maxHp: 100), Attackable
-- `socketable`: Socket, Socketable
+- `socketable`: Socket (socketedMaxHp, socketedHp for HP pool when possessing), Socketable
 
 Example with multiple parents:
 ```yaml
@@ -317,19 +439,31 @@ In this example, `aiAttacker` inherits from four base definitions and overrides 
 
 - `core/`: Main game logic (platform-agnostic)
   - `src/main/java/ca/kieve/ssss/`: Root package
+    - `ai/`: AI behavior system
+      - `behavior/`: Core behavior classes (AiController, BehaviorFactory)
+      - `condition/`: Condition evaluators (IsDeadCondition, DistanceToEntityCondition, etc.)
+      - `state/`: AI states (IdleState, ChaseState, AttackState, ScurryState, WanderState)
     - `component/`: ECS components
-    - `system/`: ECS systems
-    - `context/`: Context objects (GameContext, ClockContext, etc.)
     - `content/`: Data-driven content loading (EntityFactory, ContentRegistry, etc.)
-    - `ui/`: Custom UI framework
+    - `context/`: Context objects (GameContext, ClockContext, etc.)
+    - `event/`: Event system (AttackEvent, SocketEvent, ExamineEvent, etc.)
+    - `input/`: Input handling (InputAction, InputActionController)
+    - `repository/`: Shared repositories (FontRepo)
     - `screen/`: Game screens
+    - `system/`: ECS systems
+    - `ui/`: Custom UI framework
     - `util/`: Utility classes
+    - `world/`: World/map management (MapGenerator, WorldModel, WorldEntityFactory)
   - `src/main/resources/content/`: YAML content definitions
-    - `entities.yaml`: Entity templates
+    - `entities_base.yaml`: Base entity templates
+    - `entities.yaml`: Entity definitions
+    - `behaviors.yaml`: AI behavior definitions
     - `weapons.yaml`: Weapon definitions
     - `materials.yaml`: Material entity definitions
-    - `glyphs.yaml`: Font and glyph definitions
+    - `glyphs.yaml`: Glyph definitions
+    - `fonts.yaml`: Font definitions
     - `blocks.yaml`: Block entity definitions
+    - `maps/`: Static map YAML files
 - `lwjgl3/`: Desktop launcher (LWJGL3 backend)
 - `assets/`: Game assets (automatically indexed via `generateAssetList` task)
 

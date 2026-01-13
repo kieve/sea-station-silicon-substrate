@@ -1,5 +1,3 @@
-- Investigate performance issue with turns
-
 - "Flee" AI state, where it runs away from a specific entity.
 - A size component to determine entity sizes
 - A "mouse hole" that only the tiny mouse can go in
@@ -13,3 +11,5 @@
 
 - Attack system is checking where the damage should go. Really these should be damage events and
   some other system selects the correct HP pool to apply it to
+
+- Pathfinding could grouped by rooms rather than the whole map
