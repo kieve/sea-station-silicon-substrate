@@ -1,12 +1,11 @@
 package ca.kieve.ssss.ai.condition;
 
-import java.util.Map;
+import ca.kieve.ssss.content.YamlInitializable;
 
 /**
  * Interface for AI behavior conditions.
  */
-public interface Condition {
-    void initialize(Map<String, Object> properties);
+public interface Condition extends YamlInitializable {
     boolean evaluate(ConditionContext context);
 
     /**

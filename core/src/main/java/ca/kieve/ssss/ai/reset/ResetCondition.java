@@ -1,17 +1,12 @@
 package ca.kieve.ssss.ai.reset;
 
-import java.util.Map;
+import ca.kieve.ssss.content.YamlInitializable;
 
 /**
  * Interface for conditions that determine when a random branch selection should reset.
  * Implementations track relevant state and indicate when re-randomization should occur.
  */
-public interface ResetCondition {
-    /**
-     * Initializes this reset condition with properties from YAML.
-     */
-    void initialize(Map<String, Object> properties);
-
+public interface ResetCondition extends YamlInitializable {
     /**
      * Determines if the branch selection should be reset.
      *

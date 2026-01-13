@@ -7,6 +7,7 @@ import ca.kieve.ssss.ai.behavior.BranchDefinition;
 import ca.kieve.ssss.ai.behavior.StateDefinition;
 import ca.kieve.ssss.ai.reset.ResetCondition;
 import ca.kieve.ssss.ai.reset.ResetContext;
+import ca.kieve.ssss.content.ReflectionFactory;
 import ca.kieve.ssss.context.GameContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dominion.ecs.api.Entity;
@@ -27,7 +28,6 @@ import java.util.Random;
  * - branches: List of branch definitions with name and nested states
  */
 public class RandomBranchState extends AiState {
-    private static final String RESET_PACKAGE = "ca.kieve.ssss.ai.reset.";
 
     private int m_priority;
     private String m_resetConditionType;
@@ -165,20 +165,7 @@ public class RandomBranchState extends AiState {
         if (m_resetConditionType == null || m_resetConditionType.isEmpty()) {
             return null;
         }
-        try {
-            String className = m_resetConditionType;
-            if (!className.endsWith("Reset")) {
-                className += "Reset";
-            }
-            Class<?> resetClass = Class.forName(RESET_PACKAGE + className);
-            ResetCondition condition = (ResetCondition) resetClass
-                .getDeclaredConstructor().newInstance();
-            condition.initialize(m_properties);
-            return condition;
-        } catch (Exception e) {
-            throw new RuntimeException(
-                "Failed to create reset condition: " + m_resetConditionType, e);
-        }
+        return ReflectionFactory.createResetCondition(m_resetConditionType, m_properties);
     }
 
     @SuppressWarnings("unchecked")

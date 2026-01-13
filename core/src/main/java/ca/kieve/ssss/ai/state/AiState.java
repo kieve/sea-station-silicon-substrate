@@ -1,6 +1,7 @@
 package ca.kieve.ssss.ai.state;
 
 import ca.kieve.ssss.ai.condition.data.ConditionData;
+import ca.kieve.ssss.content.YamlInitializable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -8,10 +9,11 @@ import java.util.Map;
 /**
  * Abstract base class for AI states.
  */
-public abstract class AiState {
+public abstract class AiState implements YamlInitializable {
     protected Map<String, Object> m_properties;
     private final Map<Integer, ConditionData> m_conditionData = new HashMap<>();
 
+    @Override
     public void initialize(Map<String, Object> properties) {
         m_properties = properties;
     }

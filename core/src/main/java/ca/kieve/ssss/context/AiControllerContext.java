@@ -5,6 +5,7 @@ import ca.kieve.ssss.ai.behavior.TargetType;
 import ca.kieve.ssss.ai.condition.Condition;
 import ca.kieve.ssss.component.LastAttacker;
 import ca.kieve.ssss.component.PlayerController;
+import ca.kieve.ssss.content.ReflectionFactory;
 import dev.dominion.ecs.api.Dominion;
 import dev.dominion.ecs.api.Entity;
 
@@ -16,8 +17,6 @@ import java.util.Map;
  * compile time and don't need to be recreated each tick.
  */
 public class AiControllerContext {
-    private static final String CONDITION_PACKAGE = "ca.kieve.ssss.ai.condition.";
-
     private final Map<ConditionDefinition, Condition> m_conditionCache = new HashMap<>();
 
     public Condition getCondition(ConditionDefinition definition) {
@@ -25,20 +24,7 @@ public class AiControllerContext {
     }
 
     private Condition createCondition(ConditionDefinition definition) {
-        try {
-            String className = definition.type();
-            if (!className.endsWith("Condition")) {
-                className += "Condition";
-            }
-            Class<?> conditionClass = Class.forName(CONDITION_PACKAGE + className);
-            Condition condition = (Condition) conditionClass
-                .getDeclaredConstructor().newInstance();
-            condition.initialize(definition.properties());
-            return condition;
-        } catch (Exception e) {
-            throw new RuntimeException(
-                "Failed to create condition: " + definition.type(), e);
-        }
+        return ReflectionFactory.createCondition(definition.type(), definition.properties());
     }
 
     /**
