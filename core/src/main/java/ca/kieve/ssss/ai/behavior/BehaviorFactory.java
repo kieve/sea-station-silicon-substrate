@@ -12,6 +12,8 @@ public class BehaviorFactory {
         try {
             Class<?> stateClass = Class.forName(STATE_PACKAGE + definition.state());
             AiState state = (AiState) stateClass.getDeclaredConstructor().newInstance();
+            // Include priority in properties so states can access it if needed
+            definition.properties().put("_priority", definition.priority());
             state.initialize(definition.properties());
             return state;
         } catch (Exception e) {

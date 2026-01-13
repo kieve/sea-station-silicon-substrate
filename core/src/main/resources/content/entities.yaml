@@ -110,6 +110,6 @@ components:
   - type: Speed
     val: 150
   - type: AiController
-    behavior: fight_back_scurry
+    behavior: robo_mouse
   - type: Equipment
     weaponId: chip_claws

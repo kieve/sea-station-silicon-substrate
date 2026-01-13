@@ -47,26 +47,40 @@ states:
     priority: 1
 
 ---
-id: fight_back_scurry
+id: robo_mouse
 states:
-  - state: AttackState
+  - state: RandomBranchState
     priority: 1
-    target: LAST_ATTACKER
+    resetCondition: AttackerChange
     conditions:
       - type: WasAttacked
-      - type: DistanceToEntity
-        target: LAST_ATTACKER
-        distance: 1
-      - type: HasWeapon
-
-  - state: ChaseState
-    priority: 2
-    target: LAST_ATTACKER
-    conditions:
-      - type: WasAttacked
-      - type: DistanceToEntity
-        target: LAST_ATTACKER
-        distance: 20
+    branches:
+      - name: fight
+        states:
+          - state: AttackState
+            priority: 1
+            target: LAST_ATTACKER
+            conditions:
+              - type: DistanceToEntity
+                target: LAST_ATTACKER
+                distance: 1
+              - type: HasWeapon
+          - state: ChaseState
+            priority: 2
+            target: LAST_ATTACKER
+            conditions:
+              - type: DistanceToEntity
+                target: LAST_ATTACKER
+                distance: 20
+      - name: flee
+        states:
+          - state: FleeState
+            priority: 1
+            target: LAST_ATTACKER
+            conditions:
+              - type: DistanceToEntity
+                target: LAST_ATTACKER
+                distance: 20
 
   - state: ScurryState
-    priority: 3
+    priority: 2

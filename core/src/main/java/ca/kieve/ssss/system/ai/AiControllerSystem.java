@@ -1,11 +1,9 @@
 package ca.kieve.ssss.system.ai;
 
+import ca.kieve.ssss.ai.StateEvaluator;
 import ca.kieve.ssss.ai.behavior.AiController;
 import ca.kieve.ssss.ai.behavior.BehaviorFactory;
-import ca.kieve.ssss.ai.behavior.ConditionDefinition;
 import ca.kieve.ssss.ai.behavior.StateDefinition;
-import ca.kieve.ssss.ai.condition.Condition;
-import ca.kieve.ssss.ai.condition.ConditionContext;
 import ca.kieve.ssss.ai.state.AiState;
 import ca.kieve.ssss.ai.state.StateContext;
 import ca.kieve.ssss.component.Health;
@@ -74,21 +72,19 @@ public class AiControllerSystem extends System {
             .toList();
 
         // Find first state whose conditions all pass
-        StateDefinition selectedState = null;
-        for (StateDefinition stateDef : sortedStates) {
-            AiState state = getOrCreateState(controller, stateDef);
-            if (evaluateConditions(entity, state, stateDef)) {
-                selectedState = stateDef;
-                break;
-            }
-        }
+        StateDefinition selectedState = StateEvaluator.selectState(
+            m_gameContext, m_aiControllerContext, entity, controller,
+            sortedStates, m_behaviorFactory);
 
         if (selectedState == null) {
             return;
         }
 
         // Notify conditions that this state was selected
-        notifyConditionsOfSelection(entity, controller, selectedState);
+        AiState selectedAiState = controller.getState(selectedState.state());
+        StateEvaluator.notifyConditionsOfSelection(
+            m_gameContext, m_aiControllerContext, entity,
+            selectedAiState, selectedState);
 
         // Handle state transitions
         String newStateId = selectedState.state();
@@ -116,61 +112,6 @@ public class AiControllerSystem extends System {
         if (currentState != null) {
             currentState.execute(stateContext);
         }
-    }
-
-    private boolean evaluateConditions(
-        Entity entity,
-        AiState state,
-        StateDefinition stateDef
-    ) {
-        List<ConditionDefinition> conditions = stateDef.conditions();
-        if (conditions == null || conditions.isEmpty()) {
-            return true;  // No conditions = always true
-        }
-
-        int priority = stateDef.priority();
-        ConditionContext condContext = new ConditionContext(
-            m_gameContext, entity, state, priority);
-
-        for (ConditionDefinition condDef : conditions) {
-            Condition condition = m_aiControllerContext.getCondition(condDef);
-            if (!condition.evaluate(condContext)) {
-                return false;  // AND logic: all must pass
-            }
-        }
-
-        return true;
-    }
-
-    private void notifyConditionsOfSelection(
-        Entity entity,
-        AiController controller,
-        StateDefinition stateDef
-    ) {
-        List<ConditionDefinition> conditions = stateDef.conditions();
-        if (conditions == null || conditions.isEmpty()) {
-            return;
-        }
-
-        AiState state = controller.getState(stateDef.state());
-        int priority = stateDef.priority();
-        ConditionContext condContext = new ConditionContext(
-            m_gameContext, entity, state, priority);
-
-        for (ConditionDefinition condDef : conditions) {
-            Condition condition = m_aiControllerContext.getCondition(condDef);
-            condition.onStateSelected(condContext);
-        }
-    }
-
-    private AiState getOrCreateState(AiController controller, StateDefinition definition) {
-        String stateId = definition.state();
-        AiState state = controller.getState(stateId);
-        if (state == null) {
-            state = m_behaviorFactory.createState(definition);
-            controller.setState(stateId, state);
-        }
-        return state;
     }
 
     private StateContext createStateContext(

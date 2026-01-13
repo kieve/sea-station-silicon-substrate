@@ -1,6 +1,7 @@
 package ca.kieve.ssss.ai.behavior;
 
 import ca.kieve.ssss.ai.state.AiState;
+import ca.kieve.ssss.ai.state.RandomBranchData;
 import ca.kieve.ssss.component.Component;
 
 import java.util.Collections;
@@ -14,6 +15,7 @@ import java.util.Map;
 public class AiController implements Component {
     private final List<StateDefinition> m_stateDefinitions;
     private final Map<String, AiState> m_states = new HashMap<>();
+    private final Map<Integer, RandomBranchData> m_branchData = new HashMap<>();
     private String m_currentStateId;
 
     public AiController() {
@@ -42,5 +44,13 @@ public class AiController implements Component {
 
     public void setCurrentStateId(String stateId) {
         m_currentStateId = stateId;
+    }
+
+    public RandomBranchData getBranchData(int priority) {
+        return m_branchData.get(priority);
+    }
+
+    public void setBranchData(int priority, RandomBranchData data) {
+        m_branchData.put(priority, data);
     }
 }
