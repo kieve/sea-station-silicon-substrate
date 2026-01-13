@@ -111,6 +111,11 @@ public class Vec3i {
         return this.x < x && this.y < y && this.z < z;
     }
 
+    /** Returns the Manhattan distance to another vector (x and y only, ignores z). */
+    public int manhattanDistTo(Vec3i other) {
+        return Math.abs(x - other.x) + Math.abs(y - other.y);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof Vec3i vec3i)) return false;

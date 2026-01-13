@@ -38,8 +38,7 @@ public class ChaseState extends AiState {
         }
 
         // Stop if adjacent to target
-        int dist = Math.abs(pos.x - targetPos.x) + Math.abs(pos.y - targetPos.y);
-        if (dist <= 1) {
+        if (pos.manhattanDistTo(targetPos) <= 1) {
             return;
         }
 

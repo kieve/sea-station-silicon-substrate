@@ -37,8 +37,7 @@ public class AttackState extends AiState {
         }
 
         // Check if adjacent (Manhattan distance == 1)
-        int dist = Math.abs(pos.x - targetPos.x) + Math.abs(pos.y - targetPos.y);
-        if (dist != 1) {
+        if (pos.manhattanDistTo(targetPos) != 1) {
             return;
         }
 

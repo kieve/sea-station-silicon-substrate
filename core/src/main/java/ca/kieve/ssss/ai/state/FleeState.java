@@ -44,7 +44,7 @@ public class FleeState extends AiState {
 
         // Find best direction that increases distance from target
         Vec3i bestDir = null;
-        int bestDistance = calculateManhattanDistance(pos, targetPos);
+        int bestDistance = pos.manhattanDistTo(targetPos);
 
         for (Vec3i dir : DIRECTIONS) {
             Vec3i newPos = pos.add(dir);
@@ -54,7 +54,7 @@ public class FleeState extends AiState {
                 continue;
             }
 
-            int newDistance = calculateManhattanDistance(newPos, targetPos);
+            int newDistance = newPos.manhattanDistTo(targetPos);
             if (newDistance > bestDistance) {
                 bestDistance = newDistance;
                 bestDir = dir;
@@ -65,9 +65,5 @@ public class FleeState extends AiState {
         if (bestDir != null) {
             velocity.instant().set(bestDir);
         }
-    }
-
-    private int calculateManhattanDistance(Vec3i a, Vec3i b) {
-        return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
     }
 }
