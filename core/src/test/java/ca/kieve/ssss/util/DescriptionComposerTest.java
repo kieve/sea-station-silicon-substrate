@@ -212,6 +212,26 @@ class DescriptionComposerTest {
     }
 
     @Test
+    void composeIncludesDestroyedMessageWhenSocketDestroyed() {
+        Entity entity = mock(Entity.class);
+        var descriptor = new Descriptor("Robot", "A mechanical construct.");
+        var health = new Health(100, 0);
+        var socket = new Socket();
+        socket.destroyed = true;
+        when(entity.get(Descriptor.class)).thenReturn(descriptor);
+        when(entity.get(Health.class)).thenReturn(health);
+        when(entity.get(Material.class)).thenReturn(null);
+        when(entity.get(Socket.class)).thenReturn(socket);
+
+        String result = DescriptionComposer.compose(entity);
+
+        assertEquals(
+            "It's a Robot. A mechanical construct. It's dead. It's destroyed and unusable.",
+            result
+        );
+    }
+
+    @Test
     void composeHandlesBoundaryHealthPercentages() {
         Entity entity = mock(Entity.class);
         var descriptor = new Descriptor("Target", "Test target.");

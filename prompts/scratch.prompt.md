@@ -7,6 +7,5 @@
 
 --------
 
-Dead mechs still list as "Is prime to be hijacked."
 
 

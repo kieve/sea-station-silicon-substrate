@@ -43,6 +43,8 @@ public class DescriptionComposer {
         if (socket != null) {
             if (socket.socketedEntity != null) {
                 builder.append("You're controlling it.");
+            } else if (socket.destroyed) {
+                builder.append("It's destroyed and unusable.");
             } else if (health != null) {
                 if (health.hp > 0) {
                     builder.append("Could be hijacked, if defeated.");
