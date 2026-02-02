@@ -1,5 +1,3 @@
-- A size component to determine entity sizes
-- A "mouse hole" that only the tiny mouse can go in
 - An inventory system
 - Key item on the ground inside hole
 - Interactable lock to unlock a door
@@ -12,3 +10,8 @@
   some other system selects the correct HP pool to apply it to
 
 - Pathfinding could grouped by rooms rather than the whole map
+
+- Find a way to make the examine / interact / etc window system generic and reusable?
+  Maybe with callbacks?
+
+- Find a way to make the directional selection stuff generic and reusable?

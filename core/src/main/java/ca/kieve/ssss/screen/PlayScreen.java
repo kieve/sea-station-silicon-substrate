@@ -10,6 +10,7 @@ import ca.kieve.ssss.ui.layout.HorizontalLayout;
 import ca.kieve.ssss.ui.layout.StackLayout;
 import ca.kieve.ssss.ui.layout.VerticalLayout;
 import ca.kieve.ssss.ui.node.ExaminePanel;
+import ca.kieve.ssss.ui.node.InteractPanel;
 import ca.kieve.ssss.ui.node.LogPanel;
 import ca.kieve.ssss.ui.node.Text;
 import ca.kieve.ssss.ui.widget.GameWindow;
@@ -47,6 +48,10 @@ public class PlayScreen implements UiScreen {
         // ExaminePanel overlays on top of GameWindow
         var examinePanel = new ExaminePanel();
         gameStackLayout.add(examinePanel);
+
+        // InteractPanel overlays for multi-item interaction selection
+        var interactPanel = new InteractPanel();
+        gameStackLayout.add(interactPanel);
 
         var rightLayout = new StackLayout();
         topLayout.add(rightLayout, new HorizontalLayout.LayoutParams(300));

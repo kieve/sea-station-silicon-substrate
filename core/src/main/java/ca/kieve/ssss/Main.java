@@ -34,6 +34,7 @@ public class Main extends ApplicationAdapter {
         m_gameContext.gameEngine().init(m_gameContext);
         m_gameContext.examine().init(m_gameContext);
         m_gameContext.eject().init(m_gameContext);
+        m_gameContext.interact().init(m_gameContext);
         m_gameContext.pathing().init(m_gameContext);
 
         Gdx.input.setInputProcessor(m_gameContext.inputMux());

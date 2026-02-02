@@ -20,6 +20,7 @@ import static ca.kieve.ssss.input.InputAction.DOWN;
 import static ca.kieve.ssss.input.InputAction.EJECT;
 import static ca.kieve.ssss.input.InputAction.EXAMINE;
 import static ca.kieve.ssss.input.InputAction.EXIT_GAME;
+import static ca.kieve.ssss.input.InputAction.INTERACT;
 import static ca.kieve.ssss.input.InputAction.LEFT;
 import static ca.kieve.ssss.input.InputAction.RIGHT;
 import static ca.kieve.ssss.input.InputAction.UP;
@@ -31,9 +32,10 @@ public class InputContext {
     private static final Set<InputAction> GLOBAL_ACTIONS = EnumSet.of(EXIT_GAME);
 
     public enum Mode {
-        MODE_NORMAL(DIRECTIONS, List.of(EXAMINE, EJECT, WAIT)),
+        MODE_NORMAL(DIRECTIONS, List.of(EXAMINE, EJECT, INTERACT, WAIT)),
         MODE_EXAMINE(DIRECTIONS, PROMPT, List.of(EXAMINE)),
-        MODE_EJECT(DIRECTIONS, List.of(EJECT));
+        MODE_EJECT(DIRECTIONS, List.of(EJECT)),
+        MODE_INTERACT(DIRECTIONS, PROMPT, List.of(INTERACT, WAIT));
 
         private final Set<InputAction> m_activeActions;
 
@@ -75,6 +77,7 @@ public class InputContext {
         setKeyMapping(CONFIRM, Keys.ENTER);
         setKeyMapping(CANCEL, Keys.Q);
         setKeyMapping(EJECT, Keys.Q);
+        setKeyMapping(INTERACT, Keys.F);
         setKeyMapping(WAIT, Keys.SPACE);
         setKeyMapping(EXIT_GAME, Keys.ESCAPE);
     }

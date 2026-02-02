@@ -117,3 +117,39 @@ components:
     weaponId: chip_claws
   - type: Size
     size: TINY
+
+---
+parents: [base_entity]
+components:
+  - type: Identifier
+    key: note
+  - type: TileGlyph
+    glyphId: note
+  - type: Descriptor
+    name: Note
+    description: "Hey, it's a note! I guess?"
+  - type: Item
+
+---
+parents: [base_entity]
+components:
+  - type: Identifier
+    key: greenNote
+  - type: TileGlyph
+    glyphId: note
+  - type: Descriptor
+    name: Green Note
+    description: "Hi, I'm a green note."
+  - type: Item
+
+---
+parents: [base_entity]
+components:
+  - type: Identifier
+    key: blueNote
+  - type: TileGlyph
+    glyphId: note
+  - type: Descriptor
+    name: Blue Note
+    description: "Howdy, I'm a blue note."
+  - type: Item

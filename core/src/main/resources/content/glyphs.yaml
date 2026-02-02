@@ -49,3 +49,8 @@ glyphs:
     character: 'o'
     offsetX: 0.0
     offsetY: -6.0
+  note:
+    font: xirod_32
+    character: 'N'
+    offsetX: 2.0
+    offsetY: -6.0

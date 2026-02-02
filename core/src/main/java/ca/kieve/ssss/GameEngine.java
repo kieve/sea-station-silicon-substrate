@@ -16,6 +16,8 @@ import ca.kieve.ssss.system.EjectSystem;
 import ca.kieve.ssss.system.EventSystem;
 import ca.kieve.ssss.system.ExamineCrosshairRenderSystem;
 import ca.kieve.ssss.system.ExamineSystem;
+import ca.kieve.ssss.system.InteractHighlightRenderSystem;
+import ca.kieve.ssss.system.InteractMenuSystem;
 import ca.kieve.ssss.system.InteractSystem;
 import ca.kieve.ssss.system.PathingSystem;
 import ca.kieve.ssss.system.SanityCheckSystem;
@@ -57,6 +59,7 @@ public class GameEngine {
             new SocketSystem(m_gameContext),
             new ExamineSystem(m_gameContext),
             new EjectSystem(m_gameContext),
+            new InteractMenuSystem(m_gameContext),
             new WasdSystem(m_gameContext),
             new PathingSystem(m_gameContext),
             new AiControllerSystem(m_gameContext),
@@ -101,11 +104,17 @@ public class GameEngine {
             shapeRenderer
         );
 
+        var interactHighlightRenderSystem = new InteractHighlightRenderSystem(
+            m_gameContext,
+            shapeRenderer
+        );
+
         m_gameContext.renderSystems().addAll(List.of(
             tileGlyphRenderSystem,
             debugRectRenderSystem,
             examineCrosshairRenderSystem,
-            ejectHighlightRenderSystem
+            ejectHighlightRenderSystem,
+            interactHighlightRenderSystem
         ));
     }
 

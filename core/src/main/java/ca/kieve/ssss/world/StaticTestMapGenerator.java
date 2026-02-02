@@ -137,6 +137,11 @@ public class StaticTestMapGenerator implements MapGenerator {
             Color.SCARLET
         );
 
+        // Pickable note items
+        factory.createEntity(context, "note", new Vec3i(14, 14, 1), Color.WHITE);
+        factory.createEntity(context, "greenNote", new Vec3i(14, 14, 1), Color.GREEN);
+        factory.createEntity(context, "blueNote", new Vec3i(14, 14, 1), Color.BLUE);
+
         // Spawn RoboMouse away from walls with random CW/CCW and random direction
         Vec3i mouseSpawn = new Vec3i(8, 8, 1);
         boolean clockwise = context.random().nextBoolean();
