@@ -1,7 +1,11 @@
 package ca.kieve.ssss.context;
 
+import com.badlogic.gdx.graphics.Color;
+
 import ca.kieve.ssss.component.Item;
 import ca.kieve.ssss.event.Interaction;
+import ca.kieve.ssss.ui.TileHighlight;
+import ca.kieve.ssss.ui.TileHighlightProvider;
 import ca.kieve.ssss.util.Vec3i;
 import dev.dominion.ecs.api.Entity;
 
@@ -10,7 +14,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class InteractContext {
+public class InteractContext implements TileHighlightProvider {
+    private static final Color VALID_COLOR = Color.GREEN;
     public enum Phase {
         DIRECTION_SELECT,
         ITEM_SELECT
@@ -25,6 +30,26 @@ public class InteractContext {
     private Vec3i m_targetPos;
     private List<Interaction> m_interactions = List.of();
     private int m_selectedIndex = 0;
+
+    @Override
+    public boolean isHighlightActive() {
+        return m_active && m_phase == Phase.DIRECTION_SELECT;
+    }
+
+    @Override
+    public List<TileHighlight> getHighlights() {
+        var highlights = new ArrayList<TileHighlight>();
+        for (var entry : m_validDirections.entrySet()) {
+            if (!entry.getValue()) {
+                continue;
+            }
+            Vec3i direction = entry.getKey();
+            Vec3i targetPos = m_currentPos.add(direction);
+            highlights.add(new TileHighlight(
+                targetPos.x, targetPos.y, VALID_COLOR));
+        }
+        return highlights;
+    }
 
     public void init(GameContext gameContext) {
         m_renderContext = gameContext.render();

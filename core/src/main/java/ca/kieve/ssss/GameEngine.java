@@ -11,18 +11,16 @@ import ca.kieve.ssss.system.AttackSystem;
 import ca.kieve.ssss.system.CameraSystem;
 import ca.kieve.ssss.system.ClockSystem;
 import ca.kieve.ssss.system.DebugRectRenderSystem;
-import ca.kieve.ssss.system.EjectHighlightRenderSystem;
 import ca.kieve.ssss.system.EjectSystem;
 import ca.kieve.ssss.system.EventSystem;
-import ca.kieve.ssss.system.ExamineCrosshairRenderSystem;
 import ca.kieve.ssss.system.ExamineSystem;
-import ca.kieve.ssss.system.InteractHighlightRenderSystem;
 import ca.kieve.ssss.system.InteractMenuSystem;
 import ca.kieve.ssss.system.InteractSystem;
 import ca.kieve.ssss.system.PathingSystem;
 import ca.kieve.ssss.system.SanityCheckSystem;
 import ca.kieve.ssss.system.SocketSystem;
 import ca.kieve.ssss.system.TileGlyphRenderSystem;
+import ca.kieve.ssss.system.TileHighlightRenderSystem;
 import ca.kieve.ssss.system.VelocitySystem;
 import ca.kieve.ssss.system.WasdSystem;
 import ca.kieve.ssss.system.ai.AiControllerSystem;
@@ -94,27 +92,21 @@ public class GameEngine {
             shapeRenderer
         );
 
-        var examineCrosshairRenderSystem = new ExamineCrosshairRenderSystem(
-            m_gameContext,
-            shapeRenderer
+        var highlightProviders = List.of(
+            m_gameContext.examine(),
+            m_gameContext.eject(),
+            m_gameContext.interact()
         );
-
-        var ejectHighlightRenderSystem = new EjectHighlightRenderSystem(
+        var tileHighlightRenderSystem = new TileHighlightRenderSystem(
             m_gameContext,
-            shapeRenderer
-        );
-
-        var interactHighlightRenderSystem = new InteractHighlightRenderSystem(
-            m_gameContext,
-            shapeRenderer
+            shapeRenderer,
+            highlightProviders
         );
 
         m_gameContext.renderSystems().addAll(List.of(
             tileGlyphRenderSystem,
             debugRectRenderSystem,
-            examineCrosshairRenderSystem,
-            ejectHighlightRenderSystem,
-            interactHighlightRenderSystem
+            tileHighlightRenderSystem
         ));
     }
 

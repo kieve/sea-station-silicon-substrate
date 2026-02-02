@@ -1,37 +1,62 @@
 package ca.kieve.ssss.system;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
 import ca.kieve.ssss.context.GameContext;
+import ca.kieve.ssss.ui.TileHighlight;
+import ca.kieve.ssss.ui.TileHighlightProvider;
 
-public class ExamineCrosshairRenderSystem extends System {
+import java.util.List;
+
+public class TileHighlightRenderSystem extends System {
     private static final float CORNER_LENGTH = 0.25f;
 
     private final ShapeRenderer m_shapeRenderer;
+    private final List<TileHighlightProvider> m_providers;
 
-    public ExamineCrosshairRenderSystem(
+    public TileHighlightRenderSystem(
         GameContext gameContext,
-        ShapeRenderer shapeRenderer
+        ShapeRenderer shapeRenderer,
+        List<TileHighlightProvider> providers
     ) {
         super(gameContext);
         m_shapeRenderer = shapeRenderer;
+        m_providers = providers;
     }
 
     @Override
     public void run() {
-        var examineContext = m_gameContext.examine();
-        if (!examineContext.isActive()) {
+        boolean anyActive = false;
+        for (var provider : m_providers) {
+            if (provider.isHighlightActive()) {
+                anyActive = true;
+                break;
+            }
+        }
+        if (!anyActive) {
             return;
         }
 
-        var pos = examineContext.getCrosshairPos();
-        float x = pos.x;
-        float y = pos.y;
-
         m_shapeRenderer.begin(ShapeType.Line);
-        m_shapeRenderer.setColor(Color.YELLOW);
+
+        for (var provider : m_providers) {
+            if (!provider.isHighlightActive()) {
+                continue;
+            }
+            for (var highlight : provider.getHighlights()) {
+                drawCornerBrackets(highlight);
+            }
+        }
+
+        m_shapeRenderer.end();
+    }
+
+    private void drawCornerBrackets(TileHighlight highlight) {
+        float x = highlight.x();
+        float y = highlight.y();
+
+        m_shapeRenderer.setColor(highlight.color());
 
         // Top-left corner
         m_shapeRenderer.line(x, y, x + CORNER_LENGTH, y);
@@ -48,7 +73,5 @@ public class ExamineCrosshairRenderSystem extends System {
         // Bottom-right corner
         m_shapeRenderer.line(x + 1, y + 1 - CORNER_LENGTH, x + 1, y + 1);
         m_shapeRenderer.line(x + 1 - CORNER_LENGTH, y + 1, x + 1, y + 1);
-
-        m_shapeRenderer.end();
     }
 }
