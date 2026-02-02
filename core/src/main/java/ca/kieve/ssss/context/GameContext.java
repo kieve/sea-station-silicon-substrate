@@ -8,6 +8,7 @@ import ca.kieve.ssss.content.BlockTypeFactory;
 import ca.kieve.ssss.content.ContentRegistry;
 import ca.kieve.ssss.content.EntityFactory;
 import ca.kieve.ssss.system.System;
+import ca.kieve.ssss.util.PerfClock;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +34,8 @@ public record GameContext(
     BlockTypeFactory blockTypes,
     List<System> updateSystems,
     List<System> renderSystems,
-    GameEngine gameEngine
+    GameEngine gameEngine,
+    PerfClock perf
 ) {
     public GameContext(ContentRegistry content) {
         this(
@@ -56,7 +58,8 @@ public record GameContext(
             content.getBlockTypeFactory(),
             new ArrayList<>(),
             new ArrayList<>(),
-            new GameEngine()
+            new GameEngine(),
+            new PerfClock()
         );
     }
 }

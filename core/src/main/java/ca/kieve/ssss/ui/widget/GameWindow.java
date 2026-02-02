@@ -32,7 +32,14 @@ public class GameWindow extends UiWindow {
 
     @Override
     public void update(UiRenderContext renderContext, float delta) {
+        var clock = m_gameContext.clock();
         m_gameContext.updateSystems().forEach(Runnable::run);
+
+        // Process all tick stages within a single frame so AI turns
+        // don't stall at one stage per frame (~16.7ms each).
+        while (clock.getTickStage() != TickStage.AWAIT_INPUT) {
+            m_gameContext.updateSystems().forEach(Runnable::run);
+        }
     }
 
     @Override

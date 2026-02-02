@@ -46,6 +46,7 @@ public class ClockSystem extends System {
         if (!m_clock.isUserInputRegistered()) {
             return;
         }
+        m_gameContext.perf().report();
         m_clock.setTurnPhase(PLAYER);
         m_clock.setTickStage(PRE_TICK);
         m_clock.setUserInputRegistered(false);

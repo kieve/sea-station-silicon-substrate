@@ -9,6 +9,7 @@ import ca.kieve.ssss.ai.condition.ConditionContext;
 import ca.kieve.ssss.ai.state.AiState;
 import ca.kieve.ssss.context.AiControllerContext;
 import ca.kieve.ssss.context.GameContext;
+import ca.kieve.ssss.util.PerfClock;
 import dev.dominion.ecs.api.Entity;
 
 import java.util.List;
@@ -21,11 +22,13 @@ public class StateEvaluator {
     private final GameContext m_gameContext;
     private final AiControllerContext m_aiContext;
     private final BehaviorFactory m_behaviorFactory;
+    private final PerfClock m_perf;
 
     public StateEvaluator(GameContext gameContext) {
         m_gameContext = gameContext;
         m_aiContext = gameContext.aiController();
         m_behaviorFactory = new BehaviorFactory();
+        m_perf = gameContext.perf();
     }
 
     /**
@@ -60,13 +63,18 @@ public class StateEvaluator {
             AiController controller,
             List<StateDefinition> sortedStates
     ) {
-        for (StateDefinition stateDef : sortedStates) {
-            AiState state = getOrCreateState(controller, stateDef);
-            if (evaluateConditions(entity, state, stateDef)) {
-                return stateDef;
+        m_perf.start("AI-selectState");
+        try {
+            for (StateDefinition stateDef : sortedStates) {
+                AiState state = getOrCreateState(controller, stateDef);
+                if (evaluateConditions(entity, state, stateDef)) {
+                    return stateDef;
+                }
             }
+            return null;
+        } finally {
+            m_perf.end("AI-selectState");
         }
-        return null;
     }
 
     /**

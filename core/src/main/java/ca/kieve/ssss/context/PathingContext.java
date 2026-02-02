@@ -4,6 +4,7 @@ import ca.kieve.ssss.component.MaxPassableSize;
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.component.Size;
 import ca.kieve.ssss.component.Solid;
+import ca.kieve.ssss.util.PerfClock;
 import ca.kieve.ssss.util.SolidUtil;
 import ca.kieve.ssss.util.Vec3i;
 import com.github.yellowstonegames.grid.Coord;
@@ -28,6 +29,7 @@ public class PathingContext {
 
     private Dominion m_ecs;
     private PositionContext m_positionContext;
+    private PerfClock m_perf;
 
     // Per-Z-level dijkstra maps and grids (for non-size-aware queries)
     private final Map<Integer, DijkstraMap> m_dijkstraMaps = new HashMap<>();
@@ -47,6 +49,7 @@ public class PathingContext {
     public void init(GameContext gameContext) {
         m_ecs = gameContext.ecs();
         m_positionContext = gameContext.pos();
+        m_perf = gameContext.perf();
     }
 
     /**
@@ -93,6 +96,15 @@ public class PathingContext {
      * the expensive scan() is skipped and only findPath() is called.
      */
     public Coord findNextStep(Vec3i start, Vec3i goal) {
+        m_perf.start("Pathing-findNextStep");
+        try {
+            return findNextStepInternal(start, goal);
+        } finally {
+            m_perf.end("Pathing-findNextStep");
+        }
+    }
+
+    private Coord findNextStepInternal(Vec3i start, Vec3i goal) {
         if (start.z != goal.z) {
             return null;
         }
@@ -151,6 +163,18 @@ public class PathingContext {
      * Takes into account the entity's size for passability through size-restricted passages.
      */
     public Coord findNextStep(Vec3i start, Vec3i goal, Entity mover) {
+        m_perf.start("Pathing-findNextStepSized");
+        try {
+            return findNextStepSizedInternal(start, goal, mover);
+        } finally {
+            m_perf.end("Pathing-findNextStepSized");
+        }
+    }
+
+    private Coord findNextStepSizedInternal(
+            Vec3i start,
+            Vec3i goal,
+            Entity mover) {
         if (start.z != goal.z) {
             return null;
         }
@@ -168,7 +192,8 @@ public class PathingContext {
 
         // Check if goal is blocked and needs temporary unblocking
         boolean goalWasBlocked = false;
-        if (goal.x >= 0 && goal.x < MAP_WIDTH && goal.y >= 0 && goal.y < MAP_HEIGHT) {
+        if (goal.x >= 0 && goal.x < MAP_WIDTH
+                && goal.y >= 0 && goal.y < MAP_HEIGHT) {
             if (grid[goal.x][goal.y] == BLOCKED) {
                 grid[goal.x][goal.y] = PASSABLE;
                 goalWasBlocked = true;
@@ -186,7 +211,8 @@ public class PathingContext {
         }
 
         Coord startCoord = Coord.get(start.x, start.y);
-        var path = dijkstra.findPath(1, null, null, startCoord, goalCoord);
+        var path = dijkstra.findPath(
+            1, null, null, startCoord, goalCoord);
 
         // Restore grid if we modified it
         if (goalWasBlocked) {
@@ -212,6 +238,7 @@ public class PathingContext {
     }
 
     private void rebuildSizedGrid(SizedLevel key, char[][] grid) {
+        m_perf.start("Pathing-rebuildSizedGrid");
         int zLevel = key.zLevel();
         Size size = key.size();
 
@@ -234,17 +261,20 @@ public class PathingContext {
         });
 
         // Mark size-restricted passages as blocked if entity is too large
-        var restricted = m_ecs.findEntitiesWith(MaxPassableSize.class, Position.class);
+        var restricted = m_ecs.findEntitiesWith(
+            MaxPassableSize.class, Position.class);
         restricted.forEach(result -> {
             MaxPassableSize restriction = result.comp1();
             var pos = result.comp2().getPosition();
             if (pos.z == zLevel
                     && pos.x >= 0 && pos.x < MAP_WIDTH
                     && pos.y >= 0 && pos.y < MAP_HEIGHT
-                    && !SolidUtil.canSizePassThrough(size, restriction.maxSize())) {
+                    && !SolidUtil.canSizePassThrough(
+                        size, restriction.maxSize())) {
                 grid[pos.x][pos.y] = BLOCKED;
             }
         });
+        m_perf.end("Pathing-rebuildSizedGrid");
     }
 
     private void ensureMapExists(int zLevel) {
@@ -262,6 +292,7 @@ public class PathingContext {
     }
 
     private void rebuildGrid(int zLevel) {
+        m_perf.start("Pathing-rebuildGrid");
         ensureMapExists(zLevel);
 
         char[][] grid = m_grids.get(zLevel);
@@ -285,5 +316,6 @@ public class PathingContext {
         });
 
         m_dijkstraMaps.get(zLevel).initialize(grid);
+        m_perf.end("Pathing-rebuildGrid");
     }
 }

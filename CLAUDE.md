@@ -485,6 +485,10 @@ This prevents intermediate game states from being rendered while ensuring the fi
 ### Java 25
 The project uses Java 25. Use `IO.println()` instead of `System.out.println()` for console output.
 
+`IO` is an implicitly declared class in Java 25 (part of `java.io`). It does **not** require an explicit import — do not add `import java.io.IO;`. It is available automatically in all source files.
+
+Note that `System.nanoTime()` and similar calls from `java.lang.System` must be fully qualified as `java.lang.System.nanoTime()` in any file that imports `ca.kieve.ssss.system.System`, since the simple name `System` resolves to the project's class.
+
 ### Windows-Specific Paths
 This is a Windows development environment. Use backslash-escaped paths or forward slashes when working with file paths.
 
