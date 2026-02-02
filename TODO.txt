@@ -11,7 +11,4 @@
 
 - Pathfinding could grouped by rooms rather than the whole map
 
-- Find a way to make the examine / interact / etc window system generic and reusable?
-  Maybe with callbacks?
-
-- Find a way to make the directional selection stuff generic and reusable?
+- When interacting with only one valid option, enter should select only that one option

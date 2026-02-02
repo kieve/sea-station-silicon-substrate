@@ -52,6 +52,7 @@ public class FontRepo {
         parameter.size = size;
         parameter.flip = true;
         var result = generator.generateFont(parameter);
+        result.setUseIntegerPositions(false);
         generator.dispose();
         return result;
     }
