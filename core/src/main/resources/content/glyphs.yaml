@@ -44,3 +44,8 @@ glyphs:
     character: 'm'
     offsetX: 4.0
     offsetY: -9.0
+  mouse_hole:
+    font: xirod_32
+    character: 'o'
+    offsetX: 0.0
+    offsetY: -6.0

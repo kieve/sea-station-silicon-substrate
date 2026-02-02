@@ -46,6 +46,11 @@ public class ComponentFactory {
                 return createAiController(properties);
             }
 
+            // Handle enum components
+            if (componentType.isEnum()) {
+                return createEnumComponent(componentType, properties);
+            }
+
             if (properties == null || properties.isEmpty()) {
                 return createNoArgComponent(componentType);
             }
@@ -124,6 +129,28 @@ public class ComponentFactory {
         }
 
         return new AiController(behaviorDef.states());
+    }
+
+    @SuppressWarnings("unchecked")
+    private Object createEnumComponent(Class<?> enumType, Map<String, Object> properties) {
+        if (properties == null || properties.isEmpty()) {
+            throw new IllegalArgumentException(
+                "Enum component " + enumType.getSimpleName() + " requires a value property");
+        }
+
+        // Support either "value" property or single property with any name
+        String enumValue;
+        if (properties.containsKey("value")) {
+            enumValue = properties.get("value").toString();
+        } else if (properties.size() == 1) {
+            enumValue = properties.values().iterator().next().toString();
+        } else {
+            throw new IllegalArgumentException(
+                "Enum component " + enumType.getSimpleName()
+                    + " requires 'value' property or single property");
+        }
+
+        return Enum.valueOf((Class<Enum>) enumType, enumValue);
     }
 
     private Object createNoArgComponent(Class<?> componentClass) throws Exception {

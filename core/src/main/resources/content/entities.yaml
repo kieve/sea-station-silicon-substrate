@@ -28,6 +28,8 @@ components:
     weaponId: chip_claws
   - type: Health
     maxHp: 100
+  - type: Size
+    size: SMALL
 
 ---
 parents: [base_entity, physics]
@@ -113,3 +115,5 @@ components:
     behavior: robo_mouse
   - type: Equipment
     weaponId: chip_claws
+  - type: Size
+    size: TINY

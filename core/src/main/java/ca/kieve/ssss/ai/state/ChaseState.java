@@ -42,8 +42,8 @@ public class ChaseState extends AiState {
             return;
         }
 
-        // Use shared PathingContext for pathfinding
-        Coord next = context.gameContext().pathing().findNextStep(pos, targetPos);
+        // Use shared PathingContext for pathfinding (entity-aware for size restrictions)
+        Coord next = context.gameContext().pathing().findNextStep(pos, targetPos, context.entity());
         if (next == null) {
             return;
         }

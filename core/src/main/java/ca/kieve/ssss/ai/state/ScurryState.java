@@ -6,6 +6,7 @@ import ca.kieve.ssss.component.Velocity;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.util.SolidUtil;
 import ca.kieve.ssss.util.Vec3i;
+import dev.dominion.ecs.api.Entity;
 
 import static ca.kieve.ssss.util.Vec3i.EAST;
 import static ca.kieve.ssss.util.Vec3i.NORTH;
@@ -68,8 +69,9 @@ public class ScurryState extends AiState {
 
     @Override
     public void execute(StateContext context) {
-        Position posComp = context.entity().get(Position.class);
-        Velocity velocity = context.entity().get(Velocity.class);
+        Entity entity = context.entity();
+        Position posComp = entity.get(Position.class);
+        Velocity velocity = entity.get(Velocity.class);
 
         if (posComp == null || velocity == null) {
             return;
@@ -79,16 +81,20 @@ public class ScurryState extends AiState {
         GameContext gameContext = context.gameContext();
 
         if (!m_wallFollowing) {
-            executeStraightLine(gameContext, pos, velocity);
+            executeStraightLine(gameContext, pos, velocity, entity);
         } else {
-            executeWallFollowing(gameContext, pos, velocity);
+            executeWallFollowing(gameContext, pos, velocity, entity);
         }
     }
 
-    private void executeStraightLine(GameContext gameContext, Vec3i pos, Velocity velocity) {
+    private void executeStraightLine(
+            GameContext gameContext,
+            Vec3i pos,
+            Velocity velocity,
+            Entity entity) {
         Vec3i ahead = pos.add(m_direction);
 
-        if (SolidUtil.hasWall(gameContext, ahead)) {
+        if (SolidUtil.hasWallFor(gameContext, ahead, entity)) {
             // Hit wall - enter wall-following mode
             m_wallFollowing = true;
             // Turn: CW turns right, CCW turns left
@@ -98,7 +104,7 @@ public class ScurryState extends AiState {
                 m_direction = rotateCounterClockwise(m_direction);
             }
             // Don't move this tick - let next tick handle movement
-        } else if (SolidUtil.hasMovingSolid(gameContext, ahead)) {
+        } else if (SolidUtil.hasMovingSolidFor(gameContext, ahead, entity)) {
             // Hit moving entity - pick new random direction to find a wall
             m_direction = pickRandomDirection(gameContext);
             // Don't move this tick
@@ -108,7 +114,11 @@ public class ScurryState extends AiState {
         }
     }
 
-    private void executeWallFollowing(GameContext gameContext, Vec3i pos, Velocity velocity) {
+    private void executeWallFollowing(
+            GameContext gameContext,
+            Vec3i pos,
+            Velocity velocity,
+            Entity entity) {
         // Wall should be on the opposite side of our turn direction:
         // CW (turn right) -> wall on left
         // CCW (turn left) -> wall on right
@@ -119,14 +129,14 @@ public class ScurryState extends AiState {
         Vec3i ahead = pos.add(m_direction);
 
         // Check if a moving entity blocks our path - exit wall-following mode
-        if (SolidUtil.hasMovingSolid(gameContext, ahead)) {
+        if (SolidUtil.hasMovingSolidFor(gameContext, ahead, entity)) {
             m_wallFollowing = false;
             m_direction = pickRandomDirection(gameContext);
             // Don't move this tick
             return;
         }
 
-        if (!SolidUtil.hasWall(gameContext, wallPos)) {
+        if (!SolidUtil.hasWallFor(gameContext, wallPos, entity)) {
             // Convex corner - wall disappeared, turn toward where wall was
             if (m_clockwise) {
                 m_direction = rotateCounterClockwise(m_direction);
@@ -134,7 +144,7 @@ public class ScurryState extends AiState {
                 m_direction = rotateClockwise(m_direction);
             }
             velocity.instant().set(m_direction);
-        } else if (SolidUtil.hasWall(gameContext, ahead)) {
+        } else if (SolidUtil.hasWallFor(gameContext, ahead, entity)) {
             // Concave corner - wall blocks path, turn away
             if (m_clockwise) {
                 m_direction = rotateClockwise(m_direction);

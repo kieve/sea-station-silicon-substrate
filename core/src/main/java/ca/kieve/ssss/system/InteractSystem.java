@@ -14,6 +14,7 @@ import ca.kieve.ssss.event.AttackEvent;
 import ca.kieve.ssss.event.Event;
 import ca.kieve.ssss.event.ExamineEvent;
 import ca.kieve.ssss.event.SocketEvent;
+import ca.kieve.ssss.util.SolidUtil;
 import ca.kieve.ssss.util.Vec3i;
 import dev.dominion.ecs.api.Entity;
 
@@ -110,7 +111,11 @@ public class InteractSystem extends System {
         }
 
         // Check examinable - lowest priority
+        // Skip examine if the mover can pass through (based on size restrictions)
         if (target.has(Examinable.class)) {
+            if (SolidUtil.canPassThrough(controlledEntity, target)) {
+                return null;
+            }
             return new ExamineEvent(target);
         }
 

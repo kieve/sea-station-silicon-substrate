@@ -48,6 +48,21 @@ components:
   - type: Solid
 
 ---
+parents: [block]
+components:
+  - type: Identifier
+    key: block_mouse_hole
+  - type: TileGlyph
+    glyphId: mouse_hole
+  - type: Descriptor
+    name: Mouse Hole
+    description: "A small opening. Only tiny creatures can fit through."
+  - type: ColorComp
+    color: "#404040FF"
+  - type: MaxPassableSize
+    maxSize: TINY
+
+---
 components:
   - type: Identifier
     key: air

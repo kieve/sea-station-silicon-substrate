@@ -2,9 +2,9 @@ package ca.kieve.ssss.system;
 
 import ca.kieve.ssss.component.PlayerController;
 import ca.kieve.ssss.component.Position;
-import ca.kieve.ssss.component.Solid;
 import ca.kieve.ssss.component.Velocity;
 import ca.kieve.ssss.context.GameContext;
+import ca.kieve.ssss.util.SolidUtil;
 import ca.kieve.ssss.util.Vec3i;
 
 import java.util.ArrayList;
@@ -39,14 +39,13 @@ public class VelocitySystem extends System {
             newPos.addMut(instantVelocity);
             m_instantsToZero.add(instantVelocity);
 
-            var entities = m_gameContext.pos().getAt(newPos);
-            var solid = entities.stream().anyMatch(entity -> entity.has(Solid.class));
-            if (solid) {
+            var entity = withResult.entity();
+            if (SolidUtil.isBlockedFor(m_gameContext, newPos, entity)) {
                 return;
             }
 
             pos.set(newPos);
-            m_gameContext.pos().move(withResult.entity(), oldPos, pos);
+            m_gameContext.pos().move(entity, oldPos, pos);
         });
     }
 

@@ -49,8 +49,8 @@ public class FleeState extends AiState {
         for (Vec3i dir : DIRECTIONS) {
             Vec3i newPos = pos.add(dir);
 
-            // Skip if blocked
-            if (SolidUtil.hasSolid(gameContext, newPos)) {
+            // Skip if blocked (entity-aware for size restrictions)
+            if (SolidUtil.isBlockedFor(gameContext, newPos, context.entity())) {
                 continue;
             }
 
