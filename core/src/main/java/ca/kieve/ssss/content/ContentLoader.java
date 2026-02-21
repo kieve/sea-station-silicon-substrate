@@ -118,9 +118,10 @@ public class ContentLoader {
         List<String> entries = new ArrayList<>();
         for (String line : indexFile.readString().split("\n")) {
             String trimmed = line.trim();
-            if (!trimmed.isEmpty()) {
-                entries.add(trimmed);
+            if (trimmed.isEmpty() || trimmed.startsWith("#")) {
+                continue;
             }
+            entries.add(trimmed);
         }
         return entries;
     }

@@ -324,6 +324,9 @@ Entity and content definitions are loaded from YAML files using Jackson, enablin
 - `EntityFactory`: Creates entities from YAML definitions using reflection
 - `ComponentFactory`: Instantiates components via reflection based on YAML specs
 
+**Content Index Files:**
+The `file_list.txt` and `dir_list.txt` files in content directories are **auto-generated** by the `generateContentIndex` gradle task (runs during `processResources`). Do not edit them directly. They enable content discovery at runtime since libGDX's internal file system doesn't support directory listing on all platforms. To add new content, just add the YAML file to the appropriate directory and rebuild — the index files will be regenerated automatically.
+
 **YAML Content Files:**
 - `entities_base.yaml`: Base entity templates (base_entity, physics, solid, combatant, socketable)
 - `entities.yaml`: Entity definitions (player, enemies, etc.) with component lists
