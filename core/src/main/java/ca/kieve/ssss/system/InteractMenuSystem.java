@@ -17,6 +17,7 @@ import ca.kieve.ssss.context.InputContext;
 import ca.kieve.ssss.context.InteractContext;
 import ca.kieve.ssss.context.InteractContext.Phase;
 import ca.kieve.ssss.event.Interaction;
+import ca.kieve.ssss.event.Interaction.Verb;
 import ca.kieve.ssss.util.OpenableUtil;
 import ca.kieve.ssss.util.Vec3i;
 
@@ -150,12 +151,11 @@ public class InteractMenuSystem extends System {
 
     private void executeInteraction(Interaction interaction) {
         boolean success = switch (interaction.verb()) {
-        case "Pick up" -> { pickUp(interaction.entity()); yield true; }
-        case "Open" -> { openEntity(interaction.entity()); yield true; }
-        case "Close" -> closeEntity(interaction.entity());
-        case "Unlock" -> unlockEntity(interaction.entity());
-        case "Lock" -> lockEntity(interaction.entity());
-        default -> false;
+        case PICK_UP -> { pickUp(interaction.entity()); yield true; }
+        case OPEN -> { openEntity(interaction.entity()); yield true; }
+        case CLOSE -> closeEntity(interaction.entity());
+        case UNLOCK -> unlockEntity(interaction.entity());
+        case LOCK -> lockEntity(interaction.entity());
         };
 
         if (success) {

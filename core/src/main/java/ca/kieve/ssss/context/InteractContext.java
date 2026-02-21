@@ -6,6 +6,7 @@ import ca.kieve.ssss.component.Item;
 import ca.kieve.ssss.component.Lockable;
 import ca.kieve.ssss.component.Openable;
 import ca.kieve.ssss.event.Interaction;
+import ca.kieve.ssss.event.Interaction.Verb;
 import ca.kieve.ssss.ui.TileHighlight;
 import ca.kieve.ssss.ui.TileHighlightProvider;
 import ca.kieve.ssss.util.Vec3i;
@@ -135,7 +136,7 @@ public class InteractContext implements TileHighlightProvider {
         var result = new ArrayList<Interaction>();
         for (Entity entity : entities) {
             if (entity.has(Item.class)) {
-                result.add(new Interaction("Pick up", entity));
+                result.add(new Interaction(Verb.PICK_UP, entity));
             }
             if (entity.has(Openable.class)) {
                 var openable = entity.get(Openable.class);
@@ -143,18 +144,18 @@ public class InteractContext implements TileHighlightProvider {
                 boolean isLocked = lockable != null && lockable.isLocked;
                 if (!isLocked) {
                     if (openable.isOpen) {
-                        result.add(new Interaction("Close", entity));
+                        result.add(new Interaction(Verb.CLOSE, entity));
                     } else {
-                        result.add(new Interaction("Open", entity));
+                        result.add(new Interaction(Verb.OPEN, entity));
                     }
                 }
             }
             if (entity.has(Lockable.class)) {
                 var lockable = entity.get(Lockable.class);
                 if (lockable.isLocked) {
-                    result.add(new Interaction("Unlock", entity));
+                    result.add(new Interaction(Verb.UNLOCK, entity));
                 } else {
-                    result.add(new Interaction("Lock", entity));
+                    result.add(new Interaction(Verb.LOCK, entity));
                 }
             }
         }
