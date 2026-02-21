@@ -7,7 +7,6 @@ import java.util.Map;
 
 public record MapDefinition(
     Map<String, MapBlockDefinition> blocks,
-    MapSizeDefinition size,
     Map<String, String> layers,
     Vec3i playerSpawn,
     String floorGlyph

@@ -32,9 +32,16 @@ public class StaticTestMapGenerator implements MapGenerator {
         loadMapDefinition();
         buildCharacterMapping();
 
-        int width = m_mapDefinition.size().x();
-        int height = m_mapDefinition.size().y();
         int depth = m_mapDefinition.layers().size();
+        int width = 0;
+        int height = 0;
+        for (String layerData : m_mapDefinition.layers().values()) {
+            String[] lines = layerData.split("\n");
+            height = Math.max(height, lines.length);
+            for (String line : lines) {
+                width = Math.max(width, line.length());
+            }
+        }
 
         WorldModel world = new WorldModel(width, height, depth, blockTypeFactory);
 

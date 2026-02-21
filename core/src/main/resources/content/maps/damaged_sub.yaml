@@ -9,10 +9,6 @@ blocks:
     type: air
     layoutChar: '.'
 
-size:
-  x: 9
-  y: 7
-
 playerSpawn:
   x: 4
   y: 3

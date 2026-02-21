@@ -225,10 +225,6 @@ blocks:
     type: air
     layoutChar: '.'
 
-size:
-  x: 28
-  y: 17
-
 playerSpawn:
   x: 6
   y: 6
