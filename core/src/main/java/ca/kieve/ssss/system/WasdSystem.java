@@ -4,7 +4,7 @@ import ca.kieve.ssss.component.Speed;
 import ca.kieve.ssss.component.Velocity;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.context.InputContext;
-import ca.kieve.ssss.context.PlayerContext;
+import ca.kieve.ssss.util.PlayerUtil;
 
 import static ca.kieve.ssss.context.InputContext.Mode.MODE_NORMAL;
 import static ca.kieve.ssss.input.InputAction.DOWN;
@@ -15,12 +15,10 @@ import static ca.kieve.ssss.input.InputAction.WAIT;
 
 public class WasdSystem extends System {
     private final InputContext m_input;
-    private final PlayerContext m_playerContext;
 
     public WasdSystem(GameContext gameContext) {
         super(gameContext);
         m_input = gameContext.input();
-        m_playerContext = gameContext.player();
     }
 
     @Override
@@ -29,8 +27,8 @@ public class WasdSystem extends System {
             return;
         }
 
-        // Get the entity currently controlled by the player (body if socketed, player if not)
-        var controlledEntity = m_playerContext.getControlledEntity(m_gameContext.ecs());
+        var controlledEntity =
+            PlayerUtil.getControlledEntity(m_gameContext.ecs());
         if (controlledEntity == null) {
             return;
         }

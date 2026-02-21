@@ -1,28 +1,4 @@
-- An inventory system
-- Key item on the ground inside hole
-- Interactable lock to unlock a door
 - Connect two maps together
-
-
-
-
-
-----------------
-
-
-
-@core\src\main\java\ca\kieve\ssss\system\InteractMenuSystem.java
-```
-private void executeInteraction(Interaction interaction) {
-```
-I don't like how the switch statement uses String literals, should we not use an enum or some other constants for this? Why are they raw strings?
-
-
-The InteractMenuSystem is gathering a lot of different behaviors. These behaviors should live somewhere more relevant, and this system should just call into those.
-Same with Interact System
-
-
-------------------
 
 
 - Attack system is checking where the damage should go. Really these should be damage events and
@@ -31,3 +7,5 @@ Same with Interact System
 - Pathfinding could grouped by rooms rather than the whole map
 
 - When interacting with only one valid option, enter should select only that one option
+
+- An inventory system, it's currently missing any UI

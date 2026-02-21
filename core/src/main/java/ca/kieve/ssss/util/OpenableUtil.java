@@ -5,7 +5,9 @@ import dev.dominion.ecs.api.Entity;
 
 import ca.kieve.ssss.component.ColorComp;
 import ca.kieve.ssss.component.Descriptor;
+import ca.kieve.ssss.component.Item;
 import ca.kieve.ssss.component.Openable;
+import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.component.TileGlyph;
 import ca.kieve.ssss.context.GameContext;
 
@@ -25,6 +27,25 @@ public final class OpenableUtil {
         var descriptor = entity.get(Descriptor.class);
         String name = descriptor != null ? descriptor.name() : "something";
         context.log().log("The " + name + " opens.");
+    }
+
+    public static boolean tryClose(GameContext context, Entity entity) {
+        var position = entity.get(Position.class);
+        if (position != null) {
+            var entitiesAtPos = context.pos().getAt(
+                position.getPosition());
+            for (var other : entitiesAtPos) {
+                if (other == entity) {
+                    continue;
+                }
+                if (!other.has(Item.class)) {
+                    context.log().log("Something is in the way.");
+                    return false;
+                }
+            }
+        }
+        close(context, entity);
+        return true;
     }
 
     public static void close(GameContext context, Entity entity) {
