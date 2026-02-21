@@ -1,0 +1,15 @@
+# =============================================================================
+# Item Entities - Keys
+# =============================================================================
+
+---
+parents: [base_entity]
+components:
+  - type: Identifier
+    key: maintenanceSubDoorKey
+  - type: TileGlyph
+    glyphId: key
+  - type: Descriptor
+    name: Maintenance Sub Door Key
+    description: "A key to the maintenance submarine door."
+  - type: Item

@@ -4,6 +4,38 @@ tasks.withType(JavaCompile).configureEach {
     options.compilerArgs << '-parameters'
 }
 
+tasks.register('generateContentIndex') {
+    def contentDir = new File("${projectDir}/src/main/resources/content/")
+    inputs.dir(contentDir)
+
+    doLast {
+        contentDir.eachDirRecurse { subDir ->
+            def indexFile = new File(subDir, "file_list.txt")
+            indexFile.delete()
+            def yamlFiles = subDir.listFiles({ f ->
+                f.isFile() && f.name.endsWith('.yaml')
+            } as FileFilter)
+            if (yamlFiles != null) {
+                yamlFiles.collect { it.name }.sort().each {
+                    indexFile.append(it + "\n")
+                }
+            }
+
+            def dirListFile = new File(subDir, "dir_list.txt")
+            dirListFile.delete()
+            def childDirs = subDir.listFiles({ f ->
+                f.isDirectory()
+            } as FileFilter)
+            if (childDirs != null && childDirs.length > 0) {
+                childDirs.collect { it.name }.sort().each {
+                    dirListFile.append(it + "\n")
+                }
+            }
+        }
+    }
+}
+processResources.dependsOn 'generateContentIndex'
+
 apply plugin: 'jacoco'
 
 configurations {

@@ -9,6 +9,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class ContentLoader {
@@ -16,11 +18,9 @@ public class ContentLoader {
     private static final String FONTS_FILE = "fonts.yaml";
     private static final String GLYPHS_FILE = "glyphs.yaml";
     private static final String BEHAVIORS_FILE = "behaviors.yaml";
-    private static final String MATERIALS_FILE = "materials.yaml";
-    private static final String BLOCKS_FILE = "blocks.yaml";
-    private static final String WEAPONS_FILE = "weapons.yaml";
-    private static final String ENTITIES_BASE_FILE = "entities_base.yaml";
-    private static final String ENTITIES_FILE = "entities.yaml";
+    private static final String ENTITIES_PATH = "entities/";
+    private static final String FILE_LIST = "file_list.txt";
+    private static final String DIR_LIST = "dir_list.txt";
 
     private final ObjectMapper m_yamlMapper;
     private final ContentRegistry m_registry;
@@ -35,12 +35,7 @@ public class ContentLoader {
         loadFonts();
         loadGlyphs();
         loadBehaviors();
-        loadEntityFiles(
-            MATERIALS_FILE,
-            BLOCKS_FILE,
-            WEAPONS_FILE,
-            ENTITIES_BASE_FILE,
-            ENTITIES_FILE);
+        loadAllEntities();
         return m_registry;
     }
 
@@ -105,7 +100,40 @@ public class ContentLoader {
         }
     }
 
-    private void loadEntityFiles(String... filenames) {
+    private void loadAllEntities() {
+        var entityFiles = new ArrayList<String>();
+        for (String dir : readIndex(ENTITIES_PATH + DIR_LIST)) {
+            entityFiles.addAll(
+                readFileIndex(ENTITIES_PATH + dir + "/"));
+        }
+        loadEntityFiles(entityFiles);
+    }
+
+    private List<String> readIndex(String indexPath) {
+        FileHandle indexFile = Gdx.files.internal(CONTENT_PATH + indexPath);
+        if (!indexFile.exists()) {
+            return List.of();
+        }
+
+        List<String> entries = new ArrayList<>();
+        for (String line : indexFile.readString().split("\n")) {
+            String trimmed = line.trim();
+            if (!trimmed.isEmpty()) {
+                entries.add(trimmed);
+            }
+        }
+        return entries;
+    }
+
+    private List<String> readFileIndex(String directory) {
+        List<String> files = new ArrayList<>();
+        for (String filename : readIndex(directory + FILE_LIST)) {
+            files.add(directory + filename);
+        }
+        return files;
+    }
+
+    private void loadEntityFiles(List<String> filenames) {
         for (String filename : filenames) {
             FileHandle file = Gdx.files.internal(CONTENT_PATH + filename);
             if (!file.exists()) {

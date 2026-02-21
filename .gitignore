@@ -154,6 +154,8 @@ Thumbs.db
 *#*#
 /.kotlin/
 /assets/assets.txt
+/core/src/main/resources/content/**/file_list.txt
+/core/src/main/resources/content/**/dir_list.txt
 
 ## Special cases:
 

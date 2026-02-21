@@ -54,3 +54,8 @@ glyphs:
     character: 'N'
     offsetX: 2.0
     offsetY: -6.0
+  key:
+    font: xirod_32
+    character: 'k'
+    offsetX: 2.0
+    offsetY: -6.0
