@@ -3,6 +3,8 @@ package ca.kieve.ssss.system;
 import ca.kieve.ssss.component.Attackable;
 import ca.kieve.ssss.component.Examinable;
 import ca.kieve.ssss.component.Health;
+import ca.kieve.ssss.component.Lockable;
+import ca.kieve.ssss.component.Openable;
 import ca.kieve.ssss.component.Player;
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.component.Socket;
@@ -13,6 +15,7 @@ import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.event.AttackEvent;
 import ca.kieve.ssss.event.Event;
 import ca.kieve.ssss.event.ExamineEvent;
+import ca.kieve.ssss.event.OpenEvent;
 import ca.kieve.ssss.event.SocketEvent;
 import ca.kieve.ssss.util.SolidUtil;
 import ca.kieve.ssss.util.Vec3i;
@@ -110,10 +113,24 @@ public class InteractSystem extends System {
             }
         }
 
+        // Check locked - any locked entity blocks bump interaction
+        if (target.has(Lockable.class) && target.get(Lockable.class).isLocked) {
+            // Fall through to Examinable
+        }
+        // Check openable - bump to open unlocked doors
+        else if (target.has(Openable.class)) {
+            var openable = target.get(Openable.class);
+            if (!openable.isOpen) {
+                return new OpenEvent(controlledEntity, target);
+            }
+            // Open: player walks through (no interaction needed)
+        }
+
         // Check examinable - lowest priority
-        // Skip examine if the mover can pass through (based on size restrictions)
+        // Skip examine if the mover can pass through (not solid and no size restriction)
         if (target.has(Examinable.class)) {
-            if (SolidUtil.canPassThrough(controlledEntity, target)) {
+            if (!SolidUtil.isSolid(target)
+                    && SolidUtil.canPassThrough(controlledEntity, target)) {
                 return null;
             }
             return new ExamineEvent(target);

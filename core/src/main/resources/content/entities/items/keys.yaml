@@ -13,3 +13,5 @@ components:
     name: Maintenance Sub Door Key
     description: "A key to the maintenance submarine door."
   - type: Item
+  - type: LockId
+    lockId: maintenanceSub

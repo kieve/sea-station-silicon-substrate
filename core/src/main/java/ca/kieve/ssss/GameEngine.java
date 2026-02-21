@@ -16,6 +16,7 @@ import ca.kieve.ssss.system.EventSystem;
 import ca.kieve.ssss.system.ExamineSystem;
 import ca.kieve.ssss.system.InteractMenuSystem;
 import ca.kieve.ssss.system.InteractSystem;
+import ca.kieve.ssss.system.OpenSystem;
 import ca.kieve.ssss.system.PathingSystem;
 import ca.kieve.ssss.system.SanityCheckSystem;
 import ca.kieve.ssss.system.SocketSystem;
@@ -54,6 +55,7 @@ public class GameEngine {
         m_gameContext.updateSystems().addAll(List.of(
             new ClockSystem(m_gameContext),
             new InteractSystem(m_gameContext),
+            new OpenSystem(m_gameContext),
             new SocketSystem(m_gameContext),
             new ExamineSystem(m_gameContext),
             new EjectSystem(m_gameContext),

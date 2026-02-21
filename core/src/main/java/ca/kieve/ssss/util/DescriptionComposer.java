@@ -2,7 +2,9 @@ package ca.kieve.ssss.util;
 
 import ca.kieve.ssss.component.Descriptor;
 import ca.kieve.ssss.component.Health;
+import ca.kieve.ssss.component.Lockable;
 import ca.kieve.ssss.component.Material;
+import ca.kieve.ssss.component.Openable;
 import ca.kieve.ssss.component.Socket;
 import dev.dominion.ecs.api.Entity;
 
@@ -27,6 +29,19 @@ public class DescriptionComposer {
         var health = entity.get(Health.class);
         if (health != null) {
             builder.append(getHealthDescription(health)).append(" ");
+        }
+
+        // Openable / Lockable status
+        var openable = entity.get(Openable.class);
+        if (openable != null) {
+            var lockable = entity.get(Lockable.class);
+            if (lockable != null && lockable.isLocked) {
+                builder.append("It's locked. ");
+            } else if (openable.isOpen) {
+                builder.append("It's open. ");
+            } else {
+                builder.append("It's closed. ");
+            }
         }
 
         // Material

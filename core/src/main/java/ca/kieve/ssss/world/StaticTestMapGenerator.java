@@ -153,5 +153,10 @@ public class StaticTestMapGenerator implements MapGenerator {
         Vec3i mouseSpawn = new Vec3i(8, 8, 1);
         boolean clockwise = context.random().nextBoolean();
         factory.createRoboMouse(context, mouseSpawn, clockwise, null, Color.GRAY);
+
+        // Door and key for testing lockable/openable system
+        factory.createEntity(context, "maintenanceSubDoor", new Vec3i(17, 7, 1));
+        factory.createEntity(
+            context, "maintenanceSubDoorKey", new Vec3i(8, 6, 1), Color.YELLOW);
     }
 }

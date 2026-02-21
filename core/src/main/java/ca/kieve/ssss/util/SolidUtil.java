@@ -1,6 +1,7 @@
 package ca.kieve.ssss.util;
 
 import ca.kieve.ssss.component.MaxPassableSize;
+import ca.kieve.ssss.component.Openable;
 import ca.kieve.ssss.component.Size;
 import ca.kieve.ssss.component.Solid;
 import ca.kieve.ssss.component.Velocity;
@@ -14,11 +15,23 @@ public final class SolidUtil {
     private SolidUtil() {}
 
     /**
+     * Checks if an entity is effectively solid.
+     * An entity with Solid that is also Openable and currently open is not solid.
+     */
+    public static boolean isSolid(Entity entity) {
+        if (!entity.has(Solid.class)) {
+            return false;
+        }
+        var openable = entity.get(Openable.class);
+        return openable == null || !openable.isOpen;
+    }
+
+    /**
      * Checks if there is any solid entity at the given position.
      */
     public static boolean hasSolid(GameContext context, Vec3i pos) {
         for (Entity entity : context.pos().getAt(pos)) {
-            if (entity.has(Solid.class)) {
+            if (isSolid(entity)) {
                 return true;
             }
         }
@@ -32,7 +45,7 @@ public final class SolidUtil {
      */
     public static boolean hasWall(GameContext context, Vec3i pos) {
         for (Entity entity : context.pos().getAt(pos)) {
-            if (entity.has(Solid.class) && !entity.has(Velocity.class)) {
+            if (isSolid(entity) && !entity.has(Velocity.class)) {
                 return true;
             }
         }
@@ -45,7 +58,7 @@ public final class SolidUtil {
      */
     public static boolean hasMovingSolid(GameContext context, Vec3i pos) {
         for (Entity entity : context.pos().getAt(pos)) {
-            if (entity.has(Solid.class) && entity.has(Velocity.class)) {
+            if (isSolid(entity) && entity.has(Velocity.class)) {
                 return true;
             }
         }
@@ -60,7 +73,7 @@ public final class SolidUtil {
      */
     public static boolean isBlockedFor(GameContext context, Vec3i pos, Entity mover) {
         for (Entity entity : context.pos().getAt(pos)) {
-            if (entity.has(Solid.class)) {
+            if (isSolid(entity)) {
                 return true;
             }
             if (!canPassThrough(mover, entity)) {
@@ -80,7 +93,7 @@ public final class SolidUtil {
             if (entity.has(Velocity.class)) {
                 continue;
             }
-            if (entity.has(Solid.class)) {
+            if (isSolid(entity)) {
                 return true;
             }
             if (!canPassThrough(mover, entity)) {
@@ -99,7 +112,7 @@ public final class SolidUtil {
             if (!entity.has(Velocity.class)) {
                 continue;
             }
-            if (entity.has(Solid.class)) {
+            if (isSolid(entity)) {
                 return true;
             }
             if (!canPassThrough(mover, entity)) {

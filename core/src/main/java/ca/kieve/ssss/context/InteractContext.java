@@ -3,6 +3,8 @@ package ca.kieve.ssss.context;
 import com.badlogic.gdx.graphics.Color;
 
 import ca.kieve.ssss.component.Item;
+import ca.kieve.ssss.component.Lockable;
+import ca.kieve.ssss.component.Openable;
 import ca.kieve.ssss.event.Interaction;
 import ca.kieve.ssss.ui.TileHighlight;
 import ca.kieve.ssss.ui.TileHighlightProvider;
@@ -135,6 +137,26 @@ public class InteractContext implements TileHighlightProvider {
             if (entity.has(Item.class)) {
                 result.add(new Interaction("Pick up", entity));
             }
+            if (entity.has(Openable.class)) {
+                var openable = entity.get(Openable.class);
+                var lockable = entity.get(Lockable.class);
+                boolean isLocked = lockable != null && lockable.isLocked;
+                if (!isLocked) {
+                    if (openable.isOpen) {
+                        result.add(new Interaction("Close", entity));
+                    } else {
+                        result.add(new Interaction("Open", entity));
+                    }
+                }
+            }
+            if (entity.has(Lockable.class)) {
+                var lockable = entity.get(Lockable.class);
+                if (lockable.isLocked) {
+                    result.add(new Interaction("Unlock", entity));
+                } else {
+                    result.add(new Interaction("Lock", entity));
+                }
+            }
         }
         return result;
     }
@@ -163,6 +185,12 @@ public class InteractContext implements TileHighlightProvider {
         var entities = m_positionContext.getAt(pos);
         for (Entity entity : entities) {
             if (entity.has(Item.class)) {
+                return true;
+            }
+            if (entity.has(Openable.class)) {
+                return true;
+            }
+            if (entity.has(Lockable.class)) {
                 return true;
             }
         }

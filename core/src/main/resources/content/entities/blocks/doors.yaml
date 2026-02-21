@@ -1,0 +1,31 @@
+# =============================================================================
+# Block Entities - Doors
+# =============================================================================
+
+---
+parents: [base_entity]
+components:
+  - type: Identifier
+    key: door
+  - type: TileGlyph
+    glyphId: door_closed
+  - type: Descriptor
+    name: Door
+    description: "A door."
+  - type: Solid
+  - type: Opaque
+  - type: Openable
+    openGlyphId: door_open
+    closedGlyphId: door_closed
+
+---
+parents: [door]
+components:
+  - type: Identifier
+    key: maintenanceSubDoor
+  - type: Descriptor
+    name: Maintenance Sub Door
+    description: "A heavy steel door."
+  - type: Lockable
+  - type: LockId
+    lockId: maintenanceSub

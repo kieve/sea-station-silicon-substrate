@@ -59,3 +59,13 @@ glyphs:
     character: 'k'
     offsetX: 2.0
     offsetY: -6.0
+  door_closed:
+    font: xirod_32
+    character: '+'
+    offsetX: 2.0
+    offsetY: -6.0
+  door_open:
+    font: xirod_32
+    character: '-'
+    offsetX: 2.0
+    offsetY: -6.0
