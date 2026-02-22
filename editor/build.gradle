@@ -20,4 +20,5 @@ dependencies {
 
 run {
     workingDir = rootProject.file('assets').path
+    jvmArgs += '--add-opens=javafx.graphics/com.sun.glass.ui=ALL-UNNAMED'
 }

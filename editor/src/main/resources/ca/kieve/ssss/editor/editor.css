@@ -41,3 +41,61 @@
 .editor-toolbar-label {
     -fx-padding: 0 4 0 8;
 }
+
+/* --- Unified title bar --- */
+
+.editor-hidden-tab-header > .tab-header-area {
+    -fx-max-height: 0;
+    -fx-pref-height: 0;
+    -fx-min-height: 0;
+    visibility: hidden;
+}
+
+.editor-title-bar {
+    -fx-pref-height: 32;
+    -fx-min-height: 32;
+    -fx-max-height: 32;
+    -fx-background-color: -color-bg-subtle;
+    -fx-alignment: center-left;
+    -fx-padding: 0 0 0 4;
+}
+
+.title-tab {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-color: transparent transparent transparent transparent;
+    -fx-border-width: 0 0 2 0;
+    -fx-padding: 6 14;
+    -fx-text-fill: -color-fg-muted;
+    -fx-cursor: hand;
+}
+
+.title-tab:selected {
+    -fx-border-color: transparent transparent -color-accent-fg transparent;
+    -fx-text-fill: -color-fg-default;
+}
+
+.title-tab:hover {
+    -fx-background-color: -color-neutral-muted;
+}
+
+.window-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-pref-width: 46;
+    -fx-pref-height: 32;
+    -fx-min-width: 46;
+    -fx-min-height: 32;
+    -fx-padding: 0;
+    -fx-text-fill: -color-fg-default;
+    -fx-cursor: hand;
+}
+
+.window-button:hover {
+    -fx-background-color: -color-neutral-muted;
+}
+
+.window-button-close:hover {
+    -fx-background-color: #e81123;
+    -fx-text-fill: white;
+}

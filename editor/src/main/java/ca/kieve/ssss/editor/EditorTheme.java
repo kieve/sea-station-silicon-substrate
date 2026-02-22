@@ -25,6 +25,13 @@ public final class EditorTheme {
             "editor-toolbar-label-bold";
     public static final String STYLE_TOOLBAR_LABEL =
             "editor-toolbar-label";
+    public static final String STYLE_TITLE_BAR = "editor-title-bar";
+    public static final String STYLE_HIDDEN_TAB_HEADER =
+            "editor-hidden-tab-header";
+    public static final String STYLE_TITLE_TAB = "title-tab";
+    public static final String STYLE_WINDOW_BUTTON = "window-button";
+    public static final String STYLE_WINDOW_BUTTON_CLOSE =
+            "window-button-close";
 
     /** Path to the editor CSS stylesheet, relative to this class. */
     public static final String STYLESHEET =

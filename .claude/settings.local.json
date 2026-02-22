@@ -9,7 +9,10 @@
       "Bash(cat:*)",
       "Bash(echo:*)",
       "Bash(gradlew.bat core:compileJava:*)",
-      "Bash(./gradlew.bat test)"
+      "Bash(./gradlew.bat test)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:cpluspluspedia.com)"
     ],
     "deny": [],
     "ask": []
