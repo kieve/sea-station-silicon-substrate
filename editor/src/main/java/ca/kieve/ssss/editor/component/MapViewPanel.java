@@ -3,6 +3,7 @@ package ca.kieve.ssss.editor.component;
 import ca.kieve.ssss.content.ContentRegistry;
 import ca.kieve.ssss.content.MapDefinition;
 import ca.kieve.ssss.editor.BlockColorResolver;
+import ca.kieve.ssss.editor.BlockGlyphResolver;
 import ca.kieve.ssss.editor.EditorTheme;
 import ca.kieve.ssss.editor.ui.PanCanvas;
 import javafx.scene.control.Label;
@@ -26,7 +27,9 @@ public class MapViewPanel extends BorderPane {
     ) {
         m_mapDef = mapDef;
         m_renderer = new MapRenderer(
-                new BlockColorResolver(registry), mapDef);
+                new BlockColorResolver(registry),
+                new BlockGlyphResolver(registry),
+                mapDef);
         m_panCanvas = new PanCanvas();
         m_panCanvas.setOnRedraw(this::redraw);
 
