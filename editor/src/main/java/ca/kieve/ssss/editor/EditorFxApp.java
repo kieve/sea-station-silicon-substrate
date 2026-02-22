@@ -5,6 +5,7 @@ import ca.kieve.ssss.content.MapDefinition;
 import ca.kieve.ssss.editor.component.EntityDetailPanel;
 import ca.kieve.ssss.editor.component.EntityListPanel;
 import ca.kieve.ssss.editor.component.MapViewPanel;
+import atlantafx.base.theme.PrimerDark;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -34,6 +35,8 @@ public class EditorFxApp extends Application {
 
     @Override
     public void start(Stage stage) {
+        Application.setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
+
         m_stage = stage;
         m_registry = EditorApp.getRegistry();
 
