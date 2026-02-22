@@ -1,8 +1,10 @@
 package ca.kieve.ssss.editor.component;
 
 import ca.kieve.ssss.editor.EditorTheme;
+import ca.kieve.ssss.editor.ui.AppIcon;
 import ca.kieve.ssss.editor.ui.WindowsAeroSnap;
 import javafx.collections.ListChangeListener;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.control.Button;
@@ -13,6 +15,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -65,7 +68,14 @@ public class EditorTitleBar extends HBox {
         setMaxHeight(HEIGHT);
         setAlignment(Pos.CENTER_LEFT);
 
-        // Left: file menu button, then tabs
+        // Left: app icon, file menu button, then tabs
+        var appIcon = new ImageView(
+                AppIcon.create(16));
+        appIcon.setFitWidth(16);
+        appIcon.setFitHeight(16);
+        appIcon.setSmooth(true);
+        HBox.setMargin(appIcon, new Insets(0, 4, 0, 0));
+
         var loadMapItem = new MenuItem("Load Map...");
         loadMapItem.setOnAction(e -> onLoadMap.run());
         var fileMenu = new MenuButton("File", null, loadMapItem);
@@ -101,7 +111,7 @@ public class EditorTitleBar extends HBox {
         windowButtons.setSpacing(0);
 
         getChildren().addAll(
-                fileMenu, m_tabBox, spacer, windowButtons);
+                appIcon, fileMenu, m_tabBox, spacer, windowButtons);
 
         // Sync initial tabs
         for (Tab tab : m_tabPane.getTabs()) {

@@ -6,6 +6,7 @@ import ca.kieve.ssss.editor.component.EditorTitleBar;
 import ca.kieve.ssss.editor.component.EntityDetailPanel;
 import ca.kieve.ssss.editor.component.EntityListPanel;
 import ca.kieve.ssss.editor.component.MapViewPanel;
+import ca.kieve.ssss.editor.ui.AppIcon;
 import ca.kieve.ssss.editor.ui.WindowResizeHandler;
 import ca.kieve.ssss.editor.ui.WindowsAeroSnap;
 import atlantafx.base.theme.PrimerDark;
@@ -65,6 +66,13 @@ public class EditorFxApp extends Application {
         stage.initStyle(StageStyle.UNDECORATED);
         stage.setMinWidth(400);
         stage.setMinHeight(300);
+
+        // App icon: white @ on transparent background
+        stage.getIcons().addAll(
+                AppIcon.create(128),
+                AppIcon.create(64),
+                AppIcon.create(32),
+                AppIcon.create(16));
 
         var titleBar = new EditorTitleBar(
                 stage, m_tabPane, this::onLoadMap);
