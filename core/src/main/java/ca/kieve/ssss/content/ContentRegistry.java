@@ -4,6 +4,7 @@ import ca.kieve.ssss.ai.behavior.BehaviorDefinition;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class ContentRegistry {
     private final Map<String, EntityDefinition> m_entityDefinitions = new HashMap<>();
@@ -73,6 +74,10 @@ public class ContentRegistry {
 
     public ComponentFactory getComponentFactory() {
         return m_componentFactory;
+    }
+
+    public Set<String> getEntityIds() {
+        return Set.copyOf(m_entityDefinitions.keySet());
     }
 
     public boolean hasEntity(String id) {
