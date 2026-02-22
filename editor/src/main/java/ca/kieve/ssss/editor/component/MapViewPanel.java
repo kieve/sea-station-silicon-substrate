@@ -3,6 +3,7 @@ package ca.kieve.ssss.editor.component;
 import ca.kieve.ssss.content.ContentRegistry;
 import ca.kieve.ssss.content.MapDefinition;
 import ca.kieve.ssss.editor.BlockColorResolver;
+import ca.kieve.ssss.editor.EditorTheme;
 import ca.kieve.ssss.editor.ui.PanCanvas;
 import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
@@ -30,11 +31,11 @@ public class MapViewPanel extends BorderPane {
         m_panCanvas.setOnRedraw(this::redraw);
 
         var fileLabel = new Label(mapFile.getName());
-        fileLabel.setStyle(
-                "-fx-font-weight: bold; -fx-padding: 0 8 0 4;");
+        fileLabel.getStyleClass().add(
+                EditorTheme.STYLE_TOOLBAR_LABEL_BOLD);
 
         var zLabel = new Label("Z-Level:");
-        zLabel.setStyle("-fx-padding: 0 4 0 8;");
+        zLabel.getStyleClass().add(EditorTheme.STYLE_TOOLBAR_LABEL);
 
         var zLevels = mapDef.layers().keySet().stream()
                 .map(Integer::parseInt)
@@ -53,12 +54,12 @@ public class MapViewPanel extends BorderPane {
                 (obs, oldVal, newVal) -> loadLayer(newVal));
 
         m_dimensionsLabel = new Label();
-        m_dimensionsLabel.setStyle("-fx-padding: 0 4 0 8;");
+        m_dimensionsLabel.getStyleClass().add(
+                EditorTheme.STYLE_TOOLBAR_LABEL);
 
         var toolbar = new HBox(
                 8, fileLabel, zLabel, zSpinner, m_dimensionsLabel);
-        toolbar.setStyle(
-                "-fx-padding: 8; -fx-alignment: center-left;");
+        toolbar.getStyleClass().add(EditorTheme.STYLE_TOOLBAR);
 
         setTop(toolbar);
         setCenter(m_panCanvas);

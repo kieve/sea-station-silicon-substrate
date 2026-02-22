@@ -3,6 +3,7 @@ package ca.kieve.ssss.editor.component;
 import ca.kieve.ssss.content.MapBlockDefinition;
 import ca.kieve.ssss.content.MapDefinition;
 import ca.kieve.ssss.editor.BlockColorResolver;
+import ca.kieve.ssss.editor.EditorTheme;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
@@ -15,8 +16,6 @@ import java.util.Map;
  */
 public class MapRenderer {
     private static final int CELL_SIZE = 24;
-    private static final Color GRID_COLOR = Color.gray(0.85);
-    private static final Color BACKGROUND_COLOR = Color.gray(0.2);
 
     private final BlockColorResolver m_colorResolver;
     private final Map<Character, String> m_charToType = new HashMap<>();
@@ -85,7 +84,7 @@ public class MapRenderer {
             return;
         }
 
-        gc.setFill(BACKGROUND_COLOR);
+        gc.setFill(EditorTheme.CANVAS_BACKGROUND);
         gc.fillRect(0, 0, viewWidth, viewHeight);
 
         for (int row = 0; row < m_mapRows; row++) {
@@ -115,7 +114,7 @@ public class MapRenderer {
                 gc.setFill(color);
                 gc.fillRect(x, y, CELL_SIZE, CELL_SIZE);
 
-                gc.setStroke(GRID_COLOR);
+                gc.setStroke(EditorTheme.GRID_COLOR);
                 gc.setLineWidth(0.5);
                 gc.strokeRect(x, y, CELL_SIZE, CELL_SIZE);
             }

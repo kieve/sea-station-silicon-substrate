@@ -1,0 +1,43 @@
+/*
+ * Editor-specific styles, layered on top of the AtlantaFX dark theme.
+ */
+
+.editor-title {
+    -fx-font-weight: bold;
+    -fx-font-size: 18;
+}
+
+.editor-subtitle {
+    -fx-font-style: italic;
+}
+
+.editor-component-box {
+    -fx-padding: 8;
+    -fx-border-color: gray;
+    -fx-border-style: solid;
+    -fx-border-radius: 4;
+    -fx-border-width: 1;
+}
+
+.editor-component-type {
+    -fx-font-weight: bold;
+    -fx-font-size: 13;
+}
+
+.editor-component-marker {
+    -fx-text-fill: gray;
+}
+
+.editor-toolbar {
+    -fx-padding: 8;
+    -fx-alignment: center-left;
+}
+
+.editor-toolbar-label-bold {
+    -fx-font-weight: bold;
+    -fx-padding: 0 8 0 4;
+}
+
+.editor-toolbar-label {
+    -fx-padding: 0 4 0 8;
+}

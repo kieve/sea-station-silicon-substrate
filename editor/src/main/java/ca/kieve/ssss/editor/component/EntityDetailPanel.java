@@ -3,12 +3,11 @@ package ca.kieve.ssss.editor.component;
 import ca.kieve.ssss.content.ComponentDefinition;
 import ca.kieve.ssss.content.ContentRegistry;
 import ca.kieve.ssss.content.EntityDefinition;
+import ca.kieve.ssss.editor.EditorTheme;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 
 import java.util.List;
 
@@ -33,7 +32,7 @@ public class EntityDetailPanel extends ScrollPane {
         }
 
         var titleLabel = new Label(entityId);
-        titleLabel.setFont(Font.font("System", FontWeight.BOLD, 18));
+        titleLabel.getStyleClass().add(EditorTheme.STYLE_TITLE);
         m_content.getChildren().add(titleLabel);
 
         EntityDefinition def = m_registry.getEntityDefinition(entityId);
@@ -41,7 +40,8 @@ public class EntityDetailPanel extends ScrollPane {
         if (!def.parents().isEmpty()) {
             var parentsLabel = new Label(
                 "Parents: " + String.join(", ", def.parents()));
-            parentsLabel.setStyle("-fx-font-style: italic;");
+            parentsLabel.getStyleClass().add(
+                    EditorTheme.STYLE_SUBTITLE);
             m_content.getChildren().add(parentsLabel);
         }
 

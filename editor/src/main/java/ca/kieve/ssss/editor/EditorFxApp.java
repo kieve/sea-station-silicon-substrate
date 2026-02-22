@@ -63,6 +63,7 @@ public class EditorFxApp extends Application {
         root.setCenter(m_tabPane);
 
         var scene = new Scene(root, 900, 600);
+        scene.getStylesheets().add(EditorTheme.STYLESHEET);
 
         // Use TAB to cycle tabs instead of arrow keys
         scene.addEventFilter(KeyEvent.KEY_PRESSED, e -> {

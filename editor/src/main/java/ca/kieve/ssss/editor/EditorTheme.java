@@ -1,0 +1,35 @@
+package ca.kieve.ssss.editor;
+
+import javafx.scene.paint.Color;
+
+/**
+ * Central source of truth for editor styling constants. Canvas/renderer
+ * colors live here as static Color fields; JavaFX scene-graph styles are
+ * driven by CSS class names whose constants are also defined here.
+ */
+public final class EditorTheme {
+    // Canvas colors (used by GraphicsContext drawing, not CSS-styleable)
+    public static final Color CANVAS_BACKGROUND = Color.gray(0.2);
+    public static final Color GRID_COLOR = Color.gray(0.85);
+
+    // CSS style class names
+    public static final String STYLE_TITLE = "editor-title";
+    public static final String STYLE_SUBTITLE = "editor-subtitle";
+    public static final String STYLE_COMPONENT_BOX = "editor-component-box";
+    public static final String STYLE_COMPONENT_TYPE =
+            "editor-component-type";
+    public static final String STYLE_COMPONENT_MARKER =
+            "editor-component-marker";
+    public static final String STYLE_TOOLBAR = "editor-toolbar";
+    public static final String STYLE_TOOLBAR_LABEL_BOLD =
+            "editor-toolbar-label-bold";
+    public static final String STYLE_TOOLBAR_LABEL =
+            "editor-toolbar-label";
+
+    /** Path to the editor CSS stylesheet, relative to this class. */
+    public static final String STYLESHEET =
+            EditorTheme.class.getResource("editor.css")
+                    .toExternalForm();
+
+    private EditorTheme() {}
+}

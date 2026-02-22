@@ -10,6 +10,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.Pane;
+import ca.kieve.ssss.editor.EditorTheme;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
@@ -19,7 +20,6 @@ import javafx.scene.shape.Rectangle;
  */
 public class PanCanvas extends Pane {
     private static final double PAN_SPEED = 360.0;
-    private static final Color BACKGROUND_COLOR = Color.gray(0.2);
 
     private static final Set<KeyCode> PAN_KEYS = EnumSet.of(
             KeyCode.LEFT, KeyCode.RIGHT, KeyCode.UP, KeyCode.DOWN,
@@ -47,8 +47,8 @@ public class PanCanvas extends Pane {
 
     public PanCanvas() {
         getChildren().add(m_canvas);
-        setStyle(
-                "-fx-background-color: #" + toHex(BACKGROUND_COLOR) + ";");
+        setStyle("-fx-background-color: #"
+                + toHex(EditorTheme.CANVAS_BACKGROUND) + ";");
 
         var clip = new Rectangle();
         clip.widthProperty().bind(widthProperty());
