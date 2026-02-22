@@ -1,10 +1,9 @@
 package ca.kieve.ssss.editor;
 
-import ca.kieve.ssss.content.ComponentDefinition;
+import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.content.MapBlockDefinition;
 import ca.kieve.ssss.content.MapDefinition;
 import ca.kieve.ssss.content.MapEntityDefinition;
-import ca.kieve.ssss.component.Position;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,8 +37,6 @@ public class EditorModel {
 
     public record EntityPosition(int x, int y, int z) {}
 
-    private static final int DEFAULT_SIZE = 10;
-
     private final List<Listener> m_listeners = new ArrayList<>();
 
     private Map<String, MapBlockDefinition> m_blocks =
@@ -65,31 +62,9 @@ public class EditorModel {
         m_blocks.put("air", new MapBlockDefinition("air", '.'));
 
         m_layers.clear();
-
-        var layer0 = new HashMap<CellKey, Character>();
-        var layer1 = new HashMap<CellKey, Character>();
-        for (int row = 0; row < DEFAULT_SIZE; row++) {
-            for (int col = 0; col < DEFAULT_SIZE; col++) {
-                boolean border = row == 0
-                        || row == DEFAULT_SIZE - 1
-                        || col == 0
-                        || col == DEFAULT_SIZE - 1;
-                layer0.put(new CellKey(col, row),
-                        border ? '#' : '+');
-                layer1.put(new CellKey(col, row),
-                        border ? '#' : '.');
-            }
-        }
-        m_layers.put(0, layer0);
-        m_layers.put(1, layer1);
+        m_layers.put(0, new HashMap<>());
 
         m_entities.clear();
-        var playerPos = new ComponentDefinition(Position.class);
-        playerPos.setProperty("x", 1);
-        playerPos.setProperty("y", DEFAULT_SIZE - 2);
-        playerPos.setProperty("z", 1);
-        m_entities.add(new MapEntityDefinition(
-                "player", List.of(playerPos)));
 
         m_floorGlyph = "interpunct";
         m_activeLayer = 0;
