@@ -14,6 +14,8 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -58,6 +60,25 @@ public class EditorFxApp extends Application {
         root.setCenter(m_tabPane);
 
         var scene = new Scene(root, 900, 600);
+
+        // Use TAB to cycle tabs instead of arrow keys
+        scene.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
+            if (e.getCode() != KeyCode.TAB) {
+                return;
+            }
+            int count = m_tabPane.getTabs().size();
+            if (count < 2) {
+                return;
+            }
+            int cur = m_tabPane.getSelectionModel()
+                    .getSelectedIndex();
+            int next = e.isShiftDown()
+                    ? (cur - 1 + count) % count
+                    : (cur + 1) % count;
+            m_tabPane.getSelectionModel().select(next);
+            e.consume();
+        });
+
         stage.setTitle("SSSS Editor");
         stage.setScene(scene);
         // Windows blocks focus-stealing, so briefly set always-on-top
