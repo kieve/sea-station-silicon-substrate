@@ -12,6 +12,7 @@ public final class EditorTheme {
     public static final Color CANVAS_BACKGROUND = Color.gray(0.2);
     public static final Color CELL_BACKGROUND = Color.gray(0.1);
     public static final Color GRID_COLOR = Color.gray(0.85);
+    public static final Color INFINITE_GRID_COLOR = Color.gray(0.28);
 
     // CSS style class names
     public static final String STYLE_TITLE = "editor-title";

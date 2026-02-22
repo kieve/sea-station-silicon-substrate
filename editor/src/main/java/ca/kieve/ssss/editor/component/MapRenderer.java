@@ -96,6 +96,8 @@ public class MapRenderer {
         gc.setFill(EditorTheme.CANVAS_BACKGROUND);
         gc.fillRect(0, 0, viewWidth, viewHeight);
 
+        drawInfiniteGrid(gc, viewWidth, viewHeight, cameraX, cameraY);
+
         for (int row = 0; row < m_mapRows; row++) {
             String line = m_currentRows[row];
             for (int col = 0; col < line.length(); col++) {
@@ -139,6 +141,25 @@ public class MapRenderer {
                 gc.setLineWidth(0.5);
                 gc.strokeRect(x, y, CELL_SIZE, CELL_SIZE);
             }
+        }
+    }
+
+    private void drawInfiniteGrid(GraphicsContext gc,
+                                  double viewWidth,
+                                  double viewHeight,
+                                  double cameraX,
+                                  double cameraY) {
+        gc.setStroke(EditorTheme.INFINITE_GRID_COLOR);
+        gc.setLineWidth(0.5);
+
+        double offsetX = -((cameraX % CELL_SIZE) + CELL_SIZE) % CELL_SIZE;
+        double offsetY = -((cameraY % CELL_SIZE) + CELL_SIZE) % CELL_SIZE;
+
+        for (double x = offsetX; x <= viewWidth; x += CELL_SIZE) {
+            gc.strokeLine(x, 0, x, viewHeight);
+        }
+        for (double y = offsetY; y <= viewHeight; y += CELL_SIZE) {
+            gc.strokeLine(0, y, viewWidth, y);
         }
     }
 }
