@@ -1,9 +1,11 @@
 package ca.kieve.ssss.content;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,10 +24,13 @@ public class ComponentDefinition {
         m_properties = new HashMap<>();
     }
 
+    @JsonProperty("type")
+    @JsonSerialize(using = ComponentTypeSerializer.class)
     public Class<?> type() {
         return m_type;
     }
 
+    @JsonAnyGetter
     public Map<String, Object> properties() {
         return m_properties;
     }

@@ -1,9 +1,10 @@
 package ca.kieve.ssss.editor;
 
+import ca.kieve.ssss.content.ComponentDefinition;
 import ca.kieve.ssss.content.MapBlockDefinition;
 import ca.kieve.ssss.content.MapDefinition;
 import ca.kieve.ssss.content.MapEntityDefinition;
-import ca.kieve.ssss.util.Vec3i;
+import ca.kieve.ssss.component.Position;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,7 +18,11 @@ public class EditorModel {
         void onLayerChanged();
         void onBlockSelectionChanged();
         void onDirtyChanged();
+        void onEntitiesChanged();
+        void onToolChanged();
     }
+
+    public enum Tool { PAINT, SELECT, ERASE }
 
     public record CellKey(int col, int row) {}
 
@@ -31,6 +36,8 @@ public class EditorModel {
         }
     }
 
+    public record EntityPosition(int x, int y, int z) {}
+
     private static final int DEFAULT_SIZE = 10;
 
     private final List<Listener> m_listeners = new ArrayList<>();
@@ -39,13 +46,12 @@ public class EditorModel {
             new LinkedHashMap<>();
     private Map<Integer, HashMap<CellKey, Character>> m_layers =
             new HashMap<>();
-    private int m_spawnCol;
-    private int m_spawnRow;
-    private int m_spawnZ = 1;
+    private List<MapEntityDefinition> m_entities = new ArrayList<>();
     private String m_floorGlyph = "interpunct";
 
     private int m_activeLayer = 0;
     private String m_activeBlockName = "";
+    private Tool m_activeTool = Tool.PAINT;
     private boolean m_dirty = false;
 
     public void addListener(Listener listener) {
@@ -77,18 +83,25 @@ public class EditorModel {
         m_layers.put(0, layer0);
         m_layers.put(1, layer1);
 
-        m_spawnCol = 1;
-        m_spawnRow = DEFAULT_SIZE - 2;
-        m_spawnZ = 1;
+        m_entities.clear();
+        var playerPos = new ComponentDefinition(Position.class);
+        playerPos.setProperty("x", 1);
+        playerPos.setProperty("y", DEFAULT_SIZE - 2);
+        playerPos.setProperty("z", 1);
+        m_entities.add(new MapEntityDefinition(
+                "player", List.of(playerPos)));
+
         m_floorGlyph = "interpunct";
         m_activeLayer = 0;
         m_activeBlockName = "wall";
+        m_activeTool = Tool.PAINT;
         m_dirty = false;
 
         fireModelChanged();
         fireLayerChanged();
         fireBlockSelectionChanged();
         fireDirtyChanged();
+        fireEntitiesChanged();
     }
 
     public void fromMapDefinition(MapDefinition def) {
@@ -98,14 +111,12 @@ public class EditorModel {
                 : "interpunct";
 
         m_layers.clear();
-        int maxHeight = 0;
 
         for (var entry : def.layers().entrySet()) {
             int z = Integer.parseInt(entry.getKey());
             String layerStr = entry.getValue();
             String[] rows = layerStr.split("\n");
 
-            maxHeight = Math.max(maxHeight, rows.length);
             var cellMap = new HashMap<CellKey, Character>();
             for (int row = 0; row < rows.length; row++) {
                 for (int col = 0; col < rows[row].length(); col++) {
@@ -122,10 +133,7 @@ public class EditorModel {
             m_layers.put(0, new HashMap<>());
         }
 
-        // TODO: Extract player spawn from entities list
-        m_spawnCol = 1;
-        m_spawnRow = 1;
-        m_spawnZ = 1;
+        m_entities = new ArrayList<>(def.entities());
 
         m_activeLayer = m_layers.keySet().stream()
                 .mapToInt(Integer::intValue)
@@ -141,6 +149,7 @@ public class EditorModel {
         fireLayerChanged();
         fireBlockSelectionChanged();
         fireDirtyChanged();
+        fireEntitiesChanged();
     }
 
     public MapDefinition toMapDefinition() {
@@ -150,8 +159,7 @@ public class EditorModel {
                     new LinkedHashMap<>(m_blocks),
                     new LinkedHashMap<>(),
                     m_floorGlyph,
-                    List.of(new MapEntityDefinition(
-                        "player", List.of())));
+                    new ArrayList<>(m_entities));
         }
 
         Map<String, String> layers = new LinkedHashMap<>();
@@ -187,13 +195,11 @@ public class EditorModel {
             layers.put(String.valueOf(z), sb.toString());
         }
 
-        // TODO: Serialize player spawn as entity with Position component
         return new MapDefinition(
                 new LinkedHashMap<>(m_blocks),
                 layers,
                 m_floorGlyph,
-                List.of(new MapEntityDefinition(
-                    "player", List.of())));
+                new ArrayList<>(m_entities));
     }
 
     public Bounds getGlobalBounds() {
@@ -245,14 +251,6 @@ public class EditorModel {
         }
     }
 
-    public void setPlayerSpawn(int col, int row) {
-        m_spawnCol = col;
-        m_spawnRow = row;
-        m_spawnZ = m_activeLayer;
-        markDirty();
-        fireModelChanged();
-    }
-
     public void addBlock(String name, MapBlockDefinition block) {
         m_blocks.put(name, block);
         markDirty();
@@ -297,6 +295,94 @@ public class EditorModel {
         fireModelChanged();
         fireLayerChanged();
     }
+
+    // --- Entity management ---
+
+    public List<MapEntityDefinition> getEntities() {
+        return m_entities;
+    }
+
+    public void setEntities(List<MapEntityDefinition> entities) {
+        m_entities = new ArrayList<>(entities);
+        markDirty();
+        fireEntitiesChanged();
+    }
+
+    public void addEntity(MapEntityDefinition entity) {
+        m_entities.add(entity);
+        markDirty();
+        fireEntitiesChanged();
+    }
+
+    public void removeEntity(int index) {
+        if (index < 0 || index >= m_entities.size()) {
+            return;
+        }
+        m_entities.remove(index);
+        markDirty();
+        fireEntitiesChanged();
+    }
+
+    public void updateEntity(int index, MapEntityDefinition entity) {
+        if (index < 0 || index >= m_entities.size()) {
+            return;
+        }
+        m_entities.set(index, entity);
+        markDirty();
+        fireEntitiesChanged();
+    }
+
+    public EntityPosition getEntityPosition(
+            MapEntityDefinition entity) {
+        for (var comp : entity.components()) {
+            if (comp.type() == Position.class) {
+                var props = comp.properties();
+                Object xObj = props.get("x");
+                Object yObj = props.get("y");
+                Object zObj = props.get("z");
+                if (xObj == null || yObj == null || zObj == null) {
+                    return null;
+                }
+                return new EntityPosition(
+                        toInt(xObj), toInt(yObj), toInt(zObj));
+            }
+        }
+        return null;
+    }
+
+    public List<Integer> getEntitiesAt(int col, int row, int z) {
+        var result = new ArrayList<Integer>();
+        for (int i = 0; i < m_entities.size(); i++) {
+            var pos = getEntityPosition(m_entities.get(i));
+            if (pos != null
+                    && pos.x() == col
+                    && pos.y() == row
+                    && pos.z() == z) {
+                result.add(i);
+            }
+        }
+        return result;
+    }
+
+    private int toInt(Object obj) {
+        if (obj instanceof Number n) {
+            return n.intValue();
+        }
+        return Integer.parseInt(obj.toString());
+    }
+
+    // --- Tool ---
+
+    public Tool getActiveTool() {
+        return m_activeTool;
+    }
+
+    public void setActiveTool(Tool tool) {
+        m_activeTool = tool;
+        fireToolChanged();
+    }
+
+    // --- Existing getters/setters ---
 
     private void markDirty() {
         if (!m_dirty) {
@@ -349,18 +435,6 @@ public class EditorModel {
         return m_blocks.get(m_activeBlockName);
     }
 
-    public int getSpawnCol() {
-        return m_spawnCol;
-    }
-
-    public int getSpawnRow() {
-        return m_spawnRow;
-    }
-
-    public int getSpawnZ() {
-        return m_spawnZ;
-    }
-
     public String getFloorGlyph() {
         return m_floorGlyph;
     }
@@ -404,6 +478,18 @@ public class EditorModel {
     private void fireDirtyChanged() {
         for (var l : m_listeners) {
             l.onDirtyChanged();
+        }
+    }
+
+    private void fireEntitiesChanged() {
+        for (var l : m_listeners) {
+            l.onEntitiesChanged();
+        }
+    }
+
+    private void fireToolChanged() {
+        for (var l : m_listeners) {
+            l.onToolChanged();
         }
     }
 }

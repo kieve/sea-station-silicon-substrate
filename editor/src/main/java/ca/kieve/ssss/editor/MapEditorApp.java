@@ -1,5 +1,6 @@
 package ca.kieve.ssss.editor;
 
+import ca.kieve.ssss.content.MapEntityDefinition;
 import ca.kieve.ssss.editor.EditorModel.CellKey;
 
 import javax.swing.BoxLayout;
@@ -30,7 +31,8 @@ public class MapEditorApp {
     private final MapGridPanel m_gridPanel;
     private final BlockPalettePanel m_palettePanel;
     private final LayerControlPanel m_layerPanel;
-    private final SpawnTool m_spawnTool;
+    private final EditorToolBar m_toolBar;
+    private final EntityListPanel m_entityPanel;
 
     private final List<UndoCommand> m_undoStack = new ArrayList<>();
     private final List<UndoCommand> m_redoStack = new ArrayList<>();
@@ -42,10 +44,12 @@ public class MapEditorApp {
         m_gridPanel = new MapGridPanel(m_model);
         m_palettePanel = new BlockPalettePanel(m_model);
         m_layerPanel = new LayerControlPanel(m_model);
-        m_spawnTool = new SpawnTool(m_model, m_gridPanel);
+        m_toolBar = new EditorToolBar(m_model);
+        m_entityPanel = new EntityListPanel(m_model);
 
         m_frame = new JFrame("Map Editor");
-        m_frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        m_frame.setDefaultCloseOperation(
+                JFrame.DO_NOTHING_ON_CLOSE);
         m_frame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -59,21 +63,24 @@ public class MapEditorApp {
 
         m_model.addListener(new EditorModel.Listener() {
             @Override
-            public void onModelChanged() {
-            }
+            public void onModelChanged() {}
 
             @Override
-            public void onLayerChanged() {
-            }
+            public void onLayerChanged() {}
 
             @Override
-            public void onBlockSelectionChanged() {
-            }
+            public void onBlockSelectionChanged() {}
 
             @Override
             public void onDirtyChanged() {
                 updateTitle();
             }
+
+            @Override
+            public void onEntitiesChanged() {}
+
+            @Override
+            public void onToolChanged() {}
         });
 
         m_model.newMap();
@@ -148,22 +155,36 @@ public class MapEditorApp {
     }
 
     private void setupLayout() {
+        var rightSplit = new JSplitPane(
+                JSplitPane.VERTICAL_SPLIT,
+                m_palettePanel, m_entityPanel);
+        rightSplit.setResizeWeight(0.5);
+
         var rightPanel = new JPanel();
         rightPanel.setLayout(
                 new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
-        rightPanel.add(m_palettePanel);
-        rightPanel.add(m_spawnTool);
+        rightPanel.add(m_toolBar);
+        rightPanel.add(rightSplit);
 
         var topPanel = new JPanel(new BorderLayout());
         topPanel.add(m_layerPanel, BorderLayout.NORTH);
         topPanel.add(m_gridPanel, BorderLayout.CENTER);
 
         var splitPane = new JSplitPane(
-                JSplitPane.HORIZONTAL_SPLIT, topPanel, rightPanel);
+                JSplitPane.HORIZONTAL_SPLIT,
+                topPanel, rightPanel);
         splitPane.setResizeWeight(1.0);
 
         m_frame.getContentPane().add(
                 splitPane, BorderLayout.CENTER);
+
+        // Wire tile selection to entity list
+        m_gridPanel.addTileSelectionListener(m_entityPanel);
+
+        // Wire entity undo callback
+        m_entityPanel.setUndoCallback(before ->
+                pushEntityUndo(before,
+                        List.copyOf(m_model.getEntities())));
     }
 
     private void setupUndoTracking() {
@@ -183,7 +204,7 @@ public class MapEditorApp {
                         && m_snapshotBefore != null) {
                     var after = snapshotCellMap();
                     if (!m_snapshotBefore.equals(after)) {
-                        m_undoStack.add(new UndoCommand(
+                        m_undoStack.add(new CellUndoCommand(
                                 m_model.getActiveLayer(),
                                 m_snapshotBefore, after));
                         m_redoStack.clear();
@@ -200,6 +221,13 @@ public class MapEditorApp {
             return new HashMap<>();
         }
         return new HashMap<>(cellMap);
+    }
+
+    private void pushEntityUndo(
+            List<MapEntityDefinition> before,
+            List<MapEntityDefinition> after) {
+        m_undoStack.add(new EntityUndoCommand(before, after));
+        m_redoStack.clear();
     }
 
     private void undo() {
@@ -245,7 +273,7 @@ public class MapEditorApp {
         m_model.fromMapDefinition(def);
         m_palettePanel.refreshList();
         m_layerPanel.refreshCombo();
-        m_spawnTool.refreshFields();
+        m_entityPanel.refreshList();
         m_undoStack.clear();
         m_redoStack.clear();
         updateTitle();
@@ -306,22 +334,46 @@ public class MapEditorApp {
         SwingUtilities.invokeLater(MapEditorApp::new);
     }
 
-    private record UndoCommand(
+    private sealed interface UndoCommand
+            permits CellUndoCommand, EntityUndoCommand {
+        void undo(EditorModel model);
+        void redo(EditorModel model);
+    }
+
+    private record CellUndoCommand(
             int layer,
             HashMap<CellKey, Character> before,
-            HashMap<CellKey, Character> after) {
-        void undo(EditorModel model) {
+            HashMap<CellKey, Character> after)
+            implements UndoCommand {
+        @Override
+        public void undo(EditorModel model) {
             model.setActiveLayer(layer);
             var cellMap = model.getActiveCellMap();
             cellMap.clear();
             cellMap.putAll(before);
         }
 
-        void redo(EditorModel model) {
+        @Override
+        public void redo(EditorModel model) {
             model.setActiveLayer(layer);
             var cellMap = model.getActiveCellMap();
             cellMap.clear();
             cellMap.putAll(after);
+        }
+    }
+
+    private record EntityUndoCommand(
+            List<MapEntityDefinition> before,
+            List<MapEntityDefinition> after)
+            implements UndoCommand {
+        @Override
+        public void undo(EditorModel model) {
+            model.setEntities(before);
+        }
+
+        @Override
+        public void redo(EditorModel model) {
+            model.setEntities(after);
         }
     }
 }

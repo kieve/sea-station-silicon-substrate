@@ -2,6 +2,7 @@ package ca.kieve.ssss.editor;
 
 import ca.kieve.ssss.editor.EditorModel.Bounds;
 import ca.kieve.ssss.editor.EditorModel.CellKey;
+import ca.kieve.ssss.editor.EditorModel.EntityPosition;
 
 import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
@@ -23,16 +24,30 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class MapGridPanel extends JPanel {
+    public interface TileSelectionListener {
+        void onTileSelected(int col, int row, int z);
+        void onSelectionCleared();
+    }
+
     private static final int BASE_CELL_SIZE = 24;
     private static final int MIN_CELL_SIZE = 8;
     private static final int MAX_CELL_SIZE = 64;
     private static final int PAN_STEP = 80;
     private static final Color GRID_COLOR = new Color(80, 80, 80);
-    private static final Color SPAWN_COLOR = new Color(0, 200, 0, 160);
-    private static final Color BACKGROUND_COLOR = new Color(50, 50, 50);
+    private static final Color BACKGROUND_COLOR =
+            new Color(50, 50, 50);
+    private static final Color SELECTION_COLOR =
+            new Color(255, 255, 0, 200);
+    private static final Color ENTITY_PLAYER_COLOR =
+            new Color(0, 200, 0, 200);
+    private static final Color ENTITY_OTHER_COLOR =
+            new Color(0, 200, 200, 200);
 
     private static final Map<String, Color> BLOCK_TYPE_COLORS = Map.of(
             "wood", new Color(0x8B, 0x45, 0x13),
@@ -43,11 +58,16 @@ public class MapGridPanel extends JPanel {
     );
 
     private final EditorModel m_model;
+    private final List<TileSelectionListener> m_selectionListeners =
+            new ArrayList<>();
     private int m_cellSize = BASE_CELL_SIZE;
     private int m_panX = 0;
     private int m_panY = 0;
     private Point m_lastPanPoint;
-    private boolean m_spawnMode = false;
+
+    private int m_selectedCol;
+    private int m_selectedRow;
+    private boolean m_hasSelection = false;
 
     public MapGridPanel(EditorModel model) {
         m_model = model;
@@ -73,13 +93,76 @@ public class MapGridPanel extends JPanel {
             }
 
             @Override
-            public void onBlockSelectionChanged() {
+            public void onBlockSelectionChanged() {}
+
+            @Override
+            public void onDirtyChanged() {}
+
+            @Override
+            public void onEntitiesChanged() {
+                repaint();
             }
 
             @Override
-            public void onDirtyChanged() {
-            }
+            public void onToolChanged() {}
         });
+    }
+
+    public void addTileSelectionListener(
+            TileSelectionListener listener) {
+        m_selectionListeners.add(listener);
+    }
+
+    public void setSelection(int col, int row) {
+        m_selectedCol = col;
+        m_selectedRow = row;
+        m_hasSelection = true;
+        repaint();
+        for (var l : m_selectionListeners) {
+            l.onTileSelected(col, row, m_model.getActiveLayer());
+        }
+    }
+
+    public void clearSelection() {
+        m_hasSelection = false;
+        repaint();
+        for (var l : m_selectionListeners) {
+            l.onSelectionCleared();
+        }
+    }
+
+    public boolean hasSelection() {
+        return m_hasSelection;
+    }
+
+    public int getSelectedCol() {
+        return m_selectedCol;
+    }
+
+    public int getSelectedRow() {
+        return m_selectedRow;
+    }
+
+    // --- Coordinate conversion (Y-up grid) ---
+    // The game world uses Y-up: higher row = higher on screen.
+    // Screen pixels use Y-down: higher pixel Y = lower on screen.
+    // panX/panY is the screen pixel position of the grid origin.
+    // Cell at (col, row) has its top-left screen pixel at:
+    //   px = panX + col * cellSize
+    //   py = panY - (row + 1) * cellSize
+
+    private int gridToScreenX(int col) {
+        return m_panX + col * m_cellSize;
+    }
+
+    private int gridToScreenY(int row) {
+        return m_panY - (row + 1) * m_cellSize;
+    }
+
+    private Point screenToGrid(Point screen) {
+        int col = Math.floorDiv(screen.x - m_panX, m_cellSize);
+        int row = -Math.floorDiv(screen.y - m_panY, m_cellSize) - 1;
+        return new Point(col, row);
     }
 
     private void setupKeyBindings() {
@@ -103,10 +186,12 @@ public class MapGridPanel extends JPanel {
         im.put(KeyStroke.getKeyStroke(KeyEvent.VK_S, 0),
                 "panDown");
 
+        // W/Up: scroll to see higher rows (north) = decrease panY
+        // S/Down: scroll to see lower rows (south) = increase panY
         am.put("panLeft", new PanAction(PAN_STEP, 0));
         am.put("panRight", new PanAction(-PAN_STEP, 0));
-        am.put("panUp", new PanAction(0, PAN_STEP));
-        am.put("panDown", new PanAction(0, -PAN_STEP));
+        am.put("panUp", new PanAction(0, -PAN_STEP));
+        am.put("panDown", new PanAction(0, PAN_STEP));
     }
 
     public void centerOnContent() {
@@ -119,23 +204,24 @@ public class MapGridPanel extends JPanel {
         }
 
         int contentWidth =
-                (bounds.maxCol() - bounds.minCol() + 1) * m_cellSize;
+                (bounds.maxCol() - bounds.minCol() + 1)
+                        * m_cellSize;
         int contentHeight =
-                (bounds.maxRow() - bounds.minRow() + 1) * m_cellSize;
+                (bounds.maxRow() - bounds.minRow() + 1)
+                        * m_cellSize;
 
+        // X: same as before
         m_panX = (getWidth() - contentWidth) / 2
                 - bounds.minCol() * m_cellSize;
+
+        // Y-up: top of content on screen = gridToScreenY(maxRow)
+        //   = panY - (maxRow + 1) * cellSize
+        // We want that at: (screenHeight - contentHeight) / 2
+        // So: panY = margin + (maxRow + 1) * cellSize
         m_panY = (getHeight() - contentHeight) / 2
-                - bounds.minRow() * m_cellSize;
+                + (bounds.maxRow() + 1) * m_cellSize;
+
         repaint();
-    }
-
-    public void setSpawnMode(boolean enabled) {
-        m_spawnMode = enabled;
-    }
-
-    public boolean isSpawnMode() {
-        return m_spawnMode;
     }
 
     @Override
@@ -167,8 +253,8 @@ public class MapGridPanel extends JPanel {
             CellKey key = entry.getKey();
             char c = entry.getValue();
 
-            int px = m_panX + key.col() * m_cellSize;
-            int py = m_panY + key.row() * m_cellSize;
+            int px = gridToScreenX(key.col());
+            int py = gridToScreenY(key.row());
 
             if (px + m_cellSize < 0 || px > getWidth()
                     || py + m_cellSize < 0 || py > getHeight()) {
@@ -191,18 +277,91 @@ public class MapGridPanel extends JPanel {
             }
         }
 
-        if (m_model.getSpawnZ() == m_model.getActiveLayer()) {
-            int px = m_panX + m_model.getSpawnCol() * m_cellSize;
-            int py = m_panY + m_model.getSpawnRow() * m_cellSize;
-            g2d.setColor(SPAWN_COLOR);
-            g2d.fillOval(
-                    px + 2, py + 2,
-                    m_cellSize - 4, m_cellSize - 4);
-            g2d.setColor(Color.GREEN);
-            g2d.drawOval(
-                    px + 2, py + 2,
-                    m_cellSize - 4, m_cellSize - 4);
+        drawEntityMarkers(g2d);
+        drawSelection(g2d);
+    }
+
+    private void drawEntityMarkers(Graphics2D g2d) {
+        int layer = m_model.getActiveLayer();
+        var entities = m_model.getEntities();
+
+        var countMap = new HashMap<CellKey, Integer>();
+        var firstIdMap = new HashMap<CellKey, String>();
+
+        for (var entity : entities) {
+            EntityPosition pos =
+                    m_model.getEntityPosition(entity);
+            if (pos == null || pos.z() != layer) {
+                continue;
+            }
+            var key = new CellKey(pos.x(), pos.y());
+            countMap.merge(key, 1, Integer::sum);
+            firstIdMap.putIfAbsent(key, entity.id());
         }
+
+        int markerSize = Math.max(m_cellSize / 4, 4);
+
+        for (var entry : countMap.entrySet()) {
+            CellKey key = entry.getKey();
+            int count = entry.getValue();
+            String firstId = firstIdMap.get(key);
+
+            int px = gridToScreenX(key.col());
+            int py = gridToScreenY(key.row());
+
+            if (px + m_cellSize < 0 || px > getWidth()
+                    || py + m_cellSize < 0 || py > getHeight()) {
+                continue;
+            }
+
+            boolean isPlayer = "player".equals(firstId);
+            Color markerColor = isPlayer
+                    ? ENTITY_PLAYER_COLOR
+                    : ENTITY_OTHER_COLOR;
+
+            // Draw diamond in top-right corner
+            int cx = px + m_cellSize - markerSize - 1;
+            int cy = py + 1;
+            int half = markerSize / 2;
+
+            int[] xPoints = {
+                cx + half, cx + markerSize, cx + half, cx
+            };
+            int[] yPoints = {
+                cy, cy + half, cy + markerSize, cy + half
+            };
+
+            g2d.setColor(markerColor);
+            g2d.fillPolygon(xPoints, yPoints, 4);
+            g2d.setColor(markerColor.darker());
+            g2d.drawPolygon(xPoints, yPoints, 4);
+
+            if (count > 1 && m_cellSize >= 16) {
+                g2d.setColor(Color.WHITE);
+                g2d.setFont(new Font(
+                        Font.SANS_SERIF, Font.BOLD,
+                        Math.max(markerSize - 1, 8)));
+                String countStr = String.valueOf(count);
+                FontMetrics cfm = g2d.getFontMetrics();
+                g2d.drawString(countStr,
+                        cx + half
+                                - cfm.stringWidth(countStr) / 2,
+                        cy + half
+                                + cfm.getAscent() / 2 - 1);
+            }
+        }
+    }
+
+    private void drawSelection(Graphics2D g2d) {
+        if (!m_hasSelection) {
+            return;
+        }
+        int px = gridToScreenX(m_selectedCol);
+        int py = gridToScreenY(m_selectedRow);
+        g2d.setColor(SELECTION_COLOR);
+        g2d.drawRect(px, py, m_cellSize - 1, m_cellSize - 1);
+        g2d.drawRect(px + 1, py + 1,
+                m_cellSize - 3, m_cellSize - 3);
     }
 
     private void drawGrid(Graphics2D g2d) {
@@ -210,15 +369,17 @@ public class MapGridPanel extends JPanel {
 
         int startCol = (-m_panX) / m_cellSize - 1;
         int endCol = (-m_panX + getWidth()) / m_cellSize + 1;
-        int startRow = (-m_panY) / m_cellSize - 1;
-        int endRow = (-m_panY + getHeight()) / m_cellSize + 1;
+        // Grid lines are at panY + n * cellSize for all integer n,
+        // which is the same set regardless of Y direction.
+        int startN = (-m_panY) / m_cellSize - 1;
+        int endN = (-m_panY + getHeight()) / m_cellSize + 1;
 
         for (int col = startCol; col <= endCol; col++) {
             int x = m_panX + col * m_cellSize;
             g2d.drawLine(x, 0, x, getHeight());
         }
-        for (int row = startRow; row <= endRow; row++) {
-            int y = m_panY + row * m_cellSize;
+        for (int n = startN; n <= endN; n++) {
+            int y = m_panY + n * m_cellSize;
             g2d.drawLine(0, y, getWidth(), y);
         }
     }
@@ -246,26 +407,20 @@ public class MapGridPanel extends JPanel {
         return luminance > 128 ? Color.BLACK : Color.WHITE;
     }
 
-    private Point screenToGrid(Point screen) {
-        int col = Math.floorDiv(screen.x - m_panX, m_cellSize);
-        int row = Math.floorDiv(screen.y - m_panY, m_cellSize);
-        return new Point(col, row);
-    }
-
-    private void paintAtScreen(Point screen) {
+    private void handleLeftClick(Point screen) {
         Point grid = screenToGrid(screen);
-        if (m_spawnMode) {
-            m_model.setPlayerSpawn(grid.x, grid.y);
-            m_spawnMode = false;
-            return;
+        switch (m_model.getActiveTool()) {
+            case PAINT -> {
+                var activeBlock = m_model.getActiveBlock();
+                if (activeBlock != null) {
+                    m_model.paintCell(
+                            grid.x, grid.y,
+                            activeBlock.layoutChar());
+                }
+            }
+            case SELECT -> setSelection(grid.x, grid.y);
+            case ERASE -> m_model.eraseCell(grid.x, grid.y);
         }
-
-        var activeBlock = m_model.getActiveBlock();
-        if (activeBlock == null) {
-            return;
-        }
-        m_model.paintCell(
-                grid.x, grid.y, activeBlock.layoutChar());
     }
 
     private void eraseAtScreen(Point screen) {
@@ -299,7 +454,7 @@ public class MapGridPanel extends JPanel {
                 return;
             }
             if (SwingUtilities.isLeftMouseButton(e)) {
-                paintAtScreen(e.getPoint());
+                handleLeftClick(e.getPoint());
             }
             if (SwingUtilities.isRightMouseButton(e)) {
                 eraseAtScreen(e.getPoint());
@@ -318,7 +473,7 @@ public class MapGridPanel extends JPanel {
                 return;
             }
             if (SwingUtilities.isLeftMouseButton(e)) {
-                paintAtScreen(e.getPoint());
+                handleLeftClick(e.getPoint());
             }
             if (SwingUtilities.isRightMouseButton(e)) {
                 eraseAtScreen(e.getPoint());

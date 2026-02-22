@@ -77,6 +77,14 @@ public class BlockPalettePanel extends JPanel {
             @Override
             public void onDirtyChanged() {
             }
+
+            @Override
+            public void onEntitiesChanged() {
+            }
+
+            @Override
+            public void onToolChanged() {
+            }
         });
     }
 

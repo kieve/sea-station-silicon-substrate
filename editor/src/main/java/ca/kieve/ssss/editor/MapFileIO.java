@@ -16,6 +16,7 @@ public class MapFileIO {
     private static final String MAPS_DIR = "core/src/main/resources/content/maps";
 
     private final ObjectMapper m_yamlMapper;
+    private final JFileChooser m_fileChooser;
     private File m_currentFile;
 
     public MapFileIO() {
@@ -24,16 +25,23 @@ public class MapFileIO {
                 .build();
         m_yamlMapper = new ObjectMapper(yamlFactory);
         m_yamlMapper.findAndRegisterModules();
+
+        m_fileChooser = new JFileChooser();
+        m_fileChooser.setFileFilter(
+                new FileNameExtensionFilter("YAML files", "yaml", "yml"));
+        File mapsDir = findMapsDir();
+        if (mapsDir != null) {
+            m_fileChooser.setCurrentDirectory(mapsDir);
+        }
     }
 
     public MapDefinition load(Component parent) {
-        var chooser = createFileChooser();
-        int result = chooser.showOpenDialog(parent);
+        int result = m_fileChooser.showOpenDialog(parent);
         if (result != JFileChooser.APPROVE_OPTION) {
             return null;
         }
 
-        File file = chooser.getSelectedFile();
+        File file = m_fileChooser.getSelectedFile();
         return loadFile(file, parent);
     }
 
@@ -59,16 +67,15 @@ public class MapFileIO {
     }
 
     public boolean saveAs(Component parent, EditorModel model) {
-        var chooser = createFileChooser();
         if (m_currentFile != null) {
-            chooser.setSelectedFile(m_currentFile);
+            m_fileChooser.setSelectedFile(m_currentFile);
         }
-        int result = chooser.showSaveDialog(parent);
+        int result = m_fileChooser.showSaveDialog(parent);
         if (result != JFileChooser.APPROVE_OPTION) {
             return false;
         }
 
-        File file = chooser.getSelectedFile();
+        File file = m_fileChooser.getSelectedFile();
         if (!file.getName().endsWith(".yaml")
                 && !file.getName().endsWith(".yml")) {
             file = new File(file.getAbsolutePath() + ".yaml");
@@ -102,18 +109,6 @@ public class MapFileIO {
 
     public void clearCurrentFile() {
         m_currentFile = null;
-    }
-
-    private JFileChooser createFileChooser() {
-        var chooser = new JFileChooser();
-        chooser.setFileFilter(
-                new FileNameExtensionFilter("YAML files", "yaml", "yml"));
-
-        File mapsDir = findMapsDir();
-        if (mapsDir != null) {
-            chooser.setCurrentDirectory(mapsDir);
-        }
-        return chooser;
     }
 
     private File findMapsDir() {
