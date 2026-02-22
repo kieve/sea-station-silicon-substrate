@@ -9,3 +9,7 @@
 - When interacting with only one valid option, enter should select only that one option
 
 - An inventory system, it's currently missing any UI
+
+- Colors
+    In the map system, there's named colors for spawning entities and stuff. It would be nice if we
+    had a yaml file to map custom color names to hex colors.

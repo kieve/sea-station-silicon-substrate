@@ -12,12 +12,128 @@ blocks:
     type: mouse_hole
     layoutChar: 'o'
 
-playerSpawn:
-  x: 6
-  y: 6
-  z: 1
-
 floorGlyph: interpunct
+
+entities:
+  - id: player
+    components:
+      - type: Position
+        x: 6
+        y: 6
+        z: 1
+
+  - id: debugMover
+    components:
+      - type: Position
+        x: 4
+        y: 6
+        z: 1
+      - type: Speed
+        val: 50
+      - type: ColorComp
+        color: BLUE
+
+  - id: debugMover
+    components:
+      - type: Position
+        x: 8
+        y: 6
+        z: 1
+      - type: Speed
+        val: 100
+      - type: ColorComp
+        color: WHITE
+
+  - id: debugMover
+    components:
+      - type: Position
+        x: 10
+        y: 6
+        z: 1
+      - type: Speed
+        val: 200
+      - type: ColorComp
+        color: RED
+
+  - id: deadMech
+    components:
+      - type: Position
+        x: 5
+        y: 5
+        z: 1
+      - type: ColorComp
+        color: GOLD
+
+  - id: trainingDummy
+    components:
+      - type: Position
+        x: 23
+        y: 7
+        z: 1
+      - type: ColorComp
+        color: PINK
+
+  - id: aiAttacker
+    components:
+      - type: Position
+        x: 9
+        y: 6
+        z: 1
+      - type: ColorComp
+        color: SCARLET
+
+  - id: note
+    components:
+      - type: Position
+        x: 14
+        y: 14
+        z: 1
+      - type: ColorComp
+        color: WHITE
+
+  - id: greenNote
+    components:
+      - type: Position
+        x: 14
+        y: 14
+        z: 1
+      - type: ColorComp
+        color: GREEN
+
+  - id: blueNote
+    components:
+      - type: Position
+        x: 14
+        y: 14
+        z: 1
+      - type: ColorComp
+        color: BLUE
+
+  - id: roboMouse
+    components:
+      - type: Position
+        x: 8
+        y: 8
+        z: 1
+      - type: ScurryInit
+      - type: ColorComp
+        color: GRAY
+
+  - id: maintenanceSubDoor
+    components:
+      - type: Position
+        x: 17
+        y: 7
+        z: 1
+
+  - id: maintenanceSubDoorKey
+    components:
+      - type: Position
+        x: 8
+        y: 6
+        z: 1
+      - type: ColorComp
+        color: YELLOW
 
 layers:
   '0': |

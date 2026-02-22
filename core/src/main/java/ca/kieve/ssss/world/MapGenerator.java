@@ -1,8 +1,9 @@
 package ca.kieve.ssss.world;
 
 import ca.kieve.ssss.content.BlockTypeFactory;
-import ca.kieve.ssss.context.GameContext;
-import ca.kieve.ssss.util.Vec3i;
+import ca.kieve.ssss.content.MapEntityDefinition;
+
+import java.util.List;
 
 /**
  * Interface for map generators that produce 3D voxel worlds.
@@ -20,15 +21,6 @@ public interface MapGenerator {
     WorldModel generate(BlockTypeFactory blockTypeFactory);
 
     /**
-     * Returns a suggested starting position for the player.
-     * This should be a position where the player can stand
-     * (air block with solid block below).
-     *
-     * @return The suggested player spawn position
-     */
-    Vec3i getPlayerSpawn();
-
-    /**
      * Returns the glyph ID to use for rendering floor tiles.
      *
      * @return The glyph identifier for floor rendering
@@ -36,13 +28,9 @@ public interface MapGenerator {
     String getFloorGlyphId();
 
     /**
-     * Creates entities for this map.
-     * Default implementation does nothing.
+     * Returns the entity definitions for this map.
      *
-     * @param context The game context
-     * @param playerSpawn The player's spawn position
+     * @return List of map entity definitions to spawn
      */
-    default void createEntities(GameContext context, Vec3i playerSpawn) {
-        // Do nothing
-    }
+    List<MapEntityDefinition> getEntities();
 }

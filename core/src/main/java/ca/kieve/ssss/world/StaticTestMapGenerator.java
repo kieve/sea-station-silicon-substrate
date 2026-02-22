@@ -1,18 +1,17 @@
 package ca.kieve.ssss.world;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import ca.kieve.ssss.content.BlockTypeFactory;
 import ca.kieve.ssss.content.MapBlockDefinition;
 import ca.kieve.ssss.content.MapDefinition;
-import ca.kieve.ssss.context.GameContext;
-import ca.kieve.ssss.util.Vec3i;
+import ca.kieve.ssss.content.MapEntityDefinition;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -56,13 +55,13 @@ public class StaticTestMapGenerator implements MapGenerator {
     }
 
     @Override
-    public Vec3i getPlayerSpawn() {
-        return m_mapDefinition.playerSpawn();
+    public String getFloorGlyphId() {
+        return m_mapDefinition.floorGlyph();
     }
 
     @Override
-    public String getFloorGlyphId() {
-        return m_mapDefinition.floorGlyph();
+    public List<MapEntityDefinition> getEntities() {
+        return m_mapDefinition.entities();
     }
 
     private void loadMapDefinition() {
@@ -98,65 +97,5 @@ public class StaticTestMapGenerator implements MapGenerator {
                 }
             }
         }
-    }
-
-    @Override
-    public void createEntities(GameContext context, Vec3i playerSpawn) {
-        var factory = context.entityFactory();
-
-        // Debug movers with different speeds
-        factory.createDebugMover(context,
-            playerSpawn.add(Vec3i.X.product(-2)),
-            50,
-            Color.BLUE
-        );
-
-        factory.createDebugMover(context,
-            playerSpawn.add(Vec3i.X.product(2)),
-            100,
-            Color.WHITE
-        );
-
-        factory.createDebugMover(context,
-            playerSpawn.add(Vec3i.X.product(4)),
-            200,
-            Color.RED
-        );
-
-        // Test socket for taking over dead entities
-        factory.createEntity(context,
-            "deadMech",
-            new Vec3i(5, 5, 1),
-            Color.GOLD
-        );
-
-        // Training dummy for combat testing (in room 2)
-        factory.createEntity(context,
-            "trainingDummy",
-            new Vec3i(23, 7, 1),
-            Color.PINK
-        );
-
-        // Attacker AI test
-        factory.createEntity(context,
-            "aiAttacker",
-            playerSpawn.add(new Vec3i(3, 0, 0)),
-            Color.SCARLET
-        );
-
-        // Pickable note items
-        factory.createEntity(context, "note", new Vec3i(14, 14, 1), Color.WHITE);
-        factory.createEntity(context, "greenNote", new Vec3i(14, 14, 1), Color.GREEN);
-        factory.createEntity(context, "blueNote", new Vec3i(14, 14, 1), Color.BLUE);
-
-        // Spawn RoboMouse away from walls with random CW/CCW and random direction
-        Vec3i mouseSpawn = new Vec3i(8, 8, 1);
-        boolean clockwise = context.random().nextBoolean();
-        factory.createRoboMouse(context, mouseSpawn, clockwise, null, Color.GRAY);
-
-        // Door and key for testing lockable/openable system
-        factory.createEntity(context, "maintenanceSubDoor", new Vec3i(17, 7, 1));
-        factory.createEntity(
-            context, "maintenanceSubDoorKey", new Vec3i(8, 6, 1), Color.YELLOW);
     }
 }

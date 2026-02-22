@@ -18,8 +18,8 @@ public class ComponentDefinition {
         @JsonDeserialize(using = ComponentTypeDeserializer.class)
         Class<?> type
     ) {
-        this.m_type = type;
-        this.m_properties = new HashMap<>();
+        m_type = type;
+        m_properties = new HashMap<>();
     }
 
     public Class<?> type() {

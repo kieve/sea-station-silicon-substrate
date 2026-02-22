@@ -9,12 +9,15 @@ blocks:
     type: air
     layoutChar: '.'
 
-playerSpawn:
-  x: 4
-  y: 3
-  z: 1
-
 floorGlyph: interpunct
+
+entities:
+  - id: player
+    components:
+      - type: Position
+        x: 4
+        y: 3
+        z: 1
 
 layers:
   '0': |

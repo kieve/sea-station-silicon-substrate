@@ -2,6 +2,7 @@ package ca.kieve.ssss.editor;
 
 import ca.kieve.ssss.content.MapBlockDefinition;
 import ca.kieve.ssss.content.MapDefinition;
+import ca.kieve.ssss.content.MapEntityDefinition;
 import ca.kieve.ssss.util.Vec3i;
 
 import java.util.ArrayList;
@@ -121,16 +122,10 @@ public class EditorModel {
             m_layers.put(0, new HashMap<>());
         }
 
-        Vec3i spawn = def.playerSpawn();
-        if (spawn != null) {
-            m_spawnCol = spawn.x;
-            m_spawnRow = (maxHeight - 1) - spawn.y;
-            m_spawnZ = spawn.z;
-        } else {
-            m_spawnCol = 1;
-            m_spawnRow = 1;
-            m_spawnZ = 1;
-        }
+        // TODO: Extract player spawn from entities list
+        m_spawnCol = 1;
+        m_spawnRow = 1;
+        m_spawnZ = 1;
 
         m_activeLayer = m_layers.keySet().stream()
                 .mapToInt(Integer::intValue)
@@ -154,8 +149,9 @@ public class EditorModel {
             return new MapDefinition(
                     new LinkedHashMap<>(m_blocks),
                     new LinkedHashMap<>(),
-                    new Vec3i(0, 0, 0),
-                    m_floorGlyph);
+                    m_floorGlyph,
+                    List.of(new MapEntityDefinition(
+                        "player", List.of())));
         }
 
         Map<String, String> layers = new LinkedHashMap<>();
@@ -191,16 +187,13 @@ public class EditorModel {
             layers.put(String.valueOf(z), sb.toString());
         }
 
-        int height = bounds.height();
-        int spawnX = m_spawnCol - bounds.minCol;
-        int spawnY = (height - 1) - (m_spawnRow - bounds.minRow);
-        var spawn = new Vec3i(spawnX, spawnY, m_spawnZ);
-
+        // TODO: Serialize player spawn as entity with Position component
         return new MapDefinition(
                 new LinkedHashMap<>(m_blocks),
                 layers,
-                spawn,
-                m_floorGlyph);
+                m_floorGlyph,
+                List.of(new MapEntityDefinition(
+                    "player", List.of())));
     }
 
     public Bounds getGlobalBounds() {

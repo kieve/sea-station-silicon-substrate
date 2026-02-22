@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
 import ca.kieve.ssss.component.CameraComp;
+import ca.kieve.ssss.content.MapEntityDefinition;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.input.InputActionController;
 import ca.kieve.ssss.system.AttackSystem;
@@ -16,9 +17,11 @@ import ca.kieve.ssss.system.EventSystem;
 import ca.kieve.ssss.system.ExamineSystem;
 import ca.kieve.ssss.system.InteractMenuSystem;
 import ca.kieve.ssss.system.InteractSystem;
+import ca.kieve.ssss.system.MapInitSystem;
 import ca.kieve.ssss.system.OpenSystem;
 import ca.kieve.ssss.system.PathingSystem;
 import ca.kieve.ssss.system.SanityCheckSystem;
+import ca.kieve.ssss.system.ScurryInitSystem;
 import ca.kieve.ssss.system.SocketSystem;
 import ca.kieve.ssss.system.TileGlyphRenderSystem;
 import ca.kieve.ssss.system.TileHighlightRenderSystem;
@@ -113,17 +116,23 @@ public class GameEngine {
     }
 
     private void createEntities() {
-        var playerSpawn = m_mapGenerator.getPlayerSpawn();
-
         // Create block entities from the world model
         WorldEntityFactory.createEntities(m_gameContext, m_worldModel);
 
-        // Create player at the spawn position
+        // Create map entities from YAML definitions
         var factory = m_gameContext.entityFactory();
-        factory.createEntity(m_gameContext, "player", playerSpawn);
+        for (MapEntityDefinition entityDef : m_mapGenerator.getEntities()) {
+            factory.createEntityWithOverrides(
+                m_gameContext, entityDef.id(), entityDef.components());
+        }
 
-        // Delegate entity creation to the map generator
-        m_mapGenerator.createEntities(m_gameContext, playerSpawn);
+        // Run map init systems for post-spawn processing
+        List<MapInitSystem> mapInitSystems = List.of(
+            new ScurryInitSystem()
+        );
+        for (MapInitSystem initSystem : mapInitSystems) {
+            initSystem.run(m_gameContext);
+        }
     }
 
     public MapGenerator getMapGenerator() {

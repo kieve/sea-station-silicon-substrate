@@ -5,8 +5,6 @@ import dev.dominion.ecs.api.Entity;
 
 import ca.kieve.ssss.component.ColorComp;
 import ca.kieve.ssss.component.Position;
-import ca.kieve.ssss.component.ScurryConfig;
-import ca.kieve.ssss.component.Speed;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.util.Vec3i;
 
@@ -46,35 +44,39 @@ public class EntityFactory {
         return entity;
     }
 
+    public Entity createEntityWithOverrides(
+        GameContext context,
+        String entityId,
+        List<ComponentDefinition> overrides
+    ) {
+        // Create a virtual definition with the base entity as parent
+        // and overrides as components - reuses resolveComponents merge logic
+        EntityDefinition overrideDef =
+            new EntityDefinition(List.of(entityId), overrides);
+
+        // Set GameContext so ComponentFactory can create special components
+        m_registry.getComponentFactory().setGameContext(context);
+
+        List<Object> components =
+            new ArrayList<>(overrideDef.instantiateComponents(m_registry));
+
+        Entity entity = context.ecs().createEntity(components.toArray());
+
+        // If a Position component was included, register it in PositionContext
+        Position pos = entity.get(Position.class);
+        if (pos != null) {
+            context.pos().add(entity, pos.getPosition());
+        }
+
+        return entity;
+    }
+
     public Entity createBlock(GameContext context, Vec3i pos, String blockTypeId) {
         if ("air".equals(blockTypeId)) {
             return createEntity(context, "air", pos);
         }
         String entityId = "block_" + blockTypeId;
         return createEntity(context, entityId, pos);
-    }
-
-    public Entity createDebugMover(
-        GameContext context,
-        Vec3i pos,
-        int speed,
-        Color color
-    ) {
-        Entity entity = createEntity(context, "debugMover", pos, color);
-        entity.add(new Speed(speed));
-        return entity;
-    }
-
-    public Entity createRoboMouse(
-        GameContext context,
-        Vec3i pos,
-        boolean clockwise,
-        Vec3i initialDirection,
-        Color color
-    ) {
-        Entity entity = createEntity(context, "roboMouse", pos, color);
-        entity.add(new ScurryConfig(clockwise, initialDirection));
-        return entity;
     }
 
     public GlyphFactory getGlyphFactory() {

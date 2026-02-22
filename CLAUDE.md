@@ -211,7 +211,7 @@ Map generation is handled by the `world` package (`ca.kieve.ssss.world`):
 - **WorldEntityFactory**: Creates block entities from WorldModel
 
 **YAML Map Format:**
-Maps are defined in `core/src/main/resources/content/maps/` using character-based layer definitions:
+Maps are defined in `core/src/main/resources/content/maps/` using character-based layer definitions. Entity spawning (including the player) is data-driven via the `entities` list:
 
 ```yaml
 blocks:
@@ -225,12 +225,34 @@ blocks:
     type: air
     layoutChar: '.'
 
-playerSpawn:
-  x: 6
-  y: 6
-  z: 1
-
 floorGlyph: interpunct
+
+entities:
+  - id: player
+    components:
+      - type: Position
+        x: 6
+        y: 6
+        z: 1
+
+  - id: aiAttacker
+    components:
+      - type: Position
+        x: 9
+        y: 6
+        z: 1
+      - type: ColorComp
+        color: SCARLET
+
+  - id: roboMouse
+    components:
+      - type: Position
+        x: 8
+        y: 8
+        z: 1
+      - type: ScurryInit
+      - type: ColorComp
+        color: GRAY
 
 layers:
   '0': |
@@ -243,12 +265,19 @@ layers:
     ...
 ```
 
+Each entity entry has:
+- `id`: Matches the entity's `Identifier` key in ContentRegistry
+- `components` (optional): Uses `ComponentDefinition` format to override/add components from the base entity definition. Position is just another component — entities without Position are supported.
+
+**Map Init Systems:**
+After all map entities are spawned, `MapInitSystem` implementations run for post-spawn processing. For example, `ScurryInitSystem` finds entities with the `ScurryInit` marker component, creates a randomized `ScurryConfig`, and removes the marker. New init systems implement the `MapInitSystem` interface and are registered in `GameEngine.createEntities()`.
+
 **Integration:**
 In `GameEngine.init()`:
 1. MapGenerator creates WorldModel: `m_worldModel = m_mapGenerator.generate(blockTypes)`
 2. Block entities created: `WorldEntityFactory.createEntities(context, worldModel)`
-3. Player spawned at designated location
-4. Additional entities created via `m_mapGenerator.createEntities()`
+3. Map entities spawned via `factory.createEntityWithOverrides()` for each entry in `m_mapGenerator.getEntities()`
+4. Map init systems run for post-spawn processing (e.g., `ScurryInitSystem`)
 
 ### AI System
 
@@ -343,10 +372,14 @@ The `file_list.txt` and `dir_list.txt` files in content directories are **auto-g
 // Access factory from GameContext
 EntityFactory factory = context.entityFactory();
 
-// Create entity by ID
+// Create entity by ID (position always required)
 Entity player = factory.createEntity(context, "player", spawnPos);
 Entity dummy = factory.createEntity(context, "trainingDummy", pos, Color.PINK);
 Entity block = factory.createBlock(context, pos, BlockType.STONE);
+
+// Create entity with component overrides (used by map YAML loading)
+// Position is optional — only registered if included in overrides
+Entity entity = factory.createEntityWithOverrides(context, "entityId", overrides);
 ```
 
 **Adding New Content:**
@@ -370,7 +403,20 @@ components:
     weaponId: power_fist
 ```
 
-2. Reference in code:
+2. Spawn in a map YAML file (preferred for map-specific entities):
+```yaml
+entities:
+  - id: newEnemy
+    components:
+      - type: Position
+        x: 10
+        y: 5
+        z: 1
+      - type: ColorComp
+        color: RED
+```
+
+3. Or reference in code for programmatic spawning:
 ```java
 factory.createEntity(context, "newEnemy", pos, Color.RED);
 ```
@@ -380,6 +426,7 @@ factory.createEntity(context, "newEnemy", pos, Color.RED);
 - Constructor arguments match by type and count
 - Marker components (no args) use default constructors
 - Enum components are supported via `valueOf()`
+- Color properties support hex (`"#RRGGBBAA"`), decimal RGB/RGBA (`"255,0,0"`), and named colors (`BLUE`, `GOLD`, `SCARLET`, etc.) via libGDX `Color` class fields
 
 **Component Composition with Parent Inheritance:**
 

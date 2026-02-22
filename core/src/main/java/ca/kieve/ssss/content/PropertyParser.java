@@ -3,6 +3,8 @@ package ca.kieve.ssss.content;
 import ca.kieve.ssss.util.Vec3i;
 import com.badlogic.gdx.graphics.Color;
 
+import java.lang.reflect.Field;
+
 public class PropertyParser {
 
     public static Object parseValue(Object value, Class<?> targetType) {
@@ -91,7 +93,14 @@ public class PropertyParser {
             return new Color(r, g, b, a);
         }
 
-        throw new IllegalArgumentException("Invalid color format: " + str);
+        // Try named color (e.g., "BLUE", "gold", "Scarlet")
+        String upperName = str.toUpperCase();
+        try {
+            Field field = Color.class.getField(upperName);
+            return new Color((Color) field.get(null));
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new IllegalArgumentException("Unknown color: " + str);
+        }
     }
 
     private static Vec3i parseVec3i(String str) {
