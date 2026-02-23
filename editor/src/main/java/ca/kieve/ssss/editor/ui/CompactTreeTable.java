@@ -89,9 +89,10 @@ public class CompactTreeTable<T>
                     TreeItem<T> treeItem =
                             getTreeTableRow().getTreeItem();
                     if (treeItem != null
-                            && treeItem.getParent()
-                            == getTreeTableView()
-                                    .getRoot()) {
+                            && getTreeTableView()
+                                    .getTreeItemLevel(
+                                            treeItem)
+                                    == 1) {
                         getStyleClass().add(STYLE_SECTION);
                     }
                 }

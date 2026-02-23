@@ -271,6 +271,10 @@ public class EditorMapModel {
         m_file = file;
     }
 
+    public List<MapEntityDefinition> getEntities() {
+        return m_entities;
+    }
+
     public String getFloorGlyph() {
         return m_floorGlyph;
     }

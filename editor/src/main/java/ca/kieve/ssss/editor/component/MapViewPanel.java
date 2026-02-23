@@ -1,6 +1,7 @@
 package ca.kieve.ssss.editor.component;
 
 import ca.kieve.ssss.content.MapDefinition;
+import ca.kieve.ssss.content.MapEntityDefinition;
 import ca.kieve.ssss.editor.MapSaver;
 import ca.kieve.ssss.editor.model.EditorMapModel;
 import ca.kieve.ssss.editor.ui.PanCanvas;
@@ -9,6 +10,8 @@ import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.SplitPane;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
@@ -19,12 +22,14 @@ import javafx.scene.layout.StackPane;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 public class MapViewPanel extends BorderPane {
     private final EditorMapModel m_model;
     private final MapRenderer m_renderer;
     private final PanCanvas m_panCanvas;
     private final BlockPanel m_blockPanel;
+    private final MapEntityPanel m_entityPanel;
     private final ComponentPanel m_componentPanel;
     private final InfoBar m_infoBar;
     private final ZLevelOverlay m_zOverlay;
@@ -37,7 +42,8 @@ public class MapViewPanel extends BorderPane {
             MapDefinition mapDef,
             File mapFile
     ) {
-        m_model = EditorMapModel.fromDefinition(mapDef, mapFile);
+        m_model = EditorMapModel.fromDefinition(
+                mapDef, mapFile);
 
         m_renderer = new MapRenderer();
         m_renderer.updateNameToBpId(
@@ -49,15 +55,17 @@ public class MapViewPanel extends BorderPane {
         // Left: tool bar
         var toolBar = new EditorToolBar();
 
-        // Right: block panel + component panel
+        // Right: block panel, entity panel, component panel
         m_blockPanel = new BlockPanel(m_model);
+        m_entityPanel = new MapEntityPanel(m_model);
         m_componentPanel = new ComponentPanel();
 
         m_blockPanel.setOnSelectionChanged(name -> {
             m_selectedBlockName = name;
             var blockDef = m_model.getBlocks().get(name);
             if (blockDef != null) {
-                m_componentPanel.showEntity(blockDef.bpId());
+                m_componentPanel.showEntity(
+                        blockDef.bpId());
             } else {
                 m_componentPanel.clear();
             }
@@ -65,16 +73,65 @@ public class MapViewPanel extends BorderPane {
         m_blockPanel.setOnBlocksChanged(
                 this::refreshBlockTypes);
 
+        m_entityPanel.setOnSelectionChanged(index -> {
+            List<MapEntityDefinition> entities =
+                    m_model.getEntities();
+            if (entities == null
+                    || index >= entities.size()) {
+                m_componentPanel.clear();
+                return;
+            }
+            MapEntityDefinition entity =
+                    entities.get(index);
+            m_componentPanel.showMapEntity(
+                    entity.id(), entity.components());
+        });
+
         // Pick a default selected block (first non-air)
         for (var entry : m_model.getBlocks().entrySet()) {
             if (!"air".equals(entry.getValue().bpId())) {
                 m_selectedBlockName = entry.getKey();
-                m_blockPanel.selectBlock(m_selectedBlockName);
+                m_blockPanel.selectBlock(
+                        m_selectedBlockName);
                 m_componentPanel.showEntity(
                         entry.getValue().bpId());
                 break;
             }
         }
+
+        // TabPane for blocks and entities
+        var blocksTab = new Tab("Blocks", m_blockPanel);
+        blocksTab.setClosable(false);
+
+        var entitiesTab = new Tab(
+                "Entities", m_entityPanel);
+        entitiesTab.setClosable(false);
+
+        var tabPane = new TabPane(
+                blocksTab, entitiesTab);
+        tabPane.getSelectionModel()
+                .selectedItemProperty()
+                .addListener((obs, oldTab, newTab) -> {
+            if (newTab == blocksTab) {
+                // Re-fire block selection
+                String sel =
+                        m_blockPanel.getSelectedBlock();
+                if (sel != null) {
+                    var blockDef =
+                            m_model.getBlocks().get(sel);
+                    if (blockDef != null) {
+                        m_componentPanel.showEntity(
+                                blockDef.bpId());
+                    } else {
+                        m_componentPanel.clear();
+                    }
+                } else {
+                    m_componentPanel.clear();
+                }
+            } else {
+                m_componentPanel.clear();
+            }
+        });
 
         // Bottom: info bar
         m_infoBar = new InfoBar();
@@ -92,24 +149,28 @@ public class MapViewPanel extends BorderPane {
 
         // Floating zoom overlay
         m_zoomOverlay = new ZoomOverlay();
-        m_zoomOverlay.bindZoom(m_panCanvas.zoomProperty());
-        m_zoomOverlay.setOnReset(m_panCanvas::resetZoom);
+        m_zoomOverlay.bindZoom(
+                m_panCanvas.zoomProperty());
+        m_zoomOverlay.setOnReset(
+                m_panCanvas::resetZoom);
 
         // Center: canvas with floating overlays
-        var overlayBox = new VBox(4, m_zOverlay, m_zoomOverlay);
+        var overlayBox = new VBox(
+                4, m_zOverlay, m_zoomOverlay);
         overlayBox.setAlignment(Pos.TOP_RIGHT);
         overlayBox.setMaxWidth(Region.USE_PREF_SIZE);
         overlayBox.setMaxHeight(Region.USE_PREF_SIZE);
         overlayBox.setPickOnBounds(false);
 
-        var canvasStack = new StackPane(m_panCanvas, overlayBox);
+        var canvasStack = new StackPane(
+                m_panCanvas, overlayBox);
         StackPane.setAlignment(
                 overlayBox, Pos.TOP_RIGHT);
         StackPane.setMargin(
                 overlayBox, new Insets(8, 8, 0, 0));
 
         var rightSplit = new SplitPane(
-                m_blockPanel, m_componentPanel);
+                tabPane, m_componentPanel);
         rightSplit.setOrientation(Orientation.VERTICAL);
         rightSplit.setDividerPositions(0.35);
 
@@ -130,7 +191,8 @@ public class MapViewPanel extends BorderPane {
                 m_renderer.getMapOriginX()
                         + m_renderer.getMapWidth() / 2.0,
                 m_renderer.getMapOriginY()
-                        + m_renderer.getMapHeight() / 2.0);
+                        + m_renderer.getMapHeight()
+                                / 2.0);
     }
 
     public EditorMapModel getModel() {
@@ -155,7 +217,8 @@ public class MapViewPanel extends BorderPane {
             m_infoBar.setFileName(file.getName());
         } catch (IOException ex) {
             var alert = new Alert(Alert.AlertType.ERROR);
-            DialogUtil.style(alert, "Failed to Save Map");
+            DialogUtil.style(
+                    alert, "Failed to Save Map");
             alert.setContentText(ex.getMessage());
             alert.showAndWait();
         }
@@ -170,8 +233,9 @@ public class MapViewPanel extends BorderPane {
     private void setupScrollZLevel() {
         m_panCanvas.setOnScroll(e -> {
             if (e.isShiftDown()) {
-                // Windows converts Shift+ScrollWheel vertical
-                // into horizontal, so check both axes.
+                // Windows converts Shift+ScrollWheel
+                // vertical into horizontal, so check
+                // both axes.
                 double delta = e.getDeltaY() != 0
                         ? e.getDeltaY() : e.getDeltaX();
                 if (delta != 0) {
@@ -192,9 +256,11 @@ public class MapViewPanel extends BorderPane {
 
     private void setupPainting() {
         m_panCanvas.addEventFilter(
-                MouseEvent.MOUSE_PRESSED, this::handlePaint);
+                MouseEvent.MOUSE_PRESSED,
+                this::handlePaint);
         m_panCanvas.addEventFilter(
-                MouseEvent.MOUSE_DRAGGED, this::handlePaint);
+                MouseEvent.MOUSE_DRAGGED,
+                this::handlePaint);
     }
 
     private void handlePaint(MouseEvent e) {
@@ -205,13 +271,15 @@ public class MapViewPanel extends BorderPane {
         if (e.getButton() == MouseButton.PRIMARY) {
             paintAt(e.getX(), e.getY());
             e.consume();
-        } else if (e.getButton() == MouseButton.SECONDARY) {
+        } else if (e.getButton()
+                == MouseButton.SECONDARY) {
             eraseAt(e.getX(), e.getY());
             e.consume();
         }
     }
 
-    private void paintAt(double mouseX, double mouseY) {
+    private void paintAt(
+            double mouseX, double mouseY) {
         if (m_selectedBlockName == null) {
             return;
         }
@@ -221,10 +289,12 @@ public class MapViewPanel extends BorderPane {
         }
         double zoom = m_panCanvas.getZoom();
         int col = (int) Math.floor(
-                (mouseX / zoom + m_panCanvas.getCameraX())
+                (mouseX / zoom
+                        + m_panCanvas.getCameraX())
                         / MapRenderer.CELL_SIZE);
         int row = (int) Math.floor(
-                (mouseY / zoom + m_panCanvas.getCameraY())
+                (mouseY / zoom
+                        + m_panCanvas.getCameraY())
                         / MapRenderer.CELL_SIZE);
 
         if (!m_model.setCell(
@@ -238,13 +308,16 @@ public class MapViewPanel extends BorderPane {
         m_panCanvas.requestRedraw();
     }
 
-    private void eraseAt(double mouseX, double mouseY) {
+    private void eraseAt(
+            double mouseX, double mouseY) {
         double zoom = m_panCanvas.getZoom();
         int col = (int) Math.floor(
-                (mouseX / zoom + m_panCanvas.getCameraX())
+                (mouseX / zoom
+                        + m_panCanvas.getCameraX())
                         / MapRenderer.CELL_SIZE);
         int row = (int) Math.floor(
-                (mouseY / zoom + m_panCanvas.getCameraY())
+                (mouseY / zoom
+                        + m_panCanvas.getCameraY())
                         / MapRenderer.CELL_SIZE);
 
         if (!m_model.setCell(
