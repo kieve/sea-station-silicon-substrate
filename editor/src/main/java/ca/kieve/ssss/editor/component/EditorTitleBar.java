@@ -7,10 +7,12 @@ import javafx.collections.ListChangeListener;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
+import java.util.function.BooleanSupplier;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.ToggleButton;
@@ -39,6 +41,7 @@ public class EditorTitleBar extends HBox {
     private final ToggleGroup m_toggleGroup;
     private final HBox m_tabBox;
     private final Button m_maxBtn;
+    private final BooleanSupplier m_canCloseTab;
 
     private double m_dragOffsetX;
     private double m_dragOffsetY;
@@ -54,9 +57,14 @@ public class EditorTitleBar extends HBox {
     public EditorTitleBar(
             Stage stage,
             TabPane tabPane,
-            Runnable onLoadMap) {
+            Runnable onLoadMap,
+            Runnable onSave,
+            Runnable onSaveAs,
+            Runnable onClose,
+            BooleanSupplier canCloseTab) {
         m_stage = stage;
         m_tabPane = tabPane;
+        m_canCloseTab = canCloseTab;
         m_toggleGroup = new ToggleGroup();
         m_tabBox = new HBox();
         m_tabBox.setAlignment(Pos.CENTER_LEFT);
@@ -78,7 +86,18 @@ public class EditorTitleBar extends HBox {
 
         var loadMapItem = new MenuItem("Load Map...");
         loadMapItem.setOnAction(e -> onLoadMap.run());
-        var fileMenu = new MenuButton("File", null, loadMapItem);
+
+        var saveItem = new MenuItem("Save");
+        saveItem.setOnAction(e -> onSave.run());
+
+        var saveAsItem = new MenuItem("Save As...");
+        saveAsItem.setOnAction(e -> onSaveAs.run());
+
+        var fileMenu = new MenuButton("File", null,
+                loadMapItem,
+                new SeparatorMenuItem(),
+                saveItem,
+                saveAsItem);
 
         // Spacer pushes window buttons to the right
         var spacer = new Region();
@@ -103,7 +122,7 @@ public class EditorTitleBar extends HBox {
         closeBtn.getStyleClass().addAll(
                 EditorTheme.STYLE_WINDOW_BUTTON,
                 EditorTheme.STYLE_WINDOW_BUTTON_CLOSE);
-        closeBtn.setOnAction(e -> m_stage.close());
+        closeBtn.setOnAction(e -> onClose.run());
         closeBtn.setFocusTraversable(false);
 
         var windowButtons = new HBox(minBtn, m_maxBtn, closeBtn);
@@ -228,6 +247,10 @@ public class EditorTitleBar extends HBox {
             var closeLabel = new Label(" \u00D7");
             closeLabel.setStyle("-fx-text-fill: -color-fg-muted;");
             closeLabel.setOnMouseClicked(e -> {
+                if (!m_canCloseTab.getAsBoolean()) {
+                    e.consume();
+                    return;
+                }
                 m_tabPane.getTabs().remove(tab);
                 if (tab.getOnClosed() != null) {
                     tab.getOnClosed().handle(null);

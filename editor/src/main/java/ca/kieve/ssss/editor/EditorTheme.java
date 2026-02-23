@@ -17,7 +17,8 @@ public final class EditorTheme {
     // CSS style class names
     public static final String STYLE_TITLE = "editor-title";
     public static final String STYLE_SUBTITLE = "editor-subtitle";
-    public static final String STYLE_COMPONENT_BOX = "editor-component-box";
+    public static final String STYLE_COMPONENT_BOX =
+            "editor-component-box";
     public static final String STYLE_COMPONENT_TYPE =
             "editor-component-type";
     public static final String STYLE_COMPONENT_MARKER =
@@ -34,6 +35,17 @@ public final class EditorTheme {
     public static final String STYLE_WINDOW_BUTTON = "window-button";
     public static final String STYLE_WINDOW_BUTTON_CLOSE =
             "window-button-close";
+    public static final String STYLE_INFO_BAR = "editor-info-bar";
+    public static final String STYLE_EDITOR_TOOL_BAR =
+            "editor-tool-bar";
+    public static final String STYLE_TOOL_BUTTON =
+            "editor-tool-button";
+    public static final String STYLE_BLOCK_PANEL =
+            "editor-block-panel";
+    public static final String STYLE_Z_OVERLAY =
+            "editor-z-overlay";
+    public static final String STYLE_Z_STEP_BUTTON =
+            "editor-z-step-button";
 
     /** Path to the editor CSS stylesheet, relative to this class. */
     public static final String STYLESHEET =

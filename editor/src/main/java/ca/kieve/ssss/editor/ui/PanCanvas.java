@@ -124,9 +124,9 @@ public class PanCanvas extends Pane {
                 m_dragStartY = e.getScreenY();
                 m_dragStartCameraX = m_cameraX;
                 m_dragStartCameraY = m_cameraY;
+                e.consume();
             }
             requestFocus();
-            e.consume();
         });
 
         setOnMouseDragged(e -> {
