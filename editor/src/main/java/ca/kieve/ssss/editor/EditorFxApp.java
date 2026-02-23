@@ -256,9 +256,7 @@ public class EditorFxApp extends Application {
             onSave();
             // If still modified after save attempt (e.g. cancelled
             // Save As dialog), don't close
-            if (panel.getModel().isModified()) {
-                return false;
-            }
+            return !panel.getModel().isModified();
         }
         return true;
     }
