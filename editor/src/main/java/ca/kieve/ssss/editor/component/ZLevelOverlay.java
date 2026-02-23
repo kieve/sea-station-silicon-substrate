@@ -73,7 +73,7 @@ public class ZLevelOverlay extends HBox {
         return m_zLevel.get();
     }
 
-    private void step(int direction) {
+    public void step(int direction) {
         if (m_zLevels.isEmpty()) {
             return;
         }

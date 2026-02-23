@@ -92,6 +92,7 @@ public class MapViewPanel extends BorderPane {
         setBottom(m_infoBar);
 
         setupPainting();
+        setupScrollZLevel();
         loadLayer(defaultZ);
 
         // Center on the map once at startup
@@ -134,6 +135,17 @@ public class MapViewPanel extends BorderPane {
     public void refreshCharToType() {
         m_renderer.updateCharToType(m_model.buildCharToTypeMap());
         m_panCanvas.requestRedraw();
+    }
+
+    private void setupScrollZLevel() {
+        m_panCanvas.setOnScroll(e -> {
+            if (e.getDeltaY() > 0) {
+                m_zOverlay.step(1);
+            } else if (e.getDeltaY() < 0) {
+                m_zOverlay.step(-1);
+            }
+            e.consume();
+        });
     }
 
     private void setupPainting() {
