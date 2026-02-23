@@ -124,7 +124,7 @@ public class EditorMapModel {
                             grid.getCell(r, c);
                     if (blockName != null) {
                         var blockDef =
-                                m_blocks.get(blockName);
+                                blocks.get(blockName);
                         sb.append(blockDef != null
                                 ? blockDef.layoutChar()
                                 : ' ');
@@ -133,6 +133,7 @@ public class EditorMapModel {
                     }
                 }
             }
+            sb.append('\n');
             layers.put(
                     String.valueOf(entry.getKey()),
                     sb.toString());

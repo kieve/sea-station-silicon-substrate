@@ -13,8 +13,8 @@ import java.io.IOException;
 public final class MapSaver {
     private static final ObjectMapper MAPPER = new ObjectMapper(
             YAMLFactory.builder()
-                    .enable(YAMLGenerator.Feature
-                            .LITERAL_BLOCK_STYLE)
+                    .enable(YAMLGenerator.Feature.LITERAL_BLOCK_STYLE)
+                    .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES)
                     .build())
             .enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS);
 
