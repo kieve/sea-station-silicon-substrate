@@ -55,7 +55,8 @@ public class MapViewPanel extends BorderPane {
 
         // Right: block panel
         m_blockPanel = new BlockPanel(
-                m_model, registry, colorResolver);
+                m_model, registry,
+                colorResolver, glyphResolver);
         m_blockPanel.setOnSelectionChanged(name -> {
             m_selectedBlockName = name;
         });

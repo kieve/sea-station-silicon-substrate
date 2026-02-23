@@ -5,6 +5,7 @@ import static ca.kieve.ssss.editor.util.CssUtil.inline;
 import ca.kieve.ssss.content.ContentRegistry;
 import ca.kieve.ssss.content.MapBlockDefinition;
 import ca.kieve.ssss.editor.BlockColorResolver;
+import ca.kieve.ssss.editor.BlockGlyphResolver;
 import ca.kieve.ssss.editor.util.DialogUtil;
 import ca.kieve.ssss.editor.model.EditorMapModel;
 import javafx.geometry.Insets;
@@ -47,6 +48,7 @@ public class BlockPanel extends VBox {
 
     private final EditorMapModel m_model;
     private final BlockColorResolver m_colorResolver;
+    private final BlockGlyphResolver m_glyphResolver;
     private final ListView<String> m_blockList;
     private final List<String> m_blockTypes;
     private Consumer<String> m_onSelectionChanged;
@@ -55,10 +57,12 @@ public class BlockPanel extends VBox {
     public BlockPanel(
             EditorMapModel model,
             ContentRegistry registry,
-            BlockColorResolver colorResolver
+            BlockColorResolver colorResolver,
+            BlockGlyphResolver glyphResolver
     ) {
         m_model = model;
         m_colorResolver = colorResolver;
+        m_glyphResolver = glyphResolver;
         m_blockTypes = buildBlockTypeList(registry);
 
         getStylesheets().add(inline(CSS));
@@ -285,10 +289,20 @@ public class BlockPanel extends VBox {
             swatch.setStroke(Color.gray(0.5));
             swatch.setStrokeWidth(0.5);
 
-            var label = new Label(name);
+            char glyph =
+                    m_glyphResolver.resolve(blockDef.bpId());
+
+            var label = new Label(name + " (");
             label.setPadding(new Insets(0, 0, 0, 6));
 
-            var cell = new HBox(swatch, label);
+            var glyphLabel = new Label(String.valueOf(glyph));
+            glyphLabel.setTextFill(color);
+            glyphLabel.setStyle("-fx-font-weight: bold;");
+
+            var closeLabel = new Label(")");
+
+            var cell = new HBox(
+                    swatch, label, glyphLabel, closeLabel);
             cell.setAlignment(Pos.CENTER_LEFT);
             setGraphic(cell);
             setText(null);
