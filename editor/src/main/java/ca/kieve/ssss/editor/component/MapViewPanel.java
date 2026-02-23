@@ -40,11 +40,11 @@ public class MapViewPanel extends BorderPane {
         m_model = EditorMapModel.fromDefinition(mapDef, mapFile);
 
         var colorResolver = new BlockColorResolver(registry);
+        var glyphResolver = new BlockGlyphResolver(registry);
         m_renderer = new MapRenderer(
-                colorResolver,
-                new BlockGlyphResolver(registry));
-        m_renderer.updateNameToType(
-                m_model.buildBlockNameToTypeMap());
+                colorResolver, glyphResolver);
+        m_renderer.updateNameToBpId(
+                m_model.buildNameToBpIdMap());
 
         m_panCanvas = new PanCanvas();
         m_panCanvas.setOnRedraw(this::redraw);
@@ -63,7 +63,7 @@ public class MapViewPanel extends BorderPane {
 
         // Pick a default selected block (first non-air)
         for (var entry : m_model.getBlocks().entrySet()) {
-            if (!"air".equals(entry.getValue().type())) {
+            if (!"air".equals(entry.getValue().bpId())) {
                 m_selectedBlockName = entry.getKey();
                 m_blockPanel.selectBlock(m_selectedBlockName);
                 break;
@@ -149,8 +149,8 @@ public class MapViewPanel extends BorderPane {
     }
 
     public void refreshBlockTypes() {
-        m_renderer.updateNameToType(
-                m_model.buildBlockNameToTypeMap());
+        m_renderer.updateNameToBpId(
+                m_model.buildNameToBpIdMap());
         m_panCanvas.requestRedraw();
     }
 

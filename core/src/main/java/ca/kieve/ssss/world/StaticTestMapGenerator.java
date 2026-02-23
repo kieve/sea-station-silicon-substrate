@@ -80,7 +80,7 @@ public class StaticTestMapGenerator implements MapGenerator {
         for (Map.Entry<String, MapBlockDefinition> entry
                 : m_mapDefinition.blocks().entrySet()) {
             MapBlockDefinition blockDef = entry.getValue();
-            m_charToBlockType.put(blockDef.layoutChar(), blockDef.type());
+            m_charToBlockType.put(blockDef.layoutChar(), blockDef.bpId());
         }
     }
 

@@ -1,15 +1,15 @@
 blocks:
   floor:
-    type: wood
+    bpId: block_wood
     layoutChar: '+'
   wall:
-    type: stone
+    bpId: block_stone
     layoutChar: '#'
   air:
-    type: air
+    bpId: air
     layoutChar: '.'
   mouse_hole:
-    type: mouse_hole
+    bpId: block_mouse_hole
     layoutChar: 'o'
 
 floorGlyph: interpunct

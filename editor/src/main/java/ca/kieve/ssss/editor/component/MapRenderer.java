@@ -23,7 +23,7 @@ public class MapRenderer {
 
     private final BlockColorResolver m_colorResolver;
     private final BlockGlyphResolver m_glyphResolver;
-    private Map<String, String> m_nameToType = Map.of();
+    private Map<String, String> m_nameToBpId = Map.of();
 
     private SparseGrid m_grid;
 
@@ -33,9 +33,9 @@ public class MapRenderer {
         m_glyphResolver = glyphResolver;
     }
 
-    public void updateNameToType(
-            Map<String, String> nameToType) {
-        m_nameToType = nameToType;
+    public void updateNameToBpId(
+            Map<String, String> nameToBpId) {
+        m_nameToBpId = nameToBpId;
     }
 
     /**
@@ -120,12 +120,12 @@ public class MapRenderer {
                 continue;
             }
 
-            String typeId = m_nameToType.get(blockName);
+            String bpId = m_nameToBpId.get(blockName);
             Color color;
             char glyph;
-            if (typeId != null) {
-                color = m_colorResolver.resolve(typeId);
-                glyph = m_glyphResolver.resolve(typeId);
+            if (bpId != null) {
+                color = m_colorResolver.resolve(bpId);
+                glyph = m_glyphResolver.resolve(bpId);
             } else {
                 color = Color.MAGENTA;
                 glyph = '?';

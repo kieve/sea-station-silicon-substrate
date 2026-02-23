@@ -60,8 +60,24 @@ public class EditorMapModel {
     }
 
     public MapDefinition toDefinition() {
+        // Auto-assign layoutChars sequentially
+        String charPool =
+                "abcdefghijklmnopqrstuvwxyz0123456789";
         Map<String, MapBlockDefinition> blocks =
-                new HashMap<>(m_blocks);
+                new HashMap<>();
+        int charIndex = 0;
+        for (var entry : m_blocks.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .toList()) {
+            char layoutChar = charIndex < charPool.length()
+                    ? charPool.charAt(charIndex)
+                    : (char) ('!' + charIndex);
+            blocks.put(entry.getKey(),
+                    new MapBlockDefinition(
+                            entry.getValue().bpId(),
+                            layoutChar));
+            charIndex++;
+        }
 
         // Find the bounding box across all layers
         int minRow = Integer.MAX_VALUE;
@@ -211,6 +227,30 @@ public class EditorMapModel {
         m_modified.set(true);
     }
 
+    public boolean isBlockInUse(String blockName) {
+        for (var grid : m_layers.values()) {
+            if (grid.getCells().containsValue(blockName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void replaceBlockInLayers(
+            String oldName, String newName) {
+        for (var grid : m_layers.values()) {
+            grid.replaceValue(oldName, newName);
+        }
+        m_modified.set(true);
+    }
+
+    public void deleteBlockFromLayers(String blockName) {
+        for (var grid : m_layers.values()) {
+            grid.removeValue(blockName);
+        }
+        m_modified.set(true);
+    }
+
     public boolean isModified() {
         return m_modified.get();
     }
@@ -236,14 +276,14 @@ public class EditorMapModel {
     }
 
     /**
-     * Build a mapping from block name to block type for
+     * Build a mapping from block name to blueprint ID for
      * rendering.
      */
-    public Map<String, String> buildBlockNameToTypeMap() {
+    public Map<String, String> buildNameToBpIdMap() {
         Map<String, String> map = new HashMap<>();
         for (var entry : m_blocks.entrySet()) {
             MapBlockDefinition blockDef = entry.getValue();
-            map.put(entry.getKey(), blockDef.type());
+            map.put(entry.getKey(), blockDef.bpId());
         }
         return map;
     }

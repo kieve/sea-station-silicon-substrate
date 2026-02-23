@@ -10,32 +10,24 @@ public class BlockTypeFactory {
         m_registry = registry;
     }
 
-    public boolean isSolid(String typeId) {
-        String entityId = getEntityId(typeId);
-        if (!m_registry.hasEntity(entityId)) {
+    public boolean isSolid(String bpId) {
+        if (!m_registry.hasEntity(bpId)) {
             return false;
         }
-        EntityDefinition def = m_registry.getEntityDefinition(entityId);
+        EntityDefinition def = m_registry.getEntityDefinition(bpId);
         return hasComponentType(def, Solid.class);
     }
 
-    public boolean isOpaque(String typeId) {
-        String entityId = getEntityId(typeId);
-        if (!m_registry.hasEntity(entityId)) {
+    public boolean isOpaque(String bpId) {
+        if (!m_registry.hasEntity(bpId)) {
             return false;
         }
-        EntityDefinition def = m_registry.getEntityDefinition(entityId);
+        EntityDefinition def = m_registry.getEntityDefinition(bpId);
         return hasComponentType(def, Opaque.class);
     }
 
-    private String getEntityId(String typeId) {
-        if ("air".equals(typeId)) {
-            return "air";
-        }
-        return "block_" + typeId;
-    }
-
-    private boolean hasComponentType(EntityDefinition def, Class<?> componentType) {
+    private boolean hasComponentType(
+            EntityDefinition def, Class<?> componentType) {
         var components = def.resolveComponents(m_registry);
         for (var comp : components) {
             if (comp.type() == componentType) {

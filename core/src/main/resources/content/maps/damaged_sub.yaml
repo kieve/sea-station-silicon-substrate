@@ -1,12 +1,12 @@
 blocks:
   floor:
-    type: steel
+    bpId: block_steel
     layoutChar: '+'
   wall:
-    type: steel
+    bpId: block_steel
     layoutChar: '#'
   air:
-    type: air
+    bpId: air
     layoutChar: '.'
 
 floorGlyph: interpunct

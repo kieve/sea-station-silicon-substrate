@@ -3,7 +3,6 @@ package ca.kieve.ssss.editor.component;
 import static ca.kieve.ssss.editor.util.CssUtil.inline;
 
 import ca.kieve.ssss.content.ContentRegistry;
-import ca.kieve.ssss.content.GlyphDefinition;
 import ca.kieve.ssss.content.MapBlockDefinition;
 import ca.kieve.ssss.editor.BlockColorResolver;
 import ca.kieve.ssss.editor.model.EditorMapModel;
@@ -12,6 +11,7 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
@@ -22,9 +22,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 
 public class BlockPanel extends VBox {
@@ -50,7 +48,6 @@ public class BlockPanel extends VBox {
     private final BlockColorResolver m_colorResolver;
     private final ListView<String> m_blockList;
     private final List<String> m_blockTypes;
-    private final Map<String, GlyphDefinition> m_glyphs;
     private Consumer<String> m_onSelectionChanged;
     private Runnable m_onBlocksChanged;
 
@@ -62,7 +59,6 @@ public class BlockPanel extends VBox {
         m_model = model;
         m_colorResolver = colorResolver;
         m_blockTypes = buildBlockTypeList(registry);
-        m_glyphs = buildGlyphMap(registry);
 
         getStylesheets().add(inline(CSS));
         getStyleClass().add(STYLE_BLOCK_PANEL);
@@ -136,7 +132,7 @@ public class BlockPanel extends VBox {
     }
 
     private void onAdd() {
-        BlockEditDialog.showAdd(m_blockTypes, m_glyphs)
+        BlockEditDialog.showAdd(m_blockTypes)
                 .ifPresent(result -> {
             m_model.addBlock(result.name(), result.blockDef());
             refreshList();
@@ -154,7 +150,7 @@ public class BlockPanel extends VBox {
         MapBlockDefinition existing =
                 m_model.getBlocks().get(selected);
         BlockEditDialog.showEdit(
-                m_blockTypes, m_glyphs, selected, existing
+                m_blockTypes, selected, existing
         ).ifPresent(result -> {
             m_model.addBlock(result.name(), result.blockDef());
             refreshList();
@@ -168,18 +164,77 @@ public class BlockPanel extends VBox {
         if (selected == null) {
             return;
         }
+
+        if (!m_model.isBlockInUse(selected)) {
+            m_model.removeBlock(selected);
+            refreshList();
+            fireSelectionChanged();
+            fireBlocksChanged();
+            return;
+        }
+
+        var replaceType = new ButtonType("Replace");
+        var deleteType = new ButtonType("Delete");
+        var ignoreType = new ButtonType("Ignore");
+
         var alert = new Alert(
-                Alert.AlertType.CONFIRMATION,
-                "Remove block definition '" + selected + "'?",
-                ButtonType.YES, ButtonType.NO);
-        alert.setHeaderText(null);
+                Alert.AlertType.WARNING,
+                "Block '" + selected
+                        + "' is currently used in the map.\n\n"
+                        + "Replace: swap all cells to another"
+                        + " block\n"
+                        + "Delete: remove all cells using"
+                        + " this block\n"
+                        + "Ignore: keep orphaned cells"
+                        + " (shown as '?')",
+                replaceType, deleteType, ignoreType,
+                ButtonType.CANCEL);
+        alert.setHeaderText("Block In Use");
+
         alert.showAndWait().ifPresent(btn -> {
-            if (btn == ButtonType.YES) {
+            if (btn == replaceType) {
+                onRemoveReplace(selected);
+            } else if (btn == deleteType) {
+                m_model.deleteBlockFromLayers(selected);
+                m_model.removeBlock(selected);
+                refreshList();
+                fireSelectionChanged();
+                fireBlocksChanged();
+            } else if (btn == ignoreType) {
                 m_model.removeBlock(selected);
                 refreshList();
                 fireSelectionChanged();
                 fireBlocksChanged();
             }
+        });
+    }
+
+    private void onRemoveReplace(String selected) {
+        List<String> remaining =
+                m_model.getBlocks().keySet().stream()
+                        .filter(n -> !n.equals(selected))
+                        .sorted()
+                        .toList();
+        if (remaining.isEmpty()) {
+            var err = new Alert(
+                    Alert.AlertType.WARNING,
+                    "No other blocks to replace with.");
+            err.setHeaderText(null);
+            err.showAndWait();
+            return;
+        }
+
+        var choice = new ChoiceDialog<>(
+                remaining.getFirst(), remaining);
+        choice.setHeaderText(
+                "Replace '" + selected + "' with:");
+        choice.showAndWait().ifPresent(replacement -> {
+            m_model.replaceBlockInLayers(
+                    selected, replacement);
+            m_model.removeBlock(selected);
+            refreshList();
+            fireSelectionChanged();
+            fireBlocksChanged();
         });
     }
 
@@ -198,24 +253,13 @@ public class BlockPanel extends VBox {
         }
     }
 
-    private Map<String, GlyphDefinition> buildGlyphMap(
-            ContentRegistry registry) {
-        Map<String, GlyphDefinition> glyphs =
-                new HashMap<>();
-        for (String id : registry.getGlyphIds()) {
-            glyphs.put(id,
-                    registry.getGlyphDefinition(id));
-        }
-        return glyphs;
-    }
-
     private List<String> buildBlockTypeList(
             ContentRegistry registry) {
         List<String> types = new ArrayList<>();
         types.add("air");
         for (String entityId : registry.getEntityIds()) {
             if (entityId.startsWith("block_")) {
-                types.add(entityId.substring("block_".length()));
+                types.add(entityId);
             }
         }
         types.sort(String::compareTo);
@@ -241,13 +285,12 @@ public class BlockPanel extends VBox {
             }
 
             Color color =
-                    m_colorResolver.resolve(blockDef.type());
+                    m_colorResolver.resolve(blockDef.bpId());
             var swatch = new Rectangle(12, 12, color);
             swatch.setStroke(Color.gray(0.5));
             swatch.setStrokeWidth(0.5);
 
-            var label = new Label(
-                    name + " '" + blockDef.layoutChar() + "'");
+            var label = new Label(name);
             label.setPadding(new Insets(0, 0, 0, 6));
 
             var cell = new HBox(swatch, label);

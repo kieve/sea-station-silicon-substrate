@@ -71,14 +71,6 @@ public class EntityFactory {
         return entity;
     }
 
-    public Entity createBlock(GameContext context, Vec3i pos, String blockTypeId) {
-        if ("air".equals(blockTypeId)) {
-            return createEntity(context, "air", pos);
-        }
-        String entityId = "block_" + blockTypeId;
-        return createEntity(context, entityId, pos);
-    }
-
     public GlyphFactory getGlyphFactory() {
         return m_glyphFactory;
     }

@@ -42,7 +42,7 @@ public class WorldEntityFactory {
                     }
 
                     var pos = new Vec3i(x, y, z);
-                    var entity = factory.createBlock(context, pos, blockTypeId);
+                    var entity = factory.createEntity(context, blockTypeId, pos);
 
                     if (entity != null) {
                         count++;
@@ -78,7 +78,7 @@ public class WorldEntityFactory {
                     }
 
                     var pos = new Vec3i(x, y, z);
-                    var entity = factory.createBlock(context, pos, blockTypeId);
+                    var entity = factory.createEntity(context, blockTypeId, pos);
 
                     if (entity != null) {
                         count++;

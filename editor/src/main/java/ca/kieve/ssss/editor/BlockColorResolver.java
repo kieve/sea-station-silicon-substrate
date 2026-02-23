@@ -5,28 +5,19 @@ import ca.kieve.ssss.content.ComponentDefinition;
 import ca.kieve.ssss.content.ContentRegistry;
 import javafx.scene.paint.Color;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class BlockColorResolver {
     private final ContentRegistry m_registry;
-    private final Map<String, Color> m_cache = new HashMap<>();
 
     public BlockColorResolver(ContentRegistry registry) {
         m_registry = registry;
     }
 
-    public Color resolve(String typeId) {
-        return m_cache.computeIfAbsent(typeId, this::lookupColor);
-    }
-
-    private Color lookupColor(String typeId) {
-        String entityId = "air".equals(typeId) ? "air" : "block_" + typeId;
-        if (!m_registry.hasEntity(entityId)) {
+    public Color resolve(String bpId) {
+        if (!m_registry.hasEntity(bpId)) {
             return Color.MAGENTA;
         }
 
-        var def = m_registry.getEntityDefinition(entityId);
+        var def = m_registry.getEntityDefinition(bpId);
         var components = def.resolveComponents(m_registry);
         for (ComponentDefinition comp : components) {
             if (comp.type() == ColorComp.class) {

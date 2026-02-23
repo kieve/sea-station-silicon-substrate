@@ -85,6 +85,19 @@ public class SparseGrid {
         return m_maxCol - m_minCol + 1;
     }
 
+    public void replaceValue(String oldValue, String newValue) {
+        for (var entry : m_cells.entrySet()) {
+            if (entry.getValue().equals(oldValue)) {
+                entry.setValue(newValue);
+            }
+        }
+    }
+
+    public void removeValue(String value) {
+        m_cells.values().removeIf(v -> v.equals(value));
+        refreshBounds();
+    }
+
     public void refreshBounds() {
         if (m_cells.isEmpty()) {
             m_minRow = 0;

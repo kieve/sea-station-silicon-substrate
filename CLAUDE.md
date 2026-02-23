@@ -375,7 +375,7 @@ EntityFactory factory = context.entityFactory();
 // Create entity by ID (position always required)
 Entity player = factory.createEntity(context, "player", spawnPos);
 Entity dummy = factory.createEntity(context, "trainingDummy", pos, Color.PINK);
-Entity block = factory.createBlock(context, pos, BlockType.STONE);
+Entity block = factory.createEntity(context, "block_stone", pos);
 
 // Create entity with component overrides (used by map YAML loading)
 // Position is optional — only registered if included in overrides
