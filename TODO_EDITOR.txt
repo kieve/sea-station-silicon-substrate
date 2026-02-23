@@ -1,4 +1,0 @@
-- Confirm modals are kind of ass. Fix the styling
-  - save on exit
-  - removing blocks that already exist in the map
-

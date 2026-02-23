@@ -1,19 +1,20 @@
 package ca.kieve.ssss.editor.component;
 
 import ca.kieve.ssss.content.MapDefinition;
-import ca.kieve.ssss.editor.EditorContext;
 import ca.kieve.ssss.editor.MapSaver;
 import ca.kieve.ssss.editor.model.EditorMapModel;
 import ca.kieve.ssss.editor.ui.PanCanvas;
 import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
+import javafx.scene.control.Alert;
+import javafx.scene.control.SplitPane;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import ca.kieve.ssss.editor.util.DialogUtil;
-import javafx.scene.control.Alert;
 import javafx.scene.layout.StackPane;
 
 import java.io.File;
@@ -24,6 +25,7 @@ public class MapViewPanel extends BorderPane {
     private final MapRenderer m_renderer;
     private final PanCanvas m_panCanvas;
     private final BlockPanel m_blockPanel;
+    private final ComponentPanel m_componentPanel;
     private final InfoBar m_infoBar;
     private final ZLevelOverlay m_zOverlay;
     private final ZoomOverlay m_zoomOverlay;
@@ -47,10 +49,18 @@ public class MapViewPanel extends BorderPane {
         // Left: tool bar
         var toolBar = new EditorToolBar();
 
-        // Right: block panel
+        // Right: block panel + component panel
         m_blockPanel = new BlockPanel(m_model);
+        m_componentPanel = new ComponentPanel();
+
         m_blockPanel.setOnSelectionChanged(name -> {
             m_selectedBlockName = name;
+            var blockDef = m_model.getBlocks().get(name);
+            if (blockDef != null) {
+                m_componentPanel.showEntity(blockDef.bpId());
+            } else {
+                m_componentPanel.clear();
+            }
         });
         m_blockPanel.setOnBlocksChanged(
                 this::refreshBlockTypes);
@@ -60,6 +70,8 @@ public class MapViewPanel extends BorderPane {
             if (!"air".equals(entry.getValue().bpId())) {
                 m_selectedBlockName = entry.getKey();
                 m_blockPanel.selectBlock(m_selectedBlockName);
+                m_componentPanel.showEntity(
+                        entry.getValue().bpId());
                 break;
             }
         }
@@ -96,9 +108,17 @@ public class MapViewPanel extends BorderPane {
         StackPane.setMargin(
                 overlayBox, new Insets(8, 8, 0, 0));
 
+        var rightSplit = new SplitPane(
+                m_blockPanel, m_componentPanel);
+        rightSplit.setOrientation(Orientation.VERTICAL);
+        rightSplit.setDividerPositions(0.35);
+
+        var mainSplit = new SplitPane(
+                canvasStack, rightSplit);
+        mainSplit.setDividerPositions(0.8);
+
         setLeft(toolBar);
-        setCenter(canvasStack);
-        setRight(m_blockPanel);
+        setCenter(mainSplit);
         setBottom(m_infoBar);
 
         setupPainting();
