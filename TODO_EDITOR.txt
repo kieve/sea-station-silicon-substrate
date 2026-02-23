@@ -2,5 +2,3 @@
   - save on exit
   - removing blocks that already exist in the map
 
-Don't pass ContentRegistry and *Resolvers through parameters.
-Define a static singleton way with a "getInstance()" to get references. Then have 

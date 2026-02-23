@@ -2,10 +2,10 @@ package ca.kieve.ssss.editor.component;
 
 import static ca.kieve.ssss.editor.util.CssUtil.inline;
 
-import ca.kieve.ssss.content.ContentRegistry;
 import ca.kieve.ssss.content.MapBlockDefinition;
 import ca.kieve.ssss.editor.BlockColorResolver;
 import ca.kieve.ssss.editor.BlockGlyphResolver;
+import ca.kieve.ssss.editor.EditorContext;
 import ca.kieve.ssss.editor.util.DialogUtil;
 import ca.kieve.ssss.editor.model.EditorMapModel;
 import javafx.geometry.Insets;
@@ -54,16 +54,12 @@ public class BlockPanel extends VBox {
     private Consumer<String> m_onSelectionChanged;
     private Runnable m_onBlocksChanged;
 
-    public BlockPanel(
-            EditorMapModel model,
-            ContentRegistry registry,
-            BlockColorResolver colorResolver,
-            BlockGlyphResolver glyphResolver
-    ) {
+    public BlockPanel(EditorMapModel model) {
+        var ctx = EditorContext.getInstance();
         m_model = model;
-        m_colorResolver = colorResolver;
-        m_glyphResolver = glyphResolver;
-        m_blockTypes = buildBlockTypeList(registry);
+        m_colorResolver = ctx.getColorResolver();
+        m_glyphResolver = ctx.getGlyphResolver();
+        m_blockTypes = buildBlockTypeList();
 
         getStylesheets().add(inline(CSS));
         getStyleClass().add(STYLE_BLOCK_PANEL);
@@ -252,8 +248,9 @@ public class BlockPanel extends VBox {
         }
     }
 
-    private List<String> buildBlockTypeList(
-            ContentRegistry registry) {
+    private List<String> buildBlockTypeList() {
+        var registry =
+                EditorContext.getInstance().getRegistry();
         List<String> types = new ArrayList<>();
         types.add("air");
         for (String entityId : registry.getEntityIds()) {

@@ -2,7 +2,6 @@ package ca.kieve.ssss.editor;
 
 import static ca.kieve.ssss.editor.util.CssUtil.inline;
 
-import ca.kieve.ssss.content.ContentRegistry;
 import ca.kieve.ssss.content.MapDefinition;
 import ca.kieve.ssss.editor.component.EditorTitleBar;
 import ca.kieve.ssss.editor.component.EntityDetailPanel;
@@ -60,7 +59,6 @@ public class EditorFxApp extends Application {
             }
             """.formatted(STYLE_HIDDEN_TAB_HEADER);
 
-    private ContentRegistry m_registry;
     private TabPane m_tabPane;
     private Tab m_mapTab;
     private Stage m_stage;
@@ -72,14 +70,13 @@ public class EditorFxApp extends Application {
                 new PrimerDark().getUserAgentStylesheet());
 
         m_stage = stage;
-        m_registry = EditorApp.getRegistry();
 
         CompletableFuture.supplyAsync(this::resolveDefaultMapsDir)
                 .thenAccept(dir -> m_lastDirectory = dir);
 
-        var detailPanel = new EntityDetailPanel(m_registry);
+        var detailPanel = new EntityDetailPanel();
         var listPanel = new EntityListPanel(
-                m_registry, detailPanel::showEntity);
+                detailPanel::showEntity);
 
         var splitPane = new SplitPane(listPanel, detailPanel);
         splitPane.setDividerPositions(0.3);
@@ -286,7 +283,7 @@ public class EditorFxApp extends Application {
         try {
             MapDefinition mapDef = MapLoader.load(file);
             var mapViewPanel =
-                    new MapViewPanel(m_registry, mapDef, file);
+                    new MapViewPanel(mapDef, file);
 
             if (m_mapTab == null) {
                 m_mapTab = new Tab();

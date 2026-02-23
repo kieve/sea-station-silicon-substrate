@@ -5,6 +5,7 @@ import static ca.kieve.ssss.editor.util.CssUtil.inline;
 import ca.kieve.ssss.content.ComponentDefinition;
 import ca.kieve.ssss.content.ContentRegistry;
 import ca.kieve.ssss.content.EntityDefinition;
+import ca.kieve.ssss.editor.EditorContext;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -31,8 +32,8 @@ public class EntityDetailPanel extends ScrollPane {
     private final ContentRegistry m_registry;
     private final VBox m_content;
 
-    public EntityDetailPanel(ContentRegistry registry) {
-        m_registry = registry;
+    public EntityDetailPanel() {
+        m_registry = EditorContext.getInstance().getRegistry();
 
         getStylesheets().add(inline(CSS));
 

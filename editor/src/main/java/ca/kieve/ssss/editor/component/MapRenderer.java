@@ -2,6 +2,7 @@ package ca.kieve.ssss.editor.component;
 
 import ca.kieve.ssss.editor.BlockColorResolver;
 import ca.kieve.ssss.editor.BlockGlyphResolver;
+import ca.kieve.ssss.editor.EditorContext;
 import ca.kieve.ssss.editor.EditorTheme;
 import ca.kieve.ssss.editor.model.SparseGrid;
 import javafx.geometry.VPos;
@@ -27,10 +28,10 @@ public class MapRenderer {
 
     private SparseGrid m_grid;
 
-    public MapRenderer(BlockColorResolver colorResolver,
-                       BlockGlyphResolver glyphResolver) {
-        m_colorResolver = colorResolver;
-        m_glyphResolver = glyphResolver;
+    public MapRenderer() {
+        var ctx = EditorContext.getInstance();
+        m_colorResolver = ctx.getColorResolver();
+        m_glyphResolver = ctx.getGlyphResolver();
     }
 
     public void updateNameToBpId(

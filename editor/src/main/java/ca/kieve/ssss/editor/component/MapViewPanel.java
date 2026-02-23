@@ -1,9 +1,7 @@
 package ca.kieve.ssss.editor.component;
 
-import ca.kieve.ssss.content.ContentRegistry;
 import ca.kieve.ssss.content.MapDefinition;
-import ca.kieve.ssss.editor.BlockColorResolver;
-import ca.kieve.ssss.editor.BlockGlyphResolver;
+import ca.kieve.ssss.editor.EditorContext;
 import ca.kieve.ssss.editor.MapSaver;
 import ca.kieve.ssss.editor.model.EditorMapModel;
 import ca.kieve.ssss.editor.ui.PanCanvas;
@@ -34,16 +32,12 @@ public class MapViewPanel extends BorderPane {
     private String m_selectedBlockName;
 
     public MapViewPanel(
-            ContentRegistry registry,
             MapDefinition mapDef,
             File mapFile
     ) {
         m_model = EditorMapModel.fromDefinition(mapDef, mapFile);
 
-        var colorResolver = new BlockColorResolver(registry);
-        var glyphResolver = new BlockGlyphResolver(registry);
-        m_renderer = new MapRenderer(
-                colorResolver, glyphResolver);
+        m_renderer = new MapRenderer();
         m_renderer.updateNameToBpId(
                 m_model.buildNameToBpIdMap());
 
@@ -54,9 +48,7 @@ public class MapViewPanel extends BorderPane {
         var toolBar = new EditorToolBar();
 
         // Right: block panel
-        m_blockPanel = new BlockPanel(
-                m_model, registry,
-                colorResolver, glyphResolver);
+        m_blockPanel = new BlockPanel(m_model);
         m_blockPanel.setOnSelectionChanged(name -> {
             m_selectedBlockName = name;
         });
