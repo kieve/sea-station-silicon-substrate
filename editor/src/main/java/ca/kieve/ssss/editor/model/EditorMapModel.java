@@ -1,5 +1,6 @@
 package ca.kieve.ssss.editor.model;
 
+import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.content.ComponentDefinition;
 import ca.kieve.ssss.content.MapBlockDefinition;
 import ca.kieve.ssss.content.MapDefinition;
@@ -8,6 +9,7 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +31,8 @@ public class EditorMapModel {
         var model = new EditorMapModel();
         model.m_file = file;
         model.m_floorGlyph = def.floorGlyph();
-        model.m_entities = def.entities();
+        model.m_entities =
+                new ArrayList<>(def.entities());
         model.m_blocks.putAll(def.blocks());
 
         // Build a reverse map: layoutChar -> block name
@@ -200,6 +203,42 @@ public class EditorMapModel {
         if (!grid.setCell(row, col, blockName)) {
             return false;
         }
+        m_modified.set(true);
+        return true;
+    }
+
+    public boolean moveEntity(
+            int index, int x, int y, int z) {
+        if (index < 0 || index >= m_entities.size()) {
+            return false;
+        }
+        var entity = m_entities.get(index);
+        ComponentDefinition posComp = null;
+        for (var comp : entity.components()) {
+            if (comp.type() == Position.class) {
+                posComp = comp;
+                break;
+            }
+        }
+
+        if (posComp != null) {
+            posComp.setProperty("x", x);
+            posComp.setProperty("y", y);
+            posComp.setProperty("z", z);
+        } else {
+            var newPos =
+                    new ComponentDefinition(Position.class);
+            newPos.setProperty("x", x);
+            newPos.setProperty("y", y);
+            newPos.setProperty("z", z);
+            var newComps =
+                    new ArrayList<>(entity.components());
+            newComps.add(newPos);
+            m_entities.set(index,
+                    new MapEntityDefinition(
+                            entity.id(), newComps));
+        }
+
         m_modified.set(true);
         return true;
     }

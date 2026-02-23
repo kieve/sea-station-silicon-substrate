@@ -49,6 +49,7 @@ public class MapViewPanel extends BorderPane {
 
     private int m_currentZ;
     private String m_selectedBlockName;
+    private Integer m_selectedEntityIndex;
 
     public MapViewPanel(
             MapDefinition mapDef,
@@ -86,6 +87,7 @@ public class MapViewPanel extends BorderPane {
                 this::refreshBlockTypes);
 
         m_entityPanel.setOnSelectionChanged(index -> {
+            m_selectedEntityIndex = index;
             List<MapEntityDefinition> entities =
                     m_model.getEntities();
             if (entities == null
@@ -171,6 +173,7 @@ public class MapViewPanel extends BorderPane {
         m_selectedCellOverlay.setOnItemSelected(item -> {
             if (item.type()
                     == SelectedCellOverlay.ItemType.BLOCK) {
+                m_selectedEntityIndex = null;
                 m_tabPane.getSelectionModel()
                         .select(m_blocksTab);
                 m_blockPanel.selectBlock(item.label());
@@ -181,10 +184,10 @@ public class MapViewPanel extends BorderPane {
             }
         });
 
-        // Clear selection when tool changes away from SELECT
+        // Clear selection when switching to PAINT
         m_toolBar.activeToolProperty().addListener(
                 (obs, oldTool, newTool) -> {
-            if (newTool != EditorToolBar.Tool.SELECT) {
+            if (newTool == EditorToolBar.Tool.PAINT) {
                 clearSelection();
             }
         });
@@ -304,11 +307,25 @@ public class MapViewPanel extends BorderPane {
             return;
         }
 
-        if (m_toolBar.getActiveTool()
-                == EditorToolBar.Tool.SELECT) {
+        var tool = m_toolBar.getActiveTool();
+
+        if (tool == EditorToolBar.Tool.SELECT) {
             if (e.getButton()
                     == MouseButton.PRIMARY) {
                 selectAt(e.getX(), e.getY());
+                e.consume();
+            } else if (e.getButton()
+                    == MouseButton.SECONDARY) {
+                clearSelection();
+                e.consume();
+            }
+            return;
+        }
+
+        if (tool == EditorToolBar.Tool.MOVE) {
+            if (e.getButton()
+                    == MouseButton.PRIMARY) {
+                moveEntityTo(e.getX(), e.getY());
                 e.consume();
             } else if (e.getButton()
                     == MouseButton.SECONDARY) {
@@ -450,7 +467,41 @@ public class MapViewPanel extends BorderPane {
         m_panCanvas.requestRedraw();
     }
 
+    private void moveEntityTo(
+            double mouseX, double mouseY) {
+        if (m_selectedEntityIndex == null) {
+            return;
+        }
+        double zoom = m_panCanvas.getZoom();
+        int col = (int) Math.floor(
+                (mouseX / zoom
+                        + m_panCanvas.getCameraX())
+                        / MapRenderer.CELL_SIZE);
+        int row = (int) Math.floor(
+                (mouseY / zoom
+                        + m_panCanvas.getCameraY())
+                        / MapRenderer.CELL_SIZE);
+
+        row = m_renderer.visualRowToDataRow(row);
+        if (!m_model.moveEntity(
+                m_selectedEntityIndex,
+                col, row, m_currentZ)) {
+            return;
+        }
+
+        m_renderer.loadEntities(
+                buildEntityMarkers(m_currentZ));
+        m_renderer.setSelectedCell(row, col);
+
+        var entities = m_model.getEntities();
+        var entity = entities.get(m_selectedEntityIndex);
+        m_componentPanel.showMapEntity(
+                entity.id(), entity.components());
+        m_panCanvas.requestRedraw();
+    }
+
     private void clearSelection() {
+        m_selectedEntityIndex = null;
         m_renderer.setSelectedCell(null, null);
         m_selectedCellOverlay.clear();
         m_panCanvas.requestRedraw();

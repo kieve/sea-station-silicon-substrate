@@ -17,7 +17,8 @@ import javafx.scene.shape.Rectangle;
 public class EditorToolBar extends VBox {
     public enum Tool {
         PAINT,
-        SELECT
+        SELECT,
+        MOVE
     }
 
     private static final String STYLE_EDITOR_TOOL_BAR =
@@ -80,6 +81,18 @@ public class EditorToolBar extends VBox {
             selectBtn.setSelected(true);
         });
 
+        var moveBtn = new ToggleButton();
+        moveBtn.setGraphic(createMoveIcon());
+        moveBtn.getStyleClass().add(STYLE_TOOL_BUTTON);
+        moveBtn.setToggleGroup(toggleGroup);
+        moveBtn.setTooltip(new Tooltip("Move"));
+        moveBtn.setFocusTraversable(false);
+
+        moveBtn.setOnAction(e -> {
+            m_activeTool.set(Tool.MOVE);
+            moveBtn.setSelected(true);
+        });
+
         var paintBtn = new ToggleButton();
         paintBtn.setGraphic(createPaintIcon());
         paintBtn.getStyleClass().add(STYLE_TOOL_BUTTON);
@@ -92,7 +105,7 @@ public class EditorToolBar extends VBox {
             paintBtn.setSelected(true);
         });
 
-        getChildren().addAll(selectBtn, paintBtn);
+        getChildren().addAll(selectBtn, moveBtn, paintBtn);
     }
 
     private static Node createSelectIcon() {
@@ -122,6 +135,45 @@ public class EditorToolBar extends VBox {
         bristles.setArcHeight(2);
 
         return new Group(handle, bristles);
+    }
+
+    private static Node createMoveIcon() {
+        // Four-directional arrow
+        double cx = 7;
+        double cy = 7;
+        double arm = 5;
+        double head = 2.5;
+
+        var vLine = new Line(cx, cy - arm, cx, cy + arm);
+        vLine.setStyle(ICON_STROKE_STYLE);
+        var hLine = new Line(cx - arm, cy, cx + arm, cy);
+        hLine.setStyle(ICON_STROKE_STYLE);
+
+        String style = ICON_FILL_STYLE + ICON_STROKE_STYLE
+                + "-fx-stroke-width: 0.5;";
+        var up = new Polygon(
+                cx, cy - arm,
+                cx - head, cy - arm + head,
+                cx + head, cy - arm + head);
+        up.setStyle(style);
+        var down = new Polygon(
+                cx, cy + arm,
+                cx - head, cy + arm - head,
+                cx + head, cy + arm - head);
+        down.setStyle(style);
+        var left = new Polygon(
+                cx - arm, cy,
+                cx - arm + head, cy - head,
+                cx - arm + head, cy + head);
+        left.setStyle(style);
+        var right = new Polygon(
+                cx + arm, cy,
+                cx + arm - head, cy - head,
+                cx + arm - head, cy + head);
+        right.setStyle(style);
+
+        return new Group(
+                vLine, hLine, up, down, left, right);
     }
 
     public ObjectProperty<Tool> activeToolProperty() {
