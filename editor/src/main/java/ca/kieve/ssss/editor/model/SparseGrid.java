@@ -5,35 +5,32 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * A sparse 2D grid of characters that supports arbitrary
- * (including negative) coordinates. Tracks the bounding box
- * of all occupied cells.
+ * A sparse 2D grid of strings (block names) that supports
+ * arbitrary (including negative) coordinates. Tracks the
+ * bounding box of all occupied cells.
  */
 public class SparseGrid {
-    public static final char EMPTY = ' ';
-
     public record CellPos(int row, int col) {}
 
-    private final Map<CellPos, Character> m_cells =
+    private final Map<CellPos, String> m_cells =
             new HashMap<>();
     private int m_minRow;
     private int m_minCol;
     private int m_maxRow;
     private int m_maxCol;
 
-    public char getCell(int row, int col) {
-        Character ch = m_cells.get(new CellPos(row, col));
-        return ch != null ? ch : EMPTY;
+    public String getCell(int row, int col) {
+        return m_cells.get(new CellPos(row, col));
     }
 
     /**
-     * Set a cell value. Space characters remove the cell.
+     * Set a cell value. Null removes the cell.
      * Returns true if the grid was modified.
      */
-    public boolean setCell(int row, int col, char ch) {
+    public boolean setCell(int row, int col, String value) {
         var pos = new CellPos(row, col);
-        if (ch == EMPTY) {
-            Character prev = m_cells.remove(pos);
+        if (value == null) {
+            String prev = m_cells.remove(pos);
             if (prev == null) {
                 return false;
             }
@@ -41,16 +38,16 @@ public class SparseGrid {
             return true;
         }
 
-        Character prev = m_cells.get(pos);
-        if (prev != null && prev == ch) {
+        String prev = m_cells.get(pos);
+        if (value.equals(prev)) {
             return false;
         }
-        m_cells.put(pos, ch);
+        m_cells.put(pos, value);
         expandBounds(row, col);
         return true;
     }
 
-    public Map<CellPos, Character> getCells() {
+    public Map<CellPos, String> getCells() {
         return Collections.unmodifiableMap(m_cells);
     }
 

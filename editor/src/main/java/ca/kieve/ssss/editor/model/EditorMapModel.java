@@ -7,8 +7,6 @@ import ca.kieve.ssss.content.MapEntityDefinition;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 
-import static ca.kieve.ssss.editor.model.SparseGrid.EMPTY;
-
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +32,14 @@ public class EditorMapModel {
         model.m_entities = def.entities();
         model.m_blocks.putAll(def.blocks());
 
+        // Build a reverse map: layoutChar -> block name
+        Map<Character, String> charToName = new HashMap<>();
+        for (var entry : def.blocks().entrySet()) {
+            charToName.put(
+                    entry.getValue().layoutChar(),
+                    entry.getKey());
+        }
+
         for (var entry : def.layers().entrySet()) {
             int z = Integer.parseInt(entry.getKey());
             String[] rows = entry.getValue().split("\n");
@@ -41,8 +47,9 @@ public class EditorMapModel {
             for (int r = 0; r < rows.length; r++) {
                 for (int c = 0; c < rows[r].length(); c++) {
                     char ch = rows[r].charAt(c);
-                    if (ch != EMPTY) {
-                        grid.setCell(r, c, ch);
+                    String blockName = charToName.get(ch);
+                    if (blockName != null) {
+                        grid.setCell(r, c, blockName);
                     }
                 }
             }
@@ -89,12 +96,22 @@ public class EditorMapModel {
                 // Find the last occupied column in this row
                 int rowEnd = minCol - 1;
                 for (int c = minCol; c <= maxCol; c++) {
-                    if (grid.getCell(r, c) != EMPTY) {
+                    if (grid.getCell(r, c) != null) {
                         rowEnd = c;
                     }
                 }
                 for (int c = minCol; c <= rowEnd; c++) {
-                    sb.append(grid.getCell(r, c));
+                    String blockName =
+                            grid.getCell(r, c);
+                    if (blockName != null) {
+                        var blockDef =
+                                m_blocks.get(blockName);
+                        sb.append(blockDef != null
+                                ? blockDef.layoutChar()
+                                : ' ');
+                    } else {
+                        sb.append(' ');
+                    }
                 }
             }
             layers.put(
@@ -150,20 +167,21 @@ public class EditorMapModel {
         }).toList();
     }
 
-    public char getCell(int z, int row, int col) {
+    public String getCell(int z, int row, int col) {
         var grid = m_layers.get(z);
         if (grid == null) {
-            return EMPTY;
+            return null;
         }
         return grid.getCell(row, col);
     }
 
-    public boolean setCell(int z, int row, int col, char ch) {
+    public boolean setCell(
+            int z, int row, int col, String blockName) {
         var grid = m_layers.get(z);
         if (grid == null) {
             return false;
         }
-        if (!grid.setCell(row, col, ch)) {
+        if (!grid.setCell(row, col, blockName)) {
             return false;
         }
         m_modified.set(true);
@@ -218,14 +236,14 @@ public class EditorMapModel {
     }
 
     /**
-     * Build a mapping from layout char to block type for
+     * Build a mapping from block name to block type for
      * rendering.
      */
-    public Map<Character, String> buildCharToTypeMap() {
-        Map<Character, String> map = new HashMap<>();
+    public Map<String, String> buildBlockNameToTypeMap() {
+        Map<String, String> map = new HashMap<>();
         for (var entry : m_blocks.entrySet()) {
             MapBlockDefinition blockDef = entry.getValue();
-            map.put(blockDef.layoutChar(), blockDef.type());
+            map.put(entry.getKey(), blockDef.type());
         }
         return map;
     }

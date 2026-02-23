@@ -1,2 +1,0 @@
-- Drawing two blocks with the same glyph doesn't always use the right colors
-- co-locate css

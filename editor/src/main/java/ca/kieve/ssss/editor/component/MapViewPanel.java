@@ -1,13 +1,10 @@
 package ca.kieve.ssss.editor.component;
 
 import ca.kieve.ssss.content.ContentRegistry;
-import ca.kieve.ssss.content.MapBlockDefinition;
 import ca.kieve.ssss.content.MapDefinition;
 import ca.kieve.ssss.editor.BlockColorResolver;
 import ca.kieve.ssss.editor.BlockGlyphResolver;
 import ca.kieve.ssss.editor.MapSaver;
-import static ca.kieve.ssss.editor.model.SparseGrid.EMPTY;
-
 import ca.kieve.ssss.editor.model.EditorMapModel;
 import ca.kieve.ssss.editor.ui.PanCanvas;
 import javafx.geometry.Insets;
@@ -46,7 +43,8 @@ public class MapViewPanel extends BorderPane {
         m_renderer = new MapRenderer(
                 colorResolver,
                 new BlockGlyphResolver(registry));
-        m_renderer.updateCharToType(m_model.buildCharToTypeMap());
+        m_renderer.updateNameToType(
+                m_model.buildBlockNameToTypeMap());
 
         m_panCanvas = new PanCanvas();
         m_panCanvas.setOnRedraw(this::redraw);
@@ -60,6 +58,8 @@ public class MapViewPanel extends BorderPane {
         m_blockPanel.setOnSelectionChanged(name -> {
             m_selectedBlockName = name;
         });
+        m_blockPanel.setOnBlocksChanged(
+                this::refreshBlockTypes);
 
         // Pick a default selected block (first non-air)
         for (var entry : m_model.getBlocks().entrySet()) {
@@ -148,8 +148,9 @@ public class MapViewPanel extends BorderPane {
         }
     }
 
-    public void refreshCharToType() {
-        m_renderer.updateCharToType(m_model.buildCharToTypeMap());
+    public void refreshBlockTypes() {
+        m_renderer.updateNameToType(
+                m_model.buildBlockNameToTypeMap());
         m_panCanvas.requestRedraw();
     }
 
@@ -201,9 +202,8 @@ public class MapViewPanel extends BorderPane {
         if (m_selectedBlockName == null) {
             return;
         }
-        MapBlockDefinition block =
-                m_model.getBlocks().get(m_selectedBlockName);
-        if (block == null) {
+        if (!m_model.getBlocks()
+                .containsKey(m_selectedBlockName)) {
             return;
         }
         double zoom = m_panCanvas.getZoom();
@@ -215,7 +215,8 @@ public class MapViewPanel extends BorderPane {
                         / MapRenderer.CELL_SIZE);
 
         if (!m_model.setCell(
-                m_currentZ, row, col, block.layoutChar())) {
+                m_currentZ, row, col,
+                m_selectedBlockName)) {
             return;
         }
         m_infoBar.setDimensions(
@@ -234,7 +235,7 @@ public class MapViewPanel extends BorderPane {
                         / MapRenderer.CELL_SIZE);
 
         if (!m_model.setCell(
-                m_currentZ, row, col, EMPTY)) {
+                m_currentZ, row, col, null)) {
             return;
         }
         m_infoBar.setDimensions(

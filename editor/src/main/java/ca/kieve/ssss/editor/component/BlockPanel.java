@@ -52,6 +52,7 @@ public class BlockPanel extends VBox {
     private final List<String> m_blockTypes;
     private final Map<String, GlyphDefinition> m_glyphs;
     private Consumer<String> m_onSelectionChanged;
+    private Runnable m_onBlocksChanged;
 
     public BlockPanel(
             EditorMapModel model,
@@ -109,6 +110,10 @@ public class BlockPanel extends VBox {
         m_onSelectionChanged = callback;
     }
 
+    public void setOnBlocksChanged(Runnable callback) {
+        m_onBlocksChanged = callback;
+    }
+
     public void selectBlock(String name) {
         m_blockList.getSelectionModel().select(name);
     }
@@ -137,6 +142,7 @@ public class BlockPanel extends VBox {
             refreshList();
             m_blockList.getSelectionModel().select(result.name());
             fireSelectionChanged();
+            fireBlocksChanged();
         });
     }
 
@@ -153,6 +159,7 @@ public class BlockPanel extends VBox {
             m_model.addBlock(result.name(), result.blockDef());
             refreshList();
             fireSelectionChanged();
+            fireBlocksChanged();
         });
     }
 
@@ -171,6 +178,7 @@ public class BlockPanel extends VBox {
                 m_model.removeBlock(selected);
                 refreshList();
                 fireSelectionChanged();
+                fireBlocksChanged();
             }
         });
     }
@@ -181,6 +189,12 @@ public class BlockPanel extends VBox {
             if (sel != null) {
                 m_onSelectionChanged.accept(sel);
             }
+        }
+    }
+
+    private void fireBlocksChanged() {
+        if (m_onBlocksChanged != null) {
+            m_onBlocksChanged.run();
         }
     }
 
