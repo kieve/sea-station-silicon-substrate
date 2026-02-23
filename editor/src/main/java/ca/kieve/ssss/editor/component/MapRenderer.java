@@ -11,6 +11,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -21,12 +22,19 @@ public class MapRenderer {
     public static final int CELL_SIZE = 24;
     private static final Font GLYPH_FONT =
             new Font("Consolas", CELL_SIZE * 0.75);
+    private static final double MARKER_RATIO = 0.3;
+
+    public record EntityMarker(
+            int row, int col, Color color) {}
 
     private final BlockColorResolver m_colorResolver;
     private final BlockGlyphResolver m_glyphResolver;
     private Map<String, String> m_nameToBpId = Map.of();
+    private List<EntityMarker> m_entityMarkers = List.of();
 
     private SparseGrid m_grid;
+    private Integer m_selectedRow;
+    private Integer m_selectedCol;
 
     public MapRenderer() {
         var ctx = EditorContext.getInstance();
@@ -37,6 +45,17 @@ public class MapRenderer {
     public void updateNameToBpId(
             Map<String, String> nameToBpId) {
         m_nameToBpId = nameToBpId;
+    }
+
+    public void loadEntities(
+            List<EntityMarker> markers) {
+        m_entityMarkers = markers;
+    }
+
+    public void setSelectedCell(
+            Integer row, Integer col) {
+        m_selectedRow = row;
+        m_selectedCol = col;
     }
 
     /**
@@ -82,6 +101,18 @@ public class MapRenderer {
     }
 
     /**
+     * Convert a visual row (Y-up, as rendered) back
+     * to a data row (grid row index).
+     */
+    public int visualRowToDataRow(int visualRow) {
+        if (m_grid == null) {
+            return visualRow;
+        }
+        return m_grid.getMaxRow() - visualRow
+                + m_grid.getMinRow();
+    }
+
+    /**
      * Render the current layer to the given graphics context.
      *
      * @param zoom zoom factor (1.0 = 100%)
@@ -100,20 +131,27 @@ public class MapRenderer {
         gc.fillRect(0, 0, viewWidth, viewHeight);
 
         double cell = CELL_SIZE * zoom;
+        int maxRow = m_grid.getMaxRow();
+        int minRow = m_grid.getMinRow();
 
         drawInfiniteGrid(
                 gc, viewWidth, viewHeight,
                 cameraX, cameraY, cell);
 
         Font scaledFont = new Font(
-                GLYPH_FONT.getFamily(), CELL_SIZE * 0.75 * zoom);
+                GLYPH_FONT.getFamily(),
+                CELL_SIZE * 0.75 * zoom);
 
         for (var entry : m_grid.getCells().entrySet()) {
             var pos = entry.getKey();
             String blockName = entry.getValue();
 
-            double x = (pos.col() * CELL_SIZE - cameraX) * zoom;
-            double y = (pos.row() * CELL_SIZE - cameraY) * zoom;
+            int flippedRow =
+                    maxRow - pos.row() + minRow;
+            double x = (pos.col() * CELL_SIZE
+                    - cameraX) * zoom;
+            double y = (flippedRow * CELL_SIZE
+                    - cameraY) * zoom;
 
             if (x + cell < 0 || x > viewWidth
                     || y + cell < 0
@@ -147,6 +185,55 @@ public class MapRenderer {
             gc.setStroke(EditorTheme.GRID_COLOR);
             gc.setLineWidth(0.5);
             gc.strokeRect(x, y, cell, cell);
+        }
+
+        double diameter = cell * MARKER_RATIO;
+        double radius = diameter / 2.0;
+        double pad = cell * 0.08;
+        for (var marker : m_entityMarkers) {
+            int flippedRow =
+                    maxRow - marker.row() + minRow;
+            double x = (marker.col() * CELL_SIZE
+                    - cameraX) * zoom;
+            double y = (flippedRow * CELL_SIZE
+                    - cameraY) * zoom;
+
+            if (x + cell < 0 || x > viewWidth
+                    || y + cell < 0
+                    || y > viewHeight) {
+                continue;
+            }
+
+            double cx = x + cell - radius - pad;
+            double cy = y + radius + pad;
+
+            gc.setFill(Color.gray(0.1, 0.7));
+            gc.fillOval(
+                    cx - radius - 1,
+                    cy - radius - 1,
+                    diameter + 2,
+                    diameter + 2);
+
+            gc.setFill(marker.color());
+            gc.fillOval(
+                    cx - radius,
+                    cy - radius,
+                    diameter,
+                    diameter);
+        }
+
+        if (m_selectedRow != null
+                && m_selectedCol != null) {
+            int flippedRow = maxRow - m_selectedRow
+                    + minRow;
+            double sx = (m_selectedCol * CELL_SIZE
+                    - cameraX) * zoom;
+            double sy = (flippedRow * CELL_SIZE
+                    - cameraY) * zoom;
+
+            gc.setStroke(EditorTheme.SELECTION_COLOR);
+            gc.setLineWidth(2);
+            gc.strokeRect(sx, sy, cell, cell);
         }
     }
 

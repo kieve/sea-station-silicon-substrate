@@ -78,6 +78,10 @@ public class MapEntityPanel extends VBox {
         m_onSelectionChanged = callback;
     }
 
+    public void selectEntity(int index) {
+        m_entityList.getSelectionModel().select(index);
+    }
+
     private void refreshList() {
         List<MapEntityDefinition> entities =
                 m_model.getEntities();

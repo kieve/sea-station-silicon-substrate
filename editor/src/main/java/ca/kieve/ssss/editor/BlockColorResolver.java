@@ -5,6 +5,8 @@ import ca.kieve.ssss.content.ComponentDefinition;
 import ca.kieve.ssss.content.ContentRegistry;
 import javafx.scene.paint.Color;
 
+import java.util.List;
+
 public class BlockColorResolver {
     private final ContentRegistry m_registry;
 
@@ -29,6 +31,21 @@ public class BlockColorResolver {
         }
 
         return Color.WHITE;
+    }
+
+    public Color resolveWithOverrides(
+            String bpId,
+            List<ComponentDefinition> overrides) {
+        for (ComponentDefinition comp : overrides) {
+            if (comp.type() == ColorComp.class) {
+                Object colorVal =
+                        comp.properties().get("color");
+                if (colorVal instanceof String colorStr) {
+                    return parseColor(colorStr);
+                }
+            }
+        }
+        return resolve(bpId);
     }
 
     private static Color parseColor(String colorStr) {

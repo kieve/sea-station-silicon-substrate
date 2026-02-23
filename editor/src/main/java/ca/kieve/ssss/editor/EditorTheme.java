@@ -10,6 +10,8 @@ public final class EditorTheme {
     public static final Color CELL_BACKGROUND = Color.gray(0.1);
     public static final Color GRID_COLOR = Color.gray(0.85);
     public static final Color INFINITE_GRID_COLOR = Color.gray(0.28);
+    public static final Color ENTITY_MARKER_COLOR = Color.LIMEGREEN;
+    public static final Color SELECTION_COLOR = Color.CYAN;
 
     private EditorTheme() {}
 }

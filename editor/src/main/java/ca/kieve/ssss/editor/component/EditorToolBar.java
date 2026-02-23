@@ -11,7 +11,8 @@ import javafx.scene.layout.VBox;
 
 public class EditorToolBar extends VBox {
     public enum Tool {
-        PAINT
+        PAINT,
+        SELECT
     }
 
     private static final String STYLE_EDITOR_TOOL_BAR =
@@ -69,7 +70,18 @@ public class EditorToolBar extends VBox {
             paintBtn.setSelected(true);
         });
 
-        getChildren().add(paintBtn);
+        var selectBtn = new ToggleButton("S");
+        selectBtn.getStyleClass().add(STYLE_TOOL_BUTTON);
+        selectBtn.setToggleGroup(toggleGroup);
+        selectBtn.setTooltip(new Tooltip("Select"));
+        selectBtn.setFocusTraversable(false);
+
+        selectBtn.setOnAction(e -> {
+            m_activeTool.set(Tool.SELECT);
+            selectBtn.setSelected(true);
+        });
+
+        getChildren().addAll(paintBtn, selectBtn);
     }
 
     public ObjectProperty<Tool> activeToolProperty() {

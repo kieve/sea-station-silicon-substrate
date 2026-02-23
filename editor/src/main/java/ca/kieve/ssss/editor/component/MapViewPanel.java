@@ -1,7 +1,12 @@
 package ca.kieve.ssss.editor.component;
 
+import ca.kieve.ssss.component.Position;
+import ca.kieve.ssss.content.ComponentDefinition;
 import ca.kieve.ssss.content.MapDefinition;
 import ca.kieve.ssss.content.MapEntityDefinition;
+import ca.kieve.ssss.editor.BlockColorResolver;
+import ca.kieve.ssss.editor.EditorContext;
+import ca.kieve.ssss.editor.EditorTheme;
 import ca.kieve.ssss.editor.MapSaver;
 import ca.kieve.ssss.editor.model.EditorMapModel;
 import ca.kieve.ssss.editor.ui.PanCanvas;
@@ -17,11 +22,13 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import ca.kieve.ssss.editor.util.DialogUtil;
 import javafx.scene.layout.StackPane;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MapViewPanel extends BorderPane {
@@ -34,6 +41,11 @@ public class MapViewPanel extends BorderPane {
     private final InfoBar m_infoBar;
     private final ZLevelOverlay m_zOverlay;
     private final ZoomOverlay m_zoomOverlay;
+    private final SelectedCellOverlay m_selectedCellOverlay;
+    private final EditorToolBar m_toolBar;
+    private final TabPane m_tabPane;
+    private final Tab m_blocksTab;
+    private final Tab m_entitiesTab;
 
     private int m_currentZ;
     private String m_selectedBlockName;
@@ -53,7 +65,7 @@ public class MapViewPanel extends BorderPane {
         m_panCanvas.setOnRedraw(this::redraw);
 
         // Left: tool bar
-        var toolBar = new EditorToolBar();
+        m_toolBar = new EditorToolBar();
 
         // Right: block panel, entity panel, component panel
         m_blockPanel = new BlockPanel(m_model);
@@ -100,19 +112,19 @@ public class MapViewPanel extends BorderPane {
         }
 
         // TabPane for blocks and entities
-        var blocksTab = new Tab("Blocks", m_blockPanel);
-        blocksTab.setClosable(false);
+        m_blocksTab = new Tab("Blocks", m_blockPanel);
+        m_blocksTab.setClosable(false);
 
-        var entitiesTab = new Tab(
+        m_entitiesTab = new Tab(
                 "Entities", m_entityPanel);
-        entitiesTab.setClosable(false);
+        m_entitiesTab.setClosable(false);
 
-        var tabPane = new TabPane(
-                blocksTab, entitiesTab);
-        tabPane.getSelectionModel()
+        m_tabPane = new TabPane(
+                m_blocksTab, m_entitiesTab);
+        m_tabPane.getSelectionModel()
                 .selectedItemProperty()
                 .addListener((obs, oldTab, newTab) -> {
-            if (newTab == blocksTab) {
+            if (newTab == m_blocksTab) {
                 // Re-fire block selection
                 String sel =
                         m_blockPanel.getSelectedBlock();
@@ -154,9 +166,33 @@ public class MapViewPanel extends BorderPane {
         m_zoomOverlay.setOnReset(
                 m_panCanvas::resetZoom);
 
+        // Floating selection overlay
+        m_selectedCellOverlay = new SelectedCellOverlay();
+        m_selectedCellOverlay.setOnItemSelected(item -> {
+            if (item.type()
+                    == SelectedCellOverlay.ItemType.BLOCK) {
+                m_tabPane.getSelectionModel()
+                        .select(m_blocksTab);
+                m_blockPanel.selectBlock(item.label());
+            } else {
+                m_tabPane.getSelectionModel()
+                        .select(m_entitiesTab);
+                m_entityPanel.selectEntity(item.index());
+            }
+        });
+
+        // Clear selection when tool changes away from SELECT
+        m_toolBar.activeToolProperty().addListener(
+                (obs, oldTool, newTool) -> {
+            if (newTool != EditorToolBar.Tool.SELECT) {
+                clearSelection();
+            }
+        });
+
         // Center: canvas with floating overlays
         var overlayBox = new VBox(
-                4, m_zOverlay, m_zoomOverlay);
+                4, m_zOverlay, m_zoomOverlay,
+                m_selectedCellOverlay);
         overlayBox.setAlignment(Pos.TOP_RIGHT);
         overlayBox.setMaxWidth(Region.USE_PREF_SIZE);
         overlayBox.setMaxHeight(Region.USE_PREF_SIZE);
@@ -170,7 +206,7 @@ public class MapViewPanel extends BorderPane {
                 overlayBox, new Insets(8, 8, 0, 0));
 
         var rightSplit = new SplitPane(
-                tabPane, m_componentPanel);
+                m_tabPane, m_componentPanel);
         rightSplit.setOrientation(Orientation.VERTICAL);
         rightSplit.setDividerPositions(0.65);
 
@@ -178,7 +214,7 @@ public class MapViewPanel extends BorderPane {
                 canvasStack, rightSplit);
         mainSplit.setDividerPositions(0.8);
 
-        setLeft(toolBar);
+        setLeft(m_toolBar);
         setCenter(mainSplit);
         setBottom(m_infoBar);
 
@@ -268,6 +304,20 @@ public class MapViewPanel extends BorderPane {
             return;
         }
 
+        if (m_toolBar.getActiveTool()
+                == EditorToolBar.Tool.SELECT) {
+            if (e.getButton()
+                    == MouseButton.PRIMARY) {
+                selectAt(e.getX(), e.getY());
+                e.consume();
+            } else if (e.getButton()
+                    == MouseButton.SECONDARY) {
+                clearSelection();
+                e.consume();
+            }
+            return;
+        }
+
         if (e.getButton() == MouseButton.PRIMARY) {
             paintAt(e.getX(), e.getY());
             e.consume();
@@ -297,6 +347,7 @@ public class MapViewPanel extends BorderPane {
                         + m_panCanvas.getCameraY())
                         / MapRenderer.CELL_SIZE);
 
+        row = m_renderer.visualRowToDataRow(row);
         if (!m_model.setCell(
                 m_currentZ, row, col,
                 m_selectedBlockName)) {
@@ -320,6 +371,7 @@ public class MapViewPanel extends BorderPane {
                         + m_panCanvas.getCameraY())
                         / MapRenderer.CELL_SIZE);
 
+        row = m_renderer.visualRowToDataRow(row);
         if (!m_model.setCell(
                 m_currentZ, row, col, null)) {
             return;
@@ -330,17 +382,154 @@ public class MapViewPanel extends BorderPane {
         m_panCanvas.requestRedraw();
     }
 
+    private void selectAt(
+            double mouseX, double mouseY) {
+        double zoom = m_panCanvas.getZoom();
+        int col = (int) Math.floor(
+                (mouseX / zoom
+                        + m_panCanvas.getCameraX())
+                        / MapRenderer.CELL_SIZE);
+        int row = (int) Math.floor(
+                (mouseY / zoom
+                        + m_panCanvas.getCameraY())
+                        / MapRenderer.CELL_SIZE);
+
+        row = m_renderer.visualRowToDataRow(row);
+        m_renderer.setSelectedCell(row, col);
+
+        String blockName =
+                m_model.getCell(m_currentZ, row, col);
+
+        var entityInfos =
+                new ArrayList<SelectedCellOverlay.EntityInfo>();
+        var entities = m_model.getEntities();
+        if (entities != null) {
+            for (int i = 0; i < entities.size(); i++) {
+                var entity = entities.get(i);
+                Integer ex = null;
+                Integer ey = null;
+                Integer ez = null;
+                for (var comp : entity.components()) {
+                    if (comp.type()
+                            != Position.class) {
+                        continue;
+                    }
+                    Object xVal =
+                            comp.properties().get("x");
+                    Object yVal =
+                            comp.properties().get("y");
+                    Object zVal =
+                            comp.properties().get("z");
+                    if (xVal instanceof Number n) {
+                        ex = n.intValue();
+                    }
+                    if (yVal instanceof Number n) {
+                        ey = n.intValue();
+                    }
+                    if (zVal instanceof Number n) {
+                        ez = n.intValue();
+                    }
+                    break;
+                }
+                if (ex != null && ey != null
+                        && ez != null
+                        && ex == col && ey == row
+                        && ez == m_currentZ) {
+                    entityInfos.add(
+                            new SelectedCellOverlay
+                                    .EntityInfo(
+                                    i, entity.id()));
+                }
+            }
+        }
+
+        m_selectedCellOverlay.setHeaderText(
+                "Cell: (" + col + ", " + row + ")");
+        m_selectedCellOverlay.update(
+                blockName, entityInfos);
+        m_panCanvas.requestRedraw();
+    }
+
+    private void clearSelection() {
+        m_renderer.setSelectedCell(null, null);
+        m_selectedCellOverlay.clear();
+        m_panCanvas.requestRedraw();
+    }
+
     private void loadLayer(int zLevel) {
         var cells = m_model.getLayer(zLevel);
         if (!m_renderer.loadLayer(cells)) {
             return;
         }
 
+        clearSelection();
+        m_renderer.loadEntities(
+                buildEntityMarkers(zLevel));
         m_currentZ = zLevel;
         m_infoBar.setDimensions(
                 m_renderer.getMapCols(),
                 m_renderer.getMapRows());
         m_panCanvas.requestRedraw();
+    }
+
+    private List<MapRenderer.EntityMarker>
+            buildEntityMarkers(int zLevel) {
+        var entities = m_model.getEntities();
+        if (entities == null) {
+            return List.of();
+        }
+
+        BlockColorResolver colorResolver =
+                EditorContext.getInstance()
+                        .getColorResolver();
+        var markers =
+                new ArrayList<MapRenderer.EntityMarker>();
+        for (var entity : entities) {
+            Integer x = null;
+            Integer y = null;
+            Integer z = null;
+            for (ComponentDefinition comp
+                    : entity.components()) {
+                if (comp.type() != Position.class) {
+                    continue;
+                }
+                Object xVal =
+                        comp.properties().get("x");
+                Object yVal =
+                        comp.properties().get("y");
+                Object zVal =
+                        comp.properties().get("z");
+                if (xVal instanceof Number n) {
+                    x = n.intValue();
+                }
+                if (yVal instanceof Number n) {
+                    y = n.intValue();
+                }
+                if (zVal instanceof Number n) {
+                    z = n.intValue();
+                }
+                break;
+            }
+
+            if (x == null || y == null || z == null) {
+                continue;
+            }
+            if (z != zLevel) {
+                continue;
+            }
+
+            Color color =
+                    colorResolver.resolveWithOverrides(
+                            entity.id(),
+                            entity.components());
+            if (color.equals(Color.WHITE)) {
+                color = EditorTheme.ENTITY_MARKER_COLOR;
+            }
+            markers.add(
+                    new MapRenderer.EntityMarker(
+                            y, x, color));
+        }
+        return markers;
     }
 
     private void redraw() {
