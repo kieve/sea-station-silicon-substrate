@@ -172,7 +172,7 @@ public class MapViewPanel extends BorderPane {
         var rightSplit = new SplitPane(
                 tabPane, m_componentPanel);
         rightSplit.setOrientation(Orientation.VERTICAL);
-        rightSplit.setDividerPositions(0.35);
+        rightSplit.setDividerPositions(0.65);
 
         var mainSplit = new SplitPane(
                 canvasStack, rightSplit);

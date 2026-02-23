@@ -40,6 +40,10 @@ public class BlockPanel extends VBox {
                 -fx-padding: 8;
                 -fx-spacing: 4;
             }
+            .%1$s .list-cell {
+                -fx-cell-size: 1.5em;
+                -fx-padding: 0.125em 0.583em;
+            }
             .%2$s {
                 -fx-font-weight: bold;
                 -fx-padding: 0 8 0 4;

@@ -17,7 +17,8 @@
       "WebFetch(domain:raw.githubusercontent.com)",
       "WebFetch(domain:openjfx.io)",
       "WebFetch(domain:cr.openjdk.org)",
-      "WebFetch(domain:patch-diff.githubusercontent.com)"
+      "WebFetch(domain:patch-diff.githubusercontent.com)",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": []

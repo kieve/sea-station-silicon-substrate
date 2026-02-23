@@ -110,7 +110,7 @@ public class EditorFxApp extends Application {
         root.setTop(titleBar);
         root.setCenter(m_tabPane);
 
-        var scene = new Scene(root, 900, 600);
+        var scene = new Scene(root, 1920, 1080);
 
         // Keyboard shortcuts
         scene.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
