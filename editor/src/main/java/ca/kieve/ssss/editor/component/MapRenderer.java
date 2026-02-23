@@ -82,12 +82,15 @@ public class MapRenderer {
 
     /**
      * Render the current layer to the given graphics context.
+     *
+     * @param zoom zoom factor (1.0 = 100%)
      */
     public void render(GraphicsContext gc,
                        double viewWidth,
                        double viewHeight,
                        double cameraX,
-                       double cameraY) {
+                       double cameraY,
+                       double zoom) {
         if (m_grid == null) {
             return;
         }
@@ -95,18 +98,24 @@ public class MapRenderer {
         gc.setFill(EditorTheme.CANVAS_BACKGROUND);
         gc.fillRect(0, 0, viewWidth, viewHeight);
 
+        double cell = CELL_SIZE * zoom;
+
         drawInfiniteGrid(
-                gc, viewWidth, viewHeight, cameraX, cameraY);
+                gc, viewWidth, viewHeight,
+                cameraX, cameraY, cell);
+
+        Font scaledFont = new Font(
+                GLYPH_FONT.getFamily(), CELL_SIZE * 0.75 * zoom);
 
         for (var entry : m_grid.getCells().entrySet()) {
             var pos = entry.getKey();
             char ch = entry.getValue();
 
-            double x = pos.col() * CELL_SIZE - cameraX;
-            double y = pos.row() * CELL_SIZE - cameraY;
+            double x = (pos.col() * CELL_SIZE - cameraX) * zoom;
+            double y = (pos.row() * CELL_SIZE - cameraY) * zoom;
 
-            if (x + CELL_SIZE < 0 || x > viewWidth
-                    || y + CELL_SIZE < 0
+            if (x + cell < 0 || x > viewWidth
+                    || y + cell < 0
                     || y > viewHeight) {
                 continue;
             }
@@ -123,20 +132,20 @@ public class MapRenderer {
             }
 
             gc.setFill(EditorTheme.CELL_BACKGROUND);
-            gc.fillRect(x, y, CELL_SIZE, CELL_SIZE);
+            gc.fillRect(x, y, cell, cell);
 
-            gc.setFont(GLYPH_FONT);
+            gc.setFont(scaledFont);
             gc.setTextAlign(TextAlignment.CENTER);
             gc.setTextBaseline(VPos.CENTER);
             gc.setFill(color);
             gc.fillText(
                     String.valueOf(glyph),
-                    x + CELL_SIZE / 2.0,
-                    y + CELL_SIZE / 2.0);
+                    x + cell / 2.0,
+                    y + cell / 2.0);
 
             gc.setStroke(EditorTheme.GRID_COLOR);
             gc.setLineWidth(0.5);
-            gc.strokeRect(x, y, CELL_SIZE, CELL_SIZE);
+            gc.strokeRect(x, y, cell, cell);
         }
     }
 
@@ -144,23 +153,25 @@ public class MapRenderer {
                                   double viewWidth,
                                   double viewHeight,
                                   double cameraX,
-                                  double cameraY) {
+                                  double cameraY,
+                                  double cell) {
         gc.setStroke(EditorTheme.INFINITE_GRID_COLOR);
         gc.setLineWidth(0.5);
 
+        double scaledCamX = cameraX * (cell / CELL_SIZE);
+        double scaledCamY = cameraY * (cell / CELL_SIZE);
+
         double offsetX =
-                -((cameraX % CELL_SIZE) + CELL_SIZE)
-                        % CELL_SIZE;
+                -((scaledCamX % cell) + cell) % cell;
         double offsetY =
-                -((cameraY % CELL_SIZE) + CELL_SIZE)
-                        % CELL_SIZE;
+                -((scaledCamY % cell) + cell) % cell;
 
         for (double x = offsetX; x <= viewWidth;
-                x += CELL_SIZE) {
+                x += cell) {
             gc.strokeLine(x, 0, x, viewHeight);
         }
         for (double y = offsetY; y <= viewHeight;
-                y += CELL_SIZE) {
+                y += cell) {
             gc.strokeLine(0, y, viewWidth, y);
         }
     }

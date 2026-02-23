@@ -46,6 +46,10 @@ public final class EditorTheme {
             "editor-z-overlay";
     public static final String STYLE_Z_STEP_BUTTON =
             "editor-z-step-button";
+    public static final String STYLE_ZOOM_OVERLAY =
+            "editor-zoom-overlay";
+    public static final String STYLE_ZOOM_RESET_BUTTON =
+            "editor-zoom-reset-button";
 
     /** Path to the editor CSS stylesheet, relative to this class. */
     public static final String STYLESHEET =

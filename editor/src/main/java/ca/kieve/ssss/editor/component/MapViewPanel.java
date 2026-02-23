@@ -15,6 +15,8 @@ import javafx.geometry.Pos;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 import javafx.scene.control.Alert;
 import javafx.scene.layout.StackPane;
 
@@ -28,6 +30,7 @@ public class MapViewPanel extends BorderPane {
     private final BlockPanel m_blockPanel;
     private final InfoBar m_infoBar;
     private final ZLevelOverlay m_zOverlay;
+    private final ZoomOverlay m_zoomOverlay;
 
     private int m_currentZ;
     private String m_selectedBlockName;
@@ -81,12 +84,23 @@ public class MapViewPanel extends BorderPane {
                 (obs, oldVal, newVal) ->
                         loadLayer(newVal.intValue()));
 
-        // Center: canvas with floating overlay
-        var canvasStack = new StackPane(m_panCanvas, m_zOverlay);
+        // Floating zoom overlay
+        m_zoomOverlay = new ZoomOverlay();
+        m_zoomOverlay.bindZoom(m_panCanvas.zoomProperty());
+        m_zoomOverlay.setOnReset(m_panCanvas::resetZoom);
+
+        // Center: canvas with floating overlays
+        var overlayBox = new VBox(4, m_zOverlay, m_zoomOverlay);
+        overlayBox.setAlignment(Pos.TOP_RIGHT);
+        overlayBox.setMaxWidth(Region.USE_PREF_SIZE);
+        overlayBox.setMaxHeight(Region.USE_PREF_SIZE);
+        overlayBox.setPickOnBounds(false);
+
+        var canvasStack = new StackPane(m_panCanvas, overlayBox);
         StackPane.setAlignment(
-                m_zOverlay, Pos.TOP_RIGHT);
+                overlayBox, Pos.TOP_RIGHT);
         StackPane.setMargin(
-                m_zOverlay, new Insets(8, 8, 0, 0));
+                overlayBox, new Insets(8, 8, 0, 0));
 
         setLeft(toolBar);
         setCenter(canvasStack);
@@ -141,10 +155,22 @@ public class MapViewPanel extends BorderPane {
 
     private void setupScrollZLevel() {
         m_panCanvas.setOnScroll(e -> {
-            if (e.getDeltaY() > 0) {
-                m_zOverlay.step(1);
-            } else if (e.getDeltaY() < 0) {
-                m_zOverlay.step(-1);
+            if (e.isShiftDown()) {
+                // Windows converts Shift+ScrollWheel vertical
+                // into horizontal, so check both axes.
+                double delta = e.getDeltaY() != 0
+                        ? e.getDeltaY() : e.getDeltaX();
+                if (delta != 0) {
+                    int dir = delta > 0 ? 1 : -1;
+                    m_panCanvas.zoom(
+                            dir, e.getX(), e.getY());
+                }
+            } else {
+                if (e.getDeltaY() > 0) {
+                    m_zOverlay.step(1);
+                } else if (e.getDeltaY() < 0) {
+                    m_zOverlay.step(-1);
+                }
             }
             e.consume();
         });
@@ -180,11 +206,12 @@ public class MapViewPanel extends BorderPane {
         if (block == null) {
             return;
         }
+        double zoom = m_panCanvas.getZoom();
         int col = (int) Math.floor(
-                (mouseX + m_panCanvas.getCameraX())
+                (mouseX / zoom + m_panCanvas.getCameraX())
                         / MapRenderer.CELL_SIZE);
         int row = (int) Math.floor(
-                (mouseY + m_panCanvas.getCameraY())
+                (mouseY / zoom + m_panCanvas.getCameraY())
                         / MapRenderer.CELL_SIZE);
 
         if (!m_model.setCell(
@@ -198,11 +225,12 @@ public class MapViewPanel extends BorderPane {
     }
 
     private void eraseAt(double mouseX, double mouseY) {
+        double zoom = m_panCanvas.getZoom();
         int col = (int) Math.floor(
-                (mouseX + m_panCanvas.getCameraX())
+                (mouseX / zoom + m_panCanvas.getCameraX())
                         / MapRenderer.CELL_SIZE);
         int row = (int) Math.floor(
-                (mouseY + m_panCanvas.getCameraY())
+                (mouseY / zoom + m_panCanvas.getCameraY())
                         / MapRenderer.CELL_SIZE);
 
         if (!m_model.setCell(
@@ -235,6 +263,7 @@ public class MapViewPanel extends BorderPane {
                 canvas.getWidth(),
                 canvas.getHeight(),
                 m_panCanvas.getCameraX(),
-                m_panCanvas.getCameraY());
+                m_panCanvas.getCameraY(),
+                m_panCanvas.getZoom());
     }
 }
