@@ -4,10 +4,15 @@ import static ca.kieve.ssss.editor.util.CssUtil.inline;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Line;
+import javafx.scene.shape.Polygon;
+import javafx.scene.shape.Rectangle;
 
 public class EditorToolBar extends VBox {
     public enum Tool {
@@ -19,6 +24,10 @@ public class EditorToolBar extends VBox {
             "editor-tool-bar";
     private static final String STYLE_TOOL_BUTTON =
             "editor-tool-button";
+    private static final String ICON_STROKE_STYLE =
+            "-fx-stroke: -color-fg-default; -fx-stroke-width: 1;";
+    private static final String ICON_FILL_STYLE =
+            "-fx-fill: -color-fg-default;";
 
     // language=css
     private static final String CSS = """
@@ -47,7 +56,7 @@ public class EditorToolBar extends VBox {
             """.formatted(STYLE_EDITOR_TOOL_BAR, STYLE_TOOL_BUTTON);
 
     private final ObjectProperty<Tool> m_activeTool =
-            new SimpleObjectProperty<>(Tool.PAINT);
+            new SimpleObjectProperty<>(Tool.SELECT);
 
     public EditorToolBar() {
         getStylesheets().add(inline(CSS));
@@ -58,21 +67,11 @@ public class EditorToolBar extends VBox {
 
         var toggleGroup = new ToggleGroup();
 
-        var paintBtn = new ToggleButton("P");
-        paintBtn.getStyleClass().add(STYLE_TOOL_BUTTON);
-        paintBtn.setToggleGroup(toggleGroup);
-        paintBtn.setSelected(true);
-        paintBtn.setTooltip(new Tooltip("Paint"));
-        paintBtn.setFocusTraversable(false);
-
-        paintBtn.setOnAction(e -> {
-            m_activeTool.set(Tool.PAINT);
-            paintBtn.setSelected(true);
-        });
-
-        var selectBtn = new ToggleButton("S");
+        var selectBtn = new ToggleButton();
+        selectBtn.setGraphic(createSelectIcon());
         selectBtn.getStyleClass().add(STYLE_TOOL_BUTTON);
         selectBtn.setToggleGroup(toggleGroup);
+        selectBtn.setSelected(true);
         selectBtn.setTooltip(new Tooltip("Select"));
         selectBtn.setFocusTraversable(false);
 
@@ -81,7 +80,48 @@ public class EditorToolBar extends VBox {
             selectBtn.setSelected(true);
         });
 
-        getChildren().addAll(paintBtn, selectBtn);
+        var paintBtn = new ToggleButton();
+        paintBtn.setGraphic(createPaintIcon());
+        paintBtn.getStyleClass().add(STYLE_TOOL_BUTTON);
+        paintBtn.setToggleGroup(toggleGroup);
+        paintBtn.setTooltip(new Tooltip("Paint"));
+        paintBtn.setFocusTraversable(false);
+
+        paintBtn.setOnAction(e -> {
+            m_activeTool.set(Tool.PAINT);
+            paintBtn.setSelected(true);
+        });
+
+        getChildren().addAll(selectBtn, paintBtn);
+    }
+
+    private static Node createSelectIcon() {
+        // Arrow cursor pointing up-left
+        var arrow = new Polygon(
+                0, 0,
+                0, 12,
+                3.5, 9,
+                7, 14,
+                9, 13,
+                5.5, 8,
+                9.5, 8);
+        arrow.setStyle(ICON_FILL_STYLE + ICON_STROKE_STYLE
+                + "-fx-stroke-width: 0.5;");
+        return arrow;
+    }
+
+    private static Node createPaintIcon() {
+        // Paintbrush: angled handle + bristle tip
+        var handle = new Line(12, 0, 4, 8);
+        handle.setStyle(ICON_STROKE_STYLE
+                + "-fx-stroke-width: 2;");
+
+        var bristles = new Rectangle(1, 8, 6, 5);
+        bristles.setStyle(ICON_FILL_STYLE);
+        bristles.setArcWidth(2);
+        bristles.setArcHeight(2);
+
+        return new Group(handle, bristles);
     }
 
     public ObjectProperty<Tool> activeToolProperty() {
