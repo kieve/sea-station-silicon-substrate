@@ -194,3 +194,34 @@
 .editor-zoom-reset-button:hover {
     -fx-background-color: -color-neutral-muted;
 }
+
+/* --- Glyph selector dialog --- */
+
+.glyph-selector-button {
+    -fx-background-color: -color-bg-subtle;
+    -fx-background-radius: 4;
+    -fx-border-color: -color-border-default;
+    -fx-border-radius: 4;
+    -fx-border-width: 1;
+    -fx-pref-width: 64;
+    -fx-pref-height: 64;
+    -fx-min-width: 64;
+    -fx-min-height: 64;
+    -fx-padding: 4;
+    -fx-cursor: hand;
+}
+
+.glyph-selector-button:hover {
+    -fx-background-color: -color-accent-muted;
+    -fx-border-color: -color-accent-fg;
+}
+
+.glyph-selector-char {
+    -fx-font-size: 22;
+    -fx-font-weight: bold;
+}
+
+.glyph-selector-name {
+    -fx-font-size: 9;
+    -fx-text-fill: -color-fg-muted;
+}

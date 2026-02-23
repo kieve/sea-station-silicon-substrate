@@ -1,5 +1,6 @@
 package ca.kieve.ssss.editor.component;
 
+import ca.kieve.ssss.content.GlyphDefinition;
 import ca.kieve.ssss.content.MapBlockDefinition;
 import javafx.geometry.Insets;
 import javafx.scene.control.ButtonType;
@@ -10,6 +11,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class BlockEditDialog extends Dialog<BlockEditDialog.Result> {
@@ -18,10 +20,11 @@ public class BlockEditDialog extends Dialog<BlockEditDialog.Result> {
 
     private final TextField m_nameField;
     private final ComboBox<String> m_typeCombo;
-    private final TextField m_charField;
+    private final GlyphEditField m_glyphField;
 
     public BlockEditDialog(
             List<String> blockTypes,
+            Map<String, GlyphDefinition> glyphs,
             String existingName,
             MapBlockDefinition existingDef
     ) {
@@ -42,19 +45,11 @@ public class BlockEditDialog extends Dialog<BlockEditDialog.Result> {
             m_typeCombo.setValue(blockTypes.getFirst());
         }
 
-        m_charField = new TextField(
-                existingDef != null
-                        ? String.valueOf(existingDef.layoutChar())
-                        : "");
-        m_charField.setPrefColumnCount(2);
-        // Limit to a single character
-        m_charField.textProperty().addListener(
-                (obs, oldVal, newVal) -> {
-            if (newVal.length() > 1) {
-                m_charField.setText(
-                        newVal.substring(0, 1));
-            }
-        });
+        m_glyphField = new GlyphEditField(glyphs);
+        if (existingDef != null) {
+            m_glyphField.setGlyphChar(
+                    existingDef.layoutChar());
+        }
 
         var grid = new GridPane();
         grid.setHgap(8);
@@ -65,7 +60,7 @@ public class BlockEditDialog extends Dialog<BlockEditDialog.Result> {
         grid.add(new Label("Type:"), 0, 1);
         grid.add(m_typeCombo, 1, 1);
         grid.add(new Label("Layout Char:"), 0, 2);
-        grid.add(m_charField, 1, 2);
+        grid.add(m_glyphField, 1, 2);
 
         getDialogPane().setContent(grid);
         getDialogPane().getButtonTypes().addAll(
@@ -77,32 +72,35 @@ public class BlockEditDialog extends Dialog<BlockEditDialog.Result> {
             }
             String name = m_nameField.getText().trim();
             String type = m_typeCombo.getValue();
-            String charText = m_charField.getText();
+            Character layoutChar =
+                    m_glyphField.getLayoutChar();
             if (name.isEmpty() || type == null
-                    || charText.isEmpty()) {
+                    || layoutChar == null) {
                 return null;
             }
             return new Result(
                     name,
                     new MapBlockDefinition(
-                            type, charText.charAt(0)));
+                            type, layoutChar));
         });
     }
 
     public static Optional<Result> showAdd(
-            List<String> blockTypes) {
+            List<String> blockTypes,
+            Map<String, GlyphDefinition> glyphs) {
         var dialog = new BlockEditDialog(
-                blockTypes, null, null);
+                blockTypes, glyphs, null, null);
         return dialog.showAndWait();
     }
 
     public static Optional<Result> showEdit(
             List<String> blockTypes,
+            Map<String, GlyphDefinition> glyphs,
             String name,
             MapBlockDefinition def
     ) {
         var dialog = new BlockEditDialog(
-                blockTypes, name, def);
+                blockTypes, glyphs, name, def);
         return dialog.showAndWait();
     }
 }

@@ -80,6 +80,10 @@ public class ContentRegistry {
         return Set.copyOf(m_entityDefinitions.keySet());
     }
 
+    public Set<String> getGlyphIds() {
+        return Set.copyOf(m_glyphDefinitions.keySet());
+    }
+
     public boolean hasEntity(String id) {
         return m_entityDefinitions.containsKey(id);
     }

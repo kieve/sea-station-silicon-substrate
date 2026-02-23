@@ -1,6 +1,7 @@
 package ca.kieve.ssss.editor.component;
 
 import ca.kieve.ssss.content.ContentRegistry;
+import ca.kieve.ssss.content.GlyphDefinition;
 import ca.kieve.ssss.content.MapBlockDefinition;
 import ca.kieve.ssss.editor.BlockColorResolver;
 import ca.kieve.ssss.editor.EditorTheme;
@@ -20,7 +21,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class BlockPanel extends VBox {
@@ -28,6 +31,7 @@ public class BlockPanel extends VBox {
     private final BlockColorResolver m_colorResolver;
     private final ListView<String> m_blockList;
     private final List<String> m_blockTypes;
+    private final Map<String, GlyphDefinition> m_glyphs;
     private Consumer<String> m_onSelectionChanged;
 
     public BlockPanel(
@@ -38,6 +42,7 @@ public class BlockPanel extends VBox {
         m_model = model;
         m_colorResolver = colorResolver;
         m_blockTypes = buildBlockTypeList(registry);
+        m_glyphs = buildGlyphMap(registry);
 
         getStyleClass().add(EditorTheme.STYLE_BLOCK_PANEL);
         setPrefWidth(200);
@@ -107,7 +112,8 @@ public class BlockPanel extends VBox {
     }
 
     private void onAdd() {
-        BlockEditDialog.showAdd(m_blockTypes).ifPresent(result -> {
+        BlockEditDialog.showAdd(m_blockTypes, m_glyphs)
+                .ifPresent(result -> {
             m_model.addBlock(result.name(), result.blockDef());
             refreshList();
             m_blockList.getSelectionModel().select(result.name());
@@ -123,7 +129,7 @@ public class BlockPanel extends VBox {
         MapBlockDefinition existing =
                 m_model.getBlocks().get(selected);
         BlockEditDialog.showEdit(
-                m_blockTypes, selected, existing
+                m_blockTypes, m_glyphs, selected, existing
         ).ifPresent(result -> {
             m_model.addBlock(result.name(), result.blockDef());
             refreshList();
@@ -157,6 +163,17 @@ public class BlockPanel extends VBox {
                 m_onSelectionChanged.accept(sel);
             }
         }
+    }
+
+    private Map<String, GlyphDefinition> buildGlyphMap(
+            ContentRegistry registry) {
+        Map<String, GlyphDefinition> glyphs =
+                new HashMap<>();
+        for (String id : registry.getGlyphIds()) {
+            glyphs.put(id,
+                    registry.getGlyphDefinition(id));
+        }
+        return glyphs;
     }
 
     private List<String> buildBlockTypeList(

@@ -50,6 +50,12 @@ public final class EditorTheme {
             "editor-zoom-overlay";
     public static final String STYLE_ZOOM_RESET_BUTTON =
             "editor-zoom-reset-button";
+    public static final String STYLE_GLYPH_SELECTOR_BUTTON =
+            "glyph-selector-button";
+    public static final String STYLE_GLYPH_SELECTOR_CHAR =
+            "glyph-selector-char";
+    public static final String STYLE_GLYPH_SELECTOR_NAME =
+            "glyph-selector-name";
 
     /** Path to the editor CSS stylesheet, relative to this class. */
     public static final String STYLESHEET =
