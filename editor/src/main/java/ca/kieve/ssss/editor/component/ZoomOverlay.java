@@ -2,6 +2,7 @@ package ca.kieve.ssss.editor.component;
 
 import static ca.kieve.ssss.editor.util.CssUtil.inline;
 
+import ca.kieve.ssss.editor.EditorTheme;
 import javafx.beans.property.DoubleProperty;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -9,20 +10,13 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 
 public class ZoomOverlay extends HBox {
-    private static final String STYLE_ZOOM_OVERLAY =
-            "editor-zoom-overlay";
     private static final String STYLE_ZOOM_RESET_BUTTON =
             "editor-zoom-reset-button";
 
     // language=css
-    private static final String CSS = """
+    private static final String CSS =
+            EditorTheme.OVERLAY_CSS + """
             .%1$s {
-                -fx-background-color: rgba(30, 30, 30, 0.85);
-                -fx-background-radius: 6;
-                -fx-padding: 4 8;
-                -fx-font-size: 11;
-            }
-            .%2$s {
                 -fx-background-color: transparent;
                 -fx-background-radius: 3;
                 -fx-padding: 0 4;
@@ -33,19 +27,17 @@ public class ZoomOverlay extends HBox {
                 -fx-font-size: 12;
                 -fx-cursor: hand;
             }
-            .%2$s:hover {
+            .%1$s:hover {
                 -fx-background-color: -color-neutral-muted;
             }
-            """.formatted(
-            STYLE_ZOOM_OVERLAY,
-            STYLE_ZOOM_RESET_BUTTON);
+            """.formatted(STYLE_ZOOM_RESET_BUTTON);
 
     private final Label m_zoomLabel;
     private Runnable m_onReset;
 
     public ZoomOverlay() {
         getStylesheets().add(inline(CSS));
-        getStyleClass().add(STYLE_ZOOM_OVERLAY);
+        getStyleClass().add(EditorTheme.STYLE_OVERLAY);
         setAlignment(Pos.CENTER);
         setSpacing(4);
         setMaxWidth(USE_PREF_SIZE);

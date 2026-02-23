@@ -15,17 +15,30 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
 /**
- * Generates the editor app icon: white @ on a transparent background.
- * Uses AWT rendering so it works before the JavaFX scene is shown.
+ * Generates icons: white text on a transparent background.
+ * Uses AWT rendering so it works before the JavaFX scene
+ * is shown.
  */
 public final class AppIcon {
     private static final String FONT_FAMILY = "Segoe UI";
     private static final int PADDING = 2;
 
     /**
+     * Create the default app icon (@) at the given size.
+     *
      * @param size pixel width and height of the icon
      */
     public static Image create(int size) {
+        return create("@", size);
+    }
+
+    /**
+     * Render a string as a white-on-transparent icon.
+     *
+     * @param text the text to render
+     * @param size pixel width and height of the icon
+     */
+    public static Image create(String text, int size) {
         var buf = new BufferedImage(
                 size, size, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g = buf.createGraphics();
@@ -38,11 +51,13 @@ public final class AppIcon {
                 RenderingHints.VALUE_ANTIALIAS_ON);
         g.setColor(Color.WHITE);
 
-        // Render at a large reference size, then measure and scale
-        // to fit within the icon bounds with padding.
-        var refFont = new Font(FONT_FAMILY, Font.BOLD, 200);
+        // Render at a large reference size, then measure
+        // and scale to fit within the icon bounds with
+        // padding.
+        var refFont =
+                new Font(FONT_FAMILY, Font.BOLD, 200);
         GlyphVector gv = refFont.createGlyphVector(
-                g.getFontRenderContext(), "@");
+                g.getFontRenderContext(), text);
         Rectangle2D bounds = gv.getVisualBounds();
 
         double available = size - PADDING * 2;
@@ -50,10 +65,12 @@ public final class AppIcon {
                 available / bounds.getWidth(),
                 available / bounds.getHeight());
 
-        double tx = (size - bounds.getWidth() * scale) / 2
-                - bounds.getX() * scale;
-        double ty = (size - bounds.getHeight() * scale) / 2
-                - bounds.getY() * scale;
+        double tx =
+                (size - bounds.getWidth() * scale) / 2
+                        - bounds.getX() * scale;
+        double ty =
+                (size - bounds.getHeight() * scale) / 2
+                        - bounds.getY() * scale;
 
         var xform = new AffineTransform();
         xform.translate(tx, ty);
@@ -63,7 +80,7 @@ public final class AppIcon {
                 gv.getOutline()));
         g.dispose();
 
-        // Convert BufferedImage → WritableImage
+        // Convert BufferedImage -> WritableImage
         var img = new WritableImage(size, size);
         PixelWriter pw = img.getPixelWriter();
         for (int py = 0; py < size; py++) {

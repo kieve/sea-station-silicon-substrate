@@ -4,6 +4,8 @@ import static ca.kieve.ssss.editor.util.CssUtil.inline;
 
 import ca.kieve.ssss.editor.ui.AppIcon;
 import ca.kieve.ssss.editor.ui.WindowsAeroSnap;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ListChangeListener;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -102,10 +104,12 @@ public class EditorTitleBar extends HBox {
     private final Button m_maxBtn;
     private final BooleanSupplier m_canCloseTab;
 
+    private final BooleanProperty m_maximized =
+            new SimpleBooleanProperty(false);
+
     private double m_dragOffsetX;
     private double m_dragOffsetY;
     private boolean m_dragging;
-    private boolean m_maximized;
 
     // Saved bounds for restore-from-maximize
     private double m_restoreX;
@@ -232,8 +236,14 @@ public class EditorTitleBar extends HBox {
                 return;
             }
 
-            // Try native drag first (enables snap previews)
+            // Try native drag first (enables snap previews).
+            // Dragging a maximized window restores it.
             if (WindowsAeroSnap.startNativeDrag()) {
+                if (m_maximized.get()) {
+                    m_maximized.set(false);
+                    m_maxBtn.setGraphic(
+                            createMaximizeIcon());
+                }
                 e.consume();
                 return;
             }
@@ -262,9 +272,13 @@ public class EditorTitleBar extends HBox {
         });
     }
 
+    public BooleanProperty maximizedProperty() {
+        return m_maximized;
+    }
+
     private void toggleMaximize() {
-        if (m_maximized) {
-            m_maximized = false;
+        if (m_maximized.get()) {
+            m_maximized.set(false);
             m_stage.setX(m_restoreX);
             m_stage.setY(m_restoreY);
             m_stage.setWidth(m_restoreW);
@@ -281,7 +295,7 @@ public class EditorTitleBar extends HBox {
                     m_stage.getWidth(), m_stage.getHeight())
                     .getFirst()
                     .getVisualBounds();
-            m_maximized = true;
+            m_maximized.set(true);
             m_stage.setX(bounds.getMinX());
             m_stage.setY(bounds.getMinY());
             m_stage.setWidth(bounds.getWidth());

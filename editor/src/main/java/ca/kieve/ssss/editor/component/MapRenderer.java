@@ -35,6 +35,8 @@ public class MapRenderer {
     private SparseGrid m_grid;
     private Integer m_selectedRow;
     private Integer m_selectedCol;
+    private Font m_cachedFont;
+    private double m_cachedFontZoom;
 
     public MapRenderer() {
         var ctx = EditorContext.getInstance();
@@ -132,9 +134,14 @@ public class MapRenderer {
                 gc, viewWidth, viewHeight,
                 cameraX, cameraY, cell);
 
-        Font scaledFont = new Font(
-                GLYPH_FONT.getFamily(),
-                CELL_SIZE * 0.75 * zoom);
+        if (m_cachedFont == null
+                || m_cachedFontZoom != zoom) {
+            m_cachedFont = new Font(
+                    GLYPH_FONT.getFamily(),
+                    CELL_SIZE * 0.75 * zoom);
+            m_cachedFontZoom = zoom;
+        }
+        Font scaledFont = m_cachedFont;
 
         for (var entry : m_grid.getCells().entrySet()) {
             var pos = entry.getKey();

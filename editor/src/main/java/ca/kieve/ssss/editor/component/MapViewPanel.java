@@ -1,7 +1,6 @@
 package ca.kieve.ssss.editor.component;
 
 import ca.kieve.ssss.component.Position;
-import ca.kieve.ssss.content.ComponentDefinition;
 import ca.kieve.ssss.content.MapDefinition;
 import ca.kieve.ssss.content.MapEntityDefinition;
 import ca.kieve.ssss.editor.BlockColorResolver;
@@ -48,6 +47,32 @@ public class MapViewPanel extends BorderPane {
     private final Tab m_blocksTab;
     private final Tab m_entitiesTab;
 
+    private record GridCell(int row, int col) {}
+
+    private record EntityPos(int x, int y, int z) {}
+
+    private static EntityPos getEntityPos(
+            MapEntityDefinition entity) {
+        for (var comp : entity.components()) {
+            if (comp.type() != Position.class) {
+                continue;
+            }
+            Object xVal = comp.properties().get("x");
+            Object yVal = comp.properties().get("y");
+            Object zVal = comp.properties().get("z");
+            if (xVal instanceof Number nx
+                    && yVal instanceof Number ny
+                    && zVal instanceof Number nz) {
+                return new EntityPos(
+                        nx.intValue(),
+                        ny.intValue(),
+                        nz.intValue());
+            }
+            return null;
+        }
+        return null;
+    }
+
     private int m_currentZ;
     private String m_selectedBlockName;
     private Integer m_selectedEntityIndex;
@@ -92,8 +117,7 @@ public class MapViewPanel extends BorderPane {
             m_selectedEntityIndex = index;
             List<MapEntityDefinition> entities =
                     m_model.getEntities();
-            if (entities == null
-                    || index >= entities.size()) {
+            if (index >= entities.size()) {
                 m_componentPanel.clear();
                 return;
             }
@@ -362,15 +386,8 @@ public class MapViewPanel extends BorderPane {
         }
     }
 
-    private void paintAt(
+    private GridCell mouseToGrid(
             double mouseX, double mouseY) {
-        if (m_selectedBlockName == null) {
-            return;
-        }
-        if (!m_model.getBlocks()
-                .containsKey(m_selectedBlockName)) {
-            return;
-        }
         double zoom = m_panCanvas.getZoom();
         int col = (int) Math.floor(
                 (mouseX / zoom
@@ -380,8 +397,22 @@ public class MapViewPanel extends BorderPane {
                 (mouseY / zoom
                         + m_panCanvas.getCameraY())
                         / MapRenderer.CELL_SIZE);
-
         row = m_renderer.visualRowToDataRow(row);
+        return new GridCell(row, col);
+    }
+
+    private void paintAt(
+            double mouseX, double mouseY) {
+        if (m_selectedBlockName == null) {
+            return;
+        }
+        if (!m_model.getBlocks()
+                .containsKey(m_selectedBlockName)) {
+            return;
+        }
+        var cell = mouseToGrid(mouseX, mouseY);
+        int row = cell.row();
+        int col = cell.col();
 
         boolean changed;
         if (m_toolOptionsPanel.isAllLayers()) {
@@ -403,17 +434,9 @@ public class MapViewPanel extends BorderPane {
 
     private void eraseAt(
             double mouseX, double mouseY) {
-        double zoom = m_panCanvas.getZoom();
-        int col = (int) Math.floor(
-                (mouseX / zoom
-                        + m_panCanvas.getCameraX())
-                        / MapRenderer.CELL_SIZE);
-        int row = (int) Math.floor(
-                (mouseY / zoom
-                        + m_panCanvas.getCameraY())
-                        / MapRenderer.CELL_SIZE);
-
-        row = m_renderer.visualRowToDataRow(row);
+        var cell = mouseToGrid(mouseX, mouseY);
+        int row = cell.row();
+        int col = cell.col();
 
         boolean changed;
         if (m_toolOptionsPanel.isAllLayers()) {
@@ -444,17 +467,9 @@ public class MapViewPanel extends BorderPane {
 
     private void selectAt(
             double mouseX, double mouseY) {
-        double zoom = m_panCanvas.getZoom();
-        int col = (int) Math.floor(
-                (mouseX / zoom
-                        + m_panCanvas.getCameraX())
-                        / MapRenderer.CELL_SIZE);
-        int row = (int) Math.floor(
-                (mouseY / zoom
-                        + m_panCanvas.getCameraY())
-                        / MapRenderer.CELL_SIZE);
-
-        row = m_renderer.visualRowToDataRow(row);
+        var cell = mouseToGrid(mouseX, mouseY);
+        int row = cell.row();
+        int col = cell.col();
         m_renderer.setSelectedCell(row, col);
 
         String blockName =
@@ -463,43 +478,17 @@ public class MapViewPanel extends BorderPane {
         var entityInfos =
                 new ArrayList<SelectedCellOverlay.EntityInfo>();
         var entities = m_model.getEntities();
-        if (entities != null) {
-            for (int i = 0; i < entities.size(); i++) {
-                var entity = entities.get(i);
-                Integer ex = null;
-                Integer ey = null;
-                Integer ez = null;
-                for (var comp : entity.components()) {
-                    if (comp.type()
-                            != Position.class) {
-                        continue;
-                    }
-                    Object xVal =
-                            comp.properties().get("x");
-                    Object yVal =
-                            comp.properties().get("y");
-                    Object zVal =
-                            comp.properties().get("z");
-                    if (xVal instanceof Number n) {
-                        ex = n.intValue();
-                    }
-                    if (yVal instanceof Number n) {
-                        ey = n.intValue();
-                    }
-                    if (zVal instanceof Number n) {
-                        ez = n.intValue();
-                    }
-                    break;
-                }
-                if (ex != null && ey != null
-                        && ez != null
-                        && ex == col && ey == row
-                        && ez == m_currentZ) {
-                    entityInfos.add(
-                            new SelectedCellOverlay
-                                    .EntityInfo(
-                                    i, entity.id()));
-                }
+        for (int i = 0; i < entities.size(); i++) {
+            var entity = entities.get(i);
+            var pos = getEntityPos(entity);
+            if (pos != null
+                    && pos.x() == col
+                    && pos.y() == row
+                    && pos.z() == m_currentZ) {
+                entityInfos.add(
+                        new SelectedCellOverlay
+                                .EntityInfo(
+                                i, entity.id()));
             }
         }
 
@@ -515,17 +504,9 @@ public class MapViewPanel extends BorderPane {
         if (m_selectedEntityIndex == null) {
             return;
         }
-        double zoom = m_panCanvas.getZoom();
-        int col = (int) Math.floor(
-                (mouseX / zoom
-                        + m_panCanvas.getCameraX())
-                        / MapRenderer.CELL_SIZE);
-        int row = (int) Math.floor(
-                (mouseY / zoom
-                        + m_panCanvas.getCameraY())
-                        / MapRenderer.CELL_SIZE);
-
-        row = m_renderer.visualRowToDataRow(row);
+        var cell = mouseToGrid(mouseX, mouseY);
+        int row = cell.row();
+        int col = cell.col();
         if (!m_model.moveEntity(
                 m_selectedEntityIndex,
                 col, row, m_currentZ)) {
@@ -569,9 +550,6 @@ public class MapViewPanel extends BorderPane {
     private List<MapRenderer.EntityMarker>
             buildEntityMarkers(int zLevel) {
         var entities = m_model.getEntities();
-        if (entities == null) {
-            return List.of();
-        }
 
         BlockColorResolver colorResolver =
                 EditorContext.getInstance()
@@ -579,36 +557,8 @@ public class MapViewPanel extends BorderPane {
         var markers =
                 new ArrayList<MapRenderer.EntityMarker>();
         for (var entity : entities) {
-            Integer x = null;
-            Integer y = null;
-            Integer z = null;
-            for (ComponentDefinition comp
-                    : entity.components()) {
-                if (comp.type() != Position.class) {
-                    continue;
-                }
-                Object xVal =
-                        comp.properties().get("x");
-                Object yVal =
-                        comp.properties().get("y");
-                Object zVal =
-                        comp.properties().get("z");
-                if (xVal instanceof Number n) {
-                    x = n.intValue();
-                }
-                if (yVal instanceof Number n) {
-                    y = n.intValue();
-                }
-                if (zVal instanceof Number n) {
-                    z = n.intValue();
-                }
-                break;
-            }
-
-            if (x == null || y == null || z == null) {
-                continue;
-            }
-            if (z != zLevel) {
+            var pos = getEntityPos(entity);
+            if (pos == null || pos.z() != zLevel) {
                 continue;
             }
 
@@ -621,7 +571,7 @@ public class MapViewPanel extends BorderPane {
             }
             markers.add(
                     new MapRenderer.EntityMarker(
-                            y, x, color));
+                            pos.y(), pos.x(), color));
         }
         return markers;
     }

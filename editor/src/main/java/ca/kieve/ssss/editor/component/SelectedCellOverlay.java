@@ -2,6 +2,7 @@ package ca.kieve.ssss.editor.component;
 
 import static ca.kieve.ssss.editor.util.CssUtil.inline;
 
+import ca.kieve.ssss.editor.EditorTheme;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
@@ -19,17 +20,9 @@ public class SelectedCellOverlay extends VBox {
 
     public record EntityInfo(int index, String id) {}
 
-    private static final String STYLE_OVERLAY =
-            "editor-selected-cell-overlay";
-
     // language=css
-    private static final String CSS = """
-            .%1$s {
-                -fx-background-color: rgba(30, 30, 30, 0.85);
-                -fx-background-radius: 6;
-                -fx-padding: 4 8;
-                -fx-font-size: 11;
-            }
+    private static final String CSS =
+            EditorTheme.OVERLAY_CSS + """
             .%1$s .list-cell {
                 -fx-cell-size: 1.4em;
                 -fx-padding: 1 4;
@@ -38,7 +31,7 @@ public class SelectedCellOverlay extends VBox {
             .%1$s .list-cell:hover {
                 -fx-background-color: -color-neutral-muted;
             }
-            """.formatted(STYLE_OVERLAY);
+            """.formatted(EditorTheme.STYLE_OVERLAY);
 
     private final Label m_header;
     private final ListView<CellItem> m_list;
@@ -46,7 +39,7 @@ public class SelectedCellOverlay extends VBox {
 
     public SelectedCellOverlay() {
         getStylesheets().add(inline(CSS));
-        getStyleClass().add(STYLE_OVERLAY);
+        getStyleClass().add(EditorTheme.STYLE_OVERLAY);
         setMaxWidth(USE_PREF_SIZE);
         setMaxHeight(USE_PREF_SIZE);
         setSpacing(2);

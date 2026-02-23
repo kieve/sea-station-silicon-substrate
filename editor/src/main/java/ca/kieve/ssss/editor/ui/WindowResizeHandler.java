@@ -1,5 +1,6 @@
 package ca.kieve.ssss.editor.ui;
 
+import javafx.beans.property.BooleanProperty;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.input.MouseEvent;
@@ -15,6 +16,7 @@ public final class WindowResizeHandler {
     private static final double MIN_HEIGHT = 300;
 
     private final Stage m_stage;
+    private final BooleanProperty m_maximized;
 
     private boolean m_resizing;
     private boolean m_resizeN;
@@ -29,12 +31,18 @@ public final class WindowResizeHandler {
     private double m_startStageW;
     private double m_startStageH;
 
-    private WindowResizeHandler(Stage stage) {
+    private WindowResizeHandler(
+            Stage stage, BooleanProperty maximized) {
         m_stage = stage;
+        m_maximized = maximized;
     }
 
-    public static void install(Scene scene, Stage stage) {
-        var handler = new WindowResizeHandler(stage);
+    public static void install(
+            Scene scene,
+            Stage stage,
+            BooleanProperty maximized) {
+        var handler =
+                new WindowResizeHandler(stage, maximized);
         scene.addEventFilter(
                 MouseEvent.MOUSE_MOVED, handler::onMouseMoved);
         scene.addEventFilter(
@@ -46,7 +54,7 @@ public final class WindowResizeHandler {
     }
 
     private void onMouseMoved(MouseEvent e) {
-        if (m_stage.isMaximized()) {
+        if (m_maximized.get()) {
             m_stage.getScene().setCursor(Cursor.DEFAULT);
             return;
         }
@@ -54,7 +62,7 @@ public final class WindowResizeHandler {
     }
 
     private void onMousePressed(MouseEvent e) {
-        if (m_stage.isMaximized()) {
+        if (m_maximized.get()) {
             return;
         }
         Cursor cursor = cursorForPosition(e);

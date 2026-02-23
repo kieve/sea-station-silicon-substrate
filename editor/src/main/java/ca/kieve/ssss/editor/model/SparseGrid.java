@@ -14,10 +14,10 @@ public class SparseGrid {
 
     private final Map<CellPos, String> m_cells =
             new HashMap<>();
-    private int m_minRow;
-    private int m_minCol;
-    private int m_maxRow;
-    private int m_maxCol;
+    private int m_minRow = Integer.MAX_VALUE;
+    private int m_minCol = Integer.MAX_VALUE;
+    private int m_maxRow = Integer.MIN_VALUE;
+    private int m_maxCol = Integer.MIN_VALUE;
 
     public String getCell(int row, int col) {
         return m_cells.get(new CellPos(row, col));
@@ -56,19 +56,19 @@ public class SparseGrid {
     }
 
     public int getMinRow() {
-        return m_minRow;
+        return m_cells.isEmpty() ? 0 : m_minRow;
     }
 
     public int getMinCol() {
-        return m_minCol;
+        return m_cells.isEmpty() ? 0 : m_minCol;
     }
 
     public int getMaxRow() {
-        return m_maxRow;
+        return m_cells.isEmpty() ? 0 : m_maxRow;
     }
 
     public int getMaxCol() {
-        return m_maxCol;
+        return m_cells.isEmpty() ? 0 : m_maxCol;
     }
 
     public int getRows() {
@@ -99,17 +99,13 @@ public class SparseGrid {
     }
 
     public void refreshBounds() {
-        if (m_cells.isEmpty()) {
-            m_minRow = 0;
-            m_minCol = 0;
-            m_maxRow = 0;
-            m_maxCol = 0;
-            return;
-        }
         m_minRow = Integer.MAX_VALUE;
         m_minCol = Integer.MAX_VALUE;
         m_maxRow = Integer.MIN_VALUE;
         m_maxCol = Integer.MIN_VALUE;
+        if (m_cells.isEmpty()) {
+            return;
+        }
         for (var pos : m_cells.keySet()) {
             expandBounds(pos.row(), pos.col());
         }

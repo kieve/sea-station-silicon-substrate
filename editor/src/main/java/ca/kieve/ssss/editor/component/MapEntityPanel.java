@@ -86,9 +86,6 @@ public class MapEntityPanel extends VBox {
         List<MapEntityDefinition> entities =
                 m_model.getEntities();
         m_entityList.getItems().clear();
-        if (entities == null) {
-            return;
-        }
         for (int i = 0; i < entities.size(); i++) {
             m_entityList.getItems().add(i);
         }
@@ -107,8 +104,7 @@ public class MapEntityPanel extends VBox {
 
             List<MapEntityDefinition> entities =
                     m_model.getEntities();
-            if (entities == null
-                    || index >= entities.size()) {
+            if (index >= entities.size()) {
                 setText(null);
                 return;
             }

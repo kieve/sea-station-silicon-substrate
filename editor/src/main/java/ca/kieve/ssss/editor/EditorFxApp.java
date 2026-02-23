@@ -34,7 +34,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 public class EditorFxApp extends Application {
     private static final KeyCodeCombination SAVE_COMBO =
@@ -71,8 +70,7 @@ public class EditorFxApp extends Application {
 
         m_stage = stage;
 
-        CompletableFuture.supplyAsync(this::resolveDefaultMapsDir)
-                .thenAccept(dir -> m_lastDirectory = dir);
+        m_lastDirectory = resolveDefaultMapsDir();
 
         var detailPanel = new EntityDetailPanel();
         var listPanel = new EntityListPanel(
@@ -144,7 +142,9 @@ public class EditorFxApp extends Application {
         // Intercept window close for unsaved changes check
         stage.setOnCloseRequest(this::handleCloseRequest);
 
-        WindowResizeHandler.install(scene, stage);
+        WindowResizeHandler.install(
+                scene, stage,
+                titleBar.maximizedProperty());
 
         stage.setScene(scene);
         stage.setAlwaysOnTop(true);
