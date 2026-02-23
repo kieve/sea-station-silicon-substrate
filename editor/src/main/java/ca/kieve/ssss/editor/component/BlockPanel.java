@@ -5,6 +5,7 @@ import static ca.kieve.ssss.editor.util.CssUtil.inline;
 import ca.kieve.ssss.content.ContentRegistry;
 import ca.kieve.ssss.content.MapBlockDefinition;
 import ca.kieve.ssss.editor.BlockColorResolver;
+import ca.kieve.ssss.editor.util.DialogUtil;
 import ca.kieve.ssss.editor.model.EditorMapModel;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -179,17 +180,10 @@ public class BlockPanel extends VBox {
 
         var alert = new Alert(
                 Alert.AlertType.WARNING,
-                "Block '" + selected
-                        + "' is currently used in the map.\n\n"
-                        + "Replace: swap all cells to another"
-                        + " block\n"
-                        + "Delete: remove all cells using"
-                        + " this block\n"
-                        + "Ignore: keep orphaned cells"
-                        + " (shown as '?')",
+                "Block '" + selected + "' is currently used in the map.",
                 replaceType, deleteType, ignoreType,
                 ButtonType.CANCEL);
-        alert.setHeaderText("Block In Use");
+        DialogUtil.style(alert, "Block In Use");
 
         alert.showAndWait().ifPresent(btn -> {
             if (btn == replaceType) {
@@ -219,14 +213,15 @@ public class BlockPanel extends VBox {
             var err = new Alert(
                     Alert.AlertType.WARNING,
                     "No other blocks to replace with.");
-            err.setHeaderText(null);
+            DialogUtil.style(err, "No Replacement Available");
             err.showAndWait();
             return;
         }
 
         var choice = new ChoiceDialog<>(
                 remaining.getFirst(), remaining);
-        choice.setHeaderText(
+        DialogUtil.style(choice, "Replace Block");
+        choice.setContentText(
                 "Replace '" + selected + "' with:");
         choice.showAndWait().ifPresent(replacement -> {
             m_model.replaceBlockInLayers(

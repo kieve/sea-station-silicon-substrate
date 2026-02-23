@@ -9,6 +9,7 @@ import ca.kieve.ssss.editor.component.EntityDetailPanel;
 import ca.kieve.ssss.editor.component.EntityListPanel;
 import ca.kieve.ssss.editor.component.MapViewPanel;
 import ca.kieve.ssss.editor.ui.AppIcon;
+import ca.kieve.ssss.editor.util.DialogUtil;
 import ca.kieve.ssss.editor.ui.WindowResizeHandler;
 import ca.kieve.ssss.editor.ui.WindowsAeroSnap;
 import atlantafx.base.theme.PrimerDark;
@@ -243,9 +244,9 @@ public class EditorFxApp extends Application {
         var alert = new Alert(
                 Alert.AlertType.CONFIRMATION,
                 "You have unsaved changes. "
-                        + "Do you want to save before closing?",
+                    + "\nDo you want to save before closing?",
                 saveBtn, dontSaveBtn, cancelBtn);
-        alert.setHeaderText("Unsaved Changes");
+        DialogUtil.style(alert, "Unsaved Changes");
 
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isEmpty() || result.get() == cancelBtn) {
@@ -313,8 +314,7 @@ public class EditorFxApp extends Application {
             m_tabPane.getSelectionModel().select(m_mapTab);
         } catch (IOException ex) {
             var alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText("Failed to load map");
+            DialogUtil.style(alert, "Failed to Load Map");
             alert.setContentText(ex.getMessage());
             alert.showAndWait();
         }

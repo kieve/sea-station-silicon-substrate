@@ -12,7 +12,12 @@
       "Bash(./gradlew.bat test)",
       "WebSearch",
       "WebFetch(domain:github.com)",
-      "WebFetch(domain:cpluspluspedia.com)"
+      "WebFetch(domain:cpluspluspedia.com)",
+      "WebFetch(domain:bugs.openjdk.org)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:openjfx.io)",
+      "WebFetch(domain:cr.openjdk.org)",
+      "WebFetch(domain:patch-diff.githubusercontent.com)"
     ],
     "deny": [],
     "ask": []

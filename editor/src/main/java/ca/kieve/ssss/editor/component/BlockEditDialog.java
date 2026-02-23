@@ -1,6 +1,7 @@
 package ca.kieve.ssss.editor.component;
 
 import ca.kieve.ssss.content.MapBlockDefinition;
+import ca.kieve.ssss.editor.util.DialogUtil;
 import javafx.geometry.Insets;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
@@ -25,8 +26,9 @@ public class BlockEditDialog
             String existingName,
             MapBlockDefinition existingDef
     ) {
-        setTitle(existingDef != null
-                ? "Edit Block" : "Add Block");
+        DialogUtil.style(this,
+                existingDef != null
+                        ? "Edit Block" : "Add Block");
 
         m_nameField = new TextField(
                 existingName != null ? existingName : "");

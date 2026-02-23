@@ -14,6 +14,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import ca.kieve.ssss.editor.util.DialogUtil;
 import javafx.scene.control.Alert;
 import javafx.scene.layout.StackPane;
 
@@ -141,8 +142,7 @@ public class MapViewPanel extends BorderPane {
             m_infoBar.setFileName(file.getName());
         } catch (IOException ex) {
             var alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText("Failed to save map");
+            DialogUtil.style(alert, "Failed to Save Map");
             alert.setContentText(ex.getMessage());
             alert.showAndWait();
         }
