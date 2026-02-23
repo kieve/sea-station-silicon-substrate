@@ -1,6 +1,7 @@
 package ca.kieve.ssss.editor.component;
 
-import ca.kieve.ssss.editor.EditorTheme;
+import static ca.kieve.ssss.editor.util.CssUtil.inline;
+
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.geometry.Insets;
@@ -14,13 +15,43 @@ import javafx.scene.layout.VBox;
 import java.util.List;
 
 public class ZLevelOverlay extends HBox {
+    private static final String STYLE_Z_OVERLAY =
+            "editor-z-overlay";
+    private static final String STYLE_Z_STEP_BUTTON =
+            "editor-z-step-button";
+
+    // language=css
+    private static final String CSS = """
+            .%1$s {
+                -fx-background-color: rgba(30, 30, 30, 0.85);
+                -fx-background-radius: 6;
+                -fx-padding: 4 8;
+                -fx-font-size: 11;
+            }
+            .%2$s {
+                -fx-background-color: transparent;
+                -fx-background-radius: 3;
+                -fx-padding: 0 3;
+                -fx-min-width: 18;
+                -fx-min-height: 12;
+                -fx-pref-width: 18;
+                -fx-pref-height: 12;
+                -fx-font-size: 8;
+                -fx-cursor: hand;
+            }
+            .%2$s:hover {
+                -fx-background-color: -color-neutral-muted;
+            }
+            """.formatted(STYLE_Z_OVERLAY, STYLE_Z_STEP_BUTTON);
+
     private final ComboBox<Integer> m_zCombo;
     private final IntegerProperty m_zLevel =
             new SimpleIntegerProperty();
     private List<Integer> m_zLevels = List.of();
 
     public ZLevelOverlay() {
-        getStyleClass().add(EditorTheme.STYLE_Z_OVERLAY);
+        getStylesheets().add(inline(CSS));
+        getStyleClass().add(STYLE_Z_OVERLAY);
         setAlignment(Pos.CENTER);
         setSpacing(4);
         setMaxWidth(USE_PREF_SIZE);
@@ -33,14 +64,12 @@ public class ZLevelOverlay extends HBox {
 
         var upBtn = new Button("\u25B2");
         upBtn.setFocusTraversable(false);
-        upBtn.getStyleClass().add(
-                EditorTheme.STYLE_Z_STEP_BUTTON);
+        upBtn.getStyleClass().add(STYLE_Z_STEP_BUTTON);
         upBtn.setOnAction(e -> step(1));
 
         var downBtn = new Button("\u25BC");
         downBtn.setFocusTraversable(false);
-        downBtn.getStyleClass().add(
-                EditorTheme.STYLE_Z_STEP_BUTTON);
+        downBtn.getStyleClass().add(STYLE_Z_STEP_BUTTON);
         downBtn.setOnAction(e -> step(-1));
 
         var stepButtons = new VBox(upBtn, downBtn);

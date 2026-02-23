@@ -1,5 +1,7 @@
 package ca.kieve.ssss.editor;
 
+import static ca.kieve.ssss.editor.util.CssUtil.inline;
+
 import ca.kieve.ssss.content.ContentRegistry;
 import ca.kieve.ssss.content.MapDefinition;
 import ca.kieve.ssss.editor.component.EditorTitleBar;
@@ -44,6 +46,19 @@ public class EditorFxApp extends Application {
                     KeyCombination.CONTROL_DOWN,
                     KeyCombination.SHIFT_DOWN);
 
+    private static final String STYLE_HIDDEN_TAB_HEADER =
+            "editor-hidden-tab-header";
+
+    // language=css
+    private static final String CSS = """
+            .%s > .tab-header-area {
+                -fx-max-height: 0;
+                -fx-pref-height: 0;
+                -fx-min-height: 0;
+                visibility: hidden;
+            }
+            """.formatted(STYLE_HIDDEN_TAB_HEADER);
+
     private ContentRegistry m_registry;
     private TabPane m_tabPane;
     private Tab m_mapTab;
@@ -72,8 +87,8 @@ public class EditorFxApp extends Application {
         entitiesTab.setClosable(false);
 
         m_tabPane = new TabPane(entitiesTab);
-        m_tabPane.getStyleClass().add(
-                EditorTheme.STYLE_HIDDEN_TAB_HEADER);
+        m_tabPane.getStylesheets().add(inline(CSS));
+        m_tabPane.getStyleClass().add(STYLE_HIDDEN_TAB_HEADER);
 
         stage.initStyle(StageStyle.UNDECORATED);
         stage.setMinWidth(400);
@@ -98,7 +113,6 @@ public class EditorFxApp extends Application {
         root.setCenter(m_tabPane);
 
         var scene = new Scene(root, 900, 600);
-        scene.getStylesheets().add(EditorTheme.STYLESHEET);
 
         // Keyboard shortcuts
         scene.addEventFilter(KeyEvent.KEY_PRESSED, e -> {

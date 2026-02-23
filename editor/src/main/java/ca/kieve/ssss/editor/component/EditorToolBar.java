@@ -1,6 +1,7 @@
 package ca.kieve.ssss.editor.component;
 
-import ca.kieve.ssss.editor.EditorTheme;
+import static ca.kieve.ssss.editor.util.CssUtil.inline;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.control.ToggleButton;
@@ -13,11 +14,43 @@ public class EditorToolBar extends VBox {
         PAINT
     }
 
+    private static final String STYLE_EDITOR_TOOL_BAR =
+            "editor-tool-bar";
+    private static final String STYLE_TOOL_BUTTON =
+            "editor-tool-button";
+
+    // language=css
+    private static final String CSS = """
+            .%1$s {
+                -fx-background-color: -color-bg-subtle;
+                -fx-padding: 4;
+                -fx-spacing: 2;
+            }
+            .%2$s {
+                -fx-background-color: transparent;
+                -fx-background-radius: 4;
+                -fx-pref-width: 28;
+                -fx-pref-height: 28;
+                -fx-min-width: 28;
+                -fx-min-height: 28;
+                -fx-padding: 0;
+                -fx-font-size: 12;
+                -fx-cursor: hand;
+            }
+            .%2$s:selected {
+                -fx-background-color: -color-accent-muted;
+            }
+            .%2$s:hover {
+                -fx-background-color: -color-neutral-muted;
+            }
+            """.formatted(STYLE_EDITOR_TOOL_BAR, STYLE_TOOL_BUTTON);
+
     private final ObjectProperty<Tool> m_activeTool =
             new SimpleObjectProperty<>(Tool.PAINT);
 
     public EditorToolBar() {
-        getStyleClass().add(EditorTheme.STYLE_EDITOR_TOOL_BAR);
+        getStylesheets().add(inline(CSS));
+        getStyleClass().add(STYLE_EDITOR_TOOL_BAR);
         setPrefWidth(36);
         setMinWidth(36);
         setMaxWidth(36);
@@ -25,7 +58,7 @@ public class EditorToolBar extends VBox {
         var toggleGroup = new ToggleGroup();
 
         var paintBtn = new ToggleButton("P");
-        paintBtn.getStyleClass().add(EditorTheme.STYLE_TOOL_BUTTON);
+        paintBtn.getStyleClass().add(STYLE_TOOL_BUTTON);
         paintBtn.setToggleGroup(toggleGroup);
         paintBtn.setSelected(true);
         paintBtn.setTooltip(new Tooltip("Paint"));

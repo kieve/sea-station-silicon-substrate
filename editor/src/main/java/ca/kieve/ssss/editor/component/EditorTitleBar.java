@@ -1,6 +1,7 @@
 package ca.kieve.ssss.editor.component;
 
-import ca.kieve.ssss.editor.EditorTheme;
+import static ca.kieve.ssss.editor.util.CssUtil.inline;
+
 import ca.kieve.ssss.editor.ui.AppIcon;
 import ca.kieve.ssss.editor.ui.WindowsAeroSnap;
 import javafx.collections.ListChangeListener;
@@ -32,6 +33,64 @@ import javafx.stage.Stage;
  */
 public class EditorTitleBar extends HBox {
     private static final double HEIGHT = 32;
+
+    private static final String STYLE_TITLE_BAR =
+            "editor-title-bar";
+    private static final String STYLE_TITLE_TAB = "title-tab";
+    private static final String STYLE_WINDOW_BUTTON =
+            "window-button";
+    private static final String STYLE_WINDOW_BUTTON_CLOSE =
+            "window-button-close";
+
+    // language=css
+    private static final String CSS = """
+            .%1$s {
+                -fx-pref-height: 32;
+                -fx-min-height: 32;
+                -fx-max-height: 32;
+                -fx-background-color: -color-bg-subtle;
+                -fx-alignment: center-left;
+                -fx-padding: 0 0 0 4;
+            }
+            .%2$s {
+                -fx-background-color: transparent;
+                -fx-background-radius: 0;
+                -fx-border-color: transparent transparent transparent transparent;
+                -fx-border-width: 0 0 2 0;
+                -fx-padding: 6 14;
+                -fx-text-fill: -color-fg-muted;
+                -fx-cursor: hand;
+            }
+            .%2$s:selected {
+                -fx-border-color: transparent transparent -color-accent-fg transparent;
+                -fx-text-fill: -color-fg-default;
+            }
+            .%2$s:hover {
+                -fx-background-color: -color-neutral-muted;
+            }
+            .%3$s {
+                -fx-background-color: transparent;
+                -fx-background-radius: 0;
+                -fx-pref-width: 46;
+                -fx-pref-height: 32;
+                -fx-min-width: 46;
+                -fx-min-height: 32;
+                -fx-padding: 0;
+                -fx-text-fill: -color-fg-default;
+                -fx-cursor: hand;
+            }
+            .%3$s:hover {
+                -fx-background-color: -color-neutral-muted;
+            }
+            .%4$s:hover {
+                -fx-background-color: #e81123;
+                -fx-text-fill: white;
+            }
+            """.formatted(
+            STYLE_TITLE_BAR,
+            STYLE_TITLE_TAB,
+            STYLE_WINDOW_BUTTON,
+            STYLE_WINDOW_BUTTON_CLOSE);
 
     private static final String ICON_STROKE_STYLE =
             "-fx-stroke: -color-fg-default; -fx-stroke-width: 1;";
@@ -70,7 +129,8 @@ public class EditorTitleBar extends HBox {
         m_tabBox.setAlignment(Pos.CENTER_LEFT);
         m_tabBox.setSpacing(0);
 
-        getStyleClass().add(EditorTheme.STYLE_TITLE_BAR);
+        getStylesheets().add(inline(CSS));
+        getStyleClass().add(STYLE_TITLE_BAR);
         setPrefHeight(HEIGHT);
         setMinHeight(HEIGHT);
         setMaxHeight(HEIGHT);
@@ -106,22 +166,21 @@ public class EditorTitleBar extends HBox {
         // Right: window control buttons with Win11-style icons
         var minBtn = new Button();
         minBtn.setGraphic(createMinimizeIcon());
-        minBtn.getStyleClass().add(EditorTheme.STYLE_WINDOW_BUTTON);
+        minBtn.getStyleClass().add(STYLE_WINDOW_BUTTON);
         minBtn.setOnAction(e -> m_stage.setIconified(true));
         minBtn.setFocusTraversable(false);
 
         m_maxBtn = new Button();
         m_maxBtn.setGraphic(createMaximizeIcon());
-        m_maxBtn.getStyleClass().add(
-                EditorTheme.STYLE_WINDOW_BUTTON);
+        m_maxBtn.getStyleClass().add(STYLE_WINDOW_BUTTON);
         m_maxBtn.setOnAction(e -> toggleMaximize());
         m_maxBtn.setFocusTraversable(false);
 
         var closeBtn = new Button();
         closeBtn.setGraphic(createCloseIcon());
         closeBtn.getStyleClass().addAll(
-                EditorTheme.STYLE_WINDOW_BUTTON,
-                EditorTheme.STYLE_WINDOW_BUTTON_CLOSE);
+                STYLE_WINDOW_BUTTON,
+                STYLE_WINDOW_BUTTON_CLOSE);
         closeBtn.setOnAction(e -> onClose.run());
         closeBtn.setFocusTraversable(false);
 
@@ -235,7 +294,7 @@ public class EditorTitleBar extends HBox {
         var btn = new ToggleButton(tab.getText());
         btn.setToggleGroup(m_toggleGroup);
         btn.setUserData(tab);
-        btn.getStyleClass().add(EditorTheme.STYLE_TITLE_TAB);
+        btn.getStyleClass().add(STYLE_TITLE_TAB);
         btn.setFocusTraversable(false);
 
         // Keep button text in sync with tab text

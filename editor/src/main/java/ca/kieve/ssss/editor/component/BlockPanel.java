@@ -1,10 +1,11 @@
 package ca.kieve.ssss.editor.component;
 
+import static ca.kieve.ssss.editor.util.CssUtil.inline;
+
 import ca.kieve.ssss.content.ContentRegistry;
 import ca.kieve.ssss.content.GlyphDefinition;
 import ca.kieve.ssss.content.MapBlockDefinition;
 import ca.kieve.ssss.editor.BlockColorResolver;
-import ca.kieve.ssss.editor.EditorTheme;
 import ca.kieve.ssss.editor.model.EditorMapModel;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -27,6 +28,24 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 public class BlockPanel extends VBox {
+    private static final String STYLE_BLOCK_PANEL =
+            "editor-block-panel";
+    private static final String STYLE_TOOLBAR_LABEL_BOLD =
+            "editor-toolbar-label-bold";
+
+    // language=css
+    private static final String CSS = """
+            .%1$s {
+                -fx-background-color: -color-bg-subtle;
+                -fx-padding: 8;
+                -fx-spacing: 4;
+            }
+            .%2$s {
+                -fx-font-weight: bold;
+                -fx-padding: 0 8 0 4;
+            }
+            """.formatted(STYLE_BLOCK_PANEL, STYLE_TOOLBAR_LABEL_BOLD);
+
     private final EditorMapModel m_model;
     private final BlockColorResolver m_colorResolver;
     private final ListView<String> m_blockList;
@@ -44,13 +63,13 @@ public class BlockPanel extends VBox {
         m_blockTypes = buildBlockTypeList(registry);
         m_glyphs = buildGlyphMap(registry);
 
-        getStyleClass().add(EditorTheme.STYLE_BLOCK_PANEL);
+        getStylesheets().add(inline(CSS));
+        getStyleClass().add(STYLE_BLOCK_PANEL);
         setPrefWidth(200);
         setMinWidth(160);
 
         var titleLabel = new Label("Blocks");
-        titleLabel.getStyleClass().add(
-                EditorTheme.STYLE_TOOLBAR_LABEL_BOLD);
+        titleLabel.getStyleClass().add(STYLE_TOOLBAR_LABEL_BOLD);
 
         m_blockList = new ListView<>();
         m_blockList.setCellFactory(lv -> new BlockListCell());

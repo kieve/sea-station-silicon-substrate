@@ -1,6 +1,7 @@
 package ca.kieve.ssss.editor.component;
 
-import ca.kieve.ssss.editor.EditorTheme;
+import static ca.kieve.ssss.editor.util.CssUtil.inline;
+
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
@@ -8,11 +9,25 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 
 public class InfoBar extends HBox {
+    private static final String STYLE_INFO_BAR =
+            "editor-info-bar";
+
+    // language=css
+    private static final String CSS = """
+            .%s {
+                -fx-background-color: -color-bg-subtle;
+                -fx-padding: 2 8;
+                -fx-font-size: 11;
+                -fx-spacing: 8;
+            }
+            """.formatted(STYLE_INFO_BAR);
+
     private final Label m_fileLabel;
     private final Label m_dimensionsLabel;
 
     public InfoBar() {
-        getStyleClass().add(EditorTheme.STYLE_INFO_BAR);
+        getStylesheets().add(inline(CSS));
+        getStyleClass().add(STYLE_INFO_BAR);
         setAlignment(Pos.CENTER_LEFT);
 
         m_fileLabel = new Label();
