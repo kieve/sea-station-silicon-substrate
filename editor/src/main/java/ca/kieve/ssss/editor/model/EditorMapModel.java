@@ -7,6 +7,8 @@ import ca.kieve.ssss.content.MapEntityDefinition;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 
+import static ca.kieve.ssss.editor.model.SparseGrid.EMPTY;
+
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
@@ -39,7 +41,7 @@ public class EditorMapModel {
             for (int r = 0; r < rows.length; r++) {
                 for (int c = 0; c < rows[r].length(); c++) {
                     char ch = rows[r].charAt(c);
-                    if (ch != ' ') {
+                    if (ch != EMPTY) {
                         grid.setCell(r, c, ch);
                     }
                 }
@@ -87,7 +89,7 @@ public class EditorMapModel {
                 // Find the last occupied column in this row
                 int rowEnd = minCol - 1;
                 for (int c = minCol; c <= maxCol; c++) {
-                    if (grid.getCell(r, c) != ' ') {
+                    if (grid.getCell(r, c) != EMPTY) {
                         rowEnd = c;
                     }
                 }
@@ -151,7 +153,7 @@ public class EditorMapModel {
     public char getCell(int z, int row, int col) {
         var grid = m_layers.get(z);
         if (grid == null) {
-            return ' ';
+            return EMPTY;
         }
         return grid.getCell(row, col);
     }

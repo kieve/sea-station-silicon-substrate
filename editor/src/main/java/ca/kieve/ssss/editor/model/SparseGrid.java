@@ -10,6 +10,8 @@ import java.util.Map;
  * of all occupied cells.
  */
 public class SparseGrid {
+    public static final char EMPTY = ' ';
+
     public record CellPos(int row, int col) {}
 
     private final Map<CellPos, Character> m_cells =
@@ -21,7 +23,7 @@ public class SparseGrid {
 
     public char getCell(int row, int col) {
         Character ch = m_cells.get(new CellPos(row, col));
-        return ch != null ? ch : ' ';
+        return ch != null ? ch : EMPTY;
     }
 
     /**
@@ -30,7 +32,7 @@ public class SparseGrid {
      */
     public boolean setCell(int row, int col, char ch) {
         var pos = new CellPos(row, col);
-        if (ch == ' ') {
+        if (ch == EMPTY) {
             Character prev = m_cells.remove(pos);
             if (prev == null) {
                 return false;

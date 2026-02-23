@@ -6,6 +6,8 @@ import ca.kieve.ssss.content.MapDefinition;
 import ca.kieve.ssss.editor.BlockColorResolver;
 import ca.kieve.ssss.editor.BlockGlyphResolver;
 import ca.kieve.ssss.editor.MapSaver;
+import static ca.kieve.ssss.editor.model.SparseGrid.EMPTY;
+
 import ca.kieve.ssss.editor.model.EditorMapModel;
 import ca.kieve.ssss.editor.ui.PanCanvas;
 import javafx.geometry.Insets;
@@ -196,14 +198,6 @@ public class MapViewPanel extends BorderPane {
     }
 
     private void eraseAt(double mouseX, double mouseY) {
-        char airChar = '.';
-        for (var entry : m_model.getBlocks().entrySet()) {
-            if ("air".equals(entry.getValue().type())) {
-                airChar = entry.getValue().layoutChar();
-                break;
-            }
-        }
-
         int col = (int) Math.floor(
                 (mouseX + m_panCanvas.getCameraX())
                         / MapRenderer.CELL_SIZE);
@@ -212,7 +206,7 @@ public class MapViewPanel extends BorderPane {
                         / MapRenderer.CELL_SIZE);
 
         if (!m_model.setCell(
-                m_currentZ, row, col, airChar)) {
+                m_currentZ, row, col, EMPTY)) {
             return;
         }
         m_infoBar.setDimensions(
