@@ -94,22 +94,18 @@ public class MapRenderer {
                 ? m_grid.getMinCol() * CELL_SIZE : 0;
     }
 
-    /** Y pixel offset of the map origin (minRow). */
+    /** Y pixel offset of the map origin (flipped). */
     public double getMapOriginY() {
         return m_grid != null
-                ? m_grid.getMinRow() * CELL_SIZE : 0;
+                ? -m_grid.getMaxRow() * CELL_SIZE : 0;
     }
 
     /**
-     * Convert a visual row (Y-up, as rendered) back
-     * to a data row (grid row index).
+     * Convert a visual row (Y-down screen) back
+     * to a data row (Y-up grid index).
      */
     public int visualRowToDataRow(int visualRow) {
-        if (m_grid == null) {
-            return visualRow;
-        }
-        return m_grid.getMaxRow() - visualRow
-                + m_grid.getMinRow();
+        return -visualRow;
     }
 
     /**
@@ -131,8 +127,6 @@ public class MapRenderer {
         gc.fillRect(0, 0, viewWidth, viewHeight);
 
         double cell = CELL_SIZE * zoom;
-        int maxRow = m_grid.getMaxRow();
-        int minRow = m_grid.getMinRow();
 
         drawInfiniteGrid(
                 gc, viewWidth, viewHeight,
@@ -146,8 +140,7 @@ public class MapRenderer {
             var pos = entry.getKey();
             String blockName = entry.getValue();
 
-            int flippedRow =
-                    maxRow - pos.row() + minRow;
+            int flippedRow = -pos.row();
             double x = (pos.col() * CELL_SIZE
                     - cameraX) * zoom;
             double y = (flippedRow * CELL_SIZE
@@ -191,8 +184,7 @@ public class MapRenderer {
         double radius = diameter / 2.0;
         double pad = cell * 0.08;
         for (var marker : m_entityMarkers) {
-            int flippedRow =
-                    maxRow - marker.row() + minRow;
+            int flippedRow = -marker.row();
             double x = (marker.col() * CELL_SIZE
                     - cameraX) * zoom;
             double y = (flippedRow * CELL_SIZE
@@ -224,8 +216,7 @@ public class MapRenderer {
 
         if (m_selectedRow != null
                 && m_selectedCol != null) {
-            int flippedRow = maxRow - m_selectedRow
-                    + minRow;
+            int flippedRow = -m_selectedRow;
             double sx = (m_selectedCol * CELL_SIZE
                     - cameraX) * zoom;
             double sy = (flippedRow * CELL_SIZE

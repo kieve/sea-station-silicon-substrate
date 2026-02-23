@@ -43,6 +43,7 @@ public class MapViewPanel extends BorderPane {
     private final ZoomOverlay m_zoomOverlay;
     private final SelectedCellOverlay m_selectedCellOverlay;
     private final EditorToolBar m_toolBar;
+    private final ToolOptionsPanel m_toolOptionsPanel;
     private final TabPane m_tabPane;
     private final Tab m_blocksTab;
     private final Tab m_entitiesTab;
@@ -67,6 +68,7 @@ public class MapViewPanel extends BorderPane {
 
         // Left: tool bar
         m_toolBar = new EditorToolBar();
+        m_toolOptionsPanel = new ToolOptionsPanel();
 
         // Right: block panel, entity panel, component panel
         m_blockPanel = new BlockPanel(m_model);
@@ -190,23 +192,38 @@ public class MapViewPanel extends BorderPane {
             if (newTool == EditorToolBar.Tool.PAINT) {
                 clearSelection();
             }
+            m_toolOptionsPanel.updateForTool(newTool);
         });
 
         // Center: canvas with floating overlays
-        var overlayBox = new VBox(
+        var rightOverlayBox = new VBox(
                 4, m_zOverlay, m_zoomOverlay,
                 m_selectedCellOverlay);
-        overlayBox.setAlignment(Pos.TOP_RIGHT);
-        overlayBox.setMaxWidth(Region.USE_PREF_SIZE);
-        overlayBox.setMaxHeight(Region.USE_PREF_SIZE);
-        overlayBox.setPickOnBounds(false);
+        rightOverlayBox.setAlignment(Pos.TOP_RIGHT);
+        rightOverlayBox.setMaxWidth(Region.USE_PREF_SIZE);
+        rightOverlayBox.setMaxHeight(Region.USE_PREF_SIZE);
+        rightOverlayBox.setPickOnBounds(false);
+
+        var leftOverlayBox = new VBox(
+                4, m_toolOptionsPanel);
+        leftOverlayBox.setAlignment(Pos.TOP_LEFT);
+        leftOverlayBox.setMaxWidth(Region.USE_PREF_SIZE);
+        leftOverlayBox.setMaxHeight(Region.USE_PREF_SIZE);
+        leftOverlayBox.setPickOnBounds(false);
 
         var canvasStack = new StackPane(
-                m_panCanvas, overlayBox);
+                m_panCanvas,
+                rightOverlayBox, leftOverlayBox);
         StackPane.setAlignment(
-                overlayBox, Pos.TOP_RIGHT);
+                rightOverlayBox, Pos.TOP_RIGHT);
         StackPane.setMargin(
-                overlayBox, new Insets(8, 8, 0, 0));
+                rightOverlayBox,
+                new Insets(8, 8, 0, 0));
+        StackPane.setAlignment(
+                leftOverlayBox, Pos.TOP_LEFT);
+        StackPane.setMargin(
+                leftOverlayBox,
+                new Insets(8, 0, 0, 8));
 
         var rightSplit = new SplitPane(
                 m_tabPane, m_componentPanel);
@@ -365,9 +382,17 @@ public class MapViewPanel extends BorderPane {
                         / MapRenderer.CELL_SIZE);
 
         row = m_renderer.visualRowToDataRow(row);
-        if (!m_model.setCell(
-                m_currentZ, row, col,
-                m_selectedBlockName)) {
+
+        boolean changed;
+        if (m_toolOptionsPanel.isAllLayers()) {
+            changed = setCellAllLayers(
+                    row, col, m_selectedBlockName);
+        } else {
+            changed = m_model.setCell(
+                    m_currentZ, row, col,
+                    m_selectedBlockName);
+        }
+        if (!changed) {
             return;
         }
         m_infoBar.setDimensions(
@@ -389,14 +414,32 @@ public class MapViewPanel extends BorderPane {
                         / MapRenderer.CELL_SIZE);
 
         row = m_renderer.visualRowToDataRow(row);
-        if (!m_model.setCell(
-                m_currentZ, row, col, null)) {
+
+        boolean changed;
+        if (m_toolOptionsPanel.isAllLayers()) {
+            changed = setCellAllLayers(row, col, null);
+        } else {
+            changed = m_model.setCell(
+                    m_currentZ, row, col, null);
+        }
+        if (!changed) {
             return;
         }
         m_infoBar.setDimensions(
                 m_renderer.getMapCols(),
                 m_renderer.getMapRows());
         m_panCanvas.requestRedraw();
+    }
+
+    private boolean setCellAllLayers(
+            int row, int col, String blockName) {
+        boolean anyChanged = false;
+        for (int z : m_model.getZLevels()) {
+            if (m_model.setCell(z, row, col, blockName)) {
+                anyChanged = true;
+            }
+        }
+        return anyChanged;
     }
 
     private void selectAt(

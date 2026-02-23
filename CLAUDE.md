@@ -510,8 +510,48 @@ In this example, `aiAttacker` inherits from four base definitions and overrides 
     - `fonts.yaml`: Font definitions
     - `blocks.yaml`: Block entity definitions
     - `maps/`: Static map YAML files
+- `editor/`: JavaFX map editor (see Editor section below)
+  - `src/main/java/ca/kieve/ssss/editor/`: Root package
+    - `component/`: UI panels and rendering (MapViewPanel, MapRenderer, BlockPanel, etc.)
+    - `model/`: Data models (EditorMapModel, SparseGrid)
+    - `ui/`: Reusable UI widgets (PanCanvas, CompactTreeTable, etc.)
+    - `util/`: Utilities (DialogUtil, CssUtil)
 - `lwjgl3/`: Desktop launcher (LWJGL3 backend)
 - `assets/`: Game assets (automatically indexed via `generateAssetList` task)
+
+## Editor (Map Editor)
+
+The `editor` module is a standalone JavaFX application for editing map YAML files. It loads and saves the same map format used by the game's `StaticTestMapGenerator`.
+
+**Run the editor:**
+```bash
+./gradlew editor:run
+```
+
+### Editor Architecture
+
+- **EditorApp / EditorFxApp**: Entry point; launches the JavaFX application
+- **MapViewPanel**: Main editing view — contains the canvas, tool bar, block/entity panels, and overlays
+- **MapRenderer**: Renders a `SparseGrid` layer to a JavaFX `Canvas`, including block cells, entity markers, and selection highlights
+- **PanCanvas**: Reusable pannable/zoomable canvas viewport with middle-click drag and WASD/arrow key panning
+- **EditorMapModel**: In-memory model of the map being edited; wraps layers as `SparseGrid` instances
+- **SparseGrid**: Sparse row/col grid that tracks its own bounding box (minRow, maxRow, minCol, maxCol)
+
+### Y-Axis Flip (Screen vs. Data Coordinates)
+
+The game world uses Y-up coordinates (row increases upward), but the editor's screen/canvas uses Y-down (row increases downward). `MapRenderer` bridges this with a fixed-anchor flip:
+
+```
+screenRow = -dataRow
+dataRow   = -screenRow
+```
+
+This mapping is anchored at row 0 and is **independent of the grid's bounding box**. Do not use a formula like `maxRow - row + minRow` — that creates a dependency on the live bounds, which causes a feedback loop when painting at grid edges (expanding bounds shifts the mapping, which shifts where the next paint lands, causing runaway expansion).
+
+The flip affects:
+- `MapRenderer.visualRowToDataRow()` — converts screen row to data row
+- `MapRenderer.render()` — flips data rows for display
+- `MapRenderer.getMapOriginY()` — uses `-maxRow * CELL_SIZE` (the topmost visual row under the flip)
 
 ## Development Notes
 
