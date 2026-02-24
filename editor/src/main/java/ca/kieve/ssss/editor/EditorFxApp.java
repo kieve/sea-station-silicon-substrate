@@ -1,11 +1,17 @@
 package ca.kieve.ssss.editor;
 
-import static ca.kieve.ssss.editor.util.CssUtil.inline;
+import ca.kieve.ssss.content.MapDefinition;
+import ca.kieve.ssss.editor.component.EditorTitleBar;
+import ca.kieve.ssss.editor.component.EntityDetailPanel;
+import ca.kieve.ssss.editor.component.EntityListPanel;
+import ca.kieve.ssss.editor.component.MapViewPanel;
+import ca.kieve.ssss.editor.ui.AppIcon;
+import ca.kieve.ssss.editor.ui.WindowResizeHandler;
+import ca.kieve.ssss.editor.ui.WindowsAeroSnap;
+import ca.kieve.ssss.editor.util.DialogUtil;
+import ca.kieve.ssss.editor.util.GameLauncher;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.Optional;
+import atlantafx.base.theme.PrimerDark;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -24,22 +30,18 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 
-import atlantafx.base.theme.PrimerDark;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.Optional;
 
-import ca.kieve.ssss.content.MapDefinition;
-import ca.kieve.ssss.editor.component.EditorTitleBar;
-import ca.kieve.ssss.editor.component.EntityDetailPanel;
-import ca.kieve.ssss.editor.component.EntityListPanel;
-import ca.kieve.ssss.editor.component.MapViewPanel;
-import ca.kieve.ssss.editor.ui.AppIcon;
-import ca.kieve.ssss.editor.ui.WindowResizeHandler;
-import ca.kieve.ssss.editor.ui.WindowsAeroSnap;
-import ca.kieve.ssss.editor.util.DialogUtil;
+import static ca.kieve.ssss.editor.util.CssUtil.inline;
 
 public class EditorFxApp extends Application {
     private static final KeyCodeCombination SAVE_COMBO =
             new KeyCodeCombination(
-                    KeyCode.S, KeyCombination.CONTROL_DOWN);
+                    KeyCode.S,
+                    KeyCombination.CONTROL_DOWN);
     private static final KeyCodeCombination SAVE_AS_COMBO =
             new KeyCodeCombination(
                     KeyCode.S,
@@ -48,6 +50,16 @@ public class EditorFxApp extends Application {
 
     private static final String STYLE_HIDDEN_TAB_HEADER =
             "editor-hidden-tab-header";
+
+    private static final double SPLIT_DIVIDER_POS = 0.3;
+    private static final int MIN_STAGE_WIDTH = 400;
+    private static final int MIN_STAGE_HEIGHT = 300;
+    private static final int ICON_128 = 128;
+    private static final int ICON_64 = 64;
+    private static final int ICON_32 = 32;
+    private static final int ICON_16 = 16;
+    private static final int SCENE_WIDTH = 1920;
+    private static final int SCENE_HEIGHT = 1080;
 
     // language=css
     private static final String CSS = """
@@ -67,7 +79,8 @@ public class EditorFxApp extends Application {
     @Override
     public void start(Stage stage) {
         Application.setUserAgentStylesheet(
-                new PrimerDark().getUserAgentStylesheet());
+                new PrimerDark()
+                        .getUserAgentStylesheet());
 
         m_stage = stage;
         DialogUtil.setOwner(stage);
@@ -78,71 +91,84 @@ public class EditorFxApp extends Application {
         var listPanel = new EntityListPanel(
                 detailPanel::showEntity);
 
-        var splitPane = new SplitPane(listPanel, detailPanel);
-        splitPane.setDividerPositions(0.3);
+        var splitPane =
+                new SplitPane(listPanel, detailPanel);
+        splitPane.setDividerPositions(SPLIT_DIVIDER_POS);
 
-        var entitiesTab = new Tab("Entities", splitPane);
+        var entitiesTab =
+                new Tab("Entities", splitPane);
         entitiesTab.setClosable(false);
 
         m_tabPane = new TabPane(entitiesTab);
         m_tabPane.getStylesheets().add(inline(CSS));
-        m_tabPane.getStyleClass().add(STYLE_HIDDEN_TAB_HEADER);
+        m_tabPane.getStyleClass()
+                .add(STYLE_HIDDEN_TAB_HEADER);
 
         stage.initStyle(StageStyle.UNDECORATED);
-        stage.setMinWidth(400);
-        stage.setMinHeight(300);
+        stage.setMinWidth(MIN_STAGE_WIDTH);
+        stage.setMinHeight(MIN_STAGE_HEIGHT);
 
         stage.getIcons().addAll(
-                AppIcon.create(128),
-                AppIcon.create(64),
-                AppIcon.create(32),
-                AppIcon.create(16));
+                AppIcon.create(ICON_128),
+                AppIcon.create(ICON_64),
+                AppIcon.create(ICON_32),
+                AppIcon.create(ICON_16));
 
-        var titleBar = new EditorTitleBar(
-                stage, m_tabPane,
+        var actions = new EditorTitleBar.Actions(
                 this::onLoadMap,
                 this::onSave,
                 this::onSaveAs,
-                this::onClose,
+                this::onLaunchGame,
+                this::onClose);
+        var titleBar = new EditorTitleBar(
+                stage, m_tabPane,
+                actions,
                 this::checkUnsavedChanges);
 
         var root = new BorderPane();
         root.setTop(titleBar);
         root.setCenter(m_tabPane);
 
-        var scene = new Scene(root, 1920, 1080);
+        var scene = new Scene(
+                root, SCENE_WIDTH, SCENE_HEIGHT);
 
         // Keyboard shortcuts
-        scene.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
-            if (SAVE_AS_COMBO.match(e)) {
-                onSaveAs();
-                e.consume();
-            } else if (SAVE_COMBO.match(e)) {
-                onSave();
-                e.consume();
-            }
-        });
+        scene.addEventFilter(
+                KeyEvent.KEY_PRESSED, e -> {
+                    if (SAVE_AS_COMBO.match(e)) {
+                        onSaveAs();
+                        e.consume();
+                    } else if (SAVE_COMBO.match(e)) {
+                        onSave();
+                        e.consume();
+                    }
+                });
 
         // TAB to cycle tabs
-        scene.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
-            if (e.getCode() != KeyCode.TAB) {
-                return;
-            }
-            int count = m_tabPane.getTabs().size();
-            if (count < 2) {
-                return;
-            }
-            int cur = m_tabPane.getSelectionModel()
-                    .getSelectedIndex();
-            int next = e.isShiftDown()
-                    ? (cur - 1 + count) % count
-                    : (cur + 1) % count;
-            m_tabPane.getSelectionModel().select(next);
-            e.consume();
-        });
+        scene.addEventFilter(
+                KeyEvent.KEY_PRESSED, e -> {
+                    if (e.getCode() != KeyCode.TAB) {
+                        return;
+                    }
+                    int count =
+                            m_tabPane.getTabs().size();
+                    if (count < 2) {
+                        return;
+                    }
+                    int cur = m_tabPane
+                            .getSelectionModel()
+                            .getSelectedIndex();
+                    int next = e.isShiftDown()
+                            ? (cur - 1 + count) % count
+                            : (cur + 1) % count;
+                    m_tabPane.getSelectionModel()
+                            .select(next);
+                    e.consume();
+                });
 
-        // Intercept window close for unsaved changes check
-        stage.setOnCloseRequest(this::handleCloseRequest);
+        // Intercept window close for unsaved changes
+        stage.setOnCloseRequest(
+                this::handleCloseRequest);
 
         WindowResizeHandler.install(
                 scene, stage,
@@ -160,7 +186,8 @@ public class EditorFxApp extends Application {
         if (m_mapTab == null) {
             return null;
         }
-        if (m_mapTab.getContent() instanceof MapViewPanel mvp) {
+        if (m_mapTab.getContent()
+                instanceof MapViewPanel mvp) {
             return mvp;
         }
         return null;
@@ -194,7 +221,8 @@ public class EditorFxApp extends Application {
         if (currentFile != null) {
             chooser.setInitialDirectory(
                     currentFile.getParentFile());
-            chooser.setInitialFileName(currentFile.getName());
+            chooser.setInitialFileName(
+                    currentFile.getName());
         } else if (m_lastDirectory != null
                 && m_lastDirectory.isDirectory()) {
             chooser.setInitialDirectory(m_lastDirectory);
@@ -210,9 +238,26 @@ public class EditorFxApp extends Application {
         m_mapTab.setText("Map - " + file.getName());
     }
 
+    private void onLaunchGame() {
+        try {
+            GameLauncher.launch(
+                    m_stage.getX(), m_stage.getY(),
+                    m_stage.getWidth(),
+                    m_stage.getHeight());
+        } catch (IOException ex) {
+            var alert =
+                    new Alert(Alert.AlertType.ERROR);
+            DialogUtil.style(
+                    alert, "Failed to Launch Game");
+            alert.setContentText(ex.getMessage());
+            alert.showAndWait();
+        }
+    }
+
     private void onClose() {
         var closeEvent = new WindowEvent(
-                m_stage, WindowEvent.WINDOW_CLOSE_REQUEST);
+                m_stage,
+                WindowEvent.WINDOW_CLOSE_REQUEST);
         m_stage.fireEvent(closeEvent);
     }
 
@@ -224,37 +269,43 @@ public class EditorFxApp extends Application {
 
     /**
      * Check for unsaved changes and prompt the user.
-     * Returns true if it's safe to proceed (save/discard),
-     * false if cancelled.
+     * Returns true if it's safe to proceed
+     * (save/discard), false if cancelled.
      */
     private boolean checkUnsavedChanges() {
         var panel = getMapViewPanel();
-        if (panel == null || !panel.getModel().isModified()) {
+        if (panel == null
+                || !panel.getModel().isModified()) {
             return true;
         }
 
         var saveBtn = new ButtonType(
                 "Save", ButtonBar.ButtonData.YES);
         var dontSaveBtn = new ButtonType(
-                "Don't Save", ButtonBar.ButtonData.NO);
+                "Don't Save",
+                ButtonBar.ButtonData.NO);
         var cancelBtn = new ButtonType(
-                "Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+                "Cancel",
+                ButtonBar.ButtonData.CANCEL_CLOSE);
 
         var alert = new Alert(
                 Alert.AlertType.CONFIRMATION,
                 "You have unsaved changes. "
-                    + "\nDo you want to save before closing?",
+                        + "\nDo you want to save "
+                        + "before closing?",
                 saveBtn, dontSaveBtn, cancelBtn);
         DialogUtil.style(alert, "Unsaved Changes");
 
-        Optional<ButtonType> result = alert.showAndWait();
-        if (result.isEmpty() || result.get() == cancelBtn) {
+        Optional<ButtonType> result =
+                alert.showAndWait();
+        if (result.isEmpty()
+                || result.get() == cancelBtn) {
             return false;
         }
         if (result.get() == saveBtn) {
             onSave();
-            // If still modified after save attempt (e.g. cancelled
-            // Save As dialog), don't close
+            // If still modified after save attempt
+            // (e.g. cancelled Save As dialog)
             return !panel.getModel().isModified();
         }
         return true;
@@ -289,29 +340,39 @@ public class EditorFxApp extends Application {
 
             if (m_mapTab == null) {
                 m_mapTab = new Tab();
-                m_mapTab.setOnClosed(e -> m_mapTab = null);
+                m_mapTab.setOnClosed(
+                        e -> m_mapTab = null);
                 m_tabPane.getTabs().add(m_mapTab);
             }
 
             m_mapTab.setContent(mapViewPanel);
-            m_mapTab.setText("Map - " + file.getName());
+            m_mapTab.setText(
+                    "Map - " + file.getName());
 
             // Bind modified state to tab text
             mapViewPanel.getModel().modifiedProperty()
-                    .addListener((obs, oldVal, newVal) -> {
-                String name = mapViewPanel.getModel().getFile()
-                        != null
-                        ? mapViewPanel.getModel().getFile()
-                                .getName()
-                        : "untitled";
-                m_mapTab.setText("Map - " + name
-                        + (newVal ? " *" : ""));
-            });
+                    .addListener(
+                            (obs, oldVal, newVal) -> {
+                                File f = mapViewPanel
+                                        .getModel()
+                                        .getFile();
+                                String name = f != null
+                                        ? f.getName()
+                                        : "untitled";
+                                m_mapTab.setText(
+                                        "Map - " + name
+                                        + (newVal
+                                                ? " *"
+                                                : ""));
+                            });
 
-            m_tabPane.getSelectionModel().select(m_mapTab);
+            m_tabPane.getSelectionModel()
+                    .select(m_mapTab);
         } catch (IOException ex) {
-            var alert = new Alert(Alert.AlertType.ERROR);
-            DialogUtil.style(alert, "Failed to Load Map");
+            var alert =
+                    new Alert(Alert.AlertType.ERROR);
+            DialogUtil.style(
+                    alert, "Failed to Load Map");
             alert.setContentText(ex.getMessage());
             alert.showAndWait();
         }
@@ -323,13 +384,14 @@ public class EditorFxApp extends Application {
 
         Path userDir = Path.of(
                 System.getProperty("user.dir"));
-        Path fromUserDir = userDir.resolve(mapsRelPath);
+        Path fromUserDir =
+                userDir.resolve(mapsRelPath);
         if (fromUserDir.toFile().isDirectory()) {
             return fromUserDir.toFile();
         }
 
-        Path fromParent =
-                userDir.getParent().resolve(mapsRelPath);
+        Path fromParent = userDir.getParent()
+                .resolve(mapsRelPath);
         if (fromParent.toFile().isDirectory()) {
             return fromParent.toFile();
         }

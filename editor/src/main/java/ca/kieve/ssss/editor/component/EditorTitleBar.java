@@ -1,15 +1,19 @@
 package ca.kieve.ssss.editor.component;
 
-import static ca.kieve.ssss.editor.util.CssUtil.inline;
+import ca.kieve.ssss.editor.ui.AppIcon;
+import ca.kieve.ssss.editor.ui.WindowsAeroSnap;
 
-import java.util.function.BooleanSupplier;
+import javafx.animation.PauseTransition;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ListChangeListener;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
+import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
@@ -23,19 +27,31 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
-import ca.kieve.ssss.editor.ui.AppIcon;
-import ca.kieve.ssss.editor.ui.WindowsAeroSnap;
+import java.util.function.BooleanSupplier;
+
+import static ca.kieve.ssss.editor.util.CssUtil.inline;
 
 /**
- * Unified title bar combining menu, tab toggles, and window controls
- * in a single row, replacing the OS title bar + menu bar + tab header.
+ * Unified title bar combining menu, tab toggles, and window
+ * controls in a single row, replacing the OS title bar + menu
+ * bar + tab header.
  */
 public class EditorTitleBar extends HBox {
     private static final double HEIGHT = 32;
+    private static final int APP_ICON_SIZE = 16;
+    private static final int ICON_MARGIN_RIGHT = 4;
+    private static final int ICON_SIZE = 10;
+    private static final int RESTORE_ICON_SIZE = 8;
+    private static final int RESTORE_ICON_OFFSET = 3;
+    private static final int PLAY_ICON_WIDTH = 8;
+    private static final int PLAY_ICON_MID = 5;
+    private static final int PLAY_COOLDOWN_SECONDS = 5;
 
     private static final String STYLE_TITLE_BAR =
             "editor-title-bar";
@@ -58,14 +74,16 @@ public class EditorTitleBar extends HBox {
             .%2$s {
                 -fx-background-color: transparent;
                 -fx-background-radius: 0;
-                -fx-border-color: transparent transparent transparent transparent;
+                -fx-border-color: transparent \
+                    transparent transparent transparent;
                 -fx-border-width: 0 0 2 0;
                 -fx-padding: 6 14;
                 -fx-text-fill: -color-fg-muted;
                 -fx-cursor: hand;
             }
             .%2$s:selected {
-                -fx-border-color: transparent transparent -color-accent-fg transparent;
+                -fx-border-color: transparent \
+                    transparent -color-accent-fg transparent;
                 -fx-text-fill: -color-fg-default;
             }
             .%2$s:hover {
@@ -96,7 +114,16 @@ public class EditorTitleBar extends HBox {
             STYLE_WINDOW_BUTTON_CLOSE);
 
     private static final String ICON_STROKE_STYLE =
-            "-fx-stroke: -color-fg-default; -fx-stroke-width: 1;";
+            "-fx-stroke: -color-fg-default;"
+                    + " -fx-stroke-width: 1;";
+
+    public record Actions(
+            Runnable onLoadMap,
+            Runnable onSave,
+            Runnable onSaveAs,
+            Runnable onLaunchGame,
+            Runnable onClose) {
+    }
 
     private final Stage m_stage;
     private final TabPane m_tabPane;
@@ -121,10 +148,7 @@ public class EditorTitleBar extends HBox {
     public EditorTitleBar(
             Stage stage,
             TabPane tabPane,
-            Runnable onLoadMap,
-            Runnable onSave,
-            Runnable onSaveAs,
-            Runnable onClose,
+            Actions actions,
             BooleanSupplier canCloseTab) {
         m_stage = stage;
         m_tabPane = tabPane;
@@ -143,20 +167,24 @@ public class EditorTitleBar extends HBox {
 
         // Left: app icon, file menu button, then tabs
         var appIcon = new ImageView(
-                AppIcon.create(16));
-        appIcon.setFitWidth(16);
-        appIcon.setFitHeight(16);
+                AppIcon.create(APP_ICON_SIZE));
+        appIcon.setFitWidth(APP_ICON_SIZE);
+        appIcon.setFitHeight(APP_ICON_SIZE);
         appIcon.setSmooth(true);
-        HBox.setMargin(appIcon, new Insets(0, 4, 0, 0));
+        HBox.setMargin(appIcon,
+                new Insets(0, ICON_MARGIN_RIGHT, 0, 0));
 
         var loadMapItem = new MenuItem("Load Map...");
-        loadMapItem.setOnAction(e -> onLoadMap.run());
+        loadMapItem.setOnAction(
+                e -> actions.onLoadMap().run());
 
         var saveItem = new MenuItem("Save");
-        saveItem.setOnAction(e -> onSave.run());
+        saveItem.setOnAction(
+                e -> actions.onSave().run());
 
         var saveAsItem = new MenuItem("Save As...");
-        saveAsItem.setOnAction(e -> onSaveAs.run());
+        saveAsItem.setOnAction(
+                e -> actions.onSaveAs().run());
 
         var fileMenu = new MenuButton("File", null,
                 loadMapItem,
@@ -164,15 +192,19 @@ public class EditorTitleBar extends HBox {
                 saveItem,
                 saveAsItem);
 
+        var playBtn = createPlayButton(
+                actions.onLaunchGame());
+
         // Spacer pushes window buttons to the right
         var spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        // Right: window control buttons with Win11-style icons
+        // Right: window control buttons
         var minBtn = new Button();
         minBtn.setGraphic(createMinimizeIcon());
         minBtn.getStyleClass().add(STYLE_WINDOW_BUTTON);
-        minBtn.setOnAction(e -> m_stage.setIconified(true));
+        minBtn.setOnAction(
+                e -> m_stage.setIconified(true));
         minBtn.setFocusTraversable(false);
 
         m_maxBtn = new Button();
@@ -186,15 +218,18 @@ public class EditorTitleBar extends HBox {
         closeBtn.getStyleClass().addAll(
                 STYLE_WINDOW_BUTTON,
                 STYLE_WINDOW_BUTTON_CLOSE);
-        closeBtn.setOnAction(e -> onClose.run());
+        closeBtn.setOnAction(
+                e -> actions.onClose().run());
         closeBtn.setFocusTraversable(false);
 
-        var windowButtons = new HBox(minBtn, m_maxBtn, closeBtn);
+        var windowButtons =
+                new HBox(minBtn, m_maxBtn, closeBtn);
         windowButtons.setAlignment(Pos.CENTER_RIGHT);
         windowButtons.setSpacing(0);
 
         getChildren().addAll(
-                appIcon, fileMenu, m_tabBox, spacer, windowButtons);
+                appIcon, fileMenu, playBtn,
+                m_tabBox, spacer, windowButtons);
 
         // Sync initial tabs
         for (Tab tab : m_tabPane.getTabs()) {
@@ -202,43 +237,59 @@ public class EditorTitleBar extends HBox {
         }
         syncSelection();
 
+        initListeners();
+        initDragHandlers();
+    }
+
+    public BooleanProperty maximizedProperty() {
+        return m_maximized;
+    }
+
+    private void initListeners() {
         // Listen for tab list changes
         m_tabPane.getTabs().addListener(
                 (ListChangeListener<Tab>) change -> {
-            while (change.next()) {
-                for (Tab removed : change.getRemoved()) {
-                    removeTabToggle(removed);
-                }
-                for (Tab added : change.getAddedSubList()) {
-                    addTabToggle(added);
-                }
-            }
-        });
+                    while (change.next()) {
+                        for (Tab r : change.getRemoved()) {
+                            removeTabToggle(r);
+                        }
+                        for (Tab a : change.getAddedSubList()) {
+                            addTabToggle(a);
+                        }
+                    }
+                });
 
-        // Sync toggle → tab selection
+        // Sync toggle -> tab selection
         m_toggleGroup.selectedToggleProperty().addListener(
                 (obs, oldVal, newVal) -> {
-            if (newVal instanceof ToggleButton btn) {
-                Tab tab = (Tab) btn.getUserData();
-                m_tabPane.getSelectionModel().select(tab);
-            }
-        });
+                    if (newVal instanceof ToggleButton btn) {
+                        Tab tab = (Tab) btn.getUserData();
+                        m_tabPane.getSelectionModel()
+                                .select(tab);
+                    }
+                });
 
-        // Sync tab selection → toggle
+        // Sync tab selection -> toggle
         m_tabPane.getSelectionModel().selectedItemProperty()
-                .addListener((obs, oldVal, newVal) -> syncSelection());
+                .addListener(
+                        (obs, oldVal, newVal) ->
+                                syncSelection());
+    }
 
-        // Drag to move window — delegate to native Win32 drag
-        // so that Aero Snap previews work. Falls back to manual
-        // JavaFX drag on non-Windows platforms.
+    private void initDragHandlers() {
+        // Drag to move window -- delegate to native Win32
+        // drag so that Aero Snap previews work. Falls back
+        // to manual JavaFX drag on non-Windows platforms.
         setOnMousePressed(e -> {
             if (e.getTarget() != this
-                    && !(e.getTarget() instanceof Region)) {
+                    && !(e.getTarget()
+                            instanceof Region)) {
                 return;
             }
 
-            // Try native drag first (enables snap previews).
-            // Dragging a maximized window restores it.
+            // Try native drag first (enables snap
+            // previews). Dragging a maximized window
+            // restores it.
             if (WindowsAeroSnap.startNativeDrag()) {
                 if (m_maximized.get()) {
                     m_maximized.set(false);
@@ -251,16 +302,20 @@ public class EditorTitleBar extends HBox {
 
             // Fallback: manual JavaFX drag
             m_dragging = true;
-            m_dragOffsetX = e.getScreenX() - m_stage.getX();
-            m_dragOffsetY = e.getScreenY() - m_stage.getY();
+            m_dragOffsetX =
+                    e.getScreenX() - m_stage.getX();
+            m_dragOffsetY =
+                    e.getScreenY() - m_stage.getY();
         });
 
         setOnMouseDragged(e -> {
             if (!m_dragging) {
                 return;
             }
-            m_stage.setX(e.getScreenX() - m_dragOffsetX);
-            m_stage.setY(e.getScreenY() - m_dragOffsetY);
+            m_stage.setX(
+                    e.getScreenX() - m_dragOffsetX);
+            m_stage.setY(
+                    e.getScreenY() - m_dragOffsetY);
         });
 
         setOnMouseReleased(e -> m_dragging = false);
@@ -271,10 +326,6 @@ public class EditorTitleBar extends HBox {
                 toggleMaximize();
             }
         });
-    }
-
-    public BooleanProperty maximizedProperty() {
-        return m_maximized;
     }
 
     private void toggleMaximize() {
@@ -291,9 +342,12 @@ public class EditorTitleBar extends HBox {
             m_restoreW = m_stage.getWidth();
             m_restoreH = m_stage.getHeight();
 
-            Rectangle2D bounds = Screen.getScreensForRectangle(
-                    m_stage.getX(), m_stage.getY(),
-                    m_stage.getWidth(), m_stage.getHeight())
+            Rectangle2D bounds =
+                    Screen.getScreensForRectangle(
+                            m_stage.getX(),
+                            m_stage.getY(),
+                            m_stage.getWidth(),
+                            m_stage.getHeight())
                     .getFirst()
                     .getVisualBounds();
             m_maximized.set(true);
@@ -314,12 +368,14 @@ public class EditorTitleBar extends HBox {
 
         // Keep button text in sync with tab text
         tab.textProperty().addListener(
-                (obs, oldVal, newVal) -> btn.setText(newVal));
+                (obs, oldVal, newVal) ->
+                        btn.setText(newVal));
 
         // Add close button for closable tabs
         if (tab.isClosable()) {
             var closeLabel = new Label(" \u00D7");
-            closeLabel.setStyle("-fx-text-fill: -color-fg-muted;");
+            closeLabel.setStyle(
+                    "-fx-text-fill: -color-fg-muted;");
             closeLabel.setOnMouseClicked(e -> {
                 if (!m_canCloseTab.getAsBoolean()) {
                     e.consume();
@@ -333,7 +389,7 @@ public class EditorTitleBar extends HBox {
             });
             btn.setGraphic(closeLabel);
             btn.setContentDisplay(
-                    javafx.scene.control.ContentDisplay.RIGHT);
+                    ContentDisplay.RIGHT);
         }
 
         m_tabBox.getChildren().add(btn);
@@ -349,7 +405,8 @@ public class EditorTitleBar extends HBox {
     }
 
     private void syncSelection() {
-        Tab selected = m_tabPane.getSelectionModel().getSelectedItem();
+        Tab selected = m_tabPane.getSelectionModel()
+                .getSelectedItem();
         if (selected == null) {
             return;
         }
@@ -362,41 +419,78 @@ public class EditorTitleBar extends HBox {
         }
     }
 
+    private static Button createPlayButton(
+            Runnable onLaunchGame) {
+        var btn = new Button();
+        btn.setGraphic(createPlayIcon());
+        btn.getStyleClass().add(STYLE_WINDOW_BUTTON);
+        btn.setFocusTraversable(false);
+
+        var cooldown = new PauseTransition(
+                Duration.seconds(PLAY_COOLDOWN_SECONDS));
+        cooldown.setOnFinished(
+                e -> btn.setDisable(false));
+
+        btn.setOnAction(e -> {
+            onLaunchGame.run();
+            btn.setDisable(true);
+            cooldown.playFromStart();
+        });
+
+        return btn;
+    }
+
+    private static Node createPlayIcon() {
+        var triangle = new Polygon(
+                0, 0,
+                0, ICON_SIZE,
+                PLAY_ICON_WIDTH, PLAY_ICON_MID);
+        triangle.setStyle(
+                "-fx-fill: -color-success-fg;");
+        return triangle;
+    }
+
     // Win11-style window chrome icons drawn with shapes
 
-    private static javafx.scene.Node createMinimizeIcon() {
-        var line = new Line(0, 0, 10, 0);
+    private static Node createMinimizeIcon() {
+        var line = new Line(0, 0, ICON_SIZE, 0);
         line.setStyle(ICON_STROKE_STYLE);
         return line;
     }
 
-    private static javafx.scene.Node createMaximizeIcon() {
-        var rect = new Rectangle(10, 10);
+    private static Node createMaximizeIcon() {
+        var rect = new Rectangle(
+                ICON_SIZE, ICON_SIZE);
         rect.setFill(null);
         rect.setStyle(ICON_STROKE_STYLE);
         return rect;
     }
 
-    private static javafx.scene.Node createRestoreIcon() {
-        // Two overlapping rectangles like Win11 restore icon
-        var back = new Rectangle(3, 0, 8, 8);
+    private static Node createRestoreIcon() {
+        // Two overlapping rectangles like Win11
+        var back = new Rectangle(
+                RESTORE_ICON_OFFSET, 0,
+                RESTORE_ICON_SIZE, RESTORE_ICON_SIZE);
         back.setFill(null);
         back.setStyle(ICON_STROKE_STYLE);
 
-        var front = new Rectangle(0, 3, 8, 8);
+        var front = new Rectangle(
+                0, RESTORE_ICON_OFFSET,
+                RESTORE_ICON_SIZE, RESTORE_ICON_SIZE);
         front.setFill(null);
         front.setStyle(ICON_STROKE_STYLE
                 + "-fx-fill: -color-bg-subtle;");
 
-        var group = new javafx.scene.Group(back, front);
-        return group;
+        return new Group(back, front);
     }
 
-    private static javafx.scene.Node createCloseIcon() {
-        var line1 = new Line(0, 0, 10, 10);
+    private static Node createCloseIcon() {
+        var line1 = new Line(
+                0, 0, ICON_SIZE, ICON_SIZE);
         line1.setStyle(ICON_STROKE_STYLE);
-        var line2 = new Line(10, 0, 0, 10);
+        var line2 = new Line(
+                ICON_SIZE, 0, 0, ICON_SIZE);
         line2.setStyle(ICON_STROKE_STYLE);
-        return new javafx.scene.Group(line1, line2);
+        return new Group(line1, line2);
     }
 }
