@@ -10,8 +10,10 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
 import java.util.List;
@@ -22,6 +24,8 @@ public class MapEntityPanel extends VBox {
             "editor-entity-panel";
     private static final String STYLE_TOOLBAR_LABEL_BOLD =
             "editor-toolbar-label-bold";
+    private static final String STYLE_NO_POSITION =
+            "editor-entity-no-position";
 
     // language=css
     private static final String CSS = """
@@ -38,9 +42,16 @@ public class MapEntityPanel extends VBox {
                 -fx-font-weight: bold;
                 -fx-padding: 0 8 0 4;
             }
+            .%3$s {
+                -fx-background-color: -color-danger-emphasis;
+                -fx-background-radius: 0;
+                -fx-min-width: 6;
+                -fx-max-width: 6;
+            }
             """.formatted(
             STYLE_ENTITY_PANEL,
-            STYLE_TOOLBAR_LABEL_BOLD);
+            STYLE_TOOLBAR_LABEL_BOLD,
+            STYLE_NO_POSITION);
 
     private final EditorMapModel m_model;
     private final ListView<Integer> m_entityList;
@@ -104,6 +115,10 @@ public class MapEntityPanel extends VBox {
         m_entityList.getSelectionModel().select(index);
     }
 
+    public void refreshCells() {
+        m_entityList.refresh();
+    }
+
     public void refreshList() {
         List<EditorEntity> entities =
                 m_model.getEntities();
@@ -157,12 +172,32 @@ public class MapEntityPanel extends VBox {
 
     private class EntityListCell
             extends ListCell<Integer> {
+        private final HBox m_root = new HBox();
+        private final Label m_nameLabel = new Label();
+        private final Region m_indicator = new Region();
+        private final Region m_spacer = new Region();
+
+        EntityListCell() {
+            HBox.setHgrow(m_spacer, Priority.ALWAYS);
+            m_indicator.getStyleClass()
+                    .add(STYLE_NO_POSITION);
+            Tooltip.install(m_indicator,
+                    new Tooltip("No Position component"));
+            HBox.setMargin(m_indicator,
+                    new Insets(-4, -10, -4, 4));
+            m_root.setAlignment(Pos.CENTER_LEFT);
+            m_root.setFillHeight(true);
+            m_root.getChildren().addAll(
+                    m_nameLabel, m_spacer, m_indicator);
+        }
+
         @Override
         protected void updateItem(
                 Integer index, boolean empty) {
             super.updateItem(index, empty);
             if (empty || index == null) {
                 setText(null);
+                setGraphic(null);
                 return;
             }
 
@@ -170,11 +205,19 @@ public class MapEntityPanel extends VBox {
                     m_model.getEntities();
             if (index >= entities.size()) {
                 setText(null);
+                setGraphic(null);
                 return;
             }
 
             EditorEntity entity = entities.get(index);
-            setText(index + ": " + entity.id());
+            m_nameLabel.setText(
+                    index + ": " + entity.id());
+            boolean hasPosition =
+                    entity.getPositionComponent() != null;
+            m_indicator.setVisible(!hasPosition);
+            m_indicator.setManaged(!hasPosition);
+            setText(null);
+            setGraphic(m_root);
         }
     }
 }

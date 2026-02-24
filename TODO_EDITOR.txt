@@ -1,5 +1,5 @@
 enum field editor
 
-show entities that don't have a position component
+Select tile on map when selecting an entity in list
 
 Break out ComponentPanel into most individual files

@@ -876,6 +876,7 @@ public class MapViewPanel extends BorderPane {
                 buildEntityMarkers(m_currentZ));
         m_componentPanel.showMapEntity(
                 entity.id(), entity.components());
+        m_entityPanel.refreshCells();
         m_panCanvas.requestRedraw();
     }
 
