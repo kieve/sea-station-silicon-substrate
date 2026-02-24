@@ -1,6 +1,6 @@
 package ca.kieve.ssss.component;
 
-public class Speed {
+public class Speed implements Component {
     public int val;
     public long canActAt = 0;
     public boolean canAct = false;

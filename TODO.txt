@@ -1,3 +1,5 @@
+Setup code formatting rules
+
 - Connect two maps together
 
 

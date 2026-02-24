@@ -1,5 +1,6 @@
 package ca.kieve.ssss.component;
 
+import ca.kieve.ssss.annotations.EditorIgnore;
 import dev.dominion.ecs.api.Entity;
 
 /**
@@ -11,5 +12,6 @@ public class SocketPlug implements Component {
     /**
      * The body entity the player is currently socketed into, or null if not socketed.
      */
+    @EditorIgnore
     public Entity currentBody;
 }

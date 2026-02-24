@@ -1,7 +1,10 @@
 package ca.kieve.ssss.util;
 
+import ca.kieve.ssss.annotations.EditorDecompose;
+
 import java.util.Objects;
 
+@EditorDecompose
 public class Vec3i {
     public static final Vec3i ZERO = new Vec3i(0, 0, 0);
     public static final Vec3i X = new Vec3i(1, 0, 0);

@@ -1,6 +1,5 @@
 package ca.kieve.ssss.component;
 
-
 import dev.dominion.ecs.api.Entity;
 
 import ca.kieve.ssss.context.GameContext;

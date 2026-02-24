@@ -64,6 +64,12 @@ public class EditorEntity {
         m_components.add(comp);
     }
 
+    public boolean hasComponent(String typeName) {
+        return m_components.stream().anyMatch(comp ->
+                comp.type().getSimpleName()
+                        .equals(typeName));
+    }
+
     public void removeComponent(String typeName) {
         m_components.removeIf(comp ->
                 comp.type().getSimpleName()
