@@ -98,6 +98,17 @@ public class SelectedCellOverlay extends VBox {
         }
     }
 
+    public void selectEntity(int entityIndex) {
+        for (int i = 0; i < m_list.getItems().size(); i++) {
+            var item = m_list.getItems().get(i);
+            if (item.type() == ItemType.ENTITY
+                    && item.index() == entityIndex) {
+                m_list.getSelectionModel().select(i);
+                return;
+            }
+        }
+    }
+
     public void setHeaderText(String text) {
         m_header.setText(text);
     }

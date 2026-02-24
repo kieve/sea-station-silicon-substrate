@@ -3,8 +3,6 @@ package ca.kieve.ssss.editor.component;
 import static ca.kieve.ssss.editor.util.CssUtil.inline;
 
 import ca.kieve.ssss.editor.EditorTheme;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -14,6 +12,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public class ZLevelOverlay extends HBox {
     private static final String STYLE_Z_STEP_BUTTON =
@@ -39,9 +38,9 @@ public class ZLevelOverlay extends HBox {
             """.formatted(STYLE_Z_STEP_BUTTON);
 
     private final ComboBox<Integer> m_zCombo;
-    private final IntegerProperty m_zLevel =
-            new SimpleIntegerProperty();
     private List<Integer> m_zLevels = List.of();
+    private Consumer<Integer> m_onZLevelRequested;
+    private boolean m_suppressCallback;
 
     public ZLevelOverlay() {
         getStylesheets().add(inline(CSS));
@@ -72,39 +71,53 @@ public class ZLevelOverlay extends HBox {
         stepButtons.setPadding(Insets.EMPTY);
 
         m_zCombo.setOnAction(e -> {
+            if (m_suppressCallback) {
+                return;
+            }
             Integer val = m_zCombo.getValue();
-            if (val != null) {
-                m_zLevel.set(val);
+            if (val != null
+                    && m_onZLevelRequested != null) {
+                m_onZLevelRequested.accept(val);
             }
         });
 
         getChildren().addAll(label, m_zCombo, stepButtons);
     }
 
-    public void setZLevels(List<Integer> zLevels, int defaultZ) {
+    public void setOnZLevelRequested(
+            Consumer<Integer> callback) {
+        m_onZLevelRequested = callback;
+    }
+
+    public void setZLevels(
+            List<Integer> zLevels, int defaultZ) {
         m_zLevels = zLevels;
+        m_suppressCallback = true;
         m_zCombo.getItems().setAll(zLevels);
         m_zCombo.setValue(defaultZ);
-        m_zLevel.set(defaultZ);
+        m_suppressCallback = false;
     }
 
-    public IntegerProperty zLevelProperty() {
-        return m_zLevel;
+    public void displayZLevel(int z) {
+        m_suppressCallback = true;
+        m_zCombo.setValue(z);
+        m_suppressCallback = false;
     }
 
-    public int getZLevel() {
-        return m_zLevel.get();
-    }
-
-    public void step(int direction) {
+    private void step(int direction) {
         if (m_zLevels.isEmpty()) {
             return;
         }
-        int idx = m_zLevels.indexOf(m_zLevel.get());
+        Integer current = m_zCombo.getValue();
+        if (current == null) {
+            return;
+        }
+        int idx = m_zLevels.indexOf(current);
         int next = (idx + direction + m_zLevels.size())
                 % m_zLevels.size();
         int newZ = m_zLevels.get(next);
-        m_zCombo.setValue(newZ);
-        m_zLevel.set(newZ);
+        if (m_onZLevelRequested != null) {
+            m_onZLevelRequested.accept(newZ);
+        }
     }
 }

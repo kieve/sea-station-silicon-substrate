@@ -133,6 +133,7 @@ public class MapViewPanel extends BorderPane {
             m_componentPanel.showMapEntity(
                     entity.id(), entity.components());
             setAddOverrideVisible(true);
+            focusEntity(entity);
         });
 
         m_entityPanel.setOnEntitiesChanged(() -> {
@@ -239,9 +240,8 @@ public class MapViewPanel extends BorderPane {
         int defaultZ = zLevels.contains(1)
                 ? 1 : zLevels.getFirst();
         m_zOverlay.setZLevels(zLevels, defaultZ);
-        m_zOverlay.zLevelProperty().addListener(
-                (obs, oldVal, newVal) ->
-                        loadLayer(newVal.intValue()));
+        m_zOverlay.setOnZLevelRequested(
+                this::setZLevel);
 
         // Floating zoom overlay
         m_zoomOverlay = new ZoomOverlay();
@@ -386,9 +386,9 @@ public class MapViewPanel extends BorderPane {
                 }
             } else {
                 if (e.getDeltaY() > 0) {
-                    m_zOverlay.step(1);
+                    stepZ(1);
                 } else if (e.getDeltaY() < 0) {
-                    m_zOverlay.step(-1);
+                    stepZ(-1);
                 }
             }
             e.consume();
@@ -921,6 +921,79 @@ public class MapViewPanel extends BorderPane {
         m_renderer.setSelectedCell(null, null);
         m_selectedCellOverlay.clear();
         m_panCanvas.requestRedraw();
+    }
+
+    private void focusEntity(EditorEntity entity) {
+        var pos = getEntityPos(entity);
+        if (pos == null) {
+            return;
+        }
+
+        // Switch Z-level if needed
+        if (pos.z() != m_currentZ) {
+            var zLevels = m_model.getZLevels();
+            if (!zLevels.contains(pos.z())) {
+                return;
+            }
+            setZLevel(pos.z());
+        }
+
+        int row = pos.y();
+        int col = pos.x();
+        m_renderer.setSelectedCell(row, col);
+
+        String blockName =
+                m_model.getCell(m_currentZ, row, col);
+        var entityInfos =
+                new ArrayList<
+                        SelectedCellOverlay.EntityInfo>();
+        var entities = m_model.getEntities();
+        for (int i = 0; i < entities.size(); i++) {
+            var e = entities.get(i);
+            var ePos = getEntityPos(e);
+            if (ePos != null
+                    && ePos.x() == col
+                    && ePos.y() == row
+                    && ePos.z() == m_currentZ) {
+                entityInfos.add(
+                        new SelectedCellOverlay
+                                .EntityInfo(
+                                i, e.id()));
+            }
+        }
+
+        m_selectedCellOverlay.setHeaderText(
+                "Cell: (" + col + ", " + row + ")");
+        m_selectedCellOverlay.update(
+                blockName, entityInfos);
+        if (m_selectedEntityIndex != null) {
+            m_selectedCellOverlay.selectEntity(
+                    m_selectedEntityIndex);
+        }
+
+        // Center map on the entity's cell
+        double worldX = col * MapRenderer.CELL_SIZE
+                + MapRenderer.CELL_SIZE / 2.0;
+        double worldY = -row * MapRenderer.CELL_SIZE
+                + MapRenderer.CELL_SIZE / 2.0;
+        m_panCanvas.centerOn(worldX, worldY);
+        m_panCanvas.requestRedraw();
+    }
+
+    private void setZLevel(int z) {
+        loadLayer(z);
+        m_zOverlay.displayZLevel(z);
+    }
+
+    private void stepZ(int direction) {
+        var zLevels = m_model.getZLevels();
+        if (zLevels.isEmpty()) {
+            return;
+        }
+        int idx = zLevels.indexOf(m_currentZ);
+        int next = (idx + direction + zLevels.size())
+                % zLevels.size();
+        setZLevel(zLevels.get(next));
     }
 
     private void loadLayer(int zLevel) {
