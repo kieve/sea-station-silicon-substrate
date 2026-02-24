@@ -1,12 +1,13 @@
 package ca.kieve.ssss.editor.component;
 
-import ca.kieve.ssss.component.Position;
+import ca.kieve.ssss.content.ComponentDefinition;
+import ca.kieve.ssss.content.ContentRegistry;
 import ca.kieve.ssss.content.MapDefinition;
-import ca.kieve.ssss.content.MapEntityDefinition;
 import ca.kieve.ssss.editor.BlockColorResolver;
 import ca.kieve.ssss.editor.EditorContext;
 import ca.kieve.ssss.editor.EditorTheme;
 import ca.kieve.ssss.editor.MapSaver;
+import ca.kieve.ssss.editor.model.EditorEntity;
 import ca.kieve.ssss.editor.model.EditorMapModel;
 import ca.kieve.ssss.editor.ui.PanCanvas;
 import javafx.geometry.Insets;
@@ -52,23 +53,21 @@ public class MapViewPanel extends BorderPane {
     private record EntityPos(int x, int y, int z) {}
 
     private static EntityPos getEntityPos(
-            MapEntityDefinition entity) {
-        for (var comp : entity.components()) {
-            if (comp.type() != Position.class) {
-                continue;
-            }
-            Object xVal = comp.properties().get("x");
-            Object yVal = comp.properties().get("y");
-            Object zVal = comp.properties().get("z");
-            if (xVal instanceof Number nx
-                    && yVal instanceof Number ny
-                    && zVal instanceof Number nz) {
-                return new EntityPos(
-                        nx.intValue(),
-                        ny.intValue(),
-                        nz.intValue());
-            }
+            EditorEntity entity) {
+        var posComp = entity.getPositionComponent();
+        if (posComp == null) {
             return null;
+        }
+        Object xVal = posComp.properties().get("x");
+        Object yVal = posComp.properties().get("y");
+        Object zVal = posComp.properties().get("z");
+        if (xVal instanceof Number nx
+                && yVal instanceof Number ny
+                && zVal instanceof Number nz) {
+            return new EntityPos(
+                    nx.intValue(),
+                    ny.intValue(),
+                    nz.intValue());
         }
         return null;
     }
@@ -101,6 +100,7 @@ public class MapViewPanel extends BorderPane {
         m_componentPanel = new ComponentPanel();
 
         m_blockPanel.setOnSelectionChanged(name -> {
+            m_componentPanel.commitPendingEdit();
             m_selectedBlockName = name;
             var blockDef = m_model.getBlocks().get(name);
             if (blockDef != null) {
@@ -114,18 +114,30 @@ public class MapViewPanel extends BorderPane {
                 this::refreshBlockTypes);
 
         m_entityPanel.setOnSelectionChanged(index -> {
+            m_componentPanel.commitPendingEdit();
             m_selectedEntityIndex = index;
-            List<MapEntityDefinition> entities =
+            List<EditorEntity> entities =
                     m_model.getEntities();
             if (index >= entities.size()) {
                 m_componentPanel.clear();
                 return;
             }
-            MapEntityDefinition entity =
-                    entities.get(index);
+            EditorEntity entity = entities.get(index);
             m_componentPanel.showMapEntity(
                     entity.id(), entity.components());
         });
+
+        m_entityPanel.setOnEntitiesChanged(() -> {
+            m_componentPanel.commitPendingEdit();
+            m_selectedEntityIndex = null;
+            m_componentPanel.clear();
+            m_renderer.loadEntities(
+                    buildEntityMarkers(m_currentZ));
+            m_panCanvas.requestRedraw();
+        });
+
+        m_componentPanel.setOnPropertyEdited(
+                this::onPropertyEdited);
 
         // Pick a default selected block (first non-air)
         for (var entry : m_model.getBlocks().entrySet()) {
@@ -504,24 +516,140 @@ public class MapViewPanel extends BorderPane {
         if (m_selectedEntityIndex == null) {
             return;
         }
+        var entities = m_model.getEntities();
+        if (m_selectedEntityIndex < 0
+                || m_selectedEntityIndex
+                        >= entities.size()) {
+            return;
+        }
         var cell = mouseToGrid(mouseX, mouseY);
         int row = cell.row();
         int col = cell.col();
-        if (!m_model.moveEntity(
-                m_selectedEntityIndex,
-                col, row, m_currentZ)) {
-            return;
-        }
+
+        var entity =
+                entities.get(m_selectedEntityIndex);
+        entity.movePosition(col, row, m_currentZ);
+        m_model.markModified();
 
         m_renderer.loadEntities(
                 buildEntityMarkers(m_currentZ));
         m_renderer.setSelectedCell(row, col);
-
-        var entities = m_model.getEntities();
-        var entity = entities.get(m_selectedEntityIndex);
         m_componentPanel.showMapEntity(
                 entity.id(), entity.components());
         m_panCanvas.requestRedraw();
+    }
+
+    private void onPropertyEdited(
+            String componentTypeName,
+            String propertyName,
+            String newValue) {
+        if (m_selectedEntityIndex == null) {
+            return;
+        }
+        var entities = m_model.getEntities();
+        if (m_selectedEntityIndex < 0
+                || m_selectedEntityIndex
+                        >= entities.size()) {
+            return;
+        }
+
+        var entity =
+                entities.get(m_selectedEntityIndex);
+        ContentRegistry registry =
+                EditorContext.getInstance().getRegistry();
+
+        // Find existing override on the entity
+        ComponentDefinition overrideComp = null;
+        for (var comp : entity.components()) {
+            if (comp.type().getSimpleName()
+                    .equals(componentTypeName)) {
+                overrideComp = comp;
+                break;
+            }
+        }
+
+        if (overrideComp == null) {
+            // Creating override from base component
+            if (!registry.hasEntity(entity.id())) {
+                return;
+            }
+            var baseDef = registry.getEntityDefinition(
+                    entity.id());
+            var resolved =
+                    baseDef.resolveComponents(registry);
+            ComponentDefinition baseComp = null;
+            for (var comp : resolved) {
+                if (comp.type().getSimpleName()
+                        .equals(componentTypeName)) {
+                    baseComp = comp;
+                    break;
+                }
+            }
+            if (baseComp == null) {
+                return;
+            }
+
+            // Clone the base component into an override
+            overrideComp = new ComponentDefinition(
+                    baseComp.type());
+            for (var prop
+                    : baseComp.properties().entrySet()) {
+                overrideComp.setProperty(
+                        prop.getKey(), prop.getValue());
+            }
+        }
+
+        // Parse the new value to match original type
+        Object oldValue =
+                overrideComp.properties()
+                        .get(propertyName);
+        Object parsed = parseValue(newValue, oldValue);
+        overrideComp.setProperty(propertyName, parsed);
+        entity.setComponentOverride(overrideComp);
+        m_model.markModified();
+
+        // Refresh
+        m_renderer.loadEntities(
+                buildEntityMarkers(m_currentZ));
+        m_componentPanel.showMapEntity(
+                entity.id(), entity.components());
+        m_panCanvas.requestRedraw();
+    }
+
+    private static Object parseValue(
+            String value, Object original) {
+        if (original instanceof Integer) {
+            try {
+                return Integer.parseInt(value);
+            } catch (NumberFormatException e) {
+                return original;
+            }
+        }
+        if (original instanceof Long) {
+            try {
+                return Long.parseLong(value);
+            } catch (NumberFormatException e) {
+                return original;
+            }
+        }
+        if (original instanceof Double) {
+            try {
+                return Double.parseDouble(value);
+            } catch (NumberFormatException e) {
+                return original;
+            }
+        }
+        if (original instanceof Float) {
+            try {
+                return Float.parseFloat(value);
+            } catch (NumberFormatException e) {
+                return original;
+            }
+        }
+        if (original instanceof Boolean) {
+            return Boolean.parseBoolean(value);
+        }
+        return value;
     }
 
     private void clearSelection() {
@@ -556,7 +684,7 @@ public class MapViewPanel extends BorderPane {
                         .getColorResolver();
         var markers =
                 new ArrayList<MapRenderer.EntityMarker>();
-        for (var entity : entities) {
+        for (EditorEntity entity : entities) {
             var pos = getEntityPos(entity);
             if (pos == null || pos.z() != zLevel) {
                 continue;

@@ -59,6 +59,7 @@ public class CompactTreeTable<T>
             """.formatted(STYLE, STYLE_SECTION);
 
     private final TreeTableColumn<T, String> m_leftCol;
+    private final TreeTableColumn<T, String> m_rightCol;
 
     private boolean m_dragging;
     private double m_dragStartX;
@@ -100,21 +101,25 @@ public class CompactTreeTable<T>
         });
         m_leftCol.setPrefWidth(100);
 
-        var rightCol = new TreeTableColumn<T, String>();
-        rightCol.setCellValueFactory(p ->
+        m_rightCol = new TreeTableColumn<>();
+        m_rightCol.setCellValueFactory(p ->
                 new SimpleStringProperty(
                         rightExtractor.apply(
                                 p.getValue().getValue())));
 
         getColumns().add(m_leftCol);
-        getColumns().add(rightCol);
+        getColumns().add(m_rightCol);
 
-        rightCol.prefWidthProperty().bind(
+        m_rightCol.prefWidthProperty().bind(
                 widthProperty()
                         .subtract(m_leftCol.widthProperty())
                         .subtract(2));
 
         setupColumnDrag();
+    }
+
+    protected TreeTableColumn<T, String> getRightColumn() {
+        return m_rightCol;
     }
 
     private boolean isNearDivider(double x) {

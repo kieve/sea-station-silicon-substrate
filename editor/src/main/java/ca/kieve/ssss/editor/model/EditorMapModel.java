@@ -1,6 +1,5 @@
 package ca.kieve.ssss.editor.model;
 
-import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.content.ComponentDefinition;
 import ca.kieve.ssss.content.MapBlockDefinition;
 import ca.kieve.ssss.content.MapDefinition;
@@ -21,7 +20,7 @@ public class EditorMapModel {
     private final TreeMap<Integer, SparseGrid> m_layers =
             new TreeMap<>();
     private String m_floorGlyph;
-    private List<MapEntityDefinition> m_entities;
+    private List<EditorEntity> m_entities;
     private final BooleanProperty m_modified =
             new SimpleBooleanProperty(false);
     private File m_file;
@@ -31,8 +30,10 @@ public class EditorMapModel {
         var model = new EditorMapModel();
         model.m_file = file;
         model.m_floorGlyph = def.floorGlyph();
-        model.m_entities =
-                new ArrayList<>(def.entities());
+        model.m_entities = new ArrayList<>(
+                def.entities().stream()
+                        .map(EditorEntity::fromDefinition)
+                        .toList());
         model.m_blocks.putAll(def.blocks());
 
         // Build a reverse map: layoutChar -> block name
@@ -141,9 +142,13 @@ public class EditorMapModel {
 
         // Adjust entity positions so they are relative to the
         // bounding-box origin
+        List<MapEntityDefinition> entityDefs =
+                m_entities.stream()
+                        .map(EditorEntity::toDefinition)
+                        .toList();
         List<MapEntityDefinition> entities =
                 adjustEntityPositions(
-                        m_entities, -minCol, -minRow);
+                        entityDefs, -minCol, -minRow);
 
         return new MapDefinition(
                 blocks, layers, m_floorGlyph, entities);
@@ -208,40 +213,21 @@ public class EditorMapModel {
         return true;
     }
 
-    public boolean moveEntity(
-            int index, int x, int y, int z) {
-        if (index < 0 || index >= m_entities.size()) {
-            return false;
-        }
-        var entity = m_entities.get(index);
-        ComponentDefinition posComp = null;
-        for (var comp : entity.components()) {
-            if (comp.type() == Position.class) {
-                posComp = comp;
-                break;
-            }
-        }
-
-        if (posComp != null) {
-            posComp.setProperty("x", x);
-            posComp.setProperty("y", y);
-            posComp.setProperty("z", z);
-        } else {
-            var newPos =
-                    new ComponentDefinition(Position.class);
-            newPos.setProperty("x", x);
-            newPos.setProperty("y", y);
-            newPos.setProperty("z", z);
-            var newComps =
-                    new ArrayList<>(entity.components());
-            newComps.add(newPos);
-            m_entities.set(index,
-                    new MapEntityDefinition(
-                            entity.id(), newComps));
-        }
-
+    public void addEntity(EditorEntity entity) {
+        m_entities.add(entity);
         m_modified.set(true);
-        return true;
+    }
+
+    public void removeEntity(int index) {
+        if (index < 0 || index >= m_entities.size()) {
+            return;
+        }
+        m_entities.remove(index);
+        m_modified.set(true);
+    }
+
+    public void markModified() {
+        m_modified.set(true);
     }
 
     public SparseGrid getLayer(int z) {
@@ -311,7 +297,7 @@ public class EditorMapModel {
         m_file = file;
     }
 
-    public List<MapEntityDefinition> getEntities() {
+    public List<EditorEntity> getEntities() {
         return m_entities;
     }
 

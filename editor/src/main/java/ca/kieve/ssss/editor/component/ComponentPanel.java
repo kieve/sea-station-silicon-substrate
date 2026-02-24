@@ -7,16 +7,28 @@ import ca.kieve.ssss.content.ContentRegistry;
 import ca.kieve.ssss.content.EntityDefinition;
 import ca.kieve.ssss.editor.EditorContext;
 import ca.kieve.ssss.editor.ui.CompactTreeTable;
+import javafx.geometry.Pos;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TextFormatter;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableRow;
+import javafx.scene.input.KeyCode;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.UnaryOperator;
 
 public class ComponentPanel
-        extends CompactTreeTable<ComponentPanel.ComponentRow> {
+        extends CompactTreeTable<
+                ComponentPanel.ComponentRow> {
 
     enum OverrideStatus { NONE, REPLACED, ADDED }
 
@@ -24,11 +36,24 @@ public class ComponentPanel
             String name,
             String value,
             OverrideStatus status,
-            String baseValue
+            String baseValue,
+            String componentType,
+            String propertyName,
+            boolean editable,
+            Object rawValue
     ) {
         ComponentRow(String name, String value) {
-            this(name, value, OverrideStatus.NONE, null);
+            this(name, value, OverrideStatus.NONE,
+                    null, null, null, false, null);
         }
+    }
+
+    @FunctionalInterface
+    public interface PropertyEditCallback {
+        void onPropertyEdited(
+                String componentTypeName,
+                String propertyName,
+                String newValue);
     }
 
     private static final String STYLE_COMPONENT_PANEL =
@@ -61,6 +86,8 @@ public class ComponentPanel
             INDICATOR_WIDTH);
 
     private final ContentRegistry m_registry;
+    private PropertyEditCallback m_onPropertyEdited;
+    private EditableValueCell m_activeEditCell;
 
     public ComponentPanel() {
         super(ComponentRow::name, ComponentRow::value);
@@ -69,10 +96,17 @@ public class ComponentPanel
         getStyleClass().add(STYLE_COMPONENT_PANEL);
         getStylesheets().add(inline(ROW_CSS));
         setupRowFactory();
+        setupEditableCells();
         clear();
     }
 
+    public void setOnPropertyEdited(
+            PropertyEditCallback callback) {
+        m_onPropertyEdited = callback;
+    }
+
     public void showEntity(String entityId) {
+        commitPendingEdit();
         if (entityId == null
                 || !m_registry.hasEntity(entityId)) {
             clear();
@@ -102,7 +136,8 @@ public class ComponentPanel
                 def.resolveComponents(m_registry);
         for (ComponentDefinition comp : resolved) {
             root.getChildren().add(
-                    buildComponentItem(comp));
+                    buildComponentItem(
+                            comp, false));
         }
 
         setRoot(null);
@@ -112,14 +147,18 @@ public class ComponentPanel
     public void showMapEntity(
             String baseEntityId,
             List<ComponentDefinition> overrides) {
+        commitPendingEdit();
         if (baseEntityId == null
                 || !m_registry.hasEntity(baseEntityId)) {
             clear();
             return;
         }
 
+        Set<String> expanded = getExpandedNames();
+
         EntityDefinition def =
-                m_registry.getEntityDefinition(baseEntityId);
+                m_registry.getEntityDefinition(
+                        baseEntityId);
         List<ComponentDefinition> baseComponents =
                 def.resolveComponents(m_registry);
 
@@ -172,19 +211,24 @@ public class ComponentPanel
                                 new ComponentRow(
                                         "", parent)));
             }
-            parentsItem.setExpanded(false);
+            parentsItem.setExpanded(
+                    expanded.contains("Parents"));
             root.getChildren().add(parentsItem);
         }
 
         for (var entry : merged.entrySet()) {
             String typeName = entry.getKey();
             ComponentDefinition comp = entry.getValue();
-            OverrideStatus status = statusMap.get(typeName);
+            OverrideStatus status =
+                    statusMap.get(typeName);
             ComponentDefinition baseComp =
                     baseMap.get(typeName);
-            root.getChildren().add(
-                    buildComponentItem(
-                            comp, status, baseComp));
+            var item = buildComponentItem(
+                    comp, status, baseComp, true);
+            if (expanded.contains(typeName)) {
+                item.setExpanded(true);
+            }
+            root.getChildren().add(item);
         }
 
         setRoot(null);
@@ -192,10 +236,12 @@ public class ComponentPanel
     }
 
     public void clear() {
+        commitPendingEdit();
         var emptyRoot = new TreeItem<>(
                 new ComponentRow("", ""));
         emptyRoot.getChildren().add(new TreeItem<>(
-                new ComponentRow("Nothing selected", "")));
+                new ComponentRow(
+                        "Nothing selected", "")));
         setRoot(null);
         setRoot(emptyRoot);
     }
@@ -227,32 +273,69 @@ public class ComponentPanel
 
                 if (item.baseValue() != null) {
                     setTooltip(new Tooltip(
-                            "Base: " + item.baseValue()));
+                            "Base: "
+                                    + item.baseValue()));
                 }
             }
         });
     }
 
+    private void setupEditableCells() {
+        getRightColumn().setCellFactory(
+                col -> new EditableValueCell());
+    }
+
+    public void commitPendingEdit() {
+        if (m_activeEditCell != null) {
+            m_activeEditCell.commitFromExternal();
+        }
+    }
+
+    private Set<String> getExpandedNames() {
+        Set<String> expanded = new HashSet<>();
+        var root = getRoot();
+        if (root == null) {
+            return expanded;
+        }
+        for (var child : root.getChildren()) {
+            if (child.isExpanded()) {
+                var row = child.getValue();
+                if (row != null
+                        && row.name() != null
+                        && !row.name().isEmpty()) {
+                    expanded.add(row.name());
+                }
+            }
+        }
+        return expanded;
+    }
+
     private TreeItem<ComponentRow> buildComponentItem(
-            ComponentDefinition comp) {
+            ComponentDefinition comp,
+            boolean editable) {
         return buildComponentItem(
-                comp, OverrideStatus.NONE, null);
+                comp, OverrideStatus.NONE, null,
+                editable);
     }
 
     private TreeItem<ComponentRow> buildComponentItem(
             ComponentDefinition comp,
             OverrideStatus status,
-            ComponentDefinition baseComp) {
+            ComponentDefinition baseComp,
+            boolean editable) {
         String name = comp.type().getSimpleName();
         var props = comp.properties();
 
         if (props.isEmpty()) {
             return new TreeItem<>(new ComponentRow(
-                    name, "(marker)", status, null));
+                    name, "(marker)", status, null,
+                    name, null, false, null));
         }
 
         var item = new TreeItem<>(
-                new ComponentRow(name, "", status, null));
+                new ComponentRow(
+                        name, "", status, null,
+                        name, null, false, null));
 
         Map<String, Object> baseProps =
                 baseComp != null
@@ -261,8 +344,9 @@ public class ComponentPanel
 
         for (var entry : props.entrySet()) {
             String propName = entry.getKey();
+            Object rawValue = entry.getValue();
             String propValue =
-                    String.valueOf(entry.getValue());
+                    String.valueOf(rawValue);
 
             String baseValue = null;
             if (status == OverrideStatus.REPLACED
@@ -279,9 +363,213 @@ public class ComponentPanel
                             propName,
                             propValue,
                             status,
-                            baseValue)));
+                            baseValue,
+                            name,
+                            propName,
+                            editable,
+                            rawValue)));
         }
         item.setExpanded(false);
         return item;
+    }
+
+    private class EditableValueCell
+            extends TreeTableCell<ComponentRow, String> {
+        private TextField m_textField;
+        private boolean m_editing;
+        private ComponentRow m_editRowData;
+
+        EditableValueCell() {
+            setOnMouseClicked(e -> {
+                if (m_editing) {
+                    return;
+                }
+                var row = getTreeTableRow();
+                if (row == null) {
+                    return;
+                }
+                var treeItem = row.getTreeItem();
+                if (treeItem == null) {
+                    return;
+                }
+                ComponentRow rowData =
+                        treeItem.getValue();
+                if (rowData == null
+                        || !rowData.editable()
+                        || rowData.propertyName()
+                                == null) {
+                    return;
+                }
+                enterEditMode(rowData);
+                e.consume();
+            });
+        }
+
+        void commitFromExternal() {
+            if (!m_editing || m_editRowData == null) {
+                return;
+            }
+            commitEdit(m_editRowData);
+        }
+
+        @Override
+        protected void updateItem(
+                String item, boolean empty) {
+            super.updateItem(item, empty);
+            if (m_editing) {
+                return;
+            }
+            if (empty || item == null) {
+                setText(null);
+                setGraphic(null);
+                return;
+            }
+            setText(item);
+            setGraphic(null);
+        }
+
+        private void enterEditMode(
+                ComponentRow rowData) {
+            m_editing = true;
+            m_editRowData = rowData;
+            m_activeEditCell = this;
+
+            String currentValue = rowData.value();
+            m_textField = new TextField(currentValue);
+            m_textField.setMaxHeight(18);
+            m_textField.setPrefHeight(18);
+            m_textField.setStyle(
+                    "-fx-font-size: 11;");
+
+            applyTypeFilter(
+                    m_textField, rowData.rawValue());
+
+            var confirmBtn = new Button("\u2713");
+            confirmBtn.setStyle(
+                    "-fx-font-size: 9; "
+                    + "-fx-padding: 0 3;");
+            confirmBtn.setFocusTraversable(false);
+            confirmBtn.setOnAction(
+                    e -> commitEdit(rowData));
+
+            var cancelBtn = new Button("\u2717");
+            cancelBtn.setStyle(
+                    "-fx-font-size: 9; "
+                    + "-fx-padding: 0 3;");
+            cancelBtn.setFocusTraversable(false);
+            // Prevent focus transfer so the
+            // blur-commit listener doesn't fire
+            cancelBtn.addEventFilter(
+                    javafx.scene.input.MouseEvent
+                            .MOUSE_PRESSED,
+                    e -> {
+                        exitEditMode(currentValue);
+                        e.consume();
+                    });
+
+            m_textField.setOnKeyPressed(e -> {
+                if (e.getCode() == KeyCode.ENTER) {
+                    commitEdit(rowData);
+                    e.consume();
+                } else if (e.getCode()
+                        == KeyCode.ESCAPE) {
+                    exitEditMode(currentValue);
+                    e.consume();
+                }
+            });
+
+            m_textField.focusedProperty().addListener(
+                    (obs, wasFocused, isFocused) -> {
+                if (!isFocused && m_editing) {
+                    commitEdit(rowData);
+                }
+            });
+
+            var editBox = new HBox(
+                    2, m_textField,
+                    confirmBtn, cancelBtn);
+            editBox.setAlignment(Pos.CENTER_LEFT);
+            HBox.setHgrow(
+                    m_textField, Priority.ALWAYS);
+
+            setText(null);
+            setGraphic(editBox);
+            m_textField.requestFocus();
+            m_textField.selectAll();
+        }
+
+        private void commitEdit(ComponentRow rowData) {
+            String newValue =
+                    m_textField.getText().trim();
+            m_editing = false;
+            m_editRowData = null;
+            if (m_activeEditCell == this) {
+                m_activeEditCell = null;
+            }
+            setText(newValue);
+            setGraphic(null);
+
+            if (!newValue.equals(rowData.value())
+                    && m_onPropertyEdited != null) {
+                m_onPropertyEdited.onPropertyEdited(
+                        rowData.componentType(),
+                        rowData.propertyName(),
+                        newValue);
+            }
+        }
+
+        private void exitEditMode(String original) {
+            m_editing = false;
+            m_editRowData = null;
+            if (m_activeEditCell == this) {
+                m_activeEditCell = null;
+            }
+            setText(original);
+            setGraphic(null);
+        }
+
+        private void applyTypeFilter(
+                TextField field, Object rawValue) {
+            if (rawValue instanceof Integer
+                    || rawValue instanceof Long) {
+                UnaryOperator<TextFormatter.Change>
+                        filter = change -> {
+                    String newText =
+                            change.getControlNewText();
+                    if (newText.isEmpty()
+                            || newText.equals("-")) {
+                        return change;
+                    }
+                    try {
+                        Long.parseLong(newText);
+                        return change;
+                    } catch (NumberFormatException e) {
+                        return null;
+                    }
+                };
+                field.setTextFormatter(
+                        new TextFormatter<>(filter));
+            } else if (rawValue instanceof Double
+                    || rawValue instanceof Float) {
+                UnaryOperator<TextFormatter.Change>
+                        filter = change -> {
+                    String newText =
+                            change.getControlNewText();
+                    if (newText.isEmpty()
+                            || newText.equals("-")
+                            || newText.equals(".")) {
+                        return change;
+                    }
+                    try {
+                        Double.parseDouble(newText);
+                        return change;
+                    } catch (NumberFormatException e) {
+                        return null;
+                    }
+                };
+                field.setTextFormatter(
+                        new TextFormatter<>(filter));
+            }
+        }
     }
 }

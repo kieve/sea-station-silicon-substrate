@@ -2,7 +2,7 @@ package ca.kieve.ssss.editor;
 
 import ca.kieve.ssss.content.MapBlockDefinition;
 import ca.kieve.ssss.content.MapDefinition;
-import ca.kieve.ssss.content.MapEntityDefinition;
+import ca.kieve.ssss.editor.model.EditorEntity;
 import ca.kieve.ssss.editor.model.EditorMapModel;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -77,8 +77,8 @@ class MapSaveLoadTest {
         }
 
         // Assert entities match
-        List<MapEntityDefinition> origEntities = model.getEntities();
-        List<MapEntityDefinition> savedEntities = reloaded.getEntities();
+        List<EditorEntity> origEntities = model.getEntities();
+        List<EditorEntity> savedEntities = reloaded.getEntities();
         assertEquals(origEntities.size(), savedEntities.size(),
                 "entity count mismatch");
         for (int i = 0; i < origEntities.size(); i++) {

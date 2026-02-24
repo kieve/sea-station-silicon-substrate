@@ -2,11 +2,15 @@ package ca.kieve.ssss.editor.component;
 
 import static ca.kieve.ssss.editor.util.CssUtil.inline;
 
-import ca.kieve.ssss.content.MapEntityDefinition;
+import ca.kieve.ssss.editor.model.EditorEntity;
 import ca.kieve.ssss.editor.model.EditorMapModel;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
@@ -41,6 +45,7 @@ public class MapEntityPanel extends VBox {
     private final EditorMapModel m_model;
     private final ListView<Integer> m_entityList;
     private Consumer<Integer> m_onSelectionChanged;
+    private Runnable m_onEntitiesChanged;
 
     public MapEntityPanel(EditorMapModel model) {
         m_model = model;
@@ -69,7 +74,20 @@ public class MapEntityPanel extends VBox {
             }
         });
 
-        getChildren().addAll(titleLabel, m_entityList);
+        var addBtn = new Button("Add");
+        addBtn.setFocusTraversable(false);
+        addBtn.setOnAction(e -> onAdd());
+
+        var removeBtn = new Button("Remove");
+        removeBtn.setFocusTraversable(false);
+        removeBtn.setOnAction(e -> onRemove());
+
+        var buttonBar = new HBox(4, addBtn, removeBtn);
+        buttonBar.setAlignment(Pos.CENTER_LEFT);
+        buttonBar.setPadding(new Insets(4, 0, 0, 0));
+
+        getChildren().addAll(
+                titleLabel, m_entityList, buttonBar);
         refreshList();
     }
 
@@ -78,16 +96,62 @@ public class MapEntityPanel extends VBox {
         m_onSelectionChanged = callback;
     }
 
+    public void setOnEntitiesChanged(Runnable callback) {
+        m_onEntitiesChanged = callback;
+    }
+
     public void selectEntity(int index) {
         m_entityList.getSelectionModel().select(index);
     }
 
-    private void refreshList() {
-        List<MapEntityDefinition> entities =
+    public void refreshList() {
+        List<EditorEntity> entities =
                 m_model.getEntities();
         m_entityList.getItems().clear();
         for (int i = 0; i < entities.size(); i++) {
             m_entityList.getItems().add(i);
+        }
+    }
+
+    private void onAdd() {
+        EntityAddDialog.showAdd().ifPresent(result -> {
+            var entity = new EditorEntity(
+                    result.entityId(), List.of());
+            m_model.addEntity(entity);
+            refreshList();
+            int newIndex =
+                    m_model.getEntities().size() - 1;
+            m_entityList.getSelectionModel()
+                    .select(newIndex);
+            fireSelectionChanged();
+            fireEntitiesChanged();
+        });
+    }
+
+    private void onRemove() {
+        Integer selected = m_entityList
+                .getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            return;
+        }
+        m_model.removeEntity(selected);
+        refreshList();
+        fireEntitiesChanged();
+    }
+
+    private void fireSelectionChanged() {
+        if (m_onSelectionChanged != null) {
+            Integer sel = m_entityList
+                    .getSelectionModel().getSelectedItem();
+            if (sel != null) {
+                m_onSelectionChanged.accept(sel);
+            }
+        }
+    }
+
+    private void fireEntitiesChanged() {
+        if (m_onEntitiesChanged != null) {
+            m_onEntitiesChanged.run();
         }
     }
 
@@ -102,15 +166,14 @@ public class MapEntityPanel extends VBox {
                 return;
             }
 
-            List<MapEntityDefinition> entities =
+            List<EditorEntity> entities =
                     m_model.getEntities();
             if (index >= entities.size()) {
                 setText(null);
                 return;
             }
 
-            MapEntityDefinition entity =
-                    entities.get(index);
+            EditorEntity entity = entities.get(index);
             setText(index + ": " + entity.id());
         }
     }
