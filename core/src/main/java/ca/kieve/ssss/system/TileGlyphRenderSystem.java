@@ -1,9 +1,13 @@
 package ca.kieve.ssss.system;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import dev.dominion.ecs.api.Entity;
 
 import ca.kieve.ssss.component.CameraComp;
 import ca.kieve.ssss.component.ColorComp;
@@ -14,11 +18,6 @@ import ca.kieve.ssss.component.RenderingHint;
 import ca.kieve.ssss.component.SocketPlug;
 import ca.kieve.ssss.component.TileGlyph;
 import ca.kieve.ssss.context.GameContext;
-
-import dev.dominion.ecs.api.Entity;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class TileGlyphRenderSystem extends System {
     private final SpriteBatch m_spriteBatch;

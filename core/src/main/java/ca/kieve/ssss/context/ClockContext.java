@@ -1,11 +1,11 @@
 package ca.kieve.ssss.context;
 
+import static ca.kieve.ssss.util.TickStage.AWAIT_INPUT;
+import static ca.kieve.ssss.util.TurnPhase.PLAYER;
+
 import ca.kieve.ssss.system.ClockSystem;
 import ca.kieve.ssss.util.TickStage;
 import ca.kieve.ssss.util.TurnPhase;
-
-import static ca.kieve.ssss.util.TickStage.AWAIT_INPUT;
-import static ca.kieve.ssss.util.TurnPhase.PLAYER;
 
 public class ClockContext {
     private long m_currentTime = 0;

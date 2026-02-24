@@ -1,5 +1,10 @@
 package ca.kieve.ssss.world;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.badlogic.gdx.Gdx;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -8,11 +13,6 @@ import ca.kieve.ssss.content.BlockTypeFactory;
 import ca.kieve.ssss.content.MapBlockDefinition;
 import ca.kieve.ssss.content.MapDefinition;
 import ca.kieve.ssss.content.MapEntityDefinition;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * A static map generator that loads map layout from YAML.

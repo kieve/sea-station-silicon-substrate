@@ -1,0 +1,276 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC
+    "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+    "https://checkstyle.org/dtds/configuration_1_3.dtd">
+
+<module name="Checker">
+  <property name="severity" value="error"/>
+
+  <module name="SuppressionFilter">
+    <property name="file"
+        value="${config_loc}/suppressions.xml"/>
+  </module>
+
+  <!-- ============================================================ -->
+  <!-- File-level checks (outside TreeWalker)                       -->
+  <!-- ============================================================ -->
+
+  <!-- Max 100 characters per line -->
+  <module name="LineLength">
+    <property name="max" value="100"/>
+  </module>
+
+  <!-- No tab characters anywhere in source files -->
+  <module name="FileTabCharacter"/>
+
+  <!-- No trailing whitespace -->
+  <module name="RegexpSingleline">
+    <property name="format" value="\s+$"/>
+    <property name="message" value="Line has trailing whitespace."/>
+  </module>
+
+  <!-- Files must end with a newline -->
+  <module name="NewlineAtEndOfFile"/>
+
+  <!-- ============================================================ -->
+  <!-- TreeWalker checks                                            -->
+  <!-- ============================================================ -->
+
+  <module name="TreeWalker">
+
+    <!-- ======== Naming Conventions ======== -->
+
+    <!-- m_ prefix for private/protected instance fields -->
+    <module name="MemberName">
+      <property name="format" value="^m_[a-z][a-zA-Z0-9]*$"/>
+      <property name="applyToPublic" value="false"/>
+    </module>
+
+    <!-- s_ prefix for static non-final fields -->
+    <module name="StaticVariableName">
+      <property name="format" value="^s_[a-z][a-zA-Z0-9]*$"/>
+    </module>
+
+    <!-- SCREAMING_SNAKE_CASE for static final fields -->
+    <module name="ConstantName">
+      <property name="format" value="^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"/>
+    </module>
+
+    <!-- camelCase for local variables -->
+    <module name="LocalVariableName">
+      <property name="format" value="^[a-z][a-zA-Z0-9]*$"/>
+    </module>
+
+    <!-- camelCase for method parameters -->
+    <module name="ParameterName">
+      <property name="format" value="^[a-z][a-zA-Z0-9]*$"/>
+    </module>
+
+    <!-- camelCase for method names -->
+    <module name="MethodName">
+      <property name="format" value="^[a-z][a-zA-Z0-9]*$"/>
+    </module>
+
+    <!-- PascalCase for type names (classes, interfaces, enums) -->
+    <module name="TypeName">
+      <property name="format" value="^[A-Z][a-zA-Z0-9]*$"/>
+    </module>
+
+    <!-- All lowercase for package names -->
+    <module name="PackageName">
+      <property name="format" value="^[a-z]+(\.[a-z][a-z0-9]*)*$"/>
+    </module>
+
+    <!-- Single uppercase letter for type parameters -->
+    <module name="ClassTypeParameterName">
+      <property name="format" value="^[A-Z]$"/>
+    </module>
+    <module name="MethodTypeParameterName">
+      <property name="format" value="^[A-Z]$"/>
+    </module>
+    <module name="InterfaceTypeParameterName">
+      <property name="format" value="^[A-Z]$"/>
+    </module>
+
+    <!-- ======== Indentation ======== -->
+
+    <!-- 4-space indentation -->
+    <module name="Indentation">
+      <property name="basicOffset" value="4"/>
+      <property name="caseIndent" value="4"/>
+      <property name="throwsIndent" value="8"/>
+      <property name="lineWrappingIndentation" value="8"/>
+      <property name="arrayInitIndent" value="4"/>
+    </module>
+
+    <!-- ======== Whitespace ======== -->
+
+    <!-- Whitespace around operators and keywords -->
+    <module name="WhitespaceAround">
+      <property name="allowEmptyConstructors" value="true"/>
+      <property name="allowEmptyMethods" value="true"/>
+      <property name="allowEmptyTypes" value="true"/>
+      <property name="allowEmptyLoops" value="true"/>
+      <property name="allowEmptyLambdas" value="true"/>
+    </module>
+
+    <!-- No space after unary operators, (, !, ~, etc. -->
+    <module name="NoWhitespaceAfter">
+      <property name="tokens"
+          value="AT, INC, DEC, UNARY_MINUS, UNARY_PLUS,
+                 BNOT, LNOT, DOT, ARRAY_DECLARATOR,
+                 INDEX_OP"/>
+    </module>
+
+    <!-- No space before semicolons, commas, dots, postfix operators -->
+    <module name="NoWhitespaceBefore"/>
+
+    <!-- No space inside parentheses -->
+    <module name="ParenPad"/>
+
+    <!-- No space between method name and ( -->
+    <module name="MethodParamPad"/>
+
+    <!-- No space inside typecast parentheses -->
+    <module name="TypecastParenPad"/>
+
+    <!-- Whitespace after comma, semicolon, typecast -->
+    <module name="WhitespaceAfter"/>
+
+    <!-- Require empty lines between class members -->
+    <module name="EmptyLineSeparator">
+      <property name="allowNoEmptyLineBetweenFields" value="true"/>
+      <property name="allowMultipleEmptyLines" value="false"/>
+    </module>
+
+    <!-- ======== Braces ======== -->
+
+    <!-- Require braces on all control statements -->
+    <module name="NeedBraces"/>
+
+    <!-- K&R brace style (opening brace at end of line) -->
+    <module name="LeftCurly"/>
+
+    <!-- Closing brace on its own line (else/catch on same line as }) -->
+    <module name="RightCurly"/>
+
+    <!-- Empty blocks must contain at least a comment -->
+    <module name="EmptyBlock">
+      <property name="option" value="text"/>
+    </module>
+
+    <!-- ======== Imports ======== -->
+
+    <!-- No star/wildcard imports -->
+    <module name="AvoidStarImport"/>
+
+    <!-- Flag unused imports -->
+    <module name="UnusedImports"/>
+
+    <!-- Flag redundant imports (java.lang, same package) -->
+    <module name="RedundantImport"/>
+
+    <!-- Import ordering: project, then third-party, then java/javax, then statics -->
+    <module name="ImportOrder">
+      <property name="groups" value="ca.kieve,*,java,javax"/>
+      <property name="ordered" value="true"/>
+      <property name="separated" value="true"/>
+      <property name="option" value="bottom"/>
+    </module>
+
+    <!-- ======== Modifiers ======== -->
+
+    <!-- Enforce JLS modifier order -->
+    <module name="ModifierOrder"/>
+
+    <!-- Flag redundant modifiers -->
+    <module name="RedundantModifier"/>
+
+    <!-- Require @Override annotation -->
+    <module name="MissingOverride"/>
+
+    <!-- ======== Coding Practices ======== -->
+
+    <!-- Flag switch fall-through -->
+    <module name="FallThrough"/>
+
+    <!-- Require equals() and hashCode() together -->
+    <module name="EqualsHashCode"/>
+
+    <!-- Flag hidden fields (parameter/local same name as field) -->
+    <module name="HiddenField">
+      <property name="ignoreConstructorParameter" value="false"/>
+      <property name="ignoreSetter" value="false"/>
+    </module>
+
+    <!-- Flag string == comparison -->
+    <module name="StringLiteralEquality"/>
+
+    <!-- Enforce simplified boolean expressions -->
+    <module name="SimplifyBooleanExpression"/>
+    <module name="SimplifyBooleanReturn"/>
+
+    <!-- Flag assignment inside expressions -->
+    <module name="InnerAssignment"/>
+
+    <!-- Flag magic numbers -->
+    <module name="MagicNumber">
+      <property name="ignoreNumbers" value="-1, 0, 1, 2"/>
+      <property name="ignoreHashCodeMethod" value="true"/>
+      <property name="ignoreAnnotation" value="true"/>
+      <property name="ignoreFieldDeclaration" value="false"/>
+    </module>
+
+    <!-- One statement per line -->
+    <module name="OneStatementPerLine"/>
+
+    <!-- One variable per declaration -->
+    <module name="MultipleVariableDeclarations"/>
+
+    <!-- Java-style array declarations -->
+    <module name="ArrayTypeStyle"/>
+
+    <!-- Uppercase suffixes for long/float/double literals -->
+    <module name="UpperEll"/>
+
+    <!-- Forbid finalize() -->
+    <module name="NoFinalizer"/>
+
+    <!-- Flag empty catch blocks -->
+    <module name="EmptyCatchBlock">
+      <property name="exceptionVariableName" value="expected|ignore"/>
+    </module>
+
+    <!-- ======== Class Design ======== -->
+
+    <!-- Utility classes must have private constructor -->
+    <module name="HideUtilityClassConstructor"/>
+
+    <!-- One top-level class per file -->
+    <module name="OneTopLevelClass"/>
+
+    <!-- Flag unnecessary 'this.' qualifier (fields and methods) -->
+    <module name="RegexpSinglelineJava">
+      <property name="format" value="this\."/>
+      <property name="message"
+          value="Avoid unnecessary 'this.' qualifier. Use m_ prefix for fields."/>
+      <property name="ignoreComments" value="true"/>
+    </module>
+
+    <!-- Flag constant-only interfaces -->
+    <module name="InterfaceIsType"/>
+
+    <!-- ======== Size Limits ======== -->
+
+    <!-- Max 7 method parameters -->
+    <module name="ParameterNumber">
+      <property name="max" value="7"/>
+    </module>
+
+    <!-- Max 3 boolean operators in a single expression -->
+    <module name="BooleanExpressionComplexity">
+      <property name="max" value="3"/>
+    </module>
+
+  </module>
+</module>

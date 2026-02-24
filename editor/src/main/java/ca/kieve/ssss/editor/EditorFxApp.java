@@ -2,16 +2,10 @@ package ca.kieve.ssss.editor;
 
 import static ca.kieve.ssss.editor.util.CssUtil.inline;
 
-import ca.kieve.ssss.content.MapDefinition;
-import ca.kieve.ssss.editor.component.EditorTitleBar;
-import ca.kieve.ssss.editor.component.EntityDetailPanel;
-import ca.kieve.ssss.editor.component.EntityListPanel;
-import ca.kieve.ssss.editor.component.MapViewPanel;
-import ca.kieve.ssss.editor.ui.AppIcon;
-import ca.kieve.ssss.editor.util.DialogUtil;
-import ca.kieve.ssss.editor.ui.WindowResizeHandler;
-import ca.kieve.ssss.editor.ui.WindowsAeroSnap;
-import atlantafx.base.theme.PrimerDark;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.Optional;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -30,10 +24,17 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.Optional;
+import atlantafx.base.theme.PrimerDark;
+
+import ca.kieve.ssss.content.MapDefinition;
+import ca.kieve.ssss.editor.component.EditorTitleBar;
+import ca.kieve.ssss.editor.component.EntityDetailPanel;
+import ca.kieve.ssss.editor.component.EntityListPanel;
+import ca.kieve.ssss.editor.component.MapViewPanel;
+import ca.kieve.ssss.editor.ui.AppIcon;
+import ca.kieve.ssss.editor.ui.WindowResizeHandler;
+import ca.kieve.ssss.editor.ui.WindowsAeroSnap;
+import ca.kieve.ssss.editor.util.DialogUtil;
 
 public class EditorFxApp extends Application {
     private static final KeyCodeCombination SAVE_COMBO =

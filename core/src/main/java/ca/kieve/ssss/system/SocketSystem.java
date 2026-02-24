@@ -142,7 +142,9 @@ public class SocketSystem extends System {
     /**
      * Handles swapping the player into a new socket, ejecting from the old one if needed.
      */
-    private void handleSocketSwap(Entity playerEntity, SocketPlug socketPlug, Entity newBodyEntity, Socket newSocket) {
+    private void handleSocketSwap(
+            Entity playerEntity, SocketPlug socketPlug,
+            Entity newBodyEntity, Socket newSocket) {
         // First, check if player is currently socketed into another body
         if (socketPlug.currentBody != null) {
             var oldSocket = socketPlug.currentBody.get(Socket.class);
@@ -259,7 +261,9 @@ public class SocketSystem extends System {
      * Hides the player sprite by adding Hidden marker.
      * Player's Speed is NOT transferred - systems query the controlled entity instead.
      */
-    private void transferControlToBody(Entity playerEntity, SocketPlug socketPlug, Entity bodyEntity) {
+    private void transferControlToBody(
+            Entity playerEntity, SocketPlug socketPlug,
+            Entity bodyEntity) {
         var playerController = playerEntity.get(PlayerController.class);
         if (playerController == null) {
             return;

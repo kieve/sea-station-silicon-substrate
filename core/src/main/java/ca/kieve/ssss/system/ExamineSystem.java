@@ -1,22 +1,5 @@
 package ca.kieve.ssss.system;
 
-import dev.dominion.ecs.api.Entity;
-
-import ca.kieve.ssss.component.Descriptor;
-import ca.kieve.ssss.component.Player;
-import ca.kieve.ssss.component.PlayerController;
-import ca.kieve.ssss.component.Position;
-import ca.kieve.ssss.component.SocketPlug;
-import ca.kieve.ssss.context.ExamineContext;
-import ca.kieve.ssss.context.GameContext;
-import ca.kieve.ssss.context.InputContext;
-import ca.kieve.ssss.event.ExamineEvent;
-import ca.kieve.ssss.util.DescriptionComposer;
-import ca.kieve.ssss.util.Vec3i;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import static ca.kieve.ssss.context.InputContext.Mode.MODE_EXAMINE;
 import static ca.kieve.ssss.context.InputContext.Mode.MODE_NORMAL;
 import static ca.kieve.ssss.input.InputAction.CANCEL;
@@ -31,6 +14,23 @@ import static ca.kieve.ssss.util.Vec3i.EAST;
 import static ca.kieve.ssss.util.Vec3i.NORTH;
 import static ca.kieve.ssss.util.Vec3i.SOUTH;
 import static ca.kieve.ssss.util.Vec3i.WEST;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import dev.dominion.ecs.api.Entity;
+
+import ca.kieve.ssss.component.Descriptor;
+import ca.kieve.ssss.component.Player;
+import ca.kieve.ssss.component.PlayerController;
+import ca.kieve.ssss.component.Position;
+import ca.kieve.ssss.component.SocketPlug;
+import ca.kieve.ssss.context.ExamineContext;
+import ca.kieve.ssss.context.GameContext;
+import ca.kieve.ssss.context.InputContext;
+import ca.kieve.ssss.event.ExamineEvent;
+import ca.kieve.ssss.util.DescriptionComposer;
+import ca.kieve.ssss.util.Vec3i;
 
 public class ExamineSystem extends System {
     private final InputContext m_input;

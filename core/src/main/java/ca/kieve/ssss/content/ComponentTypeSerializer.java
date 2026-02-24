@@ -1,10 +1,10 @@
 package ca.kieve.ssss.content;
 
+import java.io.IOException;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-
-import java.io.IOException;
 
 public class ComponentTypeSerializer extends JsonSerializer<Class<?>> {
     @Override

@@ -1,14 +1,14 @@
 package ca.kieve.ssss.context;
 
-import dev.dominion.ecs.api.Entity;
-
-import ca.kieve.ssss.util.Vec3i;
+import static ca.kieve.ssss.util.Vec3i.ZERO;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static ca.kieve.ssss.util.Vec3i.ZERO;
+import dev.dominion.ecs.api.Entity;
+
+import ca.kieve.ssss.util.Vec3i;
 
 public class PositionContext {
     private static final int XY_SIZE = 200;
@@ -37,20 +37,28 @@ public class PositionContext {
     }
 
     public void add(Entity entity, Vec3i pos) {
-        if (pos == null) throw new IllegalArgumentException("pos cannot be null");
+        if (pos == null) {
+            throw new IllegalArgumentException("pos cannot be null");
+        }
         var list = getList(pos);
         list.add(entity);
     }
 
     public void remove(Entity entity, Vec3i pos) {
-        if (pos == null) throw new IllegalArgumentException("pos cannot be null");
+        if (pos == null) {
+            throw new IllegalArgumentException("pos cannot be null");
+        }
         var list = getList(pos);
         list.remove(entity);
     }
 
     public void move(Entity entity, Vec3i from, Vec3i to) {
-        if (from == null) throw new IllegalArgumentException("from cannot be null");
-        if (to == null) throw new IllegalArgumentException("to cannot be null");
+        if (from == null) {
+            throw new IllegalArgumentException("from cannot be null");
+        }
+        if (to == null) {
+            throw new IllegalArgumentException("to cannot be null");
+        }
 
         var fromList = getList(from);
         var toList = getList(to);
@@ -59,7 +67,9 @@ public class PositionContext {
     }
 
     public List<Entity> getAt(Vec3i pos) {
-        if (pos == null) throw new IllegalArgumentException("pos cannot be null");
+        if (pos == null) {
+            throw new IllegalArgumentException("pos cannot be null");
+        }
         if (!isInBounds(pos)) {
             return Collections.emptyList();
         }

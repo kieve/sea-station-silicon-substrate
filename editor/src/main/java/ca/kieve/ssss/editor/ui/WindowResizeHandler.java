@@ -145,14 +145,14 @@ public final class WindowResizeHandler {
         boolean left = x < BORDER;
         boolean right = x > w - BORDER;
 
-        if (top && left) return Cursor.NW_RESIZE;
-        if (top && right) return Cursor.NE_RESIZE;
-        if (bottom && left) return Cursor.SW_RESIZE;
-        if (bottom && right) return Cursor.SE_RESIZE;
-        if (top) return Cursor.N_RESIZE;
-        if (bottom) return Cursor.S_RESIZE;
-        if (left) return Cursor.W_RESIZE;
-        if (right) return Cursor.E_RESIZE;
+        if (top && left) { return Cursor.NW_RESIZE; }
+        if (top && right) { return Cursor.NE_RESIZE; }
+        if (bottom && left) { return Cursor.SW_RESIZE; }
+        if (bottom && right) { return Cursor.SE_RESIZE; }
+        if (top) { return Cursor.N_RESIZE; }
+        if (bottom) { return Cursor.S_RESIZE; }
+        if (left) { return Cursor.W_RESIZE; }
+        if (right) { return Cursor.E_RESIZE; }
 
         return Cursor.DEFAULT;
     }

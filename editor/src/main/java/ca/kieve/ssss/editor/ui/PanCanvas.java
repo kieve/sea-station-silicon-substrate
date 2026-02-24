@@ -2,7 +2,6 @@ package ca.kieve.ssss.editor.ui;
 
 import java.util.EnumSet;
 import java.util.Set;
-
 import javafx.animation.AnimationTimer;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -12,9 +11,10 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.Pane;
-import ca.kieve.ssss.editor.EditorTheme;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+
+import ca.kieve.ssss.editor.EditorTheme;
 
 /**
  * A reusable pannable canvas viewport. Contains an auto-sizing Canvas with

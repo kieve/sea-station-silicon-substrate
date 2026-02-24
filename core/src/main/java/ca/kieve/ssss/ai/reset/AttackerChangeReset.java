@@ -1,9 +1,10 @@
 package ca.kieve.ssss.ai.reset;
 
-import ca.kieve.ssss.component.LastAttacker;
+import java.util.Map;
+
 import dev.dominion.ecs.api.Entity;
 
-import java.util.Map;
+import ca.kieve.ssss.component.LastAttacker;
 
 /**
  * Reset condition that triggers when the LastAttacker component changes.

@@ -1,5 +1,7 @@
 package ca.kieve.ssss.ui.node;
 
+import static ca.kieve.ssss.repository.FontRepo.UI_UBUNTU_24;
+
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
@@ -11,8 +13,6 @@ import ca.kieve.ssss.component.SocketPlug;
 import ca.kieve.ssss.repository.FontRepo;
 import ca.kieve.ssss.ui.core.UiNode;
 import ca.kieve.ssss.ui.core.UiRenderContext;
-
-import static ca.kieve.ssss.repository.FontRepo.UI_UBUNTU_24;
 
 public class Text extends UiNode {
     private String m_text;

@@ -1,12 +1,13 @@
 package ca.kieve.ssss.editor;
 
-import ca.kieve.ssss.content.MapDefinition;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+
+import ca.kieve.ssss.content.MapDefinition;
 
 public final class MapLoader {
     private static final ObjectMapper MAPPER = new ObjectMapper(new YAMLFactory());

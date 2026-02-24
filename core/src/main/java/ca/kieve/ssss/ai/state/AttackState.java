@@ -1,10 +1,11 @@
 package ca.kieve.ssss.ai.state;
 
+import dev.dominion.ecs.api.Entity;
+
 import ca.kieve.ssss.component.Equipment;
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.event.AttackEvent;
 import ca.kieve.ssss.util.Vec3i;
-import dev.dominion.ecs.api.Entity;
 
 /**
  * State that attacks the target when adjacent.

@@ -1,15 +1,15 @@
 package ca.kieve.ssss.system;
 
-import ca.kieve.ssss.component.PlayerController;
-import ca.kieve.ssss.component.Speed;
-import ca.kieve.ssss.context.GameContext;
-
 import static ca.kieve.ssss.util.TickStage.AWAIT_INPUT;
 import static ca.kieve.ssss.util.TickStage.POST_TICK;
 import static ca.kieve.ssss.util.TickStage.PRE_TICK;
 import static ca.kieve.ssss.util.TickStage.TICK;
 import static ca.kieve.ssss.util.TurnPhase.AI;
 import static ca.kieve.ssss.util.TurnPhase.PLAYER;
+
+import ca.kieve.ssss.component.PlayerController;
+import ca.kieve.ssss.component.Speed;
+import ca.kieve.ssss.context.GameContext;
 
 /*
  * The general formula for speed is as follows:

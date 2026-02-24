@@ -1,5 +1,11 @@
 package ca.kieve.ssss.repository;
 
+import static ca.kieve.ssss.ui.widget.GameWindow.TILE_SCALE;
+import static com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.DEFAULT_CHARS;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -7,12 +13,6 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static ca.kieve.ssss.ui.widget.GameWindow.TILE_SCALE;
-import static com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.DEFAULT_CHARS;
 
 public class FontRepo {
     private static final String EXTRA_CHARS = "█";

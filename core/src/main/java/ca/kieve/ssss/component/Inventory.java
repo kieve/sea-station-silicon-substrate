@@ -1,10 +1,11 @@
 package ca.kieve.ssss.component;
 
-import ca.kieve.ssss.annotations.EditorIgnore;
-import dev.dominion.ecs.api.Entity;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import dev.dominion.ecs.api.Entity;
+
+import ca.kieve.ssss.annotations.EditorIgnore;
 
 public record Inventory(
     @EditorIgnore List<Entity> items

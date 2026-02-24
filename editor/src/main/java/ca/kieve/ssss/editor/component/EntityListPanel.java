@@ -1,10 +1,10 @@
 package ca.kieve.ssss.editor.component;
 
-import ca.kieve.ssss.editor.EditorContext;
+import java.util.function.Consumer;
 import javafx.collections.FXCollections;
 import javafx.scene.control.ListView;
 
-import java.util.function.Consumer;
+import ca.kieve.ssss.editor.EditorContext;
 
 public class EntityListPanel extends ListView<String> {
     public EntityListPanel(

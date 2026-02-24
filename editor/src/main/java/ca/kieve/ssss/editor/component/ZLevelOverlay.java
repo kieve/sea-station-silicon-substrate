@@ -2,7 +2,8 @@ package ca.kieve.ssss.editor.component;
 
 import static ca.kieve.ssss.editor.util.CssUtil.inline;
 
-import ca.kieve.ssss.editor.EditorTheme;
+import java.util.List;
+import java.util.function.Consumer;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -11,8 +12,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
-import java.util.List;
-import java.util.function.Consumer;
+import ca.kieve.ssss.editor.EditorTheme;
 
 public class ZLevelOverlay extends HBox {
     private static final String STYLE_Z_STEP_BUTTON =

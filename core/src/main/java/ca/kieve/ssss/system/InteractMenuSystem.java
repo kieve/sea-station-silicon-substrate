@@ -1,17 +1,5 @@
 package ca.kieve.ssss.system;
 
-import ca.kieve.ssss.component.Speed;
-import ca.kieve.ssss.context.GameContext;
-import ca.kieve.ssss.context.InputContext;
-import ca.kieve.ssss.context.InteractContext;
-import ca.kieve.ssss.context.InteractContext.Phase;
-import ca.kieve.ssss.event.Interaction;
-import ca.kieve.ssss.util.InventoryUtil;
-import ca.kieve.ssss.util.LockableUtil;
-import ca.kieve.ssss.util.OpenableUtil;
-import ca.kieve.ssss.util.PlayerUtil;
-import ca.kieve.ssss.util.Vec3i;
-
 import static ca.kieve.ssss.context.InputContext.Mode.MODE_INTERACT;
 import static ca.kieve.ssss.context.InputContext.Mode.MODE_NORMAL;
 import static ca.kieve.ssss.input.InputAction.CANCEL;
@@ -26,6 +14,18 @@ import static ca.kieve.ssss.util.Vec3i.EAST;
 import static ca.kieve.ssss.util.Vec3i.NORTH;
 import static ca.kieve.ssss.util.Vec3i.SOUTH;
 import static ca.kieve.ssss.util.Vec3i.WEST;
+
+import ca.kieve.ssss.component.Speed;
+import ca.kieve.ssss.context.GameContext;
+import ca.kieve.ssss.context.InputContext;
+import ca.kieve.ssss.context.InteractContext;
+import ca.kieve.ssss.context.InteractContext.Phase;
+import ca.kieve.ssss.event.Interaction;
+import ca.kieve.ssss.util.InventoryUtil;
+import ca.kieve.ssss.util.LockableUtil;
+import ca.kieve.ssss.util.OpenableUtil;
+import ca.kieve.ssss.util.PlayerUtil;
+import ca.kieve.ssss.util.Vec3i;
 
 public class InteractMenuSystem extends System {
     private final InputContext m_input;

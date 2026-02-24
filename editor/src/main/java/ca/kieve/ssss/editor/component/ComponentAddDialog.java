@@ -1,7 +1,8 @@
 package ca.kieve.ssss.editor.component;
 
-import ca.kieve.ssss.content.ComponentTypeDeserializer;
-import ca.kieve.ssss.editor.util.DialogUtil;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import javafx.geometry.Insets;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
@@ -9,9 +10,8 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import ca.kieve.ssss.content.ComponentTypeDeserializer;
+import ca.kieve.ssss.editor.util.DialogUtil;
 
 public class ComponentAddDialog
         extends Dialog<ComponentAddDialog.Result> {

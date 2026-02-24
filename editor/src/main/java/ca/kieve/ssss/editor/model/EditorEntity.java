@@ -1,12 +1,12 @@
 package ca.kieve.ssss.editor.model;
 
-import ca.kieve.ssss.component.Position;
-import ca.kieve.ssss.content.ComponentDefinition;
-import ca.kieve.ssss.content.MapEntityDefinition;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import ca.kieve.ssss.component.Position;
+import ca.kieve.ssss.content.ComponentDefinition;
+import ca.kieve.ssss.content.MapEntityDefinition;
 
 public class EditorEntity {
     private String m_id;

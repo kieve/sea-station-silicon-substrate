@@ -1,10 +1,10 @@
 package ca.kieve.ssss.content;
 
-import ca.kieve.ssss.ai.behavior.BehaviorDefinition;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
+import ca.kieve.ssss.ai.behavior.BehaviorDefinition;
 
 public class ContentRegistry {
     private final Map<String, EntityDefinition> m_entityDefinitions = new HashMap<>();

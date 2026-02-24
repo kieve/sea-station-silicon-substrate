@@ -1,12 +1,13 @@
 package ca.kieve.ssss.editor;
 
-import ca.kieve.ssss.content.ContentLoader;
+import java.util.concurrent.CountDownLatch;
+import javafx.application.Application;
+
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.backends.headless.HeadlessApplication;
 import com.badlogic.gdx.backends.headless.HeadlessApplicationConfiguration;
-import javafx.application.Application;
 
-import java.util.concurrent.CountDownLatch;
+import ca.kieve.ssss.content.ContentLoader;
 
 public class EditorApp {
     static void main(String[] args) throws InterruptedException {

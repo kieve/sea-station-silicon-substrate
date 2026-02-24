@@ -1,8 +1,5 @@
 package ca.kieve.ssss.editor.ui;
 
-import ca.kieve.ssss.editor.Globals;
-import javafx.stage.Stage;
-
 import java.lang.foreign.Arena;
 import java.lang.foreign.FunctionDescriptor;
 import java.lang.foreign.Linker;
@@ -12,6 +9,9 @@ import java.lang.foreign.ValueLayout;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import javafx.stage.Stage;
+
+import ca.kieve.ssss.editor.Globals;
 
 /**
  * Re-enables Windows Aero Snap on an undecorated JavaFX stage.

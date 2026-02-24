@@ -1,15 +1,15 @@
 package ca.kieve.ssss.editor.component;
 
-import ca.kieve.ssss.annotations.EditorDecompose;
-import ca.kieve.ssss.annotations.EditorIgnore;
-import ca.kieve.ssss.annotations.EditorRef;
-import ca.kieve.ssss.content.ComponentTypeDeserializer;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.RecordComponent;
 import java.util.ArrayList;
 import java.util.List;
+
+import ca.kieve.ssss.annotations.EditorDecompose;
+import ca.kieve.ssss.annotations.EditorIgnore;
+import ca.kieve.ssss.annotations.EditorRef;
+import ca.kieve.ssss.content.ComponentTypeDeserializer;
 
 /**
  * Discovers editable properties for component classes. Uses reflection to find

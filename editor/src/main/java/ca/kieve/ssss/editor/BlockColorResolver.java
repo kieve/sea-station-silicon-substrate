@@ -1,11 +1,11 @@
 package ca.kieve.ssss.editor;
 
+import java.util.List;
+import javafx.scene.paint.Color;
+
 import ca.kieve.ssss.component.ColorComp;
 import ca.kieve.ssss.content.ComponentDefinition;
 import ca.kieve.ssss.content.ContentRegistry;
-import javafx.scene.paint.Color;
-
-import java.util.List;
 
 public class BlockColorResolver {
     private final ContentRegistry m_registry;

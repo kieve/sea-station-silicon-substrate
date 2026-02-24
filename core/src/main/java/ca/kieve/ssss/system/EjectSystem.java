@@ -1,5 +1,17 @@
 package ca.kieve.ssss.system;
 
+import static ca.kieve.ssss.context.InputContext.Mode.MODE_EJECT;
+import static ca.kieve.ssss.context.InputContext.Mode.MODE_NORMAL;
+import static ca.kieve.ssss.input.InputAction.DOWN;
+import static ca.kieve.ssss.input.InputAction.EJECT;
+import static ca.kieve.ssss.input.InputAction.LEFT;
+import static ca.kieve.ssss.input.InputAction.RIGHT;
+import static ca.kieve.ssss.input.InputAction.UP;
+import static ca.kieve.ssss.util.Vec3i.EAST;
+import static ca.kieve.ssss.util.Vec3i.NORTH;
+import static ca.kieve.ssss.util.Vec3i.SOUTH;
+import static ca.kieve.ssss.util.Vec3i.WEST;
+
 import dev.dominion.ecs.api.Entity;
 
 import ca.kieve.ssss.component.Hidden;
@@ -14,18 +26,6 @@ import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.context.InputContext;
 import ca.kieve.ssss.event.EjectEvent;
 import ca.kieve.ssss.util.Vec3i;
-
-import static ca.kieve.ssss.context.InputContext.Mode.MODE_EJECT;
-import static ca.kieve.ssss.context.InputContext.Mode.MODE_NORMAL;
-import static ca.kieve.ssss.input.InputAction.DOWN;
-import static ca.kieve.ssss.input.InputAction.EJECT;
-import static ca.kieve.ssss.input.InputAction.LEFT;
-import static ca.kieve.ssss.input.InputAction.RIGHT;
-import static ca.kieve.ssss.input.InputAction.UP;
-import static ca.kieve.ssss.util.Vec3i.EAST;
-import static ca.kieve.ssss.util.Vec3i.NORTH;
-import static ca.kieve.ssss.util.Vec3i.SOUTH;
-import static ca.kieve.ssss.util.Vec3i.WEST;
 
 public class EjectSystem extends System {
     private final InputContext m_input;

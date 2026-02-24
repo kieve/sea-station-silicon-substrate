@@ -23,7 +23,7 @@ public class PerfClock {
             return;
         }
         var entry = m_entries.computeIfAbsent(key, k -> new PerfEntry());
-        entry.startTime = java.lang.System.nanoTime();
+        entry.m_startTime = java.lang.System.nanoTime();
     }
 
     public void end(String key) {
@@ -31,13 +31,13 @@ public class PerfClock {
             return;
         }
         var entry = m_entries.get(key);
-        if (entry == null || entry.startTime == 0) {
+        if (entry == null || entry.m_startTime == 0) {
             return;
         }
-        long elapsed = java.lang.System.nanoTime() - entry.startTime;
-        entry.totalNanos += elapsed;
-        entry.callCount++;
-        entry.startTime = 0;
+        long elapsed = java.lang.System.nanoTime() - entry.m_startTime;
+        entry.m_totalNanos += elapsed;
+        entry.m_callCount++;
+        entry.m_startTime = 0;
     }
 
     public void report() {
@@ -49,21 +49,21 @@ public class PerfClock {
         int maxKeyLen = 0;
         for (var e : m_entries.entrySet()) {
             maxKeyLen = Math.max(maxKeyLen, e.getKey().length());
-            grandTotal += e.getValue().totalNanos;
+            grandTotal += e.getValue().m_totalNanos;
         }
 
         for (var e : m_entries.entrySet()) {
             var key = e.getKey();
             var entry = e.getValue();
-            double totalMs = entry.totalNanos / NANOS_PER_MS;
-            double avgMs = entry.callCount > 0
-                ? totalMs / entry.callCount
+            double totalMs = entry.m_totalNanos / NANOS_PER_MS;
+            double avgMs = entry.m_callCount > 0
+                ? totalMs / entry.m_callCount
                 : 0;
             IO.println(String.format(
                 "[PerfClock] %-" + maxKeyLen + "s  calls=%-4d avg=%.2fms"
                     + "  total=%.2fms",
                 key,
-                entry.callCount,
+                entry.m_callCount,
                 avgMs,
                 totalMs));
         }
@@ -76,8 +76,8 @@ public class PerfClock {
     }
 
     private static class PerfEntry {
-        long startTime;
-        long totalNanos;
-        int callCount;
+        long m_startTime;
+        long m_totalNanos;
+        int m_callCount;
     }
 }

@@ -1,18 +1,10 @@
 package ca.kieve.ssss.editor.component;
 
-import ca.kieve.ssss.content.ComponentDefinition;
-import ca.kieve.ssss.content.ComponentTypeDeserializer;
-import ca.kieve.ssss.content.ContentRegistry;
-import ca.kieve.ssss.content.EntityDefinition;
-import ca.kieve.ssss.content.MapDefinition;
-import ca.kieve.ssss.editor.BlockColorResolver;
-import ca.kieve.ssss.editor.EditorContext;
-import ca.kieve.ssss.editor.EditorTheme;
-import ca.kieve.ssss.editor.MapSaver;
-import ca.kieve.ssss.editor.model.EditorEntity;
-import ca.kieve.ssss.editor.model.EditorMapModel;
-import ca.kieve.ssss.editor.ui.PanCanvas;
-import ca.kieve.ssss.editor.util.DialogUtil;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
@@ -30,11 +22,19 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import ca.kieve.ssss.content.ComponentDefinition;
+import ca.kieve.ssss.content.ComponentTypeDeserializer;
+import ca.kieve.ssss.content.ContentRegistry;
+import ca.kieve.ssss.content.EntityDefinition;
+import ca.kieve.ssss.content.MapDefinition;
+import ca.kieve.ssss.editor.BlockColorResolver;
+import ca.kieve.ssss.editor.EditorContext;
+import ca.kieve.ssss.editor.EditorTheme;
+import ca.kieve.ssss.editor.MapSaver;
+import ca.kieve.ssss.editor.model.EditorEntity;
+import ca.kieve.ssss.editor.model.EditorMapModel;
+import ca.kieve.ssss.editor.ui.PanCanvas;
+import ca.kieve.ssss.editor.util.DialogUtil;
 
 public class MapViewPanel extends BorderPane {
     private final EditorMapModel m_model;

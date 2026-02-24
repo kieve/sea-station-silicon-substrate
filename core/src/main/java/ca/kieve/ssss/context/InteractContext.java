@@ -1,6 +1,12 @@
 package ca.kieve.ssss.context;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.badlogic.gdx.graphics.Color;
+import dev.dominion.ecs.api.Entity;
 
 import ca.kieve.ssss.component.Item;
 import ca.kieve.ssss.component.Lockable;
@@ -10,12 +16,6 @@ import ca.kieve.ssss.event.Interaction.Verb;
 import ca.kieve.ssss.ui.TileHighlight;
 import ca.kieve.ssss.ui.TileHighlightProvider;
 import ca.kieve.ssss.util.Vec3i;
-import dev.dominion.ecs.api.Entity;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class InteractContext implements TileHighlightProvider {
     private static final Color VALID_COLOR = Color.GREEN;

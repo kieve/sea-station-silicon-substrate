@@ -1,18 +1,18 @@
 package ca.kieve.ssss.editor.model;
 
-import ca.kieve.ssss.content.ComponentDefinition;
-import ca.kieve.ssss.content.MapBlockDefinition;
-import ca.kieve.ssss.content.MapDefinition;
-import ca.kieve.ssss.content.MapEntityDefinition;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+
+import ca.kieve.ssss.content.ComponentDefinition;
+import ca.kieve.ssss.content.MapBlockDefinition;
+import ca.kieve.ssss.content.MapDefinition;
+import ca.kieve.ssss.content.MapEntityDefinition;
 
 public class EditorMapModel {
     private final Map<String, MapBlockDefinition> m_blocks =

@@ -1,16 +1,17 @@
 package ca.kieve.ssss.content;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Parameter;
+import java.util.Map;
+
+import dev.dominion.ecs.api.Entity;
+
 import ca.kieve.ssss.ai.behavior.AiController;
 import ca.kieve.ssss.ai.behavior.BehaviorDefinition;
 import ca.kieve.ssss.component.Equipment;
 import ca.kieve.ssss.component.Material;
 import ca.kieve.ssss.component.TileGlyph;
 import ca.kieve.ssss.context.GameContext;
-import dev.dominion.ecs.api.Entity;
-
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Parameter;
-import java.util.Map;
 
 public class ComponentFactory {
     private final ContentRegistry m_registry;

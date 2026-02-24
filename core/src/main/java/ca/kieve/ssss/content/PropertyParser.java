@@ -1,9 +1,10 @@
 package ca.kieve.ssss.content;
 
-import ca.kieve.ssss.util.Vec3i;
+import java.lang.reflect.Field;
+
 import com.badlogic.gdx.graphics.Color;
 
-import java.lang.reflect.Field;
+import ca.kieve.ssss.util.Vec3i;
 
 public class PropertyParser {
 

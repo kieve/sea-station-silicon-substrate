@@ -2,11 +2,12 @@ package ca.kieve.ssss.editor.util;
 
 import static ca.kieve.ssss.editor.util.CssUtil.inline;
 
-import ca.kieve.ssss.editor.ui.AppIcon;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Dialog;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+
+import ca.kieve.ssss.editor.ui.AppIcon;
 
 public final class DialogUtil {
     private static Window s_owner;

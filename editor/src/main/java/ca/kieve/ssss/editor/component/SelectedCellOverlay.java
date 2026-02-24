@@ -2,15 +2,15 @@ package ca.kieve.ssss.editor.component;
 
 import static ca.kieve.ssss.editor.util.CssUtil.inline;
 
-import ca.kieve.ssss.editor.EditorTheme;
+import java.util.List;
+import java.util.function.Consumer;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
-import java.util.List;
-import java.util.function.Consumer;
+import ca.kieve.ssss.editor.EditorTheme;
 
 public class SelectedCellOverlay extends VBox {
     public enum ItemType { BLOCK, ENTITY }

@@ -1,15 +1,16 @@
 package ca.kieve.ssss.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import dev.dominion.ecs.api.Entity;
+import org.junit.jupiter.api.Test;
+
 import ca.kieve.ssss.component.Descriptor;
 import ca.kieve.ssss.component.Health;
 import ca.kieve.ssss.component.Material;
 import ca.kieve.ssss.component.Socket;
-import dev.dominion.ecs.api.Entity;
-import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 class DescriptionComposerTest {
     @Test

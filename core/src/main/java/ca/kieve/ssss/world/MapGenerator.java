@@ -1,9 +1,9 @@
 package ca.kieve.ssss.world;
 
+import java.util.List;
+
 import ca.kieve.ssss.content.BlockTypeFactory;
 import ca.kieve.ssss.content.MapEntityDefinition;
-
-import java.util.List;
 
 /**
  * Interface for map generators that produce 3D voxel worlds.

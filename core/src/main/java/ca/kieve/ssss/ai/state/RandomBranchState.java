@@ -1,5 +1,15 @@
 package ca.kieve.ssss.ai.state;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.dominion.ecs.api.Entity;
+
 import ca.kieve.ssss.ai.StateEvaluator;
 import ca.kieve.ssss.ai.behavior.AiController;
 import ca.kieve.ssss.ai.behavior.BehaviorFactory;
@@ -9,15 +19,6 @@ import ca.kieve.ssss.ai.reset.ResetCondition;
 import ca.kieve.ssss.ai.reset.ResetContext;
 import ca.kieve.ssss.content.ReflectionFactory;
 import ca.kieve.ssss.context.GameContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.dominion.ecs.api.Entity;
-
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
 
 /**
  * Meta-state that contains nested state branches.

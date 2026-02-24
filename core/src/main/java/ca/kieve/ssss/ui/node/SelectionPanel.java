@@ -1,5 +1,10 @@
 package ca.kieve.ssss.ui.node;
 
+import static ca.kieve.ssss.repository.FontRepo.UI_UBUNTU_24;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
@@ -7,11 +12,6 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import ca.kieve.ssss.repository.FontRepo;
 import ca.kieve.ssss.ui.core.UiNode;
 import ca.kieve.ssss.ui.core.UiRenderContext;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static ca.kieve.ssss.repository.FontRepo.UI_UBUNTU_24;
 
 public abstract class SelectionPanel extends UiNode {
     private static final int PADDING = 5;

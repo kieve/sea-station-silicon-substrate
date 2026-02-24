@@ -1,8 +1,8 @@
 package ca.kieve.ssss.ai.condition;
 
-import ca.kieve.ssss.ai.condition.data.MaxTimesConditionData;
-
 import java.util.Map;
+
+import ca.kieve.ssss.ai.condition.data.MaxTimesConditionData;
 
 /**
  * Condition that is true only up to a maximum number of times.

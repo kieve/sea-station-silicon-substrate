@@ -19,7 +19,9 @@
       "WebFetch(domain:cr.openjdk.org)",
       "WebFetch(domain:patch-diff.githubusercontent.com)",
       "Bash(grep:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "WebFetch(domain:checkstyle.sourceforge.io)",
+      "WebFetch(domain:docs.gradle.org)"
     ],
     "deny": [],
     "ask": []

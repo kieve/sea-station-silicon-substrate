@@ -27,7 +27,8 @@ public class GameWindow extends UiWindow {
         m_gameContext = gameContext;
         m_viewport.setUnitsPerPixel(TILE_SCALE);
 
-        m_gameContext.gameEngine().initializeRenderSystems(m_spriteBatch, m_shapeRenderer, m_camera);
+        m_gameContext.gameEngine().initializeRenderSystems(
+            m_spriteBatch, m_shapeRenderer, m_camera);
     }
 
     @Override

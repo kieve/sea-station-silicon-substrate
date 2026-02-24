@@ -2,14 +2,13 @@ package ca.kieve.ssss.editor.ui;
 
 import static ca.kieve.ssss.editor.util.CssUtil.inline;
 
+import java.util.function.Function;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.Cursor;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
-
-import java.util.function.Function;
 
 /**
  * A compact two-column {@link TreeTableView} with hidden

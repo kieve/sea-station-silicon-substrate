@@ -1,8 +1,8 @@
 package ca.kieve.ssss.util;
 
-import ca.kieve.ssss.annotations.EditorDecompose;
-
 import java.util.Objects;
+
+import ca.kieve.ssss.annotations.EditorDecompose;
 
 @EditorDecompose
 public class Vec3i {
@@ -121,7 +121,9 @@ public class Vec3i {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof Vec3i vec3i)) return false;
+        if (!(o instanceof Vec3i vec3i)) {
+            return false;
+        }
         return x == vec3i.x && y == vec3i.y && z == vec3i.z;
     }
 

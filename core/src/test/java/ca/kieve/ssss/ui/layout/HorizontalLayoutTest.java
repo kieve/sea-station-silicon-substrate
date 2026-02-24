@@ -1,12 +1,13 @@
 package ca.kieve.ssss.ui.layout;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.junit.jupiter.api.Test;
+
 import ca.kieve.ssss.ui.TestUiNode;
 import ca.kieve.ssss.ui.core.UiPosition;
 import ca.kieve.ssss.ui.core.UiSize;
-import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class HorizontalLayoutTest {
     @Test

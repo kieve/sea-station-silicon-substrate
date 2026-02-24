@@ -1,9 +1,9 @@
 package ca.kieve.ssss.ai.condition;
 
+import java.util.Map;
+
 import ca.kieve.ssss.component.Equipment;
 import ca.kieve.ssss.component.Identifier;
-
-import java.util.Map;
 
 /**
  * Condition that checks if entity has a weapon equipped.

@@ -2,16 +2,16 @@ package ca.kieve.ssss.editor.component;
 
 import static ca.kieve.ssss.editor.util.CssUtil.inline;
 
-import ca.kieve.ssss.content.ComponentDefinition;
-import ca.kieve.ssss.content.ContentRegistry;
-import ca.kieve.ssss.content.EntityDefinition;
-import ca.kieve.ssss.editor.EditorContext;
+import java.util.List;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
 
-import java.util.List;
+import ca.kieve.ssss.content.ComponentDefinition;
+import ca.kieve.ssss.content.ContentRegistry;
+import ca.kieve.ssss.content.EntityDefinition;
+import ca.kieve.ssss.editor.EditorContext;
 
 public class EntityDetailPanel extends ScrollPane {
     private static final String STYLE_TITLE = "editor-title";

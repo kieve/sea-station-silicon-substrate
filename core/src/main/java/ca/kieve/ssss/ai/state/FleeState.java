@@ -1,16 +1,17 @@
 package ca.kieve.ssss.ai.state;
 
+import static ca.kieve.ssss.util.Vec3i.EAST;
+import static ca.kieve.ssss.util.Vec3i.NORTH;
+import static ca.kieve.ssss.util.Vec3i.SOUTH;
+import static ca.kieve.ssss.util.Vec3i.WEST;
+
+import dev.dominion.ecs.api.Entity;
+
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.component.Velocity;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.util.SolidUtil;
 import ca.kieve.ssss.util.Vec3i;
-import dev.dominion.ecs.api.Entity;
-
-import static ca.kieve.ssss.util.Vec3i.EAST;
-import static ca.kieve.ssss.util.Vec3i.NORTH;
-import static ca.kieve.ssss.util.Vec3i.SOUTH;
-import static ca.kieve.ssss.util.Vec3i.WEST;
 
 /**
  * State that moves away from the target entity.

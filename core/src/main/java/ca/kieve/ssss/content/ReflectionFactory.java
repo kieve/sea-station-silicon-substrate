@@ -1,10 +1,10 @@
 package ca.kieve.ssss.content;
 
+import java.util.Map;
+
 import ca.kieve.ssss.ai.condition.Condition;
 import ca.kieve.ssss.ai.reset.ResetCondition;
 import ca.kieve.ssss.ai.state.AiState;
-
-import java.util.Map;
 
 /**
  * Centralized factory for reflection-based instantiation of YAML-defined classes.

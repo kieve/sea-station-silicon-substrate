@@ -1,5 +1,7 @@
 package ca.kieve.ssss;
 
+import java.util.List;
+
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -32,8 +34,6 @@ import ca.kieve.ssss.world.MapGenerator;
 import ca.kieve.ssss.world.StaticTestMapGenerator;
 import ca.kieve.ssss.world.WorldEntityFactory;
 import ca.kieve.ssss.world.WorldModel;
-
-import java.util.List;
 
 public class GameEngine {
     public static final boolean DEBUG_GRID = false;

@@ -1,8 +1,9 @@
 package ca.kieve.ssss.component;
 
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+
 import ca.kieve.ssss.annotations.EditorIgnore;
 import ca.kieve.ssss.annotations.EditorRef;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 
 public record TileGlyph(
     @EditorRef(

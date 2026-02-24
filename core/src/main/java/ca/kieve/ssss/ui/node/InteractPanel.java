@@ -1,11 +1,11 @@
 package ca.kieve.ssss.ui.node;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import ca.kieve.ssss.context.InteractContext.Phase;
 import ca.kieve.ssss.event.Interaction;
 import ca.kieve.ssss.ui.core.UiRenderContext;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * UI panel that displays available interactions when multiple options exist.

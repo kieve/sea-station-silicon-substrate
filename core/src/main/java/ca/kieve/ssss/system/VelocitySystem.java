@@ -1,15 +1,15 @@
 package ca.kieve.ssss.system;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
 import ca.kieve.ssss.component.PlayerController;
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.component.Velocity;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.util.SolidUtil;
 import ca.kieve.ssss.util.Vec3i;
-
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
 
 public class VelocitySystem extends System {
     private final List<Vec3i> m_instantsToZero = new ArrayList<>();
@@ -26,7 +26,7 @@ public class VelocitySystem extends System {
         );
 
         searchResults.stream()
-            .sorted(Comparator.comparingInt(result -> 
+            .sorted(Comparator.comparingInt(result ->
                 result.entity().has(PlayerController.class) ? -1 : 0))
             .forEach(withResult -> {
             var pos = withResult.comp1().getPosition();

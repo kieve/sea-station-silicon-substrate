@@ -2,12 +2,12 @@ package ca.kieve.ssss.editor.component;
 
 import static ca.kieve.ssss.editor.util.CssUtil.inline;
 
-import ca.kieve.ssss.content.ComponentDefinition;
-import ca.kieve.ssss.content.ContentRegistry;
-import ca.kieve.ssss.content.EntityDefinition;
-import ca.kieve.ssss.editor.EditorContext;
-import ca.kieve.ssss.editor.component.ComponentIntrospector.FieldInfo;
-import ca.kieve.ssss.editor.ui.CompactTreeTable;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.UnaryOperator;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
@@ -22,12 +22,12 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.UnaryOperator;
+import ca.kieve.ssss.content.ComponentDefinition;
+import ca.kieve.ssss.content.ContentRegistry;
+import ca.kieve.ssss.content.EntityDefinition;
+import ca.kieve.ssss.editor.EditorContext;
+import ca.kieve.ssss.editor.component.ComponentIntrospector.FieldInfo;
+import ca.kieve.ssss.editor.ui.CompactTreeTable;
 
 public class ComponentPanel
         extends CompactTreeTable<ComponentPanel.ComponentRow> {

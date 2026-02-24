@@ -1,5 +1,13 @@
 package ca.kieve.ssss.context;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import com.github.yellowstonegames.grid.Coord;
+import com.github.yellowstonegames.path.DijkstraMap;
+import dev.dominion.ecs.api.Dominion;
+import dev.dominion.ecs.api.Entity;
+
 import ca.kieve.ssss.component.MaxPassableSize;
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.component.Size;
@@ -7,13 +15,6 @@ import ca.kieve.ssss.component.Solid;
 import ca.kieve.ssss.util.PerfClock;
 import ca.kieve.ssss.util.SolidUtil;
 import ca.kieve.ssss.util.Vec3i;
-import com.github.yellowstonegames.grid.Coord;
-import com.github.yellowstonegames.path.DijkstraMap;
-import dev.dominion.ecs.api.Dominion;
-import dev.dominion.ecs.api.Entity;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Caches dijkstra maps for pathfinding, avoiding repeated rebuilds per AI entity.

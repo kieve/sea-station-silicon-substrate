@@ -2,11 +2,12 @@ package ca.kieve.ssss.editor.component;
 
 import static ca.kieve.ssss.editor.util.CssUtil.inline;
 
-import ca.kieve.ssss.editor.EditorTheme;
 import javafx.beans.property.BooleanProperty;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
+
+import ca.kieve.ssss.editor.EditorTheme;
 
 public class ToolOptionsPanel extends VBox {
     // language=css

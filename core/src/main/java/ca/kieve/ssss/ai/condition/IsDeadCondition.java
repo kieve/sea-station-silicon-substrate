@@ -1,8 +1,8 @@
 package ca.kieve.ssss.ai.condition;
 
-import ca.kieve.ssss.component.Health;
-
 import java.util.Map;
+
+import ca.kieve.ssss.component.Health;
 
 /**
  * Condition that returns true if the entity is dead (HP <= 0).

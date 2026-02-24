@@ -11,14 +11,18 @@ public class KeyState {
     }
 
     public boolean handleKeyDown(int inKey) {
-        if (inKey != keycode) return false;
+        if (inKey != keycode) {
+            return false;
+        }
         event = true;
         held = true;
         return true;
     }
 
     public boolean handleKeyUp(int inKey) {
-        if (inKey != keycode) return false;
+        if (inKey != keycode) {
+            return false;
+        }
         held = false;
         return true;
     }

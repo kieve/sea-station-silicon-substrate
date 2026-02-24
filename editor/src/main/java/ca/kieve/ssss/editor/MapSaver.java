@@ -1,14 +1,15 @@
 package ca.kieve.ssss.editor;
 
-import ca.kieve.ssss.content.MapDefinition;
-import ca.kieve.ssss.editor.model.EditorMapModel;
+import java.io.File;
+import java.io.IOException;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 
-import java.io.File;
-import java.io.IOException;
+import ca.kieve.ssss.content.MapDefinition;
+import ca.kieve.ssss.editor.model.EditorMapModel;
 
 public final class MapSaver {
     private static final ObjectMapper MAPPER = new ObjectMapper(
