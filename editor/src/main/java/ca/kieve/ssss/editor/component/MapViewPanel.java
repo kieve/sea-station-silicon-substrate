@@ -1002,7 +1002,10 @@ public class MapViewPanel extends BorderPane {
             return;
         }
 
-        clearSelection();
+        // Clear visual cell selection but preserve entity
+        // selection so entities can be moved between layers.
+        m_renderer.setSelectedCell(null, null);
+        m_selectedCellOverlay.clear();
         m_renderer.loadEntities(
                 buildEntityMarkers(zLevel));
         m_currentZ = zLevel;

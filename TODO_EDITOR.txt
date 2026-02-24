@@ -1,5 +1,3 @@
 enum field editor
 
-Select tile on map when selecting an entity in list
-
 Break out ComponentPanel into most individual files
