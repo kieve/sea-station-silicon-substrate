@@ -6,8 +6,15 @@ import ca.kieve.ssss.editor.ui.AppIcon;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Dialog;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 
 public final class DialogUtil {
+    private static Window s_owner;
+
+    public static void setOwner(Window owner) {
+        s_owner = owner;
+    }
+
     // AtlantaFX sets :no-header > .content padding to
     // "1em 1em 0 0", expecting the graphic-container to
     // provide left spacing. Since we remove the graphic,
@@ -20,6 +27,9 @@ public final class DialogUtil {
             """;
 
     public static void style(Alert alert, String title) {
+        if (s_owner != null) {
+            alert.initOwner(s_owner);
+        }
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setGraphic(null);
@@ -45,6 +55,9 @@ public final class DialogUtil {
 
     public static void style(
             Dialog<?> dialog, String title) {
+        if (s_owner != null) {
+            dialog.initOwner(s_owner);
+        }
         dialog.setTitle(title);
         dialog.setHeaderText(null);
         dialog.setGraphic(null);

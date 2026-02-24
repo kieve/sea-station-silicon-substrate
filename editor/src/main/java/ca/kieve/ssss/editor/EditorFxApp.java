@@ -69,6 +69,7 @@ public class EditorFxApp extends Application {
                 new PrimerDark().getUserAgentStylesheet());
 
         m_stage = stage;
+        DialogUtil.setOwner(stage);
 
         m_lastDirectory = resolveDefaultMapsDir();
 

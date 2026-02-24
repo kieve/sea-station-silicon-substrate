@@ -1,5 +1,3 @@
-open dialogs centered on the current editor window
-
 enum field editor
 
 show entities that don't have a position component
