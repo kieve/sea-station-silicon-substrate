@@ -59,7 +59,7 @@ Output is at `lwjgl3/build/libs/`
 
 ### Checkstyle Workflow
 
-After editing Java files, run Checkstyle against the files you changed to verify they comply with the project's style rules. Use `checkstyleFiles` with a comma-separated list of file paths, or `checkstyleChanged` to automatically check all files flagged as modified by `git status`. Fix any violations before considering the task complete. These tasks work for files in any module (core, editor, lwjgl3).
+After editing Java files, run Checkstyle against the files you changed to verify they comply with the project's style rules. Use `checkstyleFiles` with a comma-separated list of file paths, or `checkstyleChanged` to automatically check all files flagged as modified by `git status`. Fix **all** violations in every file you touched, even pre-existing ones — if we're already editing a file, we should leave it fully compliant. Fix any violations before considering the task complete. These tasks work for files in any module (core, editor, lwjgl3).
 
 ## Architecture
 
@@ -596,6 +596,31 @@ This is a Windows development environment. Use backslash-escaped paths or forwar
 
 ### Line Length
 Maximum line length is 100 characters. Break long lines at logical points.
+
+### Import Ordering
+Imports must be organized in the following group order, with a blank line between each group:
+
+1. **Project imports** (`ca.kieve.*`)
+2. **Third-party imports** (everything else, e.g., `javafx.*`, `atlantafx.*`)
+3. **Java standard library** (`java.*`)
+4. **Java extensions** (`javax.*`)
+5. **Static imports** (at the bottom)
+
+Within each group, imports must be sorted alphabetically. No wildcard/star imports.
+
+**Example:**
+```java
+import ca.kieve.ssss.editor.EditorTheme;
+import ca.kieve.ssss.editor.model.EditorMapModel;
+
+import javafx.geometry.Pos;
+import javafx.scene.control.Button;
+
+import java.util.List;
+import java.util.Map;
+
+import static ca.kieve.ssss.editor.util.CssUtil.inline;
+```
 
 ### Member Variable Naming Convention
 All non-constant, non-static member variables must be prefixed with `m_`. Constants (static final fields) should use SCREAMING_SNAKE_CASE without the prefix.

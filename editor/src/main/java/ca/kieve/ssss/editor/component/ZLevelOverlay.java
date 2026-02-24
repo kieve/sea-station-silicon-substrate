@@ -1,9 +1,7 @@
 package ca.kieve.ssss.editor.component;
 
-import static ca.kieve.ssss.editor.util.CssUtil.inline;
+import ca.kieve.ssss.editor.EditorTheme;
 
-import java.util.List;
-import java.util.function.Consumer;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -12,11 +10,21 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
-import ca.kieve.ssss.editor.EditorTheme;
+import java.util.List;
+import java.util.function.Consumer;
+
+import static ca.kieve.ssss.editor.util.CssUtil.inline;
 
 public class ZLevelOverlay extends HBox {
+    private static final int SPACING = 4;
+    private static final int COMBO_WIDTH = 56;
+    private static final int OVERLAY_PAD_X = 8;
+    private static final int OVERLAY_PAD_Y = 4;
+    private static final int OVERLAY_RADIUS = 6;
     private static final String STYLE_Z_STEP_BUTTON =
             "editor-z-step-button";
+    private static final String STYLE_Z_ADD_BUTTON =
+            "editor-z-add-button";
 
     // language=css
     private static final String CSS =
@@ -35,24 +43,38 @@ public class ZLevelOverlay extends HBox {
             .%1$s:hover {
                 -fx-background-color: -color-neutral-muted;
             }
-            """.formatted(STYLE_Z_STEP_BUTTON);
+            .%2$s {
+                -fx-background-color: transparent;
+                -fx-background-radius: 0 %3$d %3$d 0;
+                -fx-padding: 0;
+                -fx-font-size: 18;
+                -fx-cursor: hand;
+            }
+            .%2$s:hover {
+                -fx-background-color: -color-neutral-muted;
+            }
+            """.formatted(
+                    STYLE_Z_STEP_BUTTON,
+                    STYLE_Z_ADD_BUTTON,
+                    OVERLAY_RADIUS);
 
     private final ComboBox<Integer> m_zCombo;
     private List<Integer> m_zLevels = List.of();
     private Consumer<Integer> m_onZLevelRequested;
+    private Runnable m_onAddLayerRequested;
     private boolean m_suppressCallback;
 
     public ZLevelOverlay() {
         getStylesheets().add(inline(CSS));
         getStyleClass().add(EditorTheme.STYLE_OVERLAY);
         setAlignment(Pos.CENTER);
-        setSpacing(4);
+        setSpacing(SPACING);
         setMaxWidth(USE_PREF_SIZE);
         setMaxHeight(USE_PREF_SIZE);
 
         var label = new Label("Z:");
         m_zCombo = new ComboBox<>();
-        m_zCombo.setPrefWidth(56);
+        m_zCombo.setPrefWidth(COMBO_WIDTH);
         m_zCombo.setFocusTraversable(false);
 
         var upBtn = new Button("\u25B2");
@@ -81,12 +103,36 @@ public class ZLevelOverlay extends HBox {
             }
         });
 
-        getChildren().addAll(label, m_zCombo, stepButtons);
+        var addBtn = new Button("+");
+        addBtn.setFocusTraversable(false);
+        addBtn.getStyleClass().add(STYLE_Z_ADD_BUTTON);
+        addBtn.setMaxHeight(Double.MAX_VALUE);
+        addBtn.minWidthProperty().bind(
+                addBtn.heightProperty());
+        addBtn.prefWidthProperty().bind(
+                addBtn.heightProperty());
+        addBtn.setOnAction(e -> {
+            if (m_onAddLayerRequested != null) {
+                m_onAddLayerRequested.run();
+            }
+        });
+        HBox.setMargin(addBtn, new Insets(
+                -OVERLAY_PAD_Y, -OVERLAY_PAD_X,
+                -OVERLAY_PAD_Y, 0));
+
+        getChildren().addAll(
+                label, m_zCombo, stepButtons,
+                addBtn);
     }
 
     public void setOnZLevelRequested(
             Consumer<Integer> callback) {
         m_onZLevelRequested = callback;
+    }
+
+    public void setOnAddLayerRequested(
+            Runnable callback) {
+        m_onAddLayerRequested = callback;
     }
 
     public void setZLevels(

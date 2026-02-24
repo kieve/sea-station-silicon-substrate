@@ -1,10 +1,18 @@
 package ca.kieve.ssss.editor.component;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import ca.kieve.ssss.content.ComponentDefinition;
+import ca.kieve.ssss.content.ComponentTypeDeserializer;
+import ca.kieve.ssss.content.ContentRegistry;
+import ca.kieve.ssss.content.MapDefinition;
+import ca.kieve.ssss.editor.BlockColorResolver;
+import ca.kieve.ssss.editor.EditorContext;
+import ca.kieve.ssss.editor.EditorTheme;
+import ca.kieve.ssss.editor.MapSaver;
+import ca.kieve.ssss.editor.model.EditorEntity;
+import ca.kieve.ssss.editor.model.EditorMapModel;
+import ca.kieve.ssss.editor.ui.PanCanvas;
+import ca.kieve.ssss.editor.util.DialogUtil;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
@@ -22,21 +30,18 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
-import ca.kieve.ssss.content.ComponentDefinition;
-import ca.kieve.ssss.content.ComponentTypeDeserializer;
-import ca.kieve.ssss.content.ContentRegistry;
-import ca.kieve.ssss.content.EntityDefinition;
-import ca.kieve.ssss.content.MapDefinition;
-import ca.kieve.ssss.editor.BlockColorResolver;
-import ca.kieve.ssss.editor.EditorContext;
-import ca.kieve.ssss.editor.EditorTheme;
-import ca.kieve.ssss.editor.MapSaver;
-import ca.kieve.ssss.editor.model.EditorEntity;
-import ca.kieve.ssss.editor.model.EditorMapModel;
-import ca.kieve.ssss.editor.ui.PanCanvas;
-import ca.kieve.ssss.editor.util.DialogUtil;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 
 public class MapViewPanel extends BorderPane {
+    private static final int OVERLAY_SPACING = 4;
+    private static final int OVERLAY_MARGIN = 8;
+    private static final double RIGHT_SPLIT_POS = 0.65;
+    private static final double MAIN_SPLIT_POS = 0.8;
+
     private final EditorMapModel m_model;
     private final MapRenderer m_renderer;
     private final PanCanvas m_panCanvas;
@@ -148,29 +153,34 @@ public class MapViewPanel extends BorderPane {
 
         m_componentPanel.setOnPropertyEdited(
                 this::onPropertyEdited);
-        m_componentPanel.setOnComponentOverride(
+        var overrideCallback =
                 new ComponentPanel
                         .ComponentOverrideCallback() {
-            @Override
-            public void onOverrideAdded(
-                    String componentTypeName) {
-                handleOverrideAdded(componentTypeName);
-            }
-            @Override
-            public void onOverrideRemoved(
-                    String componentTypeName) {
-                handleOverrideRemoved(
-                        componentTypeName);
-            }
-            @Override
-            public void onPropertyReverted(
-                    String componentTypeName,
-                    String propertyName) {
-                handlePropertyReverted(
-                        componentTypeName,
-                        propertyName);
-            }
-        });
+                    @Override
+                    public void onOverrideAdded(
+                            String componentTypeName) {
+                        handleOverrideAdded(
+                                componentTypeName);
+                    }
+
+                    @Override
+                    public void onOverrideRemoved(
+                            String componentTypeName) {
+                        handleOverrideRemoved(
+                                componentTypeName);
+                    }
+
+                    @Override
+                    public void onPropertyReverted(
+                            String componentTypeName,
+                            String propertyName) {
+                        handlePropertyReverted(
+                                componentTypeName,
+                                propertyName);
+                    }
+                };
+        m_componentPanel.setOnComponentOverride(
+                overrideCallback);
 
         m_addOverrideBtn = new Button("Add Override");
         m_addOverrideBtn.setMaxWidth(Double.MAX_VALUE);
@@ -203,32 +213,9 @@ public class MapViewPanel extends BorderPane {
                 m_blocksTab, m_entitiesTab);
         m_tabPane.getSelectionModel()
                 .selectedItemProperty()
-                .addListener((obs, oldTab, newTab) -> {
-            if (newTab == m_blocksTab) {
-                setAddOverrideVisible(false);
-                // Re-fire block selection
-                String sel =
-                        m_blockPanel.getSelectedBlock();
-                if (sel != null) {
-                    var blockDef =
-                            m_model.getBlocks().get(sel);
-                    if (blockDef != null) {
-                        m_componentPanel.showEntity(
-                                blockDef.bpId());
-                    } else {
-                        m_componentPanel.clear();
-                    }
-                } else {
-                    m_componentPanel.clear();
-                }
-            } else {
-                // Entities tab — show button if
-                // an entity is selected
-                setAddOverrideVisible(
-                        m_selectedEntityIndex != null);
-                m_componentPanel.clear();
-            }
-        });
+                .addListener(
+                        (obs, oldTab, newTab) ->
+                                onTabChanged(newTab));
 
         // Bottom: info bar
         m_infoBar = new InfoBar();
@@ -242,6 +229,8 @@ public class MapViewPanel extends BorderPane {
         m_zOverlay.setZLevels(zLevels, defaultZ);
         m_zOverlay.setOnZLevelRequested(
                 this::setZLevel);
+        m_zOverlay.setOnAddLayerRequested(
+                this::addZLayer);
 
         // Floating zoom overlay
         m_zoomOverlay = new ZoomOverlay();
@@ -268,16 +257,12 @@ public class MapViewPanel extends BorderPane {
 
         // Clear selection when switching to PAINT
         m_toolBar.activeToolProperty().addListener(
-                (obs, oldTool, newTool) -> {
-            if (newTool == EditorToolBar.Tool.PAINT) {
-                clearSelection();
-            }
-            m_toolOptionsPanel.updateForTool(newTool);
-        });
+                (obs, oldTool, newTool) ->
+                        onToolChanged(newTool));
 
         // Center: canvas with floating overlays
         var rightOverlayBox = new VBox(
-                4, m_zOverlay, m_zoomOverlay,
+                OVERLAY_SPACING, m_zOverlay, m_zoomOverlay,
                 m_selectedCellOverlay);
         rightOverlayBox.setAlignment(Pos.TOP_RIGHT);
         rightOverlayBox.setMaxWidth(Region.USE_PREF_SIZE);
@@ -285,7 +270,7 @@ public class MapViewPanel extends BorderPane {
         rightOverlayBox.setPickOnBounds(false);
 
         var leftOverlayBox = new VBox(
-                4, m_toolOptionsPanel);
+                OVERLAY_SPACING, m_toolOptionsPanel);
         leftOverlayBox.setAlignment(Pos.TOP_LEFT);
         leftOverlayBox.setMaxWidth(Region.USE_PREF_SIZE);
         leftOverlayBox.setMaxHeight(Region.USE_PREF_SIZE);
@@ -298,12 +283,14 @@ public class MapViewPanel extends BorderPane {
                 rightOverlayBox, Pos.TOP_RIGHT);
         StackPane.setMargin(
                 rightOverlayBox,
-                new Insets(8, 8, 0, 0));
+                new Insets(OVERLAY_MARGIN,
+                        OVERLAY_MARGIN, 0, 0));
         StackPane.setAlignment(
                 leftOverlayBox, Pos.TOP_LEFT);
         StackPane.setMargin(
                 leftOverlayBox,
-                new Insets(8, 0, 0, 8));
+                new Insets(OVERLAY_MARGIN, 0,
+                        0, OVERLAY_MARGIN));
 
         var componentBox = new VBox(
                 m_componentPanel, m_addOverrideBtn);
@@ -313,11 +300,11 @@ public class MapViewPanel extends BorderPane {
         var rightSplit = new SplitPane(
                 m_tabPane, componentBox);
         rightSplit.setOrientation(Orientation.VERTICAL);
-        rightSplit.setDividerPositions(0.65);
+        rightSplit.setDividerPositions(RIGHT_SPLIT_POS);
 
         var mainSplit = new SplitPane(
                 canvasStack, rightSplit);
-        mainSplit.setDividerPositions(0.8);
+        mainSplit.setDividerPositions(MAIN_SPLIT_POS);
 
         setLeft(m_toolBar);
         setCenter(mainSplit);
@@ -362,6 +349,38 @@ public class MapViewPanel extends BorderPane {
                     alert, "Failed to Save Map");
             alert.setContentText(ex.getMessage());
             alert.showAndWait();
+        }
+    }
+
+    private void onToolChanged(
+            EditorToolBar.Tool newTool) {
+        if (newTool == EditorToolBar.Tool.PAINT) {
+            clearSelection();
+        }
+        m_toolOptionsPanel.updateForTool(newTool);
+    }
+
+    private void onTabChanged(Tab newTab) {
+        if (newTab == m_blocksTab) {
+            setAddOverrideVisible(false);
+            String sel =
+                    m_blockPanel.getSelectedBlock();
+            if (sel != null) {
+                var blockDef =
+                        m_model.getBlocks().get(sel);
+                if (blockDef != null) {
+                    m_componentPanel.showEntity(
+                            blockDef.bpId());
+                } else {
+                    m_componentPanel.clear();
+                }
+            } else {
+                m_componentPanel.clear();
+            }
+        } else {
+            setAddOverrideVisible(
+                    m_selectedEntityIndex != null);
+            m_componentPanel.clear();
         }
     }
 
@@ -978,6 +997,13 @@ public class MapViewPanel extends BorderPane {
                 + MapRenderer.CELL_SIZE / 2.0;
         m_panCanvas.centerOn(worldX, worldY);
         m_panCanvas.requestRedraw();
+    }
+
+    private void addZLayer() {
+        int newZ = m_model.addZLayer();
+        var zLevels = m_model.getZLevels();
+        m_zOverlay.setZLevels(zLevels, newZ);
+        loadLayer(newZ);
     }
 
     private void setZLevel(int z) {

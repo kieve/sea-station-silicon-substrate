@@ -1,18 +1,19 @@
 package ca.kieve.ssss.editor.model;
 
+import ca.kieve.ssss.content.ComponentDefinition;
+import ca.kieve.ssss.content.MapBlockDefinition;
+import ca.kieve.ssss.content.MapDefinition;
+import ca.kieve.ssss.content.MapEntityDefinition;
+
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-
-import ca.kieve.ssss.content.ComponentDefinition;
-import ca.kieve.ssss.content.MapBlockDefinition;
-import ca.kieve.ssss.content.MapDefinition;
-import ca.kieve.ssss.content.MapEntityDefinition;
 
 public class EditorMapModel {
     private final Map<String, MapBlockDefinition> m_blocks =
@@ -162,34 +163,39 @@ public class EditorMapModel {
                 || entities.isEmpty()) {
             return entities;
         }
-        return entities.stream().map(e -> {
-            var adjusted =
-                    e.components().stream().map(comp -> {
-                if (!"Position".equals(
-                        comp.type().getSimpleName())) {
-                    return comp;
-                }
-                var copy =
-                        new ComponentDefinition(comp.type());
-                for (var p : comp.properties().entrySet()) {
-                    copy.setProperty(
-                            p.getKey(), p.getValue());
-                }
-                Object xVal = copy.properties().get("x");
-                Object yVal = copy.properties().get("y");
-                if (xVal instanceof Number n) {
-                    copy.setProperty(
-                            "x", n.intValue() + xAdj);
-                }
-                if (yVal instanceof Number n) {
-                    copy.setProperty(
-                            "y", n.intValue() + yAdj);
-                }
-                return copy;
-            }).toList();
-            return new MapEntityDefinition(
-                    e.id(), adjusted);
+        return entities.stream()
+                .map(e -> adjustEntity(e, xAdj, yAdj))
+                .toList();
+    }
+
+    private static MapEntityDefinition adjustEntity(
+            MapEntityDefinition e,
+            int xAdj, int yAdj) {
+        var adjusted = e.components().stream().map(comp -> {
+            if (!"Position".equals(
+                    comp.type().getSimpleName())) {
+                return comp;
+            }
+            var copy =
+                    new ComponentDefinition(comp.type());
+            for (var p : comp.properties().entrySet()) {
+                copy.setProperty(
+                        p.getKey(), p.getValue());
+            }
+            Object xVal = copy.properties().get("x");
+            Object yVal = copy.properties().get("y");
+            if (xVal instanceof Number n) {
+                copy.setProperty(
+                        "x", n.intValue() + xAdj);
+            }
+            if (yVal instanceof Number n) {
+                copy.setProperty(
+                        "y", n.intValue() + yAdj);
+            }
+            return copy;
         }).toList();
+        return new MapEntityDefinition(
+                e.id(), adjusted);
     }
 
     public String getCell(int z, int row, int col) {
@@ -228,6 +234,14 @@ public class EditorMapModel {
 
     public void markModified() {
         m_modified.set(true);
+    }
+
+    public int addZLayer() {
+        int z = m_layers.isEmpty()
+                ? 0 : m_layers.lastKey() + 1;
+        m_layers.put(z, new SparseGrid());
+        m_modified.set(true);
+        return z;
     }
 
     public SparseGrid getLayer(int z) {
