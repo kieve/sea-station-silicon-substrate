@@ -54,7 +54,7 @@ public final class GameLauncher {
                 "bin", "java")
                 .toString();
 
-        String windowArgs = windowPosition(
+        int[] pos = windowCenter(
                 editorX, editorY,
                 editorWidth, editorHeight);
 
@@ -66,7 +66,8 @@ public final class GameLauncher {
         cmd.add("-cp");
         cmd.add(classpath);
         cmd.add(MAIN_CLASS);
-        cmd.add("--args=" + windowArgs);
+        cmd.add("--window-x=" + pos[0]);
+        cmd.add("--window-y=" + pos[1]);
 
         new ProcessBuilder(cmd)
                 .directory(projectRoot
@@ -86,9 +87,11 @@ public final class GameLauncher {
                             + "(no gradlew found).");
         }
 
-        String windowArgs = windowPosition(
+        int[] pos = windowCenter(
                 editorX, editorY,
                 editorWidth, editorHeight);
+        String windowArgs = "--window-x=" + pos[0]
+                + " --window-y=" + pos[1];
 
         String gradlew = Globals.IS_WIN
                 ? "gradlew.bat" : "gradlew";
@@ -102,15 +105,14 @@ public final class GameLauncher {
                 .start();
     }
 
-    private static String windowPosition(
+    private static int[] windowCenter(
             double editorX, double editorY,
             double editorWidth, double editorHeight) {
         int windowX = (int) (editorX
                 + (editorWidth - GAME_WIDTH) / 2);
         int windowY = (int) (editorY
                 + (editorHeight - GAME_HEIGHT) / 2);
-        return "--window-x=" + windowX
-                + " --window-y=" + windowY;
+        return new int[] { windowX, windowY };
     }
 
     private static Path resolveProjectRoot() {
