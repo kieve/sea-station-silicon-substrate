@@ -1,3 +1,7 @@
 enum field editor
 
 Break out ComponentPanel into most individual files
+
+open game on correct monitor inside editor
+
+relaunch editor button?

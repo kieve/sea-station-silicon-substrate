@@ -30,11 +30,17 @@ import javafx.stage.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static ca.kieve.ssss.editor.util.CssUtil.inline;
 
 public class EditorFxApp extends Application {
+    private static final KeyCodeCombination NEW_COMBO =
+            new KeyCodeCombination(
+                    KeyCode.N,
+                    KeyCombination.CONTROL_DOWN);
     private static final KeyCodeCombination SAVE_COMBO =
             new KeyCodeCombination(
                     KeyCode.S,
@@ -99,6 +105,7 @@ public class EditorFxApp extends Application {
                 AppIcon.create(ICON_16));
 
         var actions = new EditorTitleBar.Actions(
+                this::onNewMap,
                 this::onLoadMap,
                 this::onSave,
                 this::onSaveAs,
@@ -120,7 +127,10 @@ public class EditorFxApp extends Application {
         // Keyboard shortcuts
         scene.addEventFilter(
                 KeyEvent.KEY_PRESSED, e -> {
-                    if (SAVE_AS_COMBO.match(e)) {
+                    if (NEW_COMBO.match(e)) {
+                        onNewMap();
+                        e.consume();
+                    } else if (SAVE_AS_COMBO.match(e)) {
                         onSaveAs();
                         e.consume();
                     } else if (SAVE_COMBO.match(e)) {
@@ -176,6 +186,20 @@ public class EditorFxApp extends Application {
             return mvp;
         }
         return null;
+    }
+
+    private void onNewMap() {
+        if (!checkUnsavedChanges()) {
+            return;
+        }
+
+        var mapDef = new MapDefinition(
+                Map.of(),
+                Map.of("0", "\n"),
+                "interpunct",
+                List.of());
+        var mapViewPanel = new MapViewPanel(mapDef, null);
+        openMapTab(mapViewPanel, "untitled");
     }
 
     private void onSave() {
@@ -338,37 +362,7 @@ public class EditorFxApp extends Application {
             MapDefinition mapDef = MapLoader.load(file);
             var mapViewPanel =
                     new MapViewPanel(mapDef, file);
-
-            if (m_mapTab == null) {
-                m_mapTab = new Tab();
-                m_mapTab.setOnClosed(
-                        e -> m_mapTab = null);
-                m_tabPane.getTabs().add(m_mapTab);
-            }
-
-            m_mapTab.setContent(mapViewPanel);
-            m_mapTab.setText(
-                    "Map - " + file.getName());
-
-            // Bind modified state to tab text
-            mapViewPanel.getModel().modifiedProperty()
-                    .addListener(
-                            (obs, oldVal, newVal) -> {
-                                File f = mapViewPanel
-                                        .getModel()
-                                        .getFile();
-                                String name = f != null
-                                        ? f.getName()
-                                        : "untitled";
-                                m_mapTab.setText(
-                                        "Map - " + name
-                                        + (newVal
-                                                ? " *"
-                                                : ""));
-                            });
-
-            m_tabPane.getSelectionModel()
-                    .select(m_mapTab);
+            openMapTab(mapViewPanel, file.getName());
         } catch (IOException ex) {
             var alert =
                     new Alert(Alert.AlertType.ERROR);
@@ -377,6 +371,40 @@ public class EditorFxApp extends Application {
             alert.setContentText(ex.getMessage());
             alert.showAndWait();
         }
+    }
+
+    private void openMapTab(
+            MapViewPanel mapViewPanel,
+            String displayName) {
+        if (m_mapTab == null) {
+            m_mapTab = new Tab();
+            m_mapTab.setOnClosed(
+                    e -> m_mapTab = null);
+            m_tabPane.getTabs().add(m_mapTab);
+        }
+
+        m_mapTab.setContent(mapViewPanel);
+        m_mapTab.setText("Map - " + displayName);
+
+        // Bind modified state to tab text
+        mapViewPanel.getModel().modifiedProperty()
+                .addListener(
+                        (obs, oldVal, newVal) -> {
+                            File f = mapViewPanel
+                                    .getModel()
+                                    .getFile();
+                            String name = f != null
+                                    ? f.getName()
+                                    : "untitled";
+                            m_mapTab.setText(
+                                    "Map - " + name
+                                    + (newVal
+                                            ? " *"
+                                            : ""));
+                        });
+
+        m_tabPane.getSelectionModel()
+                .select(m_mapTab);
     }
 
     private File resolveDefaultMapsDir() {

@@ -147,6 +147,7 @@ public class EditorTitleBar extends HBox {
                     + " -fx-stroke-width: 1;";
 
     public record Actions(
+            Runnable onNewMap,
             Runnable onLoadMap,
             Runnable onSave,
             Runnable onSaveAs,
@@ -204,6 +205,10 @@ public class EditorTitleBar extends HBox {
         HBox.setMargin(appIcon,
                 new Insets(0, ICON_MARGIN_RIGHT, 0, 0));
 
+        var newMapItem = new MenuItem("New Map");
+        newMapItem.setOnAction(
+                e -> actions.onNewMap().run());
+
         var loadMapItem = new MenuItem("Load Map...");
         loadMapItem.setOnAction(
                 e -> actions.onLoadMap().run());
@@ -217,6 +222,7 @@ public class EditorTitleBar extends HBox {
                 e -> actions.onSaveAs().run());
 
         var fileMenu = new MenuButton("File", null,
+                newMapItem,
                 loadMapItem,
                 new SeparatorMenuItem(),
                 saveItem,

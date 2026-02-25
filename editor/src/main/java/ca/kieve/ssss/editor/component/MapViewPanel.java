@@ -219,7 +219,8 @@ public class MapViewPanel extends BorderPane {
 
         // Bottom: info bar
         m_infoBar = new InfoBar();
-        m_infoBar.setFileName(mapFile.getName());
+        m_infoBar.setFileName(
+                mapFile != null ? mapFile.getName() : "");
 
         // Floating Z-level overlay
         m_zOverlay = new ZLevelOverlay();

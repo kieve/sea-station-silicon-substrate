@@ -1,9 +1,8 @@
 package ca.kieve.ssss.editor.component;
 
-import static ca.kieve.ssss.editor.util.CssUtil.inline;
+import ca.kieve.ssss.editor.model.EditorEntity;
+import ca.kieve.ssss.editor.model.EditorMapModel;
 
-import java.util.List;
-import java.util.function.Consumer;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -16,10 +15,21 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
-import ca.kieve.ssss.editor.model.EditorEntity;
-import ca.kieve.ssss.editor.model.EditorMapModel;
+import java.util.List;
+import java.util.function.Consumer;
+
+import static ca.kieve.ssss.editor.util.CssUtil.inline;
 
 public class EntityPanel extends VBox {
+    private static final int PREF_WIDTH = 200;
+    private static final int MIN_WIDTH = 160;
+    private static final int BUTTON_SPACING = 4;
+    private static final int BUTTON_BAR_TOP_PADDING = 4;
+    private static final int INDICATOR_TOP = -4;
+    private static final int INDICATOR_RIGHT = -10;
+    private static final int INDICATOR_BOTTOM = -4;
+    private static final int INDICATOR_LEFT = 4;
+
     private static final String STYLE_ENTITY_PANEL =
             "editor-entity-panel";
     private static final String STYLE_TOOLBAR_LABEL_BOLD =
@@ -63,8 +73,8 @@ public class EntityPanel extends VBox {
 
         getStylesheets().add(inline(CSS));
         getStyleClass().add(STYLE_ENTITY_PANEL);
-        setPrefWidth(200);
-        setMinWidth(160);
+        setPrefWidth(PREF_WIDTH);
+        setMinWidth(MIN_WIDTH);
 
         var titleLabel = new Label("Entities");
         titleLabel.getStyleClass()
@@ -78,12 +88,14 @@ public class EntityPanel extends VBox {
 
         m_entityList.getSelectionModel()
                 .selectedItemProperty()
-                .addListener((obs, oldVal, newVal) -> {
-            if (m_onSelectionChanged != null
-                    && newVal != null) {
-                m_onSelectionChanged.accept(newVal);
-            }
-        });
+                .addListener(
+                        (obs, oldVal, newVal) -> {
+                            if (m_onSelectionChanged != null
+                                    && newVal != null) {
+                                m_onSelectionChanged
+                                        .accept(newVal);
+                            }
+                        });
 
         var addBtn = new Button("Add");
         addBtn.setFocusTraversable(false);
@@ -93,9 +105,11 @@ public class EntityPanel extends VBox {
         removeBtn.setFocusTraversable(false);
         removeBtn.setOnAction(e -> onRemove());
 
-        var buttonBar = new HBox(4, addBtn, removeBtn);
+        var buttonBar = new HBox(
+                BUTTON_SPACING, addBtn, removeBtn);
         buttonBar.setAlignment(Pos.CENTER_LEFT);
-        buttonBar.setPadding(new Insets(4, 0, 0, 0));
+        buttonBar.setPadding(new Insets(
+                BUTTON_BAR_TOP_PADDING, 0, 0, 0));
 
         getChildren().addAll(
                 titleLabel, m_entityList, buttonBar);
@@ -134,12 +148,11 @@ public class EntityPanel extends VBox {
                     result.entityId(), List.of());
             m_model.addEntity(entity);
             refreshList();
+            fireEntitiesChanged();
             int newIndex =
                     m_model.getEntities().size() - 1;
             m_entityList.getSelectionModel()
                     .select(newIndex);
-            fireSelectionChanged();
-            fireEntitiesChanged();
         });
     }
 
@@ -152,16 +165,6 @@ public class EntityPanel extends VBox {
         m_model.removeEntity(selected);
         refreshList();
         fireEntitiesChanged();
-    }
-
-    private void fireSelectionChanged() {
-        if (m_onSelectionChanged != null) {
-            Integer sel = m_entityList
-                    .getSelectionModel().getSelectedItem();
-            if (sel != null) {
-                m_onSelectionChanged.accept(sel);
-            }
-        }
     }
 
     private void fireEntitiesChanged() {
@@ -184,7 +187,11 @@ public class EntityPanel extends VBox {
             Tooltip.install(m_indicator,
                     new Tooltip("No Position component"));
             HBox.setMargin(m_indicator,
-                    new Insets(-4, -10, -4, 4));
+                    new Insets(
+                            INDICATOR_TOP,
+                            INDICATOR_RIGHT,
+                            INDICATOR_BOTTOM,
+                            INDICATOR_LEFT));
             m_root.setAlignment(Pos.CENTER_LEFT);
             m_root.setFillHeight(true);
             m_root.getChildren().addAll(
