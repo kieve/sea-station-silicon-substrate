@@ -18,6 +18,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.SplitMenuButton;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.ToggleButton;
@@ -60,6 +61,8 @@ public class EditorTitleBar extends HBox {
             "window-button";
     private static final String STYLE_WINDOW_BUTTON_CLOSE =
             "window-button-close";
+    private static final String STYLE_SPLIT_MENU_BTN =
+            "split-menu-btn";
 
     // language=css
     private static final String CSS = """
@@ -107,11 +110,37 @@ public class EditorTitleBar extends HBox {
                 -fx-background-color: #e81123;
                 -fx-text-fill: white;
             }
+            .%5$s {
+                -fx-background-color: transparent;
+                -fx-background-radius: 0;
+                -fx-padding: 0;
+            }
+            .%5$s > .label {
+                -fx-pref-width: 32;
+                -fx-pref-height: 32;
+                -fx-min-width: 32;
+                -fx-min-height: 32;
+                -fx-padding: 0;
+                -fx-alignment: center;
+                -fx-cursor: hand;
+            }
+            .%5$s > .arrow-button {
+                -fx-pref-height: 32;
+                -fx-min-height: 32;
+                -fx-padding: 0 10 0 10;
+                -fx-background-color: transparent;
+                -fx-cursor: hand;
+            }
+            .%5$s > .label:hover,
+            .%5$s > .arrow-button:hover {
+                -fx-background-color: -color-neutral-muted;
+            }
             """.formatted(
             STYLE_TITLE_BAR,
             STYLE_TITLE_TAB,
             STYLE_WINDOW_BUTTON,
-            STYLE_WINDOW_BUTTON_CLOSE);
+            STYLE_WINDOW_BUTTON_CLOSE,
+            STYLE_SPLIT_MENU_BTN);
 
     private static final String ICON_STROKE_STYLE =
             "-fx-stroke: -color-fg-default;"
@@ -122,6 +151,7 @@ public class EditorTitleBar extends HBox {
             Runnable onSave,
             Runnable onSaveAs,
             Runnable onLaunchGame,
+            Runnable onLaunchGameGradle,
             Runnable onClose) {
     }
 
@@ -193,7 +223,8 @@ public class EditorTitleBar extends HBox {
                 saveAsItem);
 
         var playBtn = createPlayButton(
-                actions.onLaunchGame());
+                actions.onLaunchGame(),
+                actions.onLaunchGameGradle());
 
         // Spacer pushes window buttons to the right
         var spacer = new Region();
@@ -419,11 +450,14 @@ public class EditorTitleBar extends HBox {
         }
     }
 
-    private static Button createPlayButton(
-            Runnable onLaunchGame) {
-        var btn = new Button();
+    private static SplitMenuButton createPlayButton(
+            Runnable onLaunchGame,
+            Runnable onLaunchGameGradle) {
+        var gradleItem =
+                new MenuItem("Launch with Gradle Build");
+        var btn = new SplitMenuButton(gradleItem);
         btn.setGraphic(createPlayIcon());
-        btn.getStyleClass().add(STYLE_WINDOW_BUTTON);
+        btn.getStyleClass().add(STYLE_SPLIT_MENU_BTN);
         btn.setFocusTraversable(false);
 
         var cooldown = new PauseTransition(
@@ -431,10 +465,19 @@ public class EditorTitleBar extends HBox {
         cooldown.setOnFinished(
                 e -> btn.setDisable(false));
 
-        btn.setOnAction(e -> {
-            onLaunchGame.run();
+        Runnable startCooldown = () -> {
             btn.setDisable(true);
             cooldown.playFromStart();
+        };
+
+        btn.setOnAction(e -> {
+            onLaunchGame.run();
+            startCooldown.run();
+        });
+
+        gradleItem.setOnAction(e -> {
+            onLaunchGameGradle.run();
+            startCooldown.run();
         });
 
         return btn;

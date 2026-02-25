@@ -36,6 +36,7 @@ dependencies {
 def os = System.properties['os.name'].toLowerCase()
 
 run {
+  dependsOn 'exportRunClasspath'
   workingDir = rootProject.file('assets').path
 // You can uncomment the next line if your IDE claims a build failure even when the app closed properly.
   //setIgnoreExitValue(true)
@@ -43,6 +44,18 @@ run {
   if (os.contains('mac')) jvmArgs += "-XstartOnFirstThread"
   jvmArgs += "--enable-native-access=ALL-UNNAMED"
   jvmArgs += "--add-opens=java.base/java.lang=ALL-UNNAMED"
+}
+
+tasks.register('exportRunClasspath') {
+  dependsOn 'classes', 'processResources'
+  group = 'application'
+  description = 'Writes the runtime classpath to build/run-classpath.txt for direct java launches.'
+
+  doLast {
+    def cpFile = file("$buildDir/run-classpath.txt")
+    cpFile.text = sourceSets.main.runtimeClasspath.files.collect { it.absolutePath }.join(File.pathSeparator)
+    logger.lifecycle "Wrote classpath to ${cpFile.absolutePath}"
+  }
 }
 
 jar {

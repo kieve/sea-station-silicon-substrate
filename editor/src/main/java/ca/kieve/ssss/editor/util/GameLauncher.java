@@ -1,15 +1,25 @@
 package ca.kieve.ssss.editor.util;
 
-import java.io.IOException;
-import java.nio.file.Path;
-
 import ca.kieve.ssss.editor.Globals;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 public final class GameLauncher {
     private static final int GAME_WIDTH = 1280;
     private static final int GAME_HEIGHT = 720;
 
-    public static void launch(
+    private static final String MAIN_CLASS =
+            "ca.kieve.ssss.lwjgl3.Lwjgl3Launcher";
+    private static final String CLASSPATH_FILE =
+            "lwjgl3/build/run-classpath.txt";
+    private static final String CORE_RESOURCES =
+            "core/src/main/resources";
+
+    public static void launchDirect(
             double editorX, double editorY,
             double editorWidth, double editorHeight)
             throws IOException {
@@ -20,23 +30,87 @@ public final class GameLauncher {
                             + "(no gradlew found).");
         }
 
-        int windowX = (int) (editorX
-                + (editorWidth - GAME_WIDTH) / 2);
-        int windowY = (int) (editorY
-                + (editorHeight - GAME_HEIGHT) / 2);
+        Path cpFile =
+                projectRoot.resolve(CLASSPATH_FILE);
+        if (!Files.exists(cpFile)) {
+            throw new IOException(
+                    "Classpath file not found.\n"
+                            + "Run: ./gradlew "
+                            + "lwjgl3:exportRunClasspath");
+        }
+
+        // Prepend source resources so freshly saved
+        // maps are picked up without a rebuild.
+        String buildCp =
+                Files.readString(cpFile).strip();
+        String srcResources = projectRoot
+                .resolve(CORE_RESOURCES)
+                .toAbsolutePath().toString();
+        String classpath = srcResources
+                + java.io.File.pathSeparator + buildCp;
+
+        String javaBin = Path.of(
+                System.getProperty("java.home"),
+                "bin", "java")
+                .toString();
+
+        String windowArgs = windowPosition(
+                editorX, editorY,
+                editorWidth, editorHeight);
+
+        List<String> cmd = new ArrayList<>();
+        cmd.add(javaBin);
+        cmd.add("--enable-native-access=ALL-UNNAMED");
+        cmd.add("--add-opens="
+                + "java.base/java.lang=ALL-UNNAMED");
+        cmd.add("-cp");
+        cmd.add(classpath);
+        cmd.add(MAIN_CLASS);
+        cmd.add("--args=" + windowArgs);
+
+        new ProcessBuilder(cmd)
+                .directory(projectRoot
+                        .resolve("assets").toFile())
+                .inheritIO()
+                .start();
+    }
+
+    public static void launchGradle(
+            double editorX, double editorY,
+            double editorWidth, double editorHeight)
+            throws IOException {
+        Path projectRoot = resolveProjectRoot();
+        if (projectRoot == null) {
+            throw new IOException(
+                    "Could not find project root "
+                            + "(no gradlew found).");
+        }
+
+        String windowArgs = windowPosition(
+                editorX, editorY,
+                editorWidth, editorHeight);
 
         String gradlew = Globals.IS_WIN
                 ? "gradlew.bat" : "gradlew";
-        String args = "--window-x=" + windowX
-                + " --window-y=" + windowY;
 
         new ProcessBuilder(
                 projectRoot.resolve(gradlew).toString(),
                 "lwjgl3:run",
-                "--args=" + args)
+                "--args=" + windowArgs)
                 .directory(projectRoot.toFile())
                 .inheritIO()
                 .start();
+    }
+
+    private static String windowPosition(
+            double editorX, double editorY,
+            double editorWidth, double editorHeight) {
+        int windowX = (int) (editorX
+                + (editorWidth - GAME_WIDTH) / 2);
+        int windowY = (int) (editorY
+                + (editorHeight - GAME_HEIGHT) / 2);
+        return "--window-x=" + windowX
+                + " --window-y=" + windowY;
     }
 
     private static Path resolveProjectRoot() {

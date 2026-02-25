@@ -119,6 +119,7 @@ public class EditorFxApp extends Application {
                 this::onSave,
                 this::onSaveAs,
                 this::onLaunchGame,
+                this::onLaunchGameGradle,
                 this::onClose);
         var titleBar = new EditorTitleBar(
                 stage, m_tabPane,
@@ -240,7 +241,23 @@ public class EditorFxApp extends Application {
 
     private void onLaunchGame() {
         try {
-            GameLauncher.launch(
+            GameLauncher.launchDirect(
+                    m_stage.getX(), m_stage.getY(),
+                    m_stage.getWidth(),
+                    m_stage.getHeight());
+        } catch (IOException ex) {
+            var alert =
+                    new Alert(Alert.AlertType.ERROR);
+            DialogUtil.style(
+                    alert, "Failed to Launch Game");
+            alert.setContentText(ex.getMessage());
+            alert.showAndWait();
+        }
+    }
+
+    private void onLaunchGameGradle() {
+        try {
+            GameLauncher.launchGradle(
                     m_stage.getX(), m_stage.getY(),
                     m_stage.getWidth(),
                     m_stage.getHeight());
