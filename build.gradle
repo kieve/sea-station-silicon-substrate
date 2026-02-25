@@ -33,19 +33,12 @@ allprojects {
 configure(subprojects) {
   apply plugin: 'java-library'
   apply plugin: 'com.diffplug.spotless'
-  apply plugin: 'checkstyle'
-
   spotless {
     java {
-      importOrder('java', 'javax', '', 'ca.kieve')
+      importOrder('ca.kieve', '', 'java', 'javax')
       trimTrailingWhitespace()
       endWithNewline()
     }
-  }
-
-  checkstyle {
-    toolVersion = checkstyleVersion
-    configFile = rootProject.file('config/checkstyle/checkstyle.xml')
   }
 
   java {
@@ -78,67 +71,6 @@ configure(subprojects) {
     options.incremental = true
   }
 
-  tasks.register('checkstyleFiles', Checkstyle) {
-    description = 'Run Checkstyle on specific files (stub; real task is on root project)'
-    classpath = files()
-    source = files()
-  }
-
-  tasks.register('checkstyleChanged', Checkstyle) {
-    description = 'Run Checkstyle on Java files modified in git (stub; real task is on root project)'
-    classpath = files()
-    source = files()
-  }
-}
-
-apply plugin: 'checkstyle'
-
-repositories {
-  mavenCentral()
-}
-
-checkstyle {
-  toolVersion = checkstyleVersion
-  configFile = rootProject.file('config/checkstyle/checkstyle.xml')
-}
-
-tasks.register('checkstyleChanged', Checkstyle) {
-  description = 'Run Checkstyle on Java files modified in git'
-  group = 'verification'
-  classpath = files()
-
-  def gitStatus = ['git', 'diff', '--name-only', '--diff-filter=ACMR']
-      .execute(null, rootProject.projectDir)
-  def gitCached = ['git', 'diff', '--cached', '--name-only',
-      '--diff-filter=ACMR']
-      .execute(null, rootProject.projectDir)
-  def changedFiles = (gitStatus.text.trim() + '\n'
-      + gitCached.text.trim())
-      .split('\n')
-      .collect { it.trim() }
-      .findAll { it.endsWith('.java') }
-      .toUnique()
-      .collect { rootProject.file(it) }
-  source = changedFiles
-}
-
-tasks.register('checkstyleFiles', Checkstyle) {
-  description = 'Run Checkstyle on specific files. ' +
-      'Usage: ./gradlew checkstyleFiles -Pfiles=file1.java,file2.java'
-  group = 'verification'
-  classpath = files()
-  def filesProp = project.findProperty('files') ?: ''
-  def fileList = filesProp.split(',')
-      .collect { it.trim() }
-      .findAll { it }
-      .collect { rootProject.file(it) }
-  source = fileList
-  doFirst {
-    if (fileList.isEmpty()) {
-      throw new GradleException(
-          'No files specified. Use -Pfiles=file1.java,file2.java')
-    }
-  }
 }
 
 subprojects {

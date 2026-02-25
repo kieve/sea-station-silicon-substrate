@@ -1,17 +1,17 @@
 package ca.kieve.ssss.context;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import com.badlogic.gdx.graphics.Color;
-
 import ca.kieve.ssss.component.Socket;
 import ca.kieve.ssss.component.Solid;
 import ca.kieve.ssss.ui.TileHighlight;
 import ca.kieve.ssss.ui.TileHighlightProvider;
 import ca.kieve.ssss.util.Vec3i;
+
+import com.badlogic.gdx.graphics.Color;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class EjectContext implements TileHighlightProvider {
     private static final Color VALID_COLOR = Color.GREEN;

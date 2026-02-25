@@ -1,5 +1,7 @@
 package ca.kieve.ssss.editor.component;
 
+import static ca.kieve.ssss.editor.util.CssUtil.inline;
+
 import ca.kieve.ssss.editor.ui.AppIcon;
 import ca.kieve.ssss.editor.ui.WindowsAeroSnap;
 import ca.kieve.ssss.editor.ui.fx.EditorButton;
@@ -8,6 +10,7 @@ import ca.kieve.ssss.editor.ui.fx.EditorMenuButton;
 import ca.kieve.ssss.editor.ui.fx.EditorSplitMenuButton;
 import ca.kieve.ssss.editor.ui.fx.EditorToggleButton;
 
+import java.util.function.BooleanSupplier;
 import javafx.animation.PauseTransition;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -36,10 +39,6 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-
-import java.util.function.BooleanSupplier;
-
-import static ca.kieve.ssss.editor.util.CssUtil.inline;
 
 /**
  * Unified title bar combining menu, tab toggles, and window

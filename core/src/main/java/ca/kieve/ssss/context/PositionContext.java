@@ -2,13 +2,13 @@ package ca.kieve.ssss.context;
 
 import static ca.kieve.ssss.util.Vec3i.ZERO;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import ca.kieve.ssss.util.Vec3i;
 
 import dev.dominion.ecs.api.Entity;
 
-import ca.kieve.ssss.util.Vec3i;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class PositionContext {
     private static final int XY_SIZE = 200;

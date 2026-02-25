@@ -1,9 +1,9 @@
 package ca.kieve.ssss.component;
 
-import com.badlogic.gdx.graphics.Camera;
-
 import ca.kieve.ssss.annotations.EditorIgnore;
 import ca.kieve.ssss.util.Vec3i;
+
+import com.badlogic.gdx.graphics.Camera;
 
 public class CameraComp implements Component {
     @EditorIgnore

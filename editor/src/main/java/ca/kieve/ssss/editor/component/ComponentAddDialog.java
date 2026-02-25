@@ -4,15 +4,14 @@ import ca.kieve.ssss.content.ComponentTypeDeserializer;
 import ca.kieve.ssss.editor.ui.fx.EditorLabel;
 import ca.kieve.ssss.editor.util.DialogUtil;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import javafx.geometry.Insets;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.layout.GridPane;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 
 public class ComponentAddDialog
         extends Dialog<ComponentAddDialog.Result> {

@@ -1,11 +1,11 @@
 package ca.kieve.ssss.component;
 
-import java.util.Objects;
+import ca.kieve.ssss.context.GameContext;
+import ca.kieve.ssss.util.Vec3i;
 
 import dev.dominion.ecs.api.Entity;
 
-import ca.kieve.ssss.context.GameContext;
-import ca.kieve.ssss.util.Vec3i;
+import java.util.Objects;
 
 public class Position implements Component {
     private Vec3i m_position;

@@ -1,5 +1,7 @@
 package ca.kieve.ssss.editor.component;
 
+import static ca.kieve.ssss.editor.util.CssUtil.inline;
+
 import ca.kieve.ssss.editor.ui.fx.EditorToggleButton;
 
 import javafx.beans.property.ObjectProperty;
@@ -12,8 +14,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
-
-import static ca.kieve.ssss.editor.util.CssUtil.inline;
 
 public class EditorToolBar extends VBox {
     public enum Tool {

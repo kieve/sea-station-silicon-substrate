@@ -1,7 +1,5 @@
 package ca.kieve.ssss.system;
 
-import dev.dominion.ecs.api.Entity;
-
 import ca.kieve.ssss.component.Health;
 import ca.kieve.ssss.component.Hidden;
 import ca.kieve.ssss.component.Player;
@@ -18,6 +16,8 @@ import ca.kieve.ssss.context.PositionContext;
 import ca.kieve.ssss.event.EjectEvent;
 import ca.kieve.ssss.event.SocketEvent;
 import ca.kieve.ssss.util.Vec3i;
+
+import dev.dominion.ecs.api.Entity;
 
 /**
  * Handles the Socket mechanic where the player (a "microchip") can swap control

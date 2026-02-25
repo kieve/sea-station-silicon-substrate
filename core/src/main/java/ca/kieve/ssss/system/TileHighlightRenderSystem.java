@@ -1,13 +1,13 @@
 package ca.kieve.ssss.system;
 
-import java.util.List;
+import ca.kieve.ssss.context.GameContext;
+import ca.kieve.ssss.ui.TileHighlight;
+import ca.kieve.ssss.ui.TileHighlightProvider;
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
-import ca.kieve.ssss.context.GameContext;
-import ca.kieve.ssss.ui.TileHighlight;
-import ca.kieve.ssss.ui.TileHighlightProvider;
+import java.util.List;
 
 public class TileHighlightRenderSystem extends System {
     private static final float CORNER_LENGTH = 0.25f;

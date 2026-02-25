@@ -12,6 +12,11 @@ import static ca.kieve.ssss.input.InputAction.RIGHT;
 import static ca.kieve.ssss.input.InputAction.UP;
 import static ca.kieve.ssss.input.InputAction.WAIT;
 
+import ca.kieve.ssss.input.InputAction;
+import ca.kieve.ssss.input.KeyState;
+
+import com.badlogic.gdx.Input.Keys;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -20,11 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import com.badlogic.gdx.Input.Keys;
-
-import ca.kieve.ssss.input.InputAction;
-import ca.kieve.ssss.input.KeyState;
 
 public class InputContext {
     private static final Set<InputAction> DIRECTIONS = EnumSet.of(UP, DOWN, LEFT, RIGHT);

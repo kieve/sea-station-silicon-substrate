@@ -1,10 +1,14 @@
 package ca.kieve.ssss.editor.component;
 
+import static ca.kieve.ssss.editor.util.CssUtil.inline;
+
 import ca.kieve.ssss.editor.model.EditorEntity;
 import ca.kieve.ssss.editor.model.EditorMapModel;
 import ca.kieve.ssss.editor.ui.fx.EditorButton;
 import ca.kieve.ssss.editor.ui.fx.EditorLabel;
 
+import java.util.List;
+import java.util.function.Consumer;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -15,11 +19,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
-
-import java.util.List;
-import java.util.function.Consumer;
-
-import static ca.kieve.ssss.editor.util.CssUtil.inline;
 
 public class EntityPanel extends VBox {
     private static final int PREF_WIDTH = 200;

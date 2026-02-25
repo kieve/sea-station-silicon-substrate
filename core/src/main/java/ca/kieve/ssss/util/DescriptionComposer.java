@@ -1,13 +1,13 @@
 package ca.kieve.ssss.util;
 
-import dev.dominion.ecs.api.Entity;
-
 import ca.kieve.ssss.component.Descriptor;
 import ca.kieve.ssss.component.Health;
 import ca.kieve.ssss.component.Lockable;
 import ca.kieve.ssss.component.Material;
 import ca.kieve.ssss.component.Openable;
 import ca.kieve.ssss.component.Socket;
+
+import dev.dominion.ecs.api.Entity;
 
 public class DescriptionComposer {
     private DescriptionComposer() {

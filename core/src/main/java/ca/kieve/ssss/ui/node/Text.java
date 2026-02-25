@@ -2,9 +2,6 @@ package ca.kieve.ssss.ui.node;
 
 import static ca.kieve.ssss.repository.FontRepo.UI_UBUNTU_24;
 
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-
 import ca.kieve.ssss.component.Health;
 import ca.kieve.ssss.component.Player;
 import ca.kieve.ssss.component.Position;
@@ -13,6 +10,9 @@ import ca.kieve.ssss.component.SocketPlug;
 import ca.kieve.ssss.repository.FontRepo;
 import ca.kieve.ssss.ui.core.UiNode;
 import ca.kieve.ssss.ui.core.UiRenderContext;
+
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
 public class Text extends UiNode {
     private String m_text;

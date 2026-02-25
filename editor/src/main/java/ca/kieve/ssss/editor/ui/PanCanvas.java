@@ -1,5 +1,7 @@
 package ca.kieve.ssss.editor.ui;
 
+import ca.kieve.ssss.editor.EditorTheme;
+
 import java.util.EnumSet;
 import java.util.Set;
 import javafx.animation.AnimationTimer;
@@ -13,8 +15,6 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-
-import ca.kieve.ssss.editor.EditorTheme;
 
 /**
  * A reusable pannable canvas viewport. Contains an auto-sizing Canvas with

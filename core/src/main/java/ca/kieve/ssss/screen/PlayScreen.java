@@ -1,7 +1,5 @@
 package ca.kieve.ssss.screen;
 
-import com.badlogic.gdx.Gdx;
-
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.ui.core.UiScreen;
 import ca.kieve.ssss.ui.core.UiSize;
@@ -14,6 +12,8 @@ import ca.kieve.ssss.ui.node.InteractPanel;
 import ca.kieve.ssss.ui.node.LogPanel;
 import ca.kieve.ssss.ui.node.Text;
 import ca.kieve.ssss.ui.widget.GameWindow;
+
+import com.badlogic.gdx.Gdx;
 
 public class PlayScreen implements UiScreen {
     private final UiWindow m_mainUiWindow;

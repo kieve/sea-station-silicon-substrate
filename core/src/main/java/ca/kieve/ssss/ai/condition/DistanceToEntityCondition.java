@@ -1,12 +1,12 @@
 package ca.kieve.ssss.ai.condition;
 
-import java.util.Map;
-
-import dev.dominion.ecs.api.Entity;
-
 import ca.kieve.ssss.ai.behavior.TargetType;
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.util.Vec3i;
+
+import dev.dominion.ecs.api.Entity;
+
+import java.util.Map;
 
 /**
  * Condition that checks Manhattan distance to a target entity.

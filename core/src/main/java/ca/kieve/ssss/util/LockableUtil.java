@@ -1,13 +1,13 @@
 package ca.kieve.ssss.util;
 
-import dev.dominion.ecs.api.Entity;
-
 import ca.kieve.ssss.component.Descriptor;
 import ca.kieve.ssss.component.Inventory;
 import ca.kieve.ssss.component.LockId;
 import ca.kieve.ssss.component.Lockable;
 import ca.kieve.ssss.component.Openable;
 import ca.kieve.ssss.context.GameContext;
+
+import dev.dominion.ecs.api.Entity;
 
 public final class LockableUtil {
     private LockableUtil() {}

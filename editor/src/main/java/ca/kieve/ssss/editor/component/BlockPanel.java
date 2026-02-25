@@ -1,5 +1,7 @@
 package ca.kieve.ssss.editor.component;
 
+import static ca.kieve.ssss.editor.util.CssUtil.inline;
+
 import ca.kieve.ssss.content.MapBlockDefinition;
 import ca.kieve.ssss.editor.BlockColorResolver;
 import ca.kieve.ssss.editor.BlockGlyphResolver;
@@ -9,6 +11,9 @@ import ca.kieve.ssss.editor.ui.fx.EditorButton;
 import ca.kieve.ssss.editor.ui.fx.EditorLabel;
 import ca.kieve.ssss.editor.util.DialogUtil;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
@@ -21,12 +26,6 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
-
-import static ca.kieve.ssss.editor.util.CssUtil.inline;
 
 public class BlockPanel extends VBox {
     private static final String STYLE_BLOCK_PANEL =

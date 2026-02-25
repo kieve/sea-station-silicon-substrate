@@ -1,11 +1,5 @@
 package ca.kieve.ssss.system.ai;
 
-import java.util.Comparator;
-import java.util.List;
-
-import dev.dominion.ecs.api.Dominion;
-import dev.dominion.ecs.api.Entity;
-
 import ca.kieve.ssss.ai.StateEvaluator;
 import ca.kieve.ssss.ai.behavior.AiController;
 import ca.kieve.ssss.ai.behavior.StateDefinition;
@@ -17,6 +11,12 @@ import ca.kieve.ssss.component.Speed;
 import ca.kieve.ssss.context.AiControllerContext;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.system.System;
+
+import dev.dominion.ecs.api.Dominion;
+import dev.dominion.ecs.api.Entity;
+
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * AI system that evaluates state definitions and executes states.

@@ -1,5 +1,11 @@
 package ca.kieve.ssss.editor.component;
 
+import ca.kieve.ssss.editor.BlockColorResolver;
+import ca.kieve.ssss.editor.BlockGlyphResolver;
+import ca.kieve.ssss.editor.EditorContext;
+import ca.kieve.ssss.editor.EditorTheme;
+import ca.kieve.ssss.editor.model.SparseGrid;
+
 import java.util.List;
 import java.util.Map;
 import javafx.geometry.VPos;
@@ -7,12 +13,6 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
-
-import ca.kieve.ssss.editor.BlockColorResolver;
-import ca.kieve.ssss.editor.BlockGlyphResolver;
-import ca.kieve.ssss.editor.EditorContext;
-import ca.kieve.ssss.editor.EditorTheme;
-import ca.kieve.ssss.editor.model.SparseGrid;
 
 /**
  * Game-specific map drawing logic. Renders a SparseGrid

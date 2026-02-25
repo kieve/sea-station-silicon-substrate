@@ -1,8 +1,8 @@
 package ca.kieve.ssss.component;
 
-import dev.dominion.ecs.api.Entity;
-
 import ca.kieve.ssss.annotations.EditorIgnore;
+
+import dev.dominion.ecs.api.Entity;
 
 /**
  * Component that tracks the last entity to attack this entity.

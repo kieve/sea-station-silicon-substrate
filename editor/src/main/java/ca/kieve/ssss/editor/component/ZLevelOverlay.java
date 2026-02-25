@@ -1,19 +1,18 @@
 package ca.kieve.ssss.editor.component;
 
+import static ca.kieve.ssss.editor.util.CssUtil.inline;
+
 import ca.kieve.ssss.editor.EditorTheme;
 import ca.kieve.ssss.editor.ui.fx.EditorButton;
 import ca.kieve.ssss.editor.ui.fx.EditorLabel;
 
+import java.util.List;
+import java.util.function.Consumer;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.ComboBox;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-
-import java.util.List;
-import java.util.function.Consumer;
-
-import static ca.kieve.ssss.editor.util.CssUtil.inline;
 
 public class ZLevelOverlay extends HBox {
     private static final int SPACING = 4;

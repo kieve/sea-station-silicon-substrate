@@ -1,10 +1,10 @@
 package ca.kieve.ssss.ai.state;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import ca.kieve.ssss.ai.condition.data.ConditionData;
 import ca.kieve.ssss.content.YamlInitializable;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Abstract base class for AI states.

@@ -1,5 +1,7 @@
 package ca.kieve.ssss.editor;
 
+import static ca.kieve.ssss.editor.util.CssUtil.inline;
+
 import ca.kieve.ssss.content.MapDefinition;
 import ca.kieve.ssss.content.SystemConfig;
 import ca.kieve.ssss.editor.component.EditorTitleBar;
@@ -13,6 +15,14 @@ import ca.kieve.ssss.editor.util.DialogUtil;
 import ca.kieve.ssss.editor.util.GameLauncher;
 
 import atlantafx.base.theme.PrimerDark;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -29,16 +39,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import static ca.kieve.ssss.editor.util.CssUtil.inline;
 
 public class EditorFxApp extends Application {
     private static final KeyCodeCombination NEW_COMBO =

@@ -1,7 +1,5 @@
 package ca.kieve.ssss.util;
 
-import dev.dominion.ecs.api.Entity;
-
 import ca.kieve.ssss.component.Attackable;
 import ca.kieve.ssss.component.Examinable;
 import ca.kieve.ssss.component.Health;
@@ -15,6 +13,8 @@ import ca.kieve.ssss.event.Event;
 import ca.kieve.ssss.event.ExamineEvent;
 import ca.kieve.ssss.event.OpenEvent;
 import ca.kieve.ssss.event.SocketEvent;
+
+import dev.dominion.ecs.api.Entity;
 
 /**
  * Resolves which interaction should occur when bumping into an entity.

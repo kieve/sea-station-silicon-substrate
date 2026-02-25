@@ -1,11 +1,11 @@
 package ca.kieve.ssss.ui.layout;
 
-import java.util.Objects;
-import java.util.stream.Collectors;
-
 import ca.kieve.ssss.ui.core.UiNode;
 import ca.kieve.ssss.ui.core.UiPosition;
 import ca.kieve.ssss.ui.core.UiSize;
+
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class HorizontalLayout extends UiLayout {
     public static class LayoutParams implements UiLayoutParams {

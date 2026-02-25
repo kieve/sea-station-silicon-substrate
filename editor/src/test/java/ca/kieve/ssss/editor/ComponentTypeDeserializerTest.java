@@ -2,12 +2,6 @@ package ca.kieve.ssss.editor;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.junit.jupiter.api.Test;
-
 import ca.kieve.ssss.ai.behavior.AiController;
 import ca.kieve.ssss.component.Component;
 import ca.kieve.ssss.component.Health;
@@ -15,6 +9,12 @@ import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.component.Speed;
 import ca.kieve.ssss.content.ComponentTypeDeserializer;
 import ca.kieve.ssss.util.ClasspathUtil;
+
+import org.junit.jupiter.api.Test;
+
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 class ComponentTypeDeserializerTest {
     @Test

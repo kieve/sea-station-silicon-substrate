@@ -1,8 +1,8 @@
 package ca.kieve.ssss.event;
 
-import dev.dominion.ecs.api.Entity;
-
 import ca.kieve.ssss.component.Descriptor;
+
+import dev.dominion.ecs.api.Entity;
 
 public record Interaction(Verb verb, Entity entity) {
     public enum Verb {

@@ -1,5 +1,10 @@
 package ca.kieve.ssss.ui.widget;
 
+import ca.kieve.ssss.context.GameContext;
+import ca.kieve.ssss.ui.core.UiRenderContext;
+import ca.kieve.ssss.ui.core.UiWindow;
+import ca.kieve.ssss.util.TickStage;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -7,11 +12,6 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-
-import ca.kieve.ssss.context.GameContext;
-import ca.kieve.ssss.ui.core.UiRenderContext;
-import ca.kieve.ssss.ui.core.UiWindow;
-import ca.kieve.ssss.util.TickStage;
 
 public class GameWindow extends UiWindow {
     public static final int TILE_SIZE = 32;

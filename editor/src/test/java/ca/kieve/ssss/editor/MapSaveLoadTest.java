@@ -3,20 +3,20 @@ package ca.kieve.ssss.editor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import ca.kieve.ssss.content.MapBlockDefinition;
+import ca.kieve.ssss.content.MapDefinition;
+import ca.kieve.ssss.editor.model.EditorEntity;
+import ca.kieve.ssss.editor.model.EditorMapModel;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
-
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-
-import ca.kieve.ssss.content.MapBlockDefinition;
-import ca.kieve.ssss.content.MapDefinition;
-import ca.kieve.ssss.editor.model.EditorEntity;
-import ca.kieve.ssss.editor.model.EditorMapModel;
 
 class MapSaveLoadTest {
     @Test

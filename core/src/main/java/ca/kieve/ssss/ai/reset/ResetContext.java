@@ -1,8 +1,8 @@
 package ca.kieve.ssss.ai.reset;
 
-import dev.dominion.ecs.api.Entity;
-
 import ca.kieve.ssss.context.GameContext;
+
+import dev.dominion.ecs.api.Entity;
 
 /**
  * Context provided to reset conditions for evaluation.

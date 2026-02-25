@@ -1,15 +1,15 @@
 package ca.kieve.ssss.ai.behavior;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import ca.kieve.ssss.ai.state.AiState;
 import ca.kieve.ssss.ai.state.RandomBranchData;
 import ca.kieve.ssss.annotations.EditorIgnore;
 import ca.kieve.ssss.annotations.EditorRef;
 import ca.kieve.ssss.component.Component;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Runtime state for AI behavior. Holds instantiated states.

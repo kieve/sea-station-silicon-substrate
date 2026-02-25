@@ -1,12 +1,12 @@
 package ca.kieve.ssss.util;
 
-import dev.dominion.ecs.api.Dominion;
-import dev.dominion.ecs.api.Entity;
-import dev.dominion.ecs.api.Results.With1;
-
 import ca.kieve.ssss.component.Player;
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.component.SocketPlug;
+
+import dev.dominion.ecs.api.Dominion;
+import dev.dominion.ecs.api.Entity;
+import dev.dominion.ecs.api.Results.With1;
 
 public final class PlayerUtil {
     private PlayerUtil() {}

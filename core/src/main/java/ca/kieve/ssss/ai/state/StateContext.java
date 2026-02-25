@@ -1,9 +1,9 @@
 package ca.kieve.ssss.ai.state;
 
-import dev.dominion.ecs.api.Entity;
-
 import ca.kieve.ssss.ai.behavior.AiController;
 import ca.kieve.ssss.context.GameContext;
+
+import dev.dominion.ecs.api.Entity;
 
 /**
  * Context provided to states during execution.

@@ -1,10 +1,10 @@
 package ca.kieve.ssss.input;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.InputAdapter;
-
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.context.InputContext;
+
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputAdapter;
 
 public class InputActionController extends InputAdapter {
     private final InputContext m_inputContext;

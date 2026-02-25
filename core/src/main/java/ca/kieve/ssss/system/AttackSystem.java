@@ -1,8 +1,5 @@
 package ca.kieve.ssss.system;
 
-import com.badlogic.gdx.graphics.Color;
-import dev.dominion.ecs.api.Entity;
-
 import ca.kieve.ssss.component.ColorComp;
 import ca.kieve.ssss.component.Damage;
 import ca.kieve.ssss.component.Descriptor;
@@ -17,6 +14,9 @@ import ca.kieve.ssss.component.Socketable;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.event.AttackEvent;
 import ca.kieve.ssss.event.EjectEvent;
+
+import com.badlogic.gdx.graphics.Color;
+import dev.dominion.ecs.api.Entity;
 
 public class AttackSystem extends System {
     public AttackSystem(GameContext gameContext) {

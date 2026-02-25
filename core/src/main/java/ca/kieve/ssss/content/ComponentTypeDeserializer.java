@@ -1,17 +1,17 @@
 package ca.kieve.ssss.content;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.TreeSet;
+import ca.kieve.ssss.component.Component;
+import ca.kieve.ssss.util.ClasspathUtil;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 
-import ca.kieve.ssss.component.Component;
-import ca.kieve.ssss.util.ClasspathUtil;
+import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.TreeSet;
 
 public class ComponentTypeDeserializer
         extends JsonDeserializer<Class<?>> {

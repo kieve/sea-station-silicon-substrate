@@ -1,8 +1,8 @@
 package ca.kieve.ssss.ai.condition;
 
-import java.util.Map;
-
 import ca.kieve.ssss.component.LastAttacker;
+
+import java.util.Map;
 
 /**
  * Condition that returns true if the entity was attacked (has LastAttacker component).

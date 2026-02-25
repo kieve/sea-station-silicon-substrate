@@ -6,6 +6,8 @@ import ca.kieve.ssss.editor.ui.fx.EditorButton;
 import ca.kieve.ssss.editor.ui.fx.EditorLabel;
 import ca.kieve.ssss.editor.util.DialogUtil;
 
+import java.io.IOException;
+import java.util.List;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -14,9 +16,6 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-
-import java.io.IOException;
-import java.util.List;
 
 public class SystemConfigPanel extends BorderPane {
     private static final int TOOLBAR_SPACING = 8;

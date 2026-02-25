@@ -1,11 +1,11 @@
 package ca.kieve.ssss.system;
 
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-
 import ca.kieve.ssss.component.DebugRect;
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.context.GameContext;
+
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
 /**
  * Renders debug rectangles for entities with DebugRect component.

@@ -1,8 +1,8 @@
 package ca.kieve.ssss.component;
 
-import dev.dominion.ecs.api.Entity;
-
 import ca.kieve.ssss.annotations.EditorRef;
+
+import dev.dominion.ecs.api.Entity;
 
 public record Material(
     @EditorRef(

@@ -9,14 +9,14 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
-import org.junit.jupiter.api.Test;
-
 import ca.kieve.ssss.ui.TestUiNode;
 import ca.kieve.ssss.ui.core.UiNode;
 import ca.kieve.ssss.ui.core.UiPosition;
 import ca.kieve.ssss.ui.core.UiRenderContext;
 import ca.kieve.ssss.ui.core.UiSize;
 import ca.kieve.ssss.ui.core.UiWindow;
+
+import org.junit.jupiter.api.Test;
 
 class UiLayoutTest {
     private static class RenderCountingUiNode extends UiNode {

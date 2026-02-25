@@ -1,13 +1,12 @@
 package ca.kieve.ssss.editor.component;
 
+import static ca.kieve.ssss.editor.util.CssUtil.inline;
+
 import ca.kieve.ssss.content.ComponentDefinition;
 import ca.kieve.ssss.editor.ui.fx.EditorLabel;
 
-import javafx.scene.layout.VBox;
-
 import java.util.Map;
-
-import static ca.kieve.ssss.editor.util.CssUtil.inline;
+import javafx.scene.layout.VBox;
 
 public class ComponentBox extends VBox {
     private static final String STYLE_COMPONENT_BOX =

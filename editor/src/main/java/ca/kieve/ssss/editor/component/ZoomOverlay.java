@@ -1,5 +1,7 @@
 package ca.kieve.ssss.editor.component;
 
+import static ca.kieve.ssss.editor.util.CssUtil.inline;
+
 import ca.kieve.ssss.editor.EditorTheme;
 import ca.kieve.ssss.editor.ui.fx.EditorButton;
 import ca.kieve.ssss.editor.ui.fx.EditorLabel;
@@ -8,8 +10,6 @@ import javafx.beans.property.DoubleProperty;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
-
-import static ca.kieve.ssss.editor.util.CssUtil.inline;
 
 public class ZoomOverlay extends HBox {
     private static final String STYLE_ZOOM_RESET_BUTTON =

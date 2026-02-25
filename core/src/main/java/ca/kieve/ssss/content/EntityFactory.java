@@ -1,15 +1,15 @@
 package ca.kieve.ssss.content;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.badlogic.gdx.graphics.Color;
-import dev.dominion.ecs.api.Entity;
-
 import ca.kieve.ssss.component.ColorComp;
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.util.Vec3i;
+
+import com.badlogic.gdx.graphics.Color;
+import dev.dominion.ecs.api.Entity;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class EntityFactory {
     private final ContentRegistry m_registry;

@@ -47,20 +47,6 @@ Coverage reports are generated at `core/build/reports/jacoco/test/html/index.htm
 ```
 Output is at `lwjgl3/build/libs/`
 
-**Run Checkstyle on specific files:**
-```bash
-./gradlew checkstyleFiles -Pfiles=path/to/File1.java,path/to/File2.java
-```
-
-**Run Checkstyle on all git-modified files:**
-```bash
-./gradlew checkstyleChanged
-```
-
-### Checkstyle Workflow
-
-After editing Java files, run Checkstyle against the files you changed to verify they comply with the project's style rules. Use `checkstyleFiles` with a comma-separated list of file paths, or `checkstyleChanged` to automatically check all files flagged as modified by `git status`. Fix **all** violations in every file you touched, even pre-existing ones — if we're already editing a file, we should leave it fully compliant. Fix any violations before considering the task complete. These tasks work for files in any module (core, editor, lwjgl3).
-
 ## Architecture
 
 ### ECS (Entity Component System)

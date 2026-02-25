@@ -1,12 +1,12 @@
 package ca.kieve.ssss.ui.node;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import ca.kieve.ssss.component.Descriptor;
 import ca.kieve.ssss.context.ExamineContext;
 import ca.kieve.ssss.system.ExamineSystem.ExamineItem;
 import ca.kieve.ssss.ui.core.UiRenderContext;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * UI panel that displays names of entities under the examine crosshair.

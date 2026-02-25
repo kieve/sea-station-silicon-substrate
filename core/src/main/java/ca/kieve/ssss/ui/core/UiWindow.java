@@ -1,13 +1,13 @@
 package ca.kieve.ssss.ui.core;
 
+import ca.kieve.ssss.context.GameContext;
+import ca.kieve.ssss.ui.layout.UiLayout;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-
-import ca.kieve.ssss.context.GameContext;
-import ca.kieve.ssss.ui.layout.UiLayout;
 
 public class UiWindow extends UiLayout {
     protected final ScreenViewport m_viewport;

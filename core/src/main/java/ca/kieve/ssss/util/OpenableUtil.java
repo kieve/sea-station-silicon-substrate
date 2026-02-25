@@ -1,8 +1,5 @@
 package ca.kieve.ssss.util;
 
-import com.badlogic.gdx.graphics.Color;
-import dev.dominion.ecs.api.Entity;
-
 import ca.kieve.ssss.component.ColorComp;
 import ca.kieve.ssss.component.Descriptor;
 import ca.kieve.ssss.component.Item;
@@ -10,6 +7,9 @@ import ca.kieve.ssss.component.Openable;
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.component.TileGlyph;
 import ca.kieve.ssss.context.GameContext;
+
+import com.badlogic.gdx.graphics.Color;
+import dev.dominion.ecs.api.Entity;
 
 public final class OpenableUtil {
     private OpenableUtil() {}

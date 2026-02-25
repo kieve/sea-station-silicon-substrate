@@ -1,17 +1,17 @@
 package ca.kieve.ssss.context;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import dev.dominion.ecs.api.Dominion;
-import dev.dominion.ecs.api.Entity;
-
 import ca.kieve.ssss.ai.behavior.ConditionDefinition;
 import ca.kieve.ssss.ai.behavior.TargetType;
 import ca.kieve.ssss.ai.condition.Condition;
 import ca.kieve.ssss.component.LastAttacker;
 import ca.kieve.ssss.component.PlayerController;
 import ca.kieve.ssss.content.ReflectionFactory;
+
+import dev.dominion.ecs.api.Dominion;
+import dev.dominion.ecs.api.Entity;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Context for AI controller state. Caches conditions since they are defined at

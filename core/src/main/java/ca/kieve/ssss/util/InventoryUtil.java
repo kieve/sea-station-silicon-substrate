@@ -1,11 +1,11 @@
 package ca.kieve.ssss.util;
 
-import dev.dominion.ecs.api.Entity;
-
 import ca.kieve.ssss.component.Descriptor;
 import ca.kieve.ssss.component.Inventory;
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.context.GameContext;
+
+import dev.dominion.ecs.api.Entity;
 
 public final class InventoryUtil {
     private InventoryUtil() {}

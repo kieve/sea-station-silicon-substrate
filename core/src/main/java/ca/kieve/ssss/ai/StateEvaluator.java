@@ -1,9 +1,5 @@
 package ca.kieve.ssss.ai;
 
-import java.util.List;
-
-import dev.dominion.ecs.api.Entity;
-
 import ca.kieve.ssss.ai.behavior.AiController;
 import ca.kieve.ssss.ai.behavior.BehaviorFactory;
 import ca.kieve.ssss.ai.behavior.ConditionDefinition;
@@ -14,6 +10,10 @@ import ca.kieve.ssss.ai.state.AiState;
 import ca.kieve.ssss.context.AiControllerContext;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.util.PerfClock;
+
+import dev.dominion.ecs.api.Entity;
+
+import java.util.List;
 
 /**
  * Provides shared state evaluation logic.
