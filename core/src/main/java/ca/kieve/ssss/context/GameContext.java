@@ -1,18 +1,18 @@
 package ca.kieve.ssss.context;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
-import com.badlogic.gdx.InputMultiplexer;
-import dev.dominion.ecs.api.Dominion;
-
 import ca.kieve.ssss.GameEngine;
 import ca.kieve.ssss.content.BlockTypeFactory;
 import ca.kieve.ssss.content.ContentRegistry;
 import ca.kieve.ssss.content.EntityFactory;
 import ca.kieve.ssss.system.System;
 import ca.kieve.ssss.util.PerfClock;
+
+import com.badlogic.gdx.InputMultiplexer;
+import dev.dominion.ecs.api.Dominion;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public record GameContext(
     Random random,

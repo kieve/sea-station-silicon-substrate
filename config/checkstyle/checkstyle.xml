@@ -99,7 +99,7 @@
       <property name="basicOffset" value="4"/>
       <property name="caseIndent" value="4"/>
       <property name="throwsIndent" value="8"/>
-      <property name="lineWrappingIndentation" value="8"/>
+      <property name="lineWrappingIndentation" value="4"/>
       <property name="arrayInitIndent" value="4"/>
     </module>
 
@@ -199,7 +199,7 @@
 
     <!-- Flag hidden fields (parameter/local same name as field) -->
     <module name="HiddenField">
-      <property name="ignoreConstructorParameter" value="false"/>
+      <property name="ignoreConstructorParameter" value="true"/>
       <property name="ignoreSetter" value="false"/>
     </module>
 
@@ -249,11 +249,11 @@
     <!-- One top-level class per file -->
     <module name="OneTopLevelClass"/>
 
-    <!-- Flag unnecessary 'this.' qualifier (fields and methods) -->
+    <!-- Flag unnecessary 'this.' qualifier on m_ fields -->
     <module name="RegexpSinglelineJava">
-      <property name="format" value="this\."/>
+      <property name="format" value="this\.m_"/>
       <property name="message"
-          value="Avoid unnecessary 'this.' qualifier. Use m_ prefix for fields."/>
+          value="Avoid unnecessary 'this.' qualifier. The m_ prefix already distinguishes fields."/>
       <property name="ignoreComments" value="true"/>
     </module>
 

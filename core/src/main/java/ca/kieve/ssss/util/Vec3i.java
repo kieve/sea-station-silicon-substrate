@@ -1,8 +1,8 @@
 package ca.kieve.ssss.util;
 
-import java.util.Objects;
-
 import ca.kieve.ssss.annotations.EditorDecompose;
+
+import java.util.Objects;
 
 @EditorDecompose
 public class Vec3i {
@@ -80,8 +80,8 @@ public class Vec3i {
     }
 
     /** Returns true if all components are greater than or equal to the given values. */
-    public boolean gte(int x, int y, int z) {
-        return this.x >= x && this.y >= y && this.z >= z;
+    public boolean gte(int oX, int oY, int oZ) {
+        return x >= oX && y >= oY && z >= oZ;
     }
 
     /** Returns true if all components are greater than the other vector's. */
@@ -90,8 +90,8 @@ public class Vec3i {
     }
 
     /** Returns true if all components are greater than the given values. */
-    public boolean gt(int x, int y, int z) {
-        return this.x > x && this.y > y && this.z > z;
+    public boolean gt(int oX, int oY, int oZ) {
+        return x > oX && y > oY && z > oZ;
     }
 
     /** Returns true if all components are less than or equal to the other vector's. */
@@ -100,8 +100,8 @@ public class Vec3i {
     }
 
     /** Returns true if all components are less than or equal to the given values. */
-    public boolean lte(int x, int y, int z) {
-        return this.x <= x && this.y <= y && this.z <= z;
+    public boolean lte(int oX, int oY, int oZ) {
+        return x <= oX && y <= oY && z <= oZ;
     }
 
     /** Returns true if all components are less than the other vector's. */
@@ -110,8 +110,8 @@ public class Vec3i {
     }
 
     /** Returns true if all components are less than the given values. */
-    public boolean lt(int x, int y, int z) {
-        return this.x < x && this.y < y && this.z < z;
+    public boolean lt(int oX, int oY, int oZ) {
+        return x < oX && y < oY && z < oZ;
     }
 
     /** Returns the Manhattan distance to another vector (x and y only, ignores z). */
