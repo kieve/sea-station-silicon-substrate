@@ -1,12 +1,12 @@
 package ca.kieve.ssss.editor.component;
 
 import ca.kieve.ssss.editor.EditorTheme;
+import ca.kieve.ssss.editor.ui.fx.EditorButton;
+import ca.kieve.ssss.editor.ui.fx.EditorLabel;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
@@ -72,17 +72,17 @@ public class ZLevelOverlay extends HBox {
         setMaxWidth(USE_PREF_SIZE);
         setMaxHeight(USE_PREF_SIZE);
 
-        var label = new Label("Z:");
+        var label = new EditorLabel("Z:");
         m_zCombo = new ComboBox<>();
         m_zCombo.setPrefWidth(COMBO_WIDTH);
         m_zCombo.setFocusTraversable(false);
 
-        var upBtn = new Button("\u25B2");
+        var upBtn = new EditorButton("\u25B2");
         upBtn.setFocusTraversable(false);
         upBtn.getStyleClass().add(STYLE_Z_STEP_BUTTON);
         upBtn.setOnAction(e -> step(1));
 
-        var downBtn = new Button("\u25BC");
+        var downBtn = new EditorButton("\u25BC");
         downBtn.setFocusTraversable(false);
         downBtn.getStyleClass().add(STYLE_Z_STEP_BUTTON);
         downBtn.setOnAction(e -> step(-1));
@@ -103,7 +103,7 @@ public class ZLevelOverlay extends HBox {
             }
         });
 
-        var addBtn = new Button("+");
+        var addBtn = new EditorButton("+");
         addBtn.setFocusTraversable(false);
         addBtn.getStyleClass().add(STYLE_Z_ADD_BUTTON);
         addBtn.setMaxHeight(Double.MAX_VALUE);

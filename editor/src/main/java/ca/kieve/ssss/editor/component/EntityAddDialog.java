@@ -1,16 +1,17 @@
 package ca.kieve.ssss.editor.component;
 
-import java.util.List;
-import java.util.Optional;
+import ca.kieve.ssss.editor.EditorContext;
+import ca.kieve.ssss.editor.ui.fx.EditorLabel;
+import ca.kieve.ssss.editor.util.DialogUtil;
+
 import javafx.geometry.Insets;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
-import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 
-import ca.kieve.ssss.editor.EditorContext;
-import ca.kieve.ssss.editor.util.DialogUtil;
+import java.util.List;
+import java.util.Optional;
 
 public class EntityAddDialog
         extends Dialog<EntityAddDialog.Result> {
@@ -31,7 +32,7 @@ public class EntityAddDialog
         grid.setHgap(8);
         grid.setVgap(8);
         grid.setPadding(new Insets(16));
-        grid.add(new Label("Entity:"), 0, 0);
+        grid.add(new EditorLabel("Entity:"), 0, 0);
         grid.add(m_entityCombo, 1, 0);
 
         getDialogPane().setContent(grid);

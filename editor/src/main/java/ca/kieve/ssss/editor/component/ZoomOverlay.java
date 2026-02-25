@@ -1,14 +1,15 @@
 package ca.kieve.ssss.editor.component;
 
-import static ca.kieve.ssss.editor.util.CssUtil.inline;
+import ca.kieve.ssss.editor.EditorTheme;
+import ca.kieve.ssss.editor.ui.fx.EditorButton;
+import ca.kieve.ssss.editor.ui.fx.EditorLabel;
 
 import javafx.beans.property.DoubleProperty;
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 
-import ca.kieve.ssss.editor.EditorTheme;
+import static ca.kieve.ssss.editor.util.CssUtil.inline;
 
 public class ZoomOverlay extends HBox {
     private static final String STYLE_ZOOM_RESET_BUTTON =
@@ -44,11 +45,11 @@ public class ZoomOverlay extends HBox {
         setMaxWidth(USE_PREF_SIZE);
         setMaxHeight(USE_PREF_SIZE);
 
-        m_zoomLabel = new Label("100%");
+        m_zoomLabel = new EditorLabel("100%");
         m_zoomLabel.setMinWidth(40);
         m_zoomLabel.setAlignment(Pos.CENTER_RIGHT);
 
-        var resetBtn = new Button("\u21BA");
+        var resetBtn = new EditorButton("\u21BA");
         resetBtn.setFocusTraversable(false);
         resetBtn.getStyleClass().add(STYLE_ZOOM_RESET_BUTTON);
         resetBtn.setOnAction(e -> {

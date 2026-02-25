@@ -1,13 +1,14 @@
 package ca.kieve.ssss.editor.component;
 
-import static ca.kieve.ssss.editor.util.CssUtil.inline;
+import ca.kieve.ssss.editor.EditorTheme;
+import ca.kieve.ssss.editor.ui.fx.EditorCheckBox;
+import ca.kieve.ssss.editor.ui.fx.EditorLabel;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 
-import ca.kieve.ssss.editor.EditorTheme;
+import static ca.kieve.ssss.editor.util.CssUtil.inline;
 
 public class ToolOptionsPanel extends VBox {
     // language=css
@@ -23,10 +24,10 @@ public class ToolOptionsPanel extends VBox {
         setMaxWidth(USE_PREF_SIZE);
         setMaxHeight(USE_PREF_SIZE);
 
-        var header = new Label("Paint Options");
+        var header = new EditorLabel("Paint Options");
         header.setStyle("-fx-font-weight: bold;");
 
-        m_allLayersCheck = new CheckBox("All Layers");
+        m_allLayersCheck = new EditorCheckBox("All Layers");
         m_allLayersCheck.setFocusTraversable(false);
 
         getChildren().addAll(header, m_allLayersCheck);

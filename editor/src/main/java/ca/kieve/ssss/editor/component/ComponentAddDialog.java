@@ -1,17 +1,18 @@
 package ca.kieve.ssss.editor.component;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import ca.kieve.ssss.content.ComponentTypeDeserializer;
+import ca.kieve.ssss.editor.ui.fx.EditorLabel;
+import ca.kieve.ssss.editor.util.DialogUtil;
+
 import javafx.geometry.Insets;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
-import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 
-import ca.kieve.ssss.content.ComponentTypeDeserializer;
-import ca.kieve.ssss.editor.util.DialogUtil;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 public class ComponentAddDialog
         extends Dialog<ComponentAddDialog.Result> {
@@ -32,7 +33,7 @@ public class ComponentAddDialog
         grid.setHgap(8);
         grid.setVgap(8);
         grid.setPadding(new Insets(16));
-        grid.add(new Label("Component:"), 0, 0);
+        grid.add(new EditorLabel("Component:"), 0, 0);
         grid.add(m_typeCombo, 1, 0);
 
         getDialogPane().setContent(grid);

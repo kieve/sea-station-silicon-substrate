@@ -1,16 +1,18 @@
 package ca.kieve.ssss.editor.component;
 
-import static ca.kieve.ssss.editor.util.CssUtil.inline;
+import ca.kieve.ssss.editor.EditorTheme;
+import ca.kieve.ssss.editor.ui.fx.EditorLabel;
 
-import java.util.List;
-import java.util.function.Consumer;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
-import ca.kieve.ssss.editor.EditorTheme;
+import java.util.List;
+import java.util.function.Consumer;
+
+import static ca.kieve.ssss.editor.util.CssUtil.inline;
 
 public class SelectedCellOverlay extends VBox {
     public enum ItemType { BLOCK, ENTITY }
@@ -44,7 +46,7 @@ public class SelectedCellOverlay extends VBox {
         setMaxHeight(USE_PREF_SIZE);
         setSpacing(2);
 
-        m_header = new Label("No selection");
+        m_header = new EditorLabel("No selection");
         m_header.setStyle("-fx-font-weight: bold;");
 
         m_list = new ListView<>();

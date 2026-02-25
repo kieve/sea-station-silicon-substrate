@@ -10,6 +10,7 @@ import ca.kieve.ssss.editor.EditorTheme;
 import ca.kieve.ssss.editor.MapSaver;
 import ca.kieve.ssss.editor.model.EditorEntity;
 import ca.kieve.ssss.editor.model.EditorMapModel;
+import ca.kieve.ssss.editor.ui.fx.EditorButton;
 import ca.kieve.ssss.editor.ui.PanCanvas;
 import ca.kieve.ssss.editor.util.DialogUtil;
 
@@ -182,7 +183,7 @@ public class MapViewPanel extends BorderPane {
         m_componentPanel.setOnComponentOverride(
                 overrideCallback);
 
-        m_addOverrideBtn = new Button("Add Override");
+        m_addOverrideBtn = new EditorButton("Add Override");
         m_addOverrideBtn.setMaxWidth(Double.MAX_VALUE);
         m_addOverrideBtn.setVisible(false);
         m_addOverrideBtn.setManaged(false);

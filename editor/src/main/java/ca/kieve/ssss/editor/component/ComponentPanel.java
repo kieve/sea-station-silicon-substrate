@@ -1,15 +1,14 @@
 package ca.kieve.ssss.editor.component;
 
-import static ca.kieve.ssss.editor.util.CssUtil.inline;
+import ca.kieve.ssss.content.ComponentDefinition;
+import ca.kieve.ssss.content.ContentRegistry;
+import ca.kieve.ssss.content.EntityDefinition;
+import ca.kieve.ssss.editor.EditorContext;
+import ca.kieve.ssss.editor.component.ComponentIntrospector.FieldInfo;
+import ca.kieve.ssss.editor.ui.CompactTreeTable;
+import ca.kieve.ssss.editor.ui.fx.EditorButton;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.UnaryOperator;
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
@@ -22,12 +21,14 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 
-import ca.kieve.ssss.content.ComponentDefinition;
-import ca.kieve.ssss.content.ContentRegistry;
-import ca.kieve.ssss.content.EntityDefinition;
-import ca.kieve.ssss.editor.EditorContext;
-import ca.kieve.ssss.editor.component.ComponentIntrospector.FieldInfo;
-import ca.kieve.ssss.editor.ui.CompactTreeTable;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.UnaryOperator;
+
+import static ca.kieve.ssss.editor.util.CssUtil.inline;
 
 public class ComponentPanel
         extends CompactTreeTable<ComponentPanel.ComponentRow> {
@@ -472,12 +473,12 @@ public class ComponentPanel
 
             applyTypeFilter(m_textField, rowData.rawValue(), rowData.fieldType());
 
-            var confirmBtn = new Button("\u2713");
+            var confirmBtn = new EditorButton("\u2713");
             confirmBtn.setStyle("-fx-font-size: 9; -fx-padding: 0 3;");
             confirmBtn.setFocusTraversable(false);
             confirmBtn.setOnAction(e -> commitEdit(rowData));
 
-            var cancelBtn = new Button("\u2717");
+            var cancelBtn = new EditorButton("\u2717");
             cancelBtn.setStyle("-fx-font-size: 9; -fx-padding: 0 3;");
             cancelBtn.setFocusTraversable(false);
             // Prevent focus transfer so the blur-commit listener doesn't fire

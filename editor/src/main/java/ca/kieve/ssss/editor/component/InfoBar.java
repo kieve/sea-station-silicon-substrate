@@ -1,12 +1,14 @@
 package ca.kieve.ssss.editor.component;
 
-import static ca.kieve.ssss.editor.util.CssUtil.inline;
+import ca.kieve.ssss.editor.ui.fx.EditorLabel;
 
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+
+import static ca.kieve.ssss.editor.util.CssUtil.inline;
 
 public class InfoBar extends HBox {
     private static final String STYLE_INFO_BAR =
@@ -30,8 +32,8 @@ public class InfoBar extends HBox {
         getStyleClass().add(STYLE_INFO_BAR);
         setAlignment(Pos.CENTER_LEFT);
 
-        m_fileLabel = new Label();
-        m_dimensionsLabel = new Label();
+        m_fileLabel = new EditorLabel();
+        m_dimensionsLabel = new EditorLabel();
 
         var spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);

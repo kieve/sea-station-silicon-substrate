@@ -1,18 +1,19 @@
 package ca.kieve.ssss.editor.component;
 
-import static ca.kieve.ssss.editor.util.CssUtil.inline;
+import ca.kieve.ssss.editor.ui.fx.EditorToggleButton;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
+
+import static ca.kieve.ssss.editor.util.CssUtil.inline;
 
 public class EditorToolBar extends VBox {
     public enum Tool {
@@ -68,7 +69,7 @@ public class EditorToolBar extends VBox {
 
         var toggleGroup = new ToggleGroup();
 
-        var selectBtn = new ToggleButton();
+        var selectBtn = new EditorToggleButton();
         selectBtn.setGraphic(createSelectIcon());
         selectBtn.getStyleClass().add(STYLE_TOOL_BUTTON);
         selectBtn.setToggleGroup(toggleGroup);
@@ -81,7 +82,7 @@ public class EditorToolBar extends VBox {
             selectBtn.setSelected(true);
         });
 
-        var moveBtn = new ToggleButton();
+        var moveBtn = new EditorToggleButton();
         moveBtn.setGraphic(createMoveIcon());
         moveBtn.getStyleClass().add(STYLE_TOOL_BUTTON);
         moveBtn.setToggleGroup(toggleGroup);
@@ -93,7 +94,7 @@ public class EditorToolBar extends VBox {
             moveBtn.setSelected(true);
         });
 
-        var paintBtn = new ToggleButton();
+        var paintBtn = new EditorToggleButton();
         paintBtn.setGraphic(createPaintIcon());
         paintBtn.getStyleClass().add(STYLE_TOOL_BUTTON);
         paintBtn.setToggleGroup(toggleGroup);

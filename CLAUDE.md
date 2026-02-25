@@ -529,6 +529,7 @@ In this example, `aiAttacker` inherits from four base definitions and overrides 
     - `component/`: UI panels and rendering (MapViewPanel, MapRenderer, BlockPanel, etc.)
     - `model/`: Data models (EditorMapModel, SparseGrid)
     - `ui/`: Reusable UI widgets (PanCanvas, CompactTreeTable, etc.)
+      - `fx/`: JavaFX control subclasses with mnemonic parsing disabled (EditorLabel, EditorButton, etc.)
     - `util/`: Utilities (DialogUtil, CssUtil)
 - `lwjgl3/`: Desktop launcher (LWJGL3 backend)
 - `assets/`: Game assets (automatically indexed via `generateAssetList` task)
@@ -566,6 +567,28 @@ The flip affects:
 - `MapRenderer.visualRowToDataRow()` — converts screen row to data row
 - `MapRenderer.render()` — flips data rows for display
 - `MapRenderer.getMapOriginY()` — uses `-maxRow * CELL_SIZE` (the topmost visual row under the flip)
+
+### Mnemonic Parsing (JavaFX)
+
+JavaFX controls that extend `Labeled` have **mnemonic parsing enabled by default**. When enabled, the first underscore (`_`) in the text is consumed as a mnemonic indicator (keyboard shortcut prefix) and not displayed. This is undesirable in the editor — underscores in filenames and identifiers must display literally.
+
+**Affected JavaFX base classes** (all extend `Labeled`):
+- `Label`, `Button`, `ToggleButton`, `CheckBox`, `RadioButton`, `MenuButton`, `SplitMenuButton`, `Hyperlink`
+
+**Rule:** Never use these base classes directly in the editor. Instead, use the corresponding subclass from `ca.kieve.ssss.editor.ui.fx`, which disables mnemonic parsing in the constructor:
+
+| JavaFX Base Class | Editor Subclass |
+|---|---|
+| `Label` | `EditorLabel` |
+| `Button` | `EditorButton` |
+| `ToggleButton` | `EditorToggleButton` |
+| `CheckBox` | `EditorCheckBox` |
+| `MenuButton` | `EditorMenuButton` |
+| `SplitMenuButton` | `EditorSplitMenuButton` |
+
+If you need a `Labeled` subclass that doesn't have a wrapper yet (e.g., `RadioButton`, `Hyperlink`), create one in `ui.fx` following the same pattern before using it.
+
+**Note:** `-fx-mnemonic-parsing` is **not** a valid CSS property in JavaFX. This can only be disabled programmatically via `setMnemonicParsing(false)`, which is why subclasses are required.
 
 ## Development Notes
 

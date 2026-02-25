@@ -1,6 +1,11 @@
 package ca.kieve.ssss.editor.component;
 
 import ca.kieve.ssss.editor.ui.AppIcon;
+import ca.kieve.ssss.editor.ui.fx.EditorButton;
+import ca.kieve.ssss.editor.ui.fx.EditorLabel;
+import ca.kieve.ssss.editor.ui.fx.EditorMenuButton;
+import ca.kieve.ssss.editor.ui.fx.EditorSplitMenuButton;
+import ca.kieve.ssss.editor.ui.fx.EditorToggleButton;
 import ca.kieve.ssss.editor.ui.WindowsAeroSnap;
 
 import javafx.animation.PauseTransition;
@@ -14,8 +19,6 @@ import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
-import javafx.scene.control.Label;
-import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.SplitMenuButton;
@@ -221,7 +224,7 @@ public class EditorTitleBar extends HBox {
         saveAsItem.setOnAction(
                 e -> actions.onSaveAs().run());
 
-        var fileMenu = new MenuButton("File", null,
+        var fileMenu = new EditorMenuButton("File", null,
                 newMapItem,
                 loadMapItem,
                 new SeparatorMenuItem(),
@@ -237,20 +240,20 @@ public class EditorTitleBar extends HBox {
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
         // Right: window control buttons
-        var minBtn = new Button();
+        var minBtn = new EditorButton();
         minBtn.setGraphic(createMinimizeIcon());
         minBtn.getStyleClass().add(STYLE_WINDOW_BUTTON);
         minBtn.setOnAction(
                 e -> m_stage.setIconified(true));
         minBtn.setFocusTraversable(false);
 
-        m_maxBtn = new Button();
+        m_maxBtn = new EditorButton();
         m_maxBtn.setGraphic(createMaximizeIcon());
         m_maxBtn.getStyleClass().add(STYLE_WINDOW_BUTTON);
         m_maxBtn.setOnAction(e -> toggleMaximize());
         m_maxBtn.setFocusTraversable(false);
 
-        var closeBtn = new Button();
+        var closeBtn = new EditorButton();
         closeBtn.setGraphic(createCloseIcon());
         closeBtn.getStyleClass().addAll(
                 STYLE_WINDOW_BUTTON,
@@ -397,7 +400,7 @@ public class EditorTitleBar extends HBox {
     }
 
     private void addTabToggle(Tab tab) {
-        var btn = new ToggleButton(tab.getText());
+        var btn = new EditorToggleButton(tab.getText());
         btn.setToggleGroup(m_toggleGroup);
         btn.setUserData(tab);
         btn.getStyleClass().add(STYLE_TITLE_TAB);
@@ -410,7 +413,7 @@ public class EditorTitleBar extends HBox {
 
         // Add close button for closable tabs
         if (tab.isClosable()) {
-            var closeLabel = new Label(" \u00D7");
+            var closeLabel = new EditorLabel(" \u00D7");
             closeLabel.setStyle(
                     "-fx-text-fill: -color-fg-muted;");
             closeLabel.setOnMouseClicked(e -> {
@@ -461,7 +464,7 @@ public class EditorTitleBar extends HBox {
             Runnable onLaunchGameGradle) {
         var gradleItem =
                 new MenuItem("Launch with Gradle Build");
-        var btn = new SplitMenuButton(gradleItem);
+        var btn = new EditorSplitMenuButton(gradleItem);
         btn.setGraphic(createPlayIcon());
         btn.getStyleClass().add(STYLE_SPLIT_MENU_BTN);
         btn.setFocusTraversable(false);

@@ -1,17 +1,18 @@
 package ca.kieve.ssss.editor.component;
 
-import java.util.List;
-import java.util.Optional;
+import ca.kieve.ssss.content.MapBlockDefinition;
+import ca.kieve.ssss.editor.ui.fx.EditorLabel;
+import ca.kieve.ssss.editor.util.DialogUtil;
+
 import javafx.geometry.Insets;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
-import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 
-import ca.kieve.ssss.content.MapBlockDefinition;
-import ca.kieve.ssss.editor.util.DialogUtil;
+import java.util.List;
+import java.util.Optional;
 
 public class BlockEditDialog
         extends Dialog<BlockEditDialog.Result> {
@@ -49,9 +50,9 @@ public class BlockEditDialog
         grid.setHgap(8);
         grid.setVgap(8);
         grid.setPadding(new Insets(16));
-        grid.add(new Label("Name:"), 0, 0);
+        grid.add(new EditorLabel("Name:"), 0, 0);
         grid.add(m_nameField, 1, 0);
-        grid.add(new Label("Blueprint:"), 0, 1);
+        grid.add(new EditorLabel("Blueprint:"), 0, 1);
         grid.add(m_typeCombo, 1, 1);
 
         getDialogPane().setContent(grid);

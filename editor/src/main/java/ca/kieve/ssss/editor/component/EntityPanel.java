@@ -2,10 +2,11 @@ package ca.kieve.ssss.editor.component;
 
 import ca.kieve.ssss.editor.model.EditorEntity;
 import ca.kieve.ssss.editor.model.EditorMapModel;
+import ca.kieve.ssss.editor.ui.fx.EditorButton;
+import ca.kieve.ssss.editor.ui.fx.EditorLabel;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
@@ -76,7 +77,7 @@ public class EntityPanel extends VBox {
         setPrefWidth(PREF_WIDTH);
         setMinWidth(MIN_WIDTH);
 
-        var titleLabel = new Label("Entities");
+        var titleLabel = new EditorLabel("Entities");
         titleLabel.getStyleClass()
                 .add(STYLE_TOOLBAR_LABEL_BOLD);
 
@@ -97,11 +98,11 @@ public class EntityPanel extends VBox {
                             }
                         });
 
-        var addBtn = new Button("Add");
+        var addBtn = new EditorButton("Add");
         addBtn.setFocusTraversable(false);
         addBtn.setOnAction(e -> onAdd());
 
-        var removeBtn = new Button("Remove");
+        var removeBtn = new EditorButton("Remove");
         removeBtn.setFocusTraversable(false);
         removeBtn.setOnAction(e -> onRemove());
 
@@ -176,7 +177,7 @@ public class EntityPanel extends VBox {
     private class EntityListCell
             extends ListCell<Integer> {
         private final HBox m_root = new HBox();
-        private final Label m_nameLabel = new Label();
+        private final Label m_nameLabel = new EditorLabel();
         private final Region m_indicator = new Region();
         private final Region m_spacer = new Region();
 

@@ -1,17 +1,19 @@
 package ca.kieve.ssss.editor.component;
 
-import static ca.kieve.ssss.editor.util.CssUtil.inline;
+import ca.kieve.ssss.content.MapBlockDefinition;
+import ca.kieve.ssss.editor.BlockColorResolver;
+import ca.kieve.ssss.editor.BlockGlyphResolver;
+import ca.kieve.ssss.editor.EditorContext;
+import ca.kieve.ssss.editor.model.EditorMapModel;
+import ca.kieve.ssss.editor.ui.fx.EditorButton;
+import ca.kieve.ssss.editor.ui.fx.EditorLabel;
+import ca.kieve.ssss.editor.util.DialogUtil;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceDialog;
-import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.HBox;
@@ -20,12 +22,11 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
-import ca.kieve.ssss.content.MapBlockDefinition;
-import ca.kieve.ssss.editor.BlockColorResolver;
-import ca.kieve.ssss.editor.BlockGlyphResolver;
-import ca.kieve.ssss.editor.EditorContext;
-import ca.kieve.ssss.editor.model.EditorMapModel;
-import ca.kieve.ssss.editor.util.DialogUtil;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+
+import static ca.kieve.ssss.editor.util.CssUtil.inline;
 
 public class BlockPanel extends VBox {
     private static final String STYLE_BLOCK_PANEL =
@@ -70,7 +71,7 @@ public class BlockPanel extends VBox {
         setPrefWidth(200);
         setMinWidth(160);
 
-        var titleLabel = new Label("Blocks");
+        var titleLabel = new EditorLabel("Blocks");
         titleLabel.getStyleClass().add(STYLE_TOOLBAR_LABEL_BOLD);
 
         m_blockList = new ListView<>();
@@ -85,15 +86,15 @@ public class BlockPanel extends VBox {
             }
         });
 
-        var addBtn = new Button("Add");
+        var addBtn = new EditorButton("Add");
         addBtn.setFocusTraversable(false);
         addBtn.setOnAction(e -> onAdd());
 
-        var editBtn = new Button("Edit");
+        var editBtn = new EditorButton("Edit");
         editBtn.setFocusTraversable(false);
         editBtn.setOnAction(e -> onEdit());
 
-        var removeBtn = new Button("Remove");
+        var removeBtn = new EditorButton("Remove");
         removeBtn.setFocusTraversable(false);
         removeBtn.setOnAction(e -> onRemove());
 
@@ -293,14 +294,14 @@ public class BlockPanel extends VBox {
             char glyph =
                     m_glyphResolver.resolve(blockDef.bpId());
 
-            var label = new Label(name + " (");
+            var label = new EditorLabel(name + " (");
             label.setPadding(new Insets(0, 0, 0, 6));
 
-            var glyphLabel = new Label(String.valueOf(glyph));
+            var glyphLabel = new EditorLabel(String.valueOf(glyph));
             glyphLabel.setTextFill(color);
             glyphLabel.setStyle("-fx-font-weight: bold;");
 
-            var closeLabel = new Label(")");
+            var closeLabel = new EditorLabel(")");
 
             var cell = new HBox(
                     swatch, label, glyphLabel, closeLabel);
