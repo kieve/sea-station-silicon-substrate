@@ -1,12 +1,12 @@
 package ca.kieve.ssss.editor.component;
 
 import ca.kieve.ssss.editor.ui.AppIcon;
+import ca.kieve.ssss.editor.ui.WindowsAeroSnap;
 import ca.kieve.ssss.editor.ui.fx.EditorButton;
 import ca.kieve.ssss.editor.ui.fx.EditorLabel;
 import ca.kieve.ssss.editor.ui.fx.EditorMenuButton;
 import ca.kieve.ssss.editor.ui.fx.EditorSplitMenuButton;
 import ca.kieve.ssss.editor.ui.fx.EditorToggleButton;
-import ca.kieve.ssss.editor.ui.WindowsAeroSnap;
 
 import javafx.animation.PauseTransition;
 import javafx.beans.property.BooleanProperty;
@@ -156,6 +156,7 @@ public class EditorTitleBar extends HBox {
             Runnable onSaveAs,
             Runnable onLaunchGame,
             Runnable onLaunchGameGradle,
+            Runnable onLaunchCurrentMap,
             Runnable onClose) {
     }
 
@@ -200,29 +201,23 @@ public class EditorTitleBar extends HBox {
         setAlignment(Pos.CENTER_LEFT);
 
         // Left: app icon, file menu button, then tabs
-        var appIcon = new ImageView(
-                AppIcon.create(APP_ICON_SIZE));
+        var appIcon = new ImageView(AppIcon.create(APP_ICON_SIZE));
         appIcon.setFitWidth(APP_ICON_SIZE);
         appIcon.setFitHeight(APP_ICON_SIZE);
         appIcon.setSmooth(true);
-        HBox.setMargin(appIcon,
-                new Insets(0, ICON_MARGIN_RIGHT, 0, 0));
+        HBox.setMargin(appIcon, new Insets(0, ICON_MARGIN_RIGHT, 0, 0));
 
         var newMapItem = new MenuItem("New Map");
-        newMapItem.setOnAction(
-                e -> actions.onNewMap().run());
+        newMapItem.setOnAction(e -> actions.onNewMap().run());
 
         var loadMapItem = new MenuItem("Load Map...");
-        loadMapItem.setOnAction(
-                e -> actions.onLoadMap().run());
+        loadMapItem.setOnAction(e -> actions.onLoadMap().run());
 
         var saveItem = new MenuItem("Save");
-        saveItem.setOnAction(
-                e -> actions.onSave().run());
+        saveItem.setOnAction(e -> actions.onSave().run());
 
         var saveAsItem = new MenuItem("Save As...");
-        saveAsItem.setOnAction(
-                e -> actions.onSaveAs().run());
+        saveAsItem.setOnAction(e -> actions.onSaveAs().run());
 
         var fileMenu = new EditorMenuButton("File", null,
                 newMapItem,
@@ -233,7 +228,8 @@ public class EditorTitleBar extends HBox {
 
         var playBtn = createPlayButton(
                 actions.onLaunchGame(),
-                actions.onLaunchGameGradle());
+                actions.onLaunchGameGradle(),
+                actions.onLaunchCurrentMap());
 
         // Spacer pushes window buttons to the right
         var spacer = new Region();
@@ -243,8 +239,7 @@ public class EditorTitleBar extends HBox {
         var minBtn = new EditorButton();
         minBtn.setGraphic(createMinimizeIcon());
         minBtn.getStyleClass().add(STYLE_WINDOW_BUTTON);
-        minBtn.setOnAction(
-                e -> m_stage.setIconified(true));
+        minBtn.setOnAction(e -> m_stage.setIconified(true));
         minBtn.setFocusTraversable(false);
 
         m_maxBtn = new EditorButton();
@@ -258,12 +253,10 @@ public class EditorTitleBar extends HBox {
         closeBtn.getStyleClass().addAll(
                 STYLE_WINDOW_BUTTON,
                 STYLE_WINDOW_BUTTON_CLOSE);
-        closeBtn.setOnAction(
-                e -> actions.onClose().run());
+        closeBtn.setOnAction(e -> actions.onClose().run());
         closeBtn.setFocusTraversable(false);
 
-        var windowButtons =
-                new HBox(minBtn, m_maxBtn, closeBtn);
+        var windowButtons = new HBox(minBtn, m_maxBtn, closeBtn);
         windowButtons.setAlignment(Pos.CENTER_RIGHT);
         windowButtons.setSpacing(0);
 
@@ -304,16 +297,14 @@ public class EditorTitleBar extends HBox {
                 (obs, oldVal, newVal) -> {
                     if (newVal instanceof ToggleButton btn) {
                         Tab tab = (Tab) btn.getUserData();
-                        m_tabPane.getSelectionModel()
-                                .select(tab);
+                        m_tabPane.getSelectionModel().select(tab);
                     }
                 });
 
         // Sync tab selection -> toggle
         m_tabPane.getSelectionModel().selectedItemProperty()
                 .addListener(
-                        (obs, oldVal, newVal) ->
-                                syncSelection());
+                        (obs, oldVal, newVal) -> syncSelection());
     }
 
     private void initDragHandlers() {
@@ -322,19 +313,16 @@ public class EditorTitleBar extends HBox {
         // to manual JavaFX drag on non-Windows platforms.
         setOnMousePressed(e -> {
             if (e.getTarget() != this
-                    && !(e.getTarget()
-                            instanceof Region)) {
+                    && !(e.getTarget() instanceof Region)) {
                 return;
             }
 
-            // Try native drag first (enables snap
-            // previews). Dragging a maximized window
-            // restores it.
+            // Try native drag first (enables snap previews).
+            // Dragging a maximized window restores it.
             if (WindowsAeroSnap.startNativeDrag()) {
                 if (m_maximized.get()) {
                     m_maximized.set(false);
-                    m_maxBtn.setGraphic(
-                            createMaximizeIcon());
+                    m_maxBtn.setGraphic(createMaximizeIcon());
                 }
                 e.consume();
                 return;
@@ -342,20 +330,16 @@ public class EditorTitleBar extends HBox {
 
             // Fallback: manual JavaFX drag
             m_dragging = true;
-            m_dragOffsetX =
-                    e.getScreenX() - m_stage.getX();
-            m_dragOffsetY =
-                    e.getScreenY() - m_stage.getY();
+            m_dragOffsetX = e.getScreenX() - m_stage.getX();
+            m_dragOffsetY = e.getScreenY() - m_stage.getY();
         });
 
         setOnMouseDragged(e -> {
             if (!m_dragging) {
                 return;
             }
-            m_stage.setX(
-                    e.getScreenX() - m_dragOffsetX);
-            m_stage.setY(
-                    e.getScreenY() - m_dragOffsetY);
+            m_stage.setX(e.getScreenX() - m_dragOffsetX);
+            m_stage.setY(e.getScreenY() - m_dragOffsetY);
         });
 
         setOnMouseReleased(e -> m_dragging = false);
@@ -408,14 +392,12 @@ public class EditorTitleBar extends HBox {
 
         // Keep button text in sync with tab text
         tab.textProperty().addListener(
-                (obs, oldVal, newVal) ->
-                        btn.setText(newVal));
+                (obs, oldVal, newVal) -> btn.setText(newVal));
 
         // Add close button for closable tabs
         if (tab.isClosable()) {
             var closeLabel = new EditorLabel(" \u00D7");
-            closeLabel.setStyle(
-                    "-fx-text-fill: -color-fg-muted;");
+            closeLabel.setStyle("-fx-text-fill: -color-fg-muted;");
             closeLabel.setOnMouseClicked(e -> {
                 if (!m_canCloseTab.getAsBoolean()) {
                     e.consume();
@@ -428,8 +410,7 @@ public class EditorTitleBar extends HBox {
                 e.consume();
             });
             btn.setGraphic(closeLabel);
-            btn.setContentDisplay(
-                    ContentDisplay.RIGHT);
+            btn.setContentDisplay(ContentDisplay.RIGHT);
         }
 
         m_tabBox.getChildren().add(btn);
@@ -445,8 +426,7 @@ public class EditorTitleBar extends HBox {
     }
 
     private void syncSelection() {
-        Tab selected = m_tabPane.getSelectionModel()
-                .getSelectedItem();
+        Tab selected = m_tabPane.getSelectionModel().getSelectedItem();
         if (selected == null) {
             return;
         }
@@ -461,18 +441,18 @@ public class EditorTitleBar extends HBox {
 
     private static SplitMenuButton createPlayButton(
             Runnable onLaunchGame,
-            Runnable onLaunchGameGradle) {
-        var gradleItem =
-                new MenuItem("Launch with Gradle Build");
-        var btn = new EditorSplitMenuButton(gradleItem);
+            Runnable onLaunchGameGradle,
+            Runnable onLaunchCurrentMap) {
+        var gradleItem = new MenuItem("Launch with Gradle Build");
+        var currentMapItem = new MenuItem("Launch Current Map");
+        var btn = new EditorSplitMenuButton(currentMapItem, gradleItem);
         btn.setGraphic(createPlayIcon());
         btn.getStyleClass().add(STYLE_SPLIT_MENU_BTN);
         btn.setFocusTraversable(false);
 
         var cooldown = new PauseTransition(
                 Duration.seconds(PLAY_COOLDOWN_SECONDS));
-        cooldown.setOnFinished(
-                e -> btn.setDisable(false));
+        cooldown.setOnFinished(e -> btn.setDisable(false));
 
         Runnable startCooldown = () -> {
             btn.setDisable(true);
@@ -489,6 +469,11 @@ public class EditorTitleBar extends HBox {
             startCooldown.run();
         });
 
+        currentMapItem.setOnAction(e -> {
+            onLaunchCurrentMap.run();
+            startCooldown.run();
+        });
+
         return btn;
     }
 
@@ -497,8 +482,7 @@ public class EditorTitleBar extends HBox {
                 0, 0,
                 0, ICON_SIZE,
                 PLAY_ICON_WIDTH, PLAY_ICON_MID);
-        triangle.setStyle(
-                "-fx-fill: -color-success-fg;");
+        triangle.setStyle("-fx-fill: -color-success-fg;");
         return triangle;
     }
 
@@ -511,8 +495,7 @@ public class EditorTitleBar extends HBox {
     }
 
     private static Node createMaximizeIcon() {
-        var rect = new Rectangle(
-                ICON_SIZE, ICON_SIZE);
+        var rect = new Rectangle(ICON_SIZE, ICON_SIZE);
         rect.setFill(null);
         rect.setStyle(ICON_STROKE_STYLE);
         return rect;
@@ -530,18 +513,15 @@ public class EditorTitleBar extends HBox {
                 0, RESTORE_ICON_OFFSET,
                 RESTORE_ICON_SIZE, RESTORE_ICON_SIZE);
         front.setFill(null);
-        front.setStyle(ICON_STROKE_STYLE
-                + "-fx-fill: -color-bg-subtle;");
+        front.setStyle(ICON_STROKE_STYLE + "-fx-fill: -color-bg-subtle;");
 
         return new Group(back, front);
     }
 
     private static Node createCloseIcon() {
-        var line1 = new Line(
-                0, 0, ICON_SIZE, ICON_SIZE);
+        var line1 = new Line(0, 0, ICON_SIZE, ICON_SIZE);
         line1.setStyle(ICON_STROKE_STYLE);
-        var line2 = new Line(
-                ICON_SIZE, 0, 0, ICON_SIZE);
+        var line2 = new Line(ICON_SIZE, 0, 0, ICON_SIZE);
         line2.setStyle(ICON_STROKE_STYLE);
         return new Group(line1, line2);
     }

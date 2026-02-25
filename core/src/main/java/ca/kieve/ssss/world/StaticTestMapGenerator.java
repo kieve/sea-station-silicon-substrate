@@ -1,18 +1,18 @@
 package ca.kieve.ssss.world;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import ca.kieve.ssss.content.BlockTypeFactory;
+import ca.kieve.ssss.content.MapBlockDefinition;
+import ca.kieve.ssss.content.MapDefinition;
+import ca.kieve.ssss.content.MapEntityDefinition;
 
 import com.badlogic.gdx.Gdx;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
-import ca.kieve.ssss.content.BlockTypeFactory;
-import ca.kieve.ssss.content.MapBlockDefinition;
-import ca.kieve.ssss.content.MapDefinition;
-import ca.kieve.ssss.content.MapEntityDefinition;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * A static map generator that loads map layout from YAML.
@@ -21,10 +21,15 @@ import ca.kieve.ssss.content.MapEntityDefinition;
  */
 public class StaticTestMapGenerator implements MapGenerator {
 
-    private static final String MAP_FILE = "content/maps/static_test_map.yaml";
+    private static final String MAPS_PATH = "content/maps/";
 
+    private final String m_mapFile;
     private MapDefinition m_mapDefinition;
     private Map<Character, String> m_charToBlockType;
+
+    public StaticTestMapGenerator(String mapFilename) {
+        m_mapFile = MAPS_PATH + mapFilename;
+    }
 
     @Override
     public WorldModel generate(BlockTypeFactory blockTypeFactory) {
@@ -45,7 +50,8 @@ public class StaticTestMapGenerator implements MapGenerator {
         WorldModel world = new WorldModel(width, height, depth, blockTypeFactory);
 
         // Parse each layer and populate the world
-        for (Map.Entry<String, String> layerEntry : m_mapDefinition.layers().entrySet()) {
+        for (Map.Entry<String, String> layerEntry
+                : m_mapDefinition.layers().entrySet()) {
             int z = Integer.parseInt(layerEntry.getKey());
             String layerData = layerEntry.getValue();
             parseLayer(world, layerData, z);
@@ -68,10 +74,11 @@ public class StaticTestMapGenerator implements MapGenerator {
         try {
             ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
             mapper.findAndRegisterModules();
-            String yamlContent = Gdx.files.internal(MAP_FILE).readString();
+            String yamlContent = Gdx.files.internal(m_mapFile).readString();
             m_mapDefinition = mapper.readValue(yamlContent, MapDefinition.class);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to load map file: " + MAP_FILE, e);
+            throw new RuntimeException(
+                    "Failed to load map file: " + m_mapFile, e);
         }
     }
 

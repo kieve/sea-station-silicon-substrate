@@ -1,23 +1,24 @@
 package ca.kieve.ssss.content;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import ca.kieve.ssss.ai.behavior.BehaviorDefinition;
+import ca.kieve.ssss.component.Identifier;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
-import ca.kieve.ssss.ai.behavior.BehaviorDefinition;
-import ca.kieve.ssss.component.Identifier;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class ContentLoader {
     private static final String CONTENT_PATH = "content/";
     private static final String FONTS_FILE = "fonts.yaml";
     private static final String GLYPHS_FILE = "glyphs.yaml";
     private static final String BEHAVIORS_FILE = "behaviors.yaml";
+    private static final String SYSTEM_FILE = "system.yaml";
     private static final String ENTITIES_PATH = "entities/";
     private static final String FILE_LIST = "file_list.txt";
     private static final String DIR_LIST = "dir_list.txt";
@@ -32,6 +33,7 @@ public class ContentLoader {
     }
 
     public ContentRegistry loadAll() {
+        loadSystemConfig();
         loadFonts();
         loadGlyphs();
         loadBehaviors();
@@ -43,6 +45,22 @@ public class ContentLoader {
         return m_registry;
     }
 
+    private void loadSystemConfig() {
+        FileHandle file = Gdx.files.internal(CONTENT_PATH + SYSTEM_FILE);
+        if (!file.exists()) {
+            m_registry.setSystemConfig(new SystemConfig(null));
+            return;
+        }
+
+        try {
+            SystemConfig config = m_yamlMapper.readValue(
+                    file.readString(), SystemConfig.class);
+            m_registry.setSystemConfig(config);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load " + SYSTEM_FILE, e);
+        }
+    }
+
     private void loadFonts() {
         FileHandle file = Gdx.files.internal(CONTENT_PATH + FONTS_FILE);
         if (!file.exists()) {
@@ -50,7 +68,8 @@ public class ContentLoader {
         }
 
         try {
-            FontsFile data = m_yamlMapper.readValue(file.readString(), FontsFile.class);
+            FontsFile data = m_yamlMapper.readValue(
+                    file.readString(), FontsFile.class);
             if (data.fonts != null) {
                 for (Map.Entry<String, FontDefinition> entry : data.fonts.entrySet()) {
                     m_registry.registerFont(entry.getKey(), entry.getValue());
@@ -68,7 +87,8 @@ public class ContentLoader {
         }
 
         try {
-            GlyphsFile data = m_yamlMapper.readValue(file.readString(), GlyphsFile.class);
+            GlyphsFile data = m_yamlMapper.readValue(
+                    file.readString(), GlyphsFile.class);
             if (data.glyphs != null) {
                 for (Map.Entry<String, GlyphDefinition> entry : data.glyphs.entrySet()) {
                     m_registry.registerGlyph(entry.getKey(), entry.getValue());
@@ -87,9 +107,8 @@ public class ContentLoader {
 
         try {
             var iterator = m_yamlMapper.readValues(
-                m_yamlMapper.getFactory().createParser(file.readString()),
-                BehaviorDefinition.class
-            );
+                    m_yamlMapper.getFactory().createParser(file.readString()),
+                    BehaviorDefinition.class);
 
             while (iterator.hasNext()) {
                 BehaviorDefinition def = iterator.next();
@@ -103,8 +122,7 @@ public class ContentLoader {
     private void loadAllEntities() {
         var entityFiles = new ArrayList<String>();
         for (String dir : readIndex(ENTITIES_PATH + DIR_LIST)) {
-            entityFiles.addAll(
-                readFileIndex(ENTITIES_PATH + dir + "/"));
+            entityFiles.addAll(readFileIndex(ENTITIES_PATH + dir + "/"));
         }
         loadEntityFiles(entityFiles);
     }
@@ -143,9 +161,8 @@ public class ContentLoader {
 
             try {
                 var iterator = m_yamlMapper.readValues(
-                    m_yamlMapper.getFactory().createParser(file.readString()),
-                    EntityDefinition.class
-                );
+                        m_yamlMapper.getFactory().createParser(file.readString()),
+                        EntityDefinition.class);
 
                 while (iterator.hasNext()) {
                     EntityDefinition def = iterator.next();
@@ -168,7 +185,7 @@ public class ContentLoader {
             }
         }
         throw new RuntimeException(
-            "Entity definition missing Identifier component with 'key' property");
+                "Entity definition missing Identifier component with 'key' property");
     }
 
     public static class GlyphsFile {

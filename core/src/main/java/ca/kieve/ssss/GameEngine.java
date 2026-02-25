@@ -1,11 +1,5 @@
 package ca.kieve.ssss;
 
-import java.util.List;
-
-import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-
 import ca.kieve.ssss.component.CameraComp;
 import ca.kieve.ssss.content.MapEntityDefinition;
 import ca.kieve.ssss.context.GameContext;
@@ -35,6 +29,12 @@ import ca.kieve.ssss.world.StaticTestMapGenerator;
 import ca.kieve.ssss.world.WorldEntityFactory;
 import ca.kieve.ssss.world.WorldModel;
 
+import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+
+import java.util.List;
+
 public class GameEngine {
     public static final boolean DEBUG_GRID = false;
 
@@ -44,7 +44,8 @@ public class GameEngine {
 
     public void init(GameContext gameContext) {
         m_gameContext = gameContext;
-        m_mapGenerator = new StaticTestMapGenerator();
+        String launchMap = gameContext.content().getSystemConfig().launchMap();
+        m_mapGenerator = new StaticTestMapGenerator(launchMap);
         m_worldModel = m_mapGenerator.generate(gameContext.blockTypes());
 
         var inputActionController = new InputActionController(gameContext);
@@ -56,21 +57,21 @@ public class GameEngine {
 
     private void createUpdateSystems() {
         m_gameContext.updateSystems().addAll(List.of(
-            new ClockSystem(m_gameContext),
-            new InteractSystem(m_gameContext),
-            new OpenSystem(m_gameContext),
-            new SocketSystem(m_gameContext),
-            new ExamineSystem(m_gameContext),
-            new EjectSystem(m_gameContext),
-            new InteractMenuSystem(m_gameContext),
-            new WasdSystem(m_gameContext),
-            new PathingSystem(m_gameContext),
-            new AiControllerSystem(m_gameContext),
-            new AttackSystem(m_gameContext),
-            new VelocitySystem(m_gameContext),
-            new CameraSystem(m_gameContext),
-            new SanityCheckSystem(m_gameContext),
-            new EventSystem(m_gameContext)
+                new ClockSystem(m_gameContext),
+                new InteractSystem(m_gameContext),
+                new OpenSystem(m_gameContext),
+                new SocketSystem(m_gameContext),
+                new ExamineSystem(m_gameContext),
+                new EjectSystem(m_gameContext),
+                new InteractMenuSystem(m_gameContext),
+                new WasdSystem(m_gameContext),
+                new PathingSystem(m_gameContext),
+                new AiControllerSystem(m_gameContext),
+                new AttackSystem(m_gameContext),
+                new VelocitySystem(m_gameContext),
+                new CameraSystem(m_gameContext),
+                new SanityCheckSystem(m_gameContext),
+                new EventSystem(m_gameContext)
         ));
     }
 
@@ -85,33 +86,26 @@ public class GameEngine {
         }
 
         var tileGlyphRenderSystem = new TileGlyphRenderSystem(
-            m_gameContext,
-            spriteBatch,
-            shapeRenderer,
-            m_mapGenerator.getFloorGlyphId()
-        );
+                m_gameContext,
+                spriteBatch,
+                shapeRenderer,
+                m_mapGenerator.getFloorGlyphId());
         tileGlyphRenderSystem.setDebugGrid(DEBUG_GRID);
 
         var debugRectRenderSystem = new DebugRectRenderSystem(
-            m_gameContext,
-            shapeRenderer
-        );
+                m_gameContext, shapeRenderer);
 
         var highlightProviders = List.of(
-            m_gameContext.examine(),
-            m_gameContext.eject(),
-            m_gameContext.interact()
-        );
+                m_gameContext.examine(),
+                m_gameContext.eject(),
+                m_gameContext.interact());
         var tileHighlightRenderSystem = new TileHighlightRenderSystem(
-            m_gameContext,
-            shapeRenderer,
-            highlightProviders
-        );
+                m_gameContext, shapeRenderer, highlightProviders);
 
         m_gameContext.renderSystems().addAll(List.of(
-            tileGlyphRenderSystem,
-            debugRectRenderSystem,
-            tileHighlightRenderSystem
+                tileGlyphRenderSystem,
+                debugRectRenderSystem,
+                tileHighlightRenderSystem
         ));
     }
 
@@ -123,13 +117,11 @@ public class GameEngine {
         var factory = m_gameContext.entityFactory();
         for (MapEntityDefinition entityDef : m_mapGenerator.getEntities()) {
             factory.createEntityWithOverrides(
-                m_gameContext, entityDef.id(), entityDef.components());
+                    m_gameContext, entityDef.id(), entityDef.components());
         }
 
         // Run map init systems for post-spawn processing
-        List<MapInitSystem> mapInitSystems = List.of(
-            new ScurryInitSystem()
-        );
+        List<MapInitSystem> mapInitSystems = List.of(new ScurryInitSystem());
         for (MapInitSystem initSystem : mapInitSystems) {
             initSystem.run(m_gameContext);
         }

@@ -1,8 +1,11 @@
 package ca.kieve.ssss.editor;
 
 import ca.kieve.ssss.content.MapDefinition;
+import ca.kieve.ssss.content.SystemConfig;
 import ca.kieve.ssss.editor.component.EditorTitleBar;
 import ca.kieve.ssss.editor.component.MapViewPanel;
+import ca.kieve.ssss.editor.component.SystemConfigPanel;
+import ca.kieve.ssss.editor.model.SystemConfigModel;
 import ca.kieve.ssss.editor.ui.AppIcon;
 import ca.kieve.ssss.editor.ui.WindowResizeHandler;
 import ca.kieve.ssss.editor.ui.WindowsAeroSnap;
@@ -30,6 +33,7 @@ import javafx.stage.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -39,12 +43,10 @@ import static ca.kieve.ssss.editor.util.CssUtil.inline;
 public class EditorFxApp extends Application {
     private static final KeyCodeCombination NEW_COMBO =
             new KeyCodeCombination(
-                    KeyCode.N,
-                    KeyCombination.CONTROL_DOWN);
+                    KeyCode.N, KeyCombination.CONTROL_DOWN);
     private static final KeyCodeCombination SAVE_COMBO =
             new KeyCodeCombination(
-                    KeyCode.S,
-                    KeyCombination.CONTROL_DOWN);
+                    KeyCode.S, KeyCombination.CONTROL_DOWN);
     private static final KeyCodeCombination SAVE_AS_COMBO =
             new KeyCodeCombination(
                     KeyCode.S,
@@ -75,14 +77,14 @@ public class EditorFxApp extends Application {
 
     private TabPane m_tabPane;
     private Tab m_mapTab;
+    private Tab m_systemConfigTab;
     private Stage m_stage;
     private File m_lastDirectory;
 
     @Override
     public void start(Stage stage) {
         Application.setUserAgentStylesheet(
-                new PrimerDark()
-                        .getUserAgentStylesheet());
+                new PrimerDark().getUserAgentStylesheet());
 
         m_stage = stage;
         DialogUtil.setOwner(stage);
@@ -91,8 +93,7 @@ public class EditorFxApp extends Application {
 
         m_tabPane = new TabPane();
         m_tabPane.getStylesheets().add(inline(CSS));
-        m_tabPane.getStyleClass()
-                .add(STYLE_HIDDEN_TAB_HEADER);
+        m_tabPane.getStyleClass().add(STYLE_HIDDEN_TAB_HEADER);
 
         stage.initStyle(StageStyle.UNDECORATED);
         stage.setMinWidth(MIN_STAGE_WIDTH);
@@ -104,6 +105,8 @@ public class EditorFxApp extends Application {
                 AppIcon.create(ICON_32),
                 AppIcon.create(ICON_16));
 
+        initSystemConfigTab();
+
         var actions = new EditorTitleBar.Actions(
                 this::onNewMap,
                 this::onLoadMap,
@@ -111,63 +114,54 @@ public class EditorFxApp extends Application {
                 this::onSaveAs,
                 this::onLaunchGame,
                 this::onLaunchGameGradle,
+                this::onLaunchCurrentMap,
                 this::onClose);
         var titleBar = new EditorTitleBar(
-                stage, m_tabPane,
-                actions,
+                stage, m_tabPane, actions,
                 this::checkUnsavedChanges);
 
         var root = new BorderPane();
         root.setTop(titleBar);
         root.setCenter(m_tabPane);
 
-        var scene = new Scene(
-                root, SCENE_WIDTH, SCENE_HEIGHT);
+        var scene = new Scene(root, SCENE_WIDTH, SCENE_HEIGHT);
 
         // Keyboard shortcuts
-        scene.addEventFilter(
-                KeyEvent.KEY_PRESSED, e -> {
-                    if (NEW_COMBO.match(e)) {
-                        onNewMap();
-                        e.consume();
-                    } else if (SAVE_AS_COMBO.match(e)) {
-                        onSaveAs();
-                        e.consume();
-                    } else if (SAVE_COMBO.match(e)) {
-                        onSave();
-                        e.consume();
-                    }
-                });
+        scene.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
+            if (NEW_COMBO.match(e)) {
+                onNewMap();
+                e.consume();
+            } else if (SAVE_AS_COMBO.match(e)) {
+                onSaveAs();
+                e.consume();
+            } else if (SAVE_COMBO.match(e)) {
+                onSave();
+                e.consume();
+            }
+        });
 
         // TAB to cycle tabs
-        scene.addEventFilter(
-                KeyEvent.KEY_PRESSED, e -> {
-                    if (e.getCode() != KeyCode.TAB) {
-                        return;
-                    }
-                    int count =
-                            m_tabPane.getTabs().size();
-                    if (count < 2) {
-                        return;
-                    }
-                    int cur = m_tabPane
-                            .getSelectionModel()
-                            .getSelectedIndex();
-                    int next = e.isShiftDown()
-                            ? (cur - 1 + count) % count
-                            : (cur + 1) % count;
-                    m_tabPane.getSelectionModel()
-                            .select(next);
-                    e.consume();
-                });
+        scene.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
+            if (e.getCode() != KeyCode.TAB) {
+                return;
+            }
+            int count = m_tabPane.getTabs().size();
+            if (count < 2) {
+                return;
+            }
+            int cur = m_tabPane.getSelectionModel().getSelectedIndex();
+            int next = e.isShiftDown()
+                    ? (cur - 1 + count) % count
+                    : (cur + 1) % count;
+            m_tabPane.getSelectionModel().select(next);
+            e.consume();
+        });
 
         // Intercept window close for unsaved changes
-        stage.setOnCloseRequest(
-                this::handleCloseRequest);
+        stage.setOnCloseRequest(this::handleCloseRequest);
 
         WindowResizeHandler.install(
-                scene, stage,
-                titleBar.maximizedProperty());
+                scene, stage, titleBar.maximizedProperty());
 
         stage.setScene(scene);
         stage.setAlwaysOnTop(true);
@@ -181,9 +175,19 @@ public class EditorFxApp extends Application {
         if (m_mapTab == null) {
             return null;
         }
-        if (m_mapTab.getContent()
-                instanceof MapViewPanel mvp) {
+        if (m_mapTab.getContent() instanceof MapViewPanel mvp) {
             return mvp;
+        }
+        return null;
+    }
+
+    private SystemConfigPanel getSystemConfigPanel() {
+        if (m_systemConfigTab == null) {
+            return null;
+        }
+        if (m_systemConfigTab.getContent()
+                instanceof SystemConfigPanel scp) {
+            return scp;
         }
         return null;
     }
@@ -194,15 +198,23 @@ public class EditorFxApp extends Application {
         }
 
         var mapDef = new MapDefinition(
-                Map.of(),
-                Map.of("0", "\n"),
-                "interpunct",
-                List.of());
+                Map.of(), Map.of("0", "\n"),
+                "interpunct", List.of());
         var mapViewPanel = new MapViewPanel(mapDef, null);
         openMapTab(mapViewPanel, "untitled");
     }
 
     private void onSave() {
+        Tab selected =
+                m_tabPane.getSelectionModel().getSelectedItem();
+        if (selected == m_systemConfigTab) {
+            onSaveSystemConfig();
+            return;
+        }
+        onSaveMap();
+    }
+
+    private void onSaveMap() {
         var panel = getMapViewPanel();
         if (panel == null) {
             return;
@@ -212,6 +224,14 @@ public class EditorFxApp extends Application {
         } else {
             onSaveAs();
         }
+    }
+
+    private void onSaveSystemConfig() {
+        var panel = getSystemConfigPanel();
+        if (panel == null) {
+            return;
+        }
+        panel.save();
     }
 
     private void onSaveAs() {
@@ -228,10 +248,8 @@ public class EditorFxApp extends Application {
 
         File currentFile = panel.getModel().getFile();
         if (currentFile != null) {
-            chooser.setInitialDirectory(
-                    currentFile.getParentFile());
-            chooser.setInitialFileName(
-                    currentFile.getName());
+            chooser.setInitialDirectory(currentFile.getParentFile());
+            chooser.setInitialFileName(currentFile.getName());
         } else if (m_lastDirectory != null
                 && m_lastDirectory.isDirectory()) {
             chooser.setInitialDirectory(m_lastDirectory);
@@ -251,13 +269,10 @@ public class EditorFxApp extends Application {
         try {
             GameLauncher.launchDirect(
                     m_stage.getX(), m_stage.getY(),
-                    m_stage.getWidth(),
-                    m_stage.getHeight());
+                    m_stage.getWidth(), m_stage.getHeight());
         } catch (IOException ex) {
-            var alert =
-                    new Alert(Alert.AlertType.ERROR);
-            DialogUtil.style(
-                    alert, "Failed to Launch Game");
+            var alert = new Alert(Alert.AlertType.ERROR);
+            DialogUtil.style(alert, "Failed to Launch Game");
             alert.setContentText(ex.getMessage());
             alert.showAndWait();
         }
@@ -267,22 +282,63 @@ public class EditorFxApp extends Application {
         try {
             GameLauncher.launchGradle(
                     m_stage.getX(), m_stage.getY(),
-                    m_stage.getWidth(),
-                    m_stage.getHeight());
+                    m_stage.getWidth(), m_stage.getHeight());
         } catch (IOException ex) {
-            var alert =
-                    new Alert(Alert.AlertType.ERROR);
-            DialogUtil.style(
-                    alert, "Failed to Launch Game");
+            var alert = new Alert(Alert.AlertType.ERROR);
+            DialogUtil.style(alert, "Failed to Launch Game");
             alert.setContentText(ex.getMessage());
             alert.showAndWait();
         }
     }
 
+    private void onLaunchCurrentMap() {
+        var panel = getMapViewPanel();
+        if (panel == null) {
+            var alert = new Alert(Alert.AlertType.ERROR);
+            DialogUtil.style(alert, "No Map Open");
+            alert.setContentText(
+                    "Open a map before using Launch Current Map.");
+            alert.showAndWait();
+            return;
+        }
+
+        // Save the map first
+        if (panel.getModel().getFile() != null) {
+            panel.save();
+        } else {
+            onSaveAs();
+        }
+
+        // Abort if map is still unsaved
+        if (panel.getModel().getFile() == null) {
+            return;
+        }
+
+        // Update system config to point to this map
+        String mapFilename = panel.getModel().getFile().getName();
+        var configPanel = getSystemConfigPanel();
+        if (configPanel != null) {
+            configPanel.getModel().setLaunchMap(mapFilename);
+            try {
+                SystemConfigSaver.save(
+                        configPanel.getModel(),
+                        configPanel.getModel().getFile());
+            } catch (IOException ex) {
+                var alert = new Alert(Alert.AlertType.ERROR);
+                DialogUtil.style(
+                        alert, "Failed to Save System Config");
+                alert.setContentText(ex.getMessage());
+                alert.showAndWait();
+                return;
+            }
+        }
+
+        onLaunchGame();
+    }
+
     private void onClose() {
         var closeEvent = new WindowEvent(
-                m_stage,
-                WindowEvent.WINDOW_CLOSE_REQUEST);
+                m_stage, WindowEvent.WINDOW_CLOSE_REQUEST);
         m_stage.fireEvent(closeEvent);
     }
 
@@ -294,44 +350,57 @@ public class EditorFxApp extends Application {
 
     /**
      * Check for unsaved changes and prompt the user.
-     * Returns true if it's safe to proceed
-     * (save/discard), false if cancelled.
+     * Returns true if it's safe to proceed (save/discard),
+     * false if cancelled.
      */
     private boolean checkUnsavedChanges() {
-        var panel = getMapViewPanel();
-        if (panel == null
-                || !panel.getModel().isModified()) {
+        boolean mapModified = false;
+        var mapPanel = getMapViewPanel();
+        if (mapPanel != null) {
+            mapModified = mapPanel.getModel().isModified();
+        }
+
+        boolean configModified = false;
+        var configPanel = getSystemConfigPanel();
+        if (configPanel != null) {
+            configModified = configPanel.getModel().isModified();
+        }
+
+        if (!mapModified && !configModified) {
             return true;
         }
 
         var saveBtn = new ButtonType(
                 "Save", ButtonBar.ButtonData.YES);
         var dontSaveBtn = new ButtonType(
-                "Don't Save",
-                ButtonBar.ButtonData.NO);
+                "Don't Save", ButtonBar.ButtonData.NO);
         var cancelBtn = new ButtonType(
-                "Cancel",
-                ButtonBar.ButtonData.CANCEL_CLOSE);
+                "Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
 
         var alert = new Alert(
                 Alert.AlertType.CONFIRMATION,
                 "You have unsaved changes. "
-                        + "\nDo you want to save "
-                        + "before closing?",
+                        + "\nDo you want to save before closing?",
                 saveBtn, dontSaveBtn, cancelBtn);
         DialogUtil.style(alert, "Unsaved Changes");
 
-        Optional<ButtonType> result =
-                alert.showAndWait();
-        if (result.isEmpty()
-                || result.get() == cancelBtn) {
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isEmpty() || result.get() == cancelBtn) {
             return false;
         }
         if (result.get() == saveBtn) {
-            onSave();
-            // If still modified after save attempt
-            // (e.g. cancelled Save As dialog)
-            return !panel.getModel().isModified();
+            if (mapModified) {
+                onSaveMap();
+                if (mapPanel.getModel().isModified()) {
+                    return false;
+                }
+            }
+            if (configModified) {
+                onSaveSystemConfig();
+                if (configPanel.getModel().isModified()) {
+                    return false;
+                }
+            }
         }
         return true;
     }
@@ -343,8 +412,7 @@ public class EditorFxApp extends Application {
                 new FileChooser.ExtensionFilter(
                         "YAML files", "*.yaml"));
 
-        if (m_lastDirectory != null
-                && m_lastDirectory.isDirectory()) {
+        if (m_lastDirectory != null && m_lastDirectory.isDirectory()) {
             chooser.setInitialDirectory(m_lastDirectory);
         }
 
@@ -360,26 +428,21 @@ public class EditorFxApp extends Application {
     private void loadMapFile(File file) {
         try {
             MapDefinition mapDef = MapLoader.load(file);
-            var mapViewPanel =
-                    new MapViewPanel(mapDef, file);
+            var mapViewPanel = new MapViewPanel(mapDef, file);
             openMapTab(mapViewPanel, file.getName());
         } catch (IOException ex) {
-            var alert =
-                    new Alert(Alert.AlertType.ERROR);
-            DialogUtil.style(
-                    alert, "Failed to Load Map");
+            var alert = new Alert(Alert.AlertType.ERROR);
+            DialogUtil.style(alert, "Failed to Load Map");
             alert.setContentText(ex.getMessage());
             alert.showAndWait();
         }
     }
 
     private void openMapTab(
-            MapViewPanel mapViewPanel,
-            String displayName) {
+            MapViewPanel mapViewPanel, String displayName) {
         if (m_mapTab == null) {
             m_mapTab = new Tab();
-            m_mapTab.setOnClosed(
-                    e -> m_mapTab = null);
+            m_mapTab.setOnClosed(e -> m_mapTab = null);
             m_tabPane.getTabs().add(m_mapTab);
         }
 
@@ -388,39 +451,100 @@ public class EditorFxApp extends Application {
 
         // Bind modified state to tab text
         mapViewPanel.getModel().modifiedProperty()
-                .addListener(
-                        (obs, oldVal, newVal) -> {
-                            File f = mapViewPanel
-                                    .getModel()
-                                    .getFile();
-                            String name = f != null
-                                    ? f.getName()
-                                    : "untitled";
-                            m_mapTab.setText(
-                                    "Map - " + name
-                                    + (newVal
-                                            ? " *"
-                                            : ""));
-                        });
+                .addListener((obs, oldVal, newVal) -> {
+                    File f = mapViewPanel.getModel().getFile();
+                    String name = f != null
+                            ? f.getName() : "untitled";
+                    m_mapTab.setText("Map - " + name
+                            + (newVal ? " *" : ""));
+                });
 
-        m_tabPane.getSelectionModel()
-                .select(m_mapTab);
+        m_tabPane.getSelectionModel().select(m_mapTab);
+    }
+
+    private void initSystemConfigTab() {
+        File configFile = resolveSystemConfigFile();
+        SystemConfigModel model = loadSystemConfigModel(configFile);
+        List<String> maps = listAvailableMaps();
+
+        var panel = new SystemConfigPanel(model, maps);
+
+        m_systemConfigTab = new Tab();
+        m_systemConfigTab.setClosable(false);
+        m_systemConfigTab.setContent(panel);
+        m_systemConfigTab.setText("System Config");
+
+        model.modifiedProperty().addListener(
+                (obs, oldVal, newVal) ->
+                        m_systemConfigTab.setText("System Config"
+                                + (newVal ? " *" : "")));
+
+        m_tabPane.getTabs().add(m_systemConfigTab);
+    }
+
+    private File resolveSystemConfigFile() {
+        String configRelPath =
+                "core/src/main/resources/content/system.yaml";
+
+        Path userDir = Path.of(System.getProperty("user.dir"));
+        Path fromUserDir = userDir.resolve(configRelPath);
+        if (fromUserDir.toFile().isFile()) {
+            return fromUserDir.toFile();
+        }
+
+        Path fromParent = userDir.getParent().resolve(configRelPath);
+        if (fromParent.toFile().isFile()) {
+            return fromParent.toFile();
+        }
+
+        return null;
+    }
+
+    private SystemConfigModel loadSystemConfigModel(File configFile) {
+        if (configFile == null || !configFile.exists()) {
+            return new SystemConfigModel(
+                    "static_test_map.yaml", configFile);
+        }
+        try {
+            SystemConfig config =
+                    SystemConfigLoader.load(configFile);
+            return new SystemConfigModel(
+                    config.launchMap(), configFile);
+        } catch (IOException ex) {
+            return new SystemConfigModel(
+                    "static_test_map.yaml", configFile);
+        }
+    }
+
+    private List<String> listAvailableMaps() {
+        File mapsDir = resolveDefaultMapsDir();
+        if (mapsDir == null || !mapsDir.isDirectory()) {
+            return List.of();
+        }
+        File[] files = mapsDir.listFiles(
+                (dir, name) -> name.endsWith(".yaml"));
+        if (files == null) {
+            return List.of();
+        }
+        var names = new ArrayList<String>();
+        for (File f : files) {
+            names.add(f.getName());
+        }
+        names.sort(String::compareTo);
+        return names;
     }
 
     private File resolveDefaultMapsDir() {
         String mapsRelPath =
                 "core/src/main/resources/content/maps";
 
-        Path userDir = Path.of(
-                System.getProperty("user.dir"));
-        Path fromUserDir =
-                userDir.resolve(mapsRelPath);
+        Path userDir = Path.of(System.getProperty("user.dir"));
+        Path fromUserDir = userDir.resolve(mapsRelPath);
         if (fromUserDir.toFile().isDirectory()) {
             return fromUserDir.toFile();
         }
 
-        Path fromParent = userDir.getParent()
-                .resolve(mapsRelPath);
+        Path fromParent = userDir.getParent().resolve(mapsRelPath);
         if (fromParent.toFile().isDirectory()) {
             return fromParent.toFile();
         }

@@ -1,10 +1,10 @@
 package ca.kieve.ssss.content;
 
+import ca.kieve.ssss.ai.behavior.BehaviorDefinition;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
-import ca.kieve.ssss.ai.behavior.BehaviorDefinition;
 
 public class ContentRegistry {
     private final Map<String, EntityDefinition> m_entityDefinitions = new HashMap<>();
@@ -14,6 +14,7 @@ public class ContentRegistry {
 
     private final ComponentFactory m_componentFactory;
     private BlockTypeFactory m_blockTypeFactory;
+    private SystemConfig m_systemConfig = new SystemConfig(null);
 
     public ContentRegistry() {
         m_componentFactory = new ComponentFactory(this);
@@ -22,6 +23,14 @@ public class ContentRegistry {
 
     public BlockTypeFactory getBlockTypeFactory() {
         return m_blockTypeFactory;
+    }
+
+    public SystemConfig getSystemConfig() {
+        return m_systemConfig;
+    }
+
+    public void setSystemConfig(SystemConfig systemConfig) {
+        m_systemConfig = systemConfig;
     }
 
     public void registerEntity(String id, EntityDefinition definition) {

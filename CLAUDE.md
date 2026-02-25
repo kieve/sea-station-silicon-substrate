@@ -618,7 +618,7 @@ This is a Windows development environment. Use backslash-escaped paths or forwar
 ## Coding Style Rules
 
 ### Line Length
-Maximum line length is 100 characters. Break long lines at logical points.
+Maximum line length is **100 characters**. Only break lines that actually exceed 100 characters. Do NOT wrap lines that are under 100 characters — a 70-character line should stay on one line. When a line must be broken, break it at a logical point (after a comma, before an operator, etc.).
 
 ### Import Ordering
 Imports must be organized in the following group order, with a blank line between each group:

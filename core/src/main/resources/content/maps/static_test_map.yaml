@@ -1,192 +1,178 @@
+---
 blocks:
-  floor:
-    bpId: block_wood
-    layoutChar: '+'
-  wall:
-    bpId: block_stone
-    layoutChar: '#'
   air:
     bpId: air
-    layoutChar: '.'
+    layoutChar: a
+  floor:
+    bpId: block_wood
+    layoutChar: b
   mouse_hole:
     bpId: block_mouse_hole
-    layoutChar: 'o'
-
-floorGlyph: interpunct
-
-entities:
-  - id: player
-    components:
-      - type: Position
-        x: 6
-        y: 6
-        z: 1
-
-  - id: debugMover
-    components:
-      - type: Position
-        x: 4
-        y: 6
-        z: 1
-      - type: Speed
-        val: 50
-      - type: ColorComp
-        color: BLUE
-
-  - id: debugMover
-    components:
-      - type: Position
-        x: 8
-        y: 6
-        z: 1
-      - type: Speed
-        val: 100
-      - type: ColorComp
-        color: WHITE
-
-  - id: debugMover
-    components:
-      - type: Position
-        x: 10
-        y: 6
-        z: 1
-      - type: Speed
-        val: 200
-      - type: ColorComp
-        color: RED
-
-  - id: deadMech
-    components:
-      - type: Position
-        x: 5
-        y: 5
-        z: 1
-      - type: ColorComp
-        color: GOLD
-
-  - id: trainingDummy
-    components:
-      - type: Position
-        x: 23
-        y: 7
-        z: 1
-      - type: ColorComp
-        color: PINK
-
-  - id: aiAttacker
-    components:
-      - type: Position
-        x: 9
-        y: 6
-        z: 1
-      - type: ColorComp
-        color: SCARLET
-
-  - id: note
-    components:
-      - type: Position
-        x: 14
-        y: 14
-        z: 1
-      - type: ColorComp
-        color: WHITE
-
-  - id: greenNote
-    components:
-      - type: Position
-        x: 14
-        y: 14
-        z: 1
-      - type: ColorComp
-        color: GREEN
-
-  - id: blueNote
-    components:
-      - type: Position
-        x: 14
-        y: 14
-        z: 1
-      - type: ColorComp
-        color: BLUE
-
-  - id: roboMouse
-    components:
-      - type: Position
-        x: 8
-        y: 8
-        z: 1
-      - type: ScurryInit
-      - type: ColorComp
-        color: GRAY
-
-  - id: maintenanceSubDoor
-    components:
-      - type: Position
-        x: 17
-        y: 7
-        z: 1
-
-  - id: maintenanceSubDoorKey
-    components:
-      - type: Position
-        x: 8
-        y: 6
-        z: 1
-      - type: ColorComp
-        color: YELLOW
-
+    layoutChar: c
+  wall:
+    bpId: block_stone
+    layoutChar: d
 layers:
-  '0': |
-    #################
-    #+++++++++++++++#
-    #+++++++++++++++#
-    #+++++++++++++++#   ########
-    #+++++++++++++++#   #++++++#
-    #+++++++++++++++#####++++++#
-    #++++++++++++++++++++++++++#
-    #++++++++++++++++++++++++++#
-    #++++++++++++++++++++++++++#
-    #+++++++++++++++#####++++++#
-    #+++++++++++++++#   #++++++#
-    #+++++++++++++++#   ########
-    #+++++++++++++++#
-    #+++++++++++++++#
-    #+++++++++++++++#
-    #+++++++++++++++#
-    #################
-  '1': |
-    #################
-    #...............#
-    #...............#
-    #...............#   ########
-    #...............#   #......#
-    #...............#####......#
-    #...............#..........#
-    #...............o..........#
-    #...............#..........#
-    #...............#####......#
-    #...............#   #......#
-    #...............#   ########
-    #...............#
-    #...............#
-    #...............#
-    #...............#
-    #################
-  '2': |
-    #################
-    #################
-    #################
-    #################   ########
-    #################   ########
-    ############################
-    ############################
-    ############################
-    ############################
-    ############################
-    #################   ########
-    #################   ########
-    #################
-    #################
-    #################
-    #################
-    #################
+  "0": |
+    ddddddddddddddddd
+    dbbbbbbbbbbbbbbbd
+    dbbbbbbbbbbbbbbbd
+    dbbbbbbbbbbbbbbbd   dddddddd
+    dbbbbbbbbbbbbbbbd   dbbbbbbd
+    dbbbbbbbbbbbbbbbdddddbbbbbbd
+    dbbbbbbbbbbbbbbbbbbbbbbbbbbd
+    dbbbbbbbbbbbbbbbbbbbbbbbbbbd
+    dbbbbbbbbbbbbbbbbbbbbbbbbbbd
+    dbbbbbbbbbbbbbbbdddddbbbbbbd
+    dbbbbbbbbbbbbbbbd   dbbbbbbd
+    dbbbbbbbbbbbbbbbd   dddddddd
+    dbbbbbbbbbbbbbbbd
+    dbbbbbbbbbbbbbbbd
+    dbbbbbbbbbbbbbbbd
+    dbbbbbbbbbbbbbbbd
+    ddddddddddddddddd
+  "1": |
+    ddddddddddddddddd
+    daaaaaaaaaaaaaaad
+    daaaaaaaaaaaaaaad
+    daaaaaaaaaaaaaaad   dddddddd
+    daaaaaaaaaaaaaaad   daaaaaad
+    daaaaaaaaaaaaaaadddddaaaaaad
+    daaaaaaaaaaaaaaadaaaaaaaaaad
+    daaaaaaaaaaaaaaacaaaaaaaaaad
+    daaaaaaaaaaaaaaadaaaaaaaaaad
+    daaaaaaaaaaaaaaadddddaaaaaad
+    daaaaaaaaaaaaaaad   daaaaaad
+    daaaaaaaaaaaaaaad   dddddddd
+    daaaaaaaaaaaaaaad
+    daaaaaaaaaaaaaaad
+    daaaaaaaaaaaaaaad
+    daaaaaaaaaaaaaaad
+    ddddddddddddddddd
+  "2": |
+    ddddddddddddddddd
+    ddddddddddddddddd
+    ddddddddddddddddd
+    ddddddddddddddddd   dddddddd
+    ddddddddddddddddd   dddddddd
+    dddddddddddddddddddddddddddd
+    dddddddddddddddddddddddddddd
+    dddddddddddddddddddddddddddd
+    dddddddddddddddddddddddddddd
+    dddddddddddddddddddddddddddd
+    ddddddddddddddddd   dddddddd
+    ddddddddddddddddd   dddddddd
+    ddddddddddddddddd
+    ddddddddddddddddd
+    ddddddddddddddddd
+    ddddddddddddddddd
+    ddddddddddddddddd
+floorGlyph: interpunct
+entities:
+- id: player
+  components:
+  - type: Position
+    x: 6
+    "y": 6
+    z: 1
+- id: debugMover
+  components:
+  - type: Position
+    x: 4
+    "y": 6
+    z: 1
+  - type: Speed
+    val: 50
+  - type: ColorComp
+    color: BLUE
+- id: debugMover
+  components:
+  - type: Position
+    x: 8
+    "y": 6
+    z: 1
+  - type: Speed
+    val: 100
+  - type: ColorComp
+    color: WHITE
+- id: debugMover
+  components:
+  - type: Position
+    x: 10
+    "y": 6
+    z: 1
+  - type: Speed
+    val: 200
+  - type: ColorComp
+    color: RED
+- id: deadMech
+  components:
+  - type: Position
+    x: 5
+    "y": 5
+    z: 1
+  - type: ColorComp
+    color: GOLD
+- id: trainingDummy
+  components:
+  - type: Position
+    x: 23
+    "y": 7
+    z: 1
+  - type: ColorComp
+    color: PINK
+- id: aiAttacker
+  components:
+  - type: Position
+    x: 9
+    "y": 6
+    z: 1
+  - type: ColorComp
+    color: SCARLET
+- id: note
+  components:
+  - type: Position
+    x: 14
+    "y": 14
+    z: 1
+  - type: ColorComp
+    color: WHITE
+- id: greenNote
+  components:
+  - type: Position
+    x: 14
+    "y": 14
+    z: 1
+  - type: ColorComp
+    color: GREEN
+- id: blueNote
+  components:
+  - type: Position
+    x: 14
+    "y": 14
+    z: 1
+  - type: ColorComp
+    color: BLUE
+- id: roboMouse
+  components:
+  - type: Position
+    x: 8
+    "y": 8
+    z: 1
+  - type: ScurryInit
+  - type: ColorComp
+    color: GRAY
+- id: maintenanceSubDoor
+  components:
+  - type: Position
+    x: 17
+    "y": 7
+    z: 1
+- id: maintenanceSubDoorKey
+  components:
+  - type: Position
+    x: 8
+    "y": 6
+    z: 1
+  - type: ColorComp
+    color: YELLOW
