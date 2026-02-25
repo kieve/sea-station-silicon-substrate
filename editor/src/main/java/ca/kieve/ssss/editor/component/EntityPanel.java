@@ -19,7 +19,7 @@ import javafx.scene.layout.VBox;
 import ca.kieve.ssss.editor.model.EditorEntity;
 import ca.kieve.ssss.editor.model.EditorMapModel;
 
-public class MapEntityPanel extends VBox {
+public class EntityPanel extends VBox {
     private static final String STYLE_ENTITY_PANEL =
             "editor-entity-panel";
     private static final String STYLE_TOOLBAR_LABEL_BOLD =
@@ -58,7 +58,7 @@ public class MapEntityPanel extends VBox {
     private Consumer<Integer> m_onSelectionChanged;
     private Runnable m_onEntitiesChanged;
 
-    public MapEntityPanel(EditorMapModel model) {
+    public EntityPanel(EditorMapModel model) {
         m_model = model;
 
         getStylesheets().add(inline(CSS));

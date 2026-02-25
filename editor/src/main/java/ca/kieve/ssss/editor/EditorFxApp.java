@@ -2,8 +2,6 @@ package ca.kieve.ssss.editor;
 
 import ca.kieve.ssss.content.MapDefinition;
 import ca.kieve.ssss.editor.component.EditorTitleBar;
-import ca.kieve.ssss.editor.component.EntityDetailPanel;
-import ca.kieve.ssss.editor.component.EntityListPanel;
 import ca.kieve.ssss.editor.component.MapViewPanel;
 import ca.kieve.ssss.editor.ui.AppIcon;
 import ca.kieve.ssss.editor.ui.WindowResizeHandler;
@@ -17,7 +15,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.input.KeyCode;
@@ -51,7 +48,6 @@ public class EditorFxApp extends Application {
     private static final String STYLE_HIDDEN_TAB_HEADER =
             "editor-hidden-tab-header";
 
-    private static final double SPLIT_DIVIDER_POS = 0.3;
     private static final int MIN_STAGE_WIDTH = 400;
     private static final int MIN_STAGE_HEIGHT = 300;
     private static final int ICON_128 = 128;
@@ -87,19 +83,7 @@ public class EditorFxApp extends Application {
 
         m_lastDirectory = resolveDefaultMapsDir();
 
-        var detailPanel = new EntityDetailPanel();
-        var listPanel = new EntityListPanel(
-                detailPanel::showEntity);
-
-        var splitPane =
-                new SplitPane(listPanel, detailPanel);
-        splitPane.setDividerPositions(SPLIT_DIVIDER_POS);
-
-        var entitiesTab =
-                new Tab("Entities", splitPane);
-        entitiesTab.setClosable(false);
-
-        m_tabPane = new TabPane(entitiesTab);
+        m_tabPane = new TabPane();
         m_tabPane.getStylesheets().add(inline(CSS));
         m_tabPane.getStyleClass()
                 .add(STYLE_HIDDEN_TAB_HEADER);

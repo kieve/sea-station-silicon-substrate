@@ -46,7 +46,7 @@ public class MapViewPanel extends BorderPane {
     private final MapRenderer m_renderer;
     private final PanCanvas m_panCanvas;
     private final BlockPanel m_blockPanel;
-    private final MapEntityPanel m_entityPanel;
+    private final EntityPanel m_entityPanel;
     private final ComponentPanel m_componentPanel;
     private final InfoBar m_infoBar;
     private final ZLevelOverlay m_zOverlay;
@@ -107,7 +107,7 @@ public class MapViewPanel extends BorderPane {
 
         // Right: block panel, entity panel, component panel
         m_blockPanel = new BlockPanel(m_model);
-        m_entityPanel = new MapEntityPanel(m_model);
+        m_entityPanel = new EntityPanel(m_model);
         m_componentPanel = new ComponentPanel();
 
         m_blockPanel.setOnSelectionChanged(name -> {
