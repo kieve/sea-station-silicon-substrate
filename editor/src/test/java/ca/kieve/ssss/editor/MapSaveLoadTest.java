@@ -23,7 +23,7 @@ class MapSaveLoadTest {
     void roundTrip_staticTestMap(@TempDir Path tempDir) throws IOException {
         // Load the original map from classpath
         InputStream stream = getClass().getClassLoader()
-                .getResourceAsStream("content/maps/static_test_map.yaml");
+                .getResourceAsStream("content/maps/debug/static_test_map.yaml");
         assertNotNull(stream, "static_test_map.yaml not on classpath");
         MapDefinition originalDef = MapLoader.load(stream);
 

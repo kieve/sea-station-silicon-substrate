@@ -1,13 +1,12 @@
 package ca.kieve.ssss.editor.component;
 
-import ca.kieve.ssss.content.ComponentDefinition;
-import ca.kieve.ssss.content.ComponentTypeDeserializer;
-import ca.kieve.ssss.content.ContentRegistry;
 import ca.kieve.ssss.content.MapDefinition;
 import ca.kieve.ssss.editor.BlockColorResolver;
 import ca.kieve.ssss.editor.EditorContext;
 import ca.kieve.ssss.editor.EditorTheme;
 import ca.kieve.ssss.editor.MapSaver;
+import ca.kieve.ssss.editor.handler.EntityOverrideHandler;
+import ca.kieve.ssss.editor.handler.MapToolHandler;
 import ca.kieve.ssss.editor.model.EditorEntity;
 import ca.kieve.ssss.editor.model.EditorMapModel;
 import ca.kieve.ssss.editor.ui.PanCanvas;
@@ -18,7 +17,6 @@ import ca.kieve.ssss.editor.util.MapPathUtil;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
@@ -59,30 +57,8 @@ public class MapViewPanel extends BorderPane {
     private final Tab m_blocksTab;
     private final Tab m_entitiesTab;
     private final Button m_addOverrideBtn;
-
-    private record GridCell(int row, int col) {}
-
-    private record EntityPos(int x, int y, int z) {}
-
-    private static EntityPos getEntityPos(
-            EditorEntity entity) {
-        var posComp = entity.getPositionComponent();
-        if (posComp == null) {
-            return null;
-        }
-        Object xVal = posComp.properties().get("x");
-        Object yVal = posComp.properties().get("y");
-        Object zVal = posComp.properties().get("z");
-        if (xVal instanceof Number nx
-                && yVal instanceof Number ny
-                && zVal instanceof Number nz) {
-            return new EntityPos(
-                    nx.intValue(),
-                    ny.intValue(),
-                    nz.intValue());
-        }
-        return null;
-    }
+    private final EntityOverrideHandler m_overrideHandler;
+    private final MapToolHandler m_toolHandler;
 
     private int m_currentZ;
     private String m_selectedBlockName;
@@ -152,43 +128,72 @@ public class MapViewPanel extends BorderPane {
             m_panCanvas.requestRedraw();
         });
 
-        m_componentPanel.setOnPropertyEdited(
-                this::onPropertyEdited);
-        var overrideCallback =
-                new ComponentPanel
-                        .ComponentOverrideCallback() {
-                    @Override
-                    public void onOverrideAdded(
-                            String componentTypeName) {
-                        handleOverrideAdded(
-                                componentTypeName);
-                    }
+        m_overrideHandler = new EntityOverrideHandler(m_model);
+        m_overrideHandler.setRefresher(this::refreshEntityView);
 
-                    @Override
-                    public void onOverrideRemoved(
-                            String componentTypeName) {
-                        handleOverrideRemoved(
-                                componentTypeName);
-                    }
+        m_toolHandler = new MapToolHandler(m_model, m_renderer, m_panCanvas);
+        m_toolHandler.setViewUpdater(new MapToolHandler.ViewUpdater() {
+            @Override
+            public void onCellChanged(int mapCols, int mapRows) {
+                m_infoBar.setDimensions(mapCols, mapRows);
+            }
 
-                    @Override
-                    public void onPropertyReverted(
-                            String componentTypeName,
-                            String propertyName) {
-                        handlePropertyReverted(
-                                componentTypeName,
-                                propertyName);
-                    }
-                };
-        m_componentPanel.setOnComponentOverride(
-                overrideCallback);
+            @Override
+            public void onCellSelected(int row, int col, String blockName,
+                    List<SelectedCellOverlay.EntityInfo> entityInfos) {
+                m_selectedCellOverlay.setHeaderText(
+                        "Cell: (" + col + ", " + row + ")");
+                m_selectedCellOverlay.update(blockName, entityInfos);
+            }
+
+            @Override
+            public void onEntityMoved(EditorEntity entity, int row, int col) {
+                m_renderer.loadEntities(buildEntityMarkers(m_currentZ));
+                m_renderer.setSelectedCell(row, col);
+                m_componentPanel.showMapEntity(
+                        entity.id(), entity.components());
+            }
+
+            @Override
+            public void onSelectionCleared() {
+                m_selectedEntityIndex = null;
+                m_selectedCellOverlay.clear();
+            }
+        });
+
+        m_componentPanel.setOnPropertyEdited((compType, propName, newValue) ->
+                m_overrideHandler.onPropertyEdited(
+                        m_selectedEntityIndex, compType, propName, newValue));
+        var overrideCallback = new ComponentPanel.ComponentOverrideCallback() {
+            @Override
+            public void onOverrideAdded(String componentTypeName) {
+                m_overrideHandler.handleOverrideAdded(
+                        m_selectedEntityIndex, componentTypeName);
+            }
+
+            @Override
+            public void onOverrideRemoved(String componentTypeName) {
+                m_overrideHandler.handleOverrideRemoved(
+                        m_selectedEntityIndex, componentTypeName);
+            }
+
+            @Override
+            public void onPropertyReverted(String componentTypeName,
+                    String propertyName) {
+                m_overrideHandler.handlePropertyReverted(
+                        m_selectedEntityIndex, componentTypeName,
+                        propertyName);
+            }
+        };
+        m_componentPanel.setOnComponentOverride(overrideCallback);
 
         m_addOverrideBtn = new EditorButton("Add Override");
         m_addOverrideBtn.setMaxWidth(Double.MAX_VALUE);
         m_addOverrideBtn.setVisible(false);
         m_addOverrideBtn.setManaged(false);
         m_addOverrideBtn.setOnAction(
-                e -> showAddOverrideDialog());
+                e -> m_overrideHandler.showAddOverrideDialog(
+                        m_selectedEntityIndex));
 
         // Pick a default selected block (first non-air)
         for (var entry : m_model.getBlocks().entrySet()) {
@@ -356,7 +361,7 @@ public class MapViewPanel extends BorderPane {
     private void onToolChanged(
             EditorToolBar.Tool newTool) {
         if (newTool == EditorToolBar.Tool.PAINT) {
-            clearSelection();
+            m_toolHandler.clearSelection();
         }
         m_toolOptionsPanel.updateForTool(newTool);
     }
@@ -434,11 +439,13 @@ public class MapViewPanel extends BorderPane {
         if (tool == EditorToolBar.Tool.SELECT) {
             if (e.getButton()
                     == MouseButton.PRIMARY) {
-                selectAt(e.getX(), e.getY());
+                m_toolHandler.selectAt(
+                        e.getX(), e.getY(),
+                        m_currentZ);
                 e.consume();
             } else if (e.getButton()
                     == MouseButton.SECONDARY) {
-                clearSelection();
+                m_toolHandler.clearSelection();
                 e.consume();
             }
             return;
@@ -447,448 +454,39 @@ public class MapViewPanel extends BorderPane {
         if (tool == EditorToolBar.Tool.MOVE) {
             if (e.getButton()
                     == MouseButton.PRIMARY) {
-                moveEntityTo(e.getX(), e.getY());
+                m_toolHandler.moveEntityTo(
+                        e.getX(), e.getY(),
+                        m_selectedEntityIndex,
+                        m_currentZ);
                 e.consume();
             } else if (e.getButton()
                     == MouseButton.SECONDARY) {
-                clearSelection();
+                m_toolHandler.clearSelection();
                 e.consume();
             }
             return;
         }
 
+        boolean allLayers =
+                m_toolOptionsPanel.isAllLayers();
         if (e.getButton() == MouseButton.PRIMARY) {
-            paintAt(e.getX(), e.getY());
+            m_toolHandler.paintAt(
+                    e.getX(), e.getY(),
+                    m_selectedBlockName, m_currentZ,
+                    allLayers);
             e.consume();
         } else if (e.getButton()
                 == MouseButton.SECONDARY) {
-            eraseAt(e.getX(), e.getY());
+            m_toolHandler.eraseAt(
+                    e.getX(), e.getY(),
+                    m_currentZ, allLayers);
             e.consume();
         }
-    }
-
-    private GridCell mouseToGrid(
-            double mouseX, double mouseY) {
-        double zoom = m_panCanvas.getZoom();
-        int col = (int) Math.floor(
-                (mouseX / zoom
-                        + m_panCanvas.getCameraX())
-                        / MapRenderer.CELL_SIZE);
-        int row = (int) Math.floor(
-                (mouseY / zoom
-                        + m_panCanvas.getCameraY())
-                        / MapRenderer.CELL_SIZE);
-        row = m_renderer.visualRowToDataRow(row);
-        return new GridCell(row, col);
-    }
-
-    private void paintAt(
-            double mouseX, double mouseY) {
-        if (m_selectedBlockName == null) {
-            return;
-        }
-        if (!m_model.getBlocks()
-                .containsKey(m_selectedBlockName)) {
-            return;
-        }
-        var cell = mouseToGrid(mouseX, mouseY);
-        int row = cell.row();
-        int col = cell.col();
-
-        boolean changed;
-        if (m_toolOptionsPanel.isAllLayers()) {
-            changed = setCellAllLayers(
-                    row, col, m_selectedBlockName);
-        } else {
-            changed = m_model.setCell(
-                    m_currentZ, row, col,
-                    m_selectedBlockName);
-        }
-        if (!changed) {
-            return;
-        }
-        m_infoBar.setDimensions(
-                m_renderer.getMapCols(),
-                m_renderer.getMapRows());
-        m_panCanvas.requestRedraw();
-    }
-
-    private void eraseAt(
-            double mouseX, double mouseY) {
-        var cell = mouseToGrid(mouseX, mouseY);
-        int row = cell.row();
-        int col = cell.col();
-
-        boolean changed;
-        if (m_toolOptionsPanel.isAllLayers()) {
-            changed = setCellAllLayers(row, col, null);
-        } else {
-            changed = m_model.setCell(
-                    m_currentZ, row, col, null);
-        }
-        if (!changed) {
-            return;
-        }
-        m_infoBar.setDimensions(
-                m_renderer.getMapCols(),
-                m_renderer.getMapRows());
-        m_panCanvas.requestRedraw();
-    }
-
-    private boolean setCellAllLayers(
-            int row, int col, String blockName) {
-        boolean anyChanged = false;
-        for (int z : m_model.getZLevels()) {
-            if (m_model.setCell(z, row, col, blockName)) {
-                anyChanged = true;
-            }
-        }
-        return anyChanged;
-    }
-
-    private void selectAt(
-            double mouseX, double mouseY) {
-        var cell = mouseToGrid(mouseX, mouseY);
-        int row = cell.row();
-        int col = cell.col();
-        m_renderer.setSelectedCell(row, col);
-
-        String blockName =
-                m_model.getCell(m_currentZ, row, col);
-
-        var entityInfos =
-                new ArrayList<SelectedCellOverlay.EntityInfo>();
-        var entities = m_model.getEntities();
-        for (int i = 0; i < entities.size(); i++) {
-            var entity = entities.get(i);
-            var pos = getEntityPos(entity);
-            if (pos != null
-                    && pos.x() == col
-                    && pos.y() == row
-                    && pos.z() == m_currentZ) {
-                entityInfos.add(
-                        new SelectedCellOverlay
-                                .EntityInfo(
-                                i, entity.id()));
-            }
-        }
-
-        m_selectedCellOverlay.setHeaderText(
-                "Cell: (" + col + ", " + row + ")");
-        m_selectedCellOverlay.update(
-                blockName, entityInfos);
-        m_panCanvas.requestRedraw();
-    }
-
-    private void moveEntityTo(
-            double mouseX, double mouseY) {
-        if (m_selectedEntityIndex == null) {
-            return;
-        }
-        var entities = m_model.getEntities();
-        if (m_selectedEntityIndex < 0
-                || m_selectedEntityIndex
-                        >= entities.size()) {
-            return;
-        }
-        var cell = mouseToGrid(mouseX, mouseY);
-        int row = cell.row();
-        int col = cell.col();
-
-        var entity =
-                entities.get(m_selectedEntityIndex);
-        entity.movePosition(col, row, m_currentZ);
-        m_model.markModified();
-
-        m_renderer.loadEntities(
-                buildEntityMarkers(m_currentZ));
-        m_renderer.setSelectedCell(row, col);
-        m_componentPanel.showMapEntity(
-                entity.id(), entity.components());
-        m_panCanvas.requestRedraw();
-    }
-
-    private void onPropertyEdited(
-            String componentTypeName,
-            String propertyName,
-            String newValue) {
-        if (m_selectedEntityIndex == null) {
-            return;
-        }
-        var entities = m_model.getEntities();
-        if (m_selectedEntityIndex < 0
-                || m_selectedEntityIndex
-                        >= entities.size()) {
-            return;
-        }
-
-        var entity =
-                entities.get(m_selectedEntityIndex);
-        ContentRegistry registry =
-                EditorContext.getInstance().getRegistry();
-
-        // Find existing override on the entity
-        ComponentDefinition overrideComp = null;
-        for (var comp : entity.components()) {
-            if (comp.type().getSimpleName()
-                    .equals(componentTypeName)) {
-                overrideComp = comp;
-                break;
-            }
-        }
-
-        if (overrideComp == null) {
-            // Creating override from base component
-            if (!registry.hasEntity(entity.id())) {
-                return;
-            }
-            var baseDef = registry.getEntityDefinition(
-                    entity.id());
-            var resolved =
-                    baseDef.resolveComponents(registry);
-            ComponentDefinition baseComp = null;
-            for (var comp : resolved) {
-                if (comp.type().getSimpleName()
-                        .equals(componentTypeName)) {
-                    baseComp = comp;
-                    break;
-                }
-            }
-            if (baseComp == null) {
-                return;
-            }
-
-            // Clone the base component into an override
-            overrideComp = new ComponentDefinition(
-                    baseComp.type());
-            for (var prop
-                    : baseComp.properties().entrySet()) {
-                overrideComp.setProperty(
-                        prop.getKey(), prop.getValue());
-            }
-        }
-
-        // Parse the new value to match original type
-        Object oldValue =
-                overrideComp.properties()
-                        .get(propertyName);
-        Object parsed = parseValue(newValue, oldValue);
-        overrideComp.setProperty(propertyName, parsed);
-        entity.setComponentOverride(overrideComp);
-        m_model.markModified();
-
-        // Refresh
-        m_renderer.loadEntities(
-                buildEntityMarkers(m_currentZ));
-        m_componentPanel.showMapEntity(
-                entity.id(), entity.components());
-        m_panCanvas.requestRedraw();
     }
 
     private void setAddOverrideVisible(boolean visible) {
         m_addOverrideBtn.setVisible(visible);
         m_addOverrideBtn.setManaged(visible);
-    }
-
-    private void showAddOverrideDialog() {
-        if (m_selectedEntityIndex == null) {
-            return;
-        }
-        var entities = m_model.getEntities();
-        if (m_selectedEntityIndex < 0
-                || m_selectedEntityIndex
-                        >= entities.size()) {
-            return;
-        }
-
-        var entity =
-                entities.get(m_selectedEntityIndex);
-        ContentRegistry registry =
-                EditorContext.getInstance().getRegistry();
-
-        // Build set of types already present
-        var excludeTypes = new HashSet<String>();
-        for (var comp : entity.components()) {
-            excludeTypes.add(
-                    comp.type().getSimpleName());
-        }
-        if (registry.hasEntity(entity.id())) {
-            var baseDef = registry.getEntityDefinition(
-                    entity.id());
-            for (var comp
-                    : baseDef.resolveComponents(
-                            registry)) {
-                excludeTypes.add(
-                        comp.type().getSimpleName());
-            }
-        }
-
-        var result =
-                ComponentAddDialog.showAdd(excludeTypes);
-        result.ifPresent(r ->
-                handleOverrideAdded(
-                        r.componentTypeName()));
-    }
-
-    private void handleOverrideAdded(
-            String componentTypeName) {
-        if (m_selectedEntityIndex == null) {
-            return;
-        }
-        var entities = m_model.getEntities();
-        if (m_selectedEntityIndex < 0
-                || m_selectedEntityIndex
-                        >= entities.size()) {
-            return;
-        }
-
-        var entity =
-                entities.get(m_selectedEntityIndex);
-        ContentRegistry registry =
-                EditorContext.getInstance().getRegistry();
-
-        // Check if base entity has this component
-        ComponentDefinition baseComp = null;
-        if (registry.hasEntity(entity.id())) {
-            var baseDef = registry.getEntityDefinition(
-                    entity.id());
-            for (var comp
-                    : baseDef.resolveComponents(
-                            registry)) {
-                if (comp.type().getSimpleName()
-                        .equals(componentTypeName)) {
-                    baseComp = comp;
-                    break;
-                }
-            }
-        }
-
-        ComponentDefinition newComp;
-        if (baseComp != null) {
-            // Clone base component (REPLACED)
-            newComp = new ComponentDefinition(
-                    baseComp.type());
-            for (var prop
-                    : baseComp.properties().entrySet()) {
-                newComp.setProperty(
-                        prop.getKey(),
-                        prop.getValue());
-            }
-        } else {
-            // New component not in base (ADDED)
-            Class<?> clazz =
-                    ComponentTypeDeserializer
-                            .resolveType(
-                                    componentTypeName);
-            if (clazz == null) {
-                return;
-            }
-            newComp = new ComponentDefinition(clazz);
-        }
-
-        entity.setComponentOverride(newComp);
-        m_model.markModified();
-        refreshEntityView(entity);
-    }
-
-    private void handleOverrideRemoved(
-            String componentTypeName) {
-        if (m_selectedEntityIndex == null) {
-            return;
-        }
-        var entities = m_model.getEntities();
-        if (m_selectedEntityIndex < 0
-                || m_selectedEntityIndex
-                        >= entities.size()) {
-            return;
-        }
-
-        var entity =
-                entities.get(m_selectedEntityIndex);
-        entity.removeComponent(componentTypeName);
-        m_model.markModified();
-        refreshEntityView(entity);
-    }
-
-    private void handlePropertyReverted(
-            String componentTypeName,
-            String propertyName) {
-        if (m_selectedEntityIndex == null) {
-            return;
-        }
-        var entities = m_model.getEntities();
-        if (m_selectedEntityIndex < 0
-                || m_selectedEntityIndex
-                        >= entities.size()) {
-            return;
-        }
-
-        var entity =
-                entities.get(m_selectedEntityIndex);
-        ContentRegistry registry =
-                EditorContext.getInstance().getRegistry();
-
-        if (!registry.hasEntity(entity.id())) {
-            return;
-        }
-        var baseDef = registry.getEntityDefinition(
-                entity.id());
-        var resolved =
-                baseDef.resolveComponents(registry);
-
-        // Find base component
-        ComponentDefinition baseComp = null;
-        for (var comp : resolved) {
-            if (comp.type().getSimpleName()
-                    .equals(componentTypeName)) {
-                baseComp = comp;
-                break;
-            }
-        }
-        if (baseComp == null) {
-            return;
-        }
-
-        // Find override component on entity
-        ComponentDefinition overrideComp = null;
-        for (var comp : entity.components()) {
-            if (comp.type().getSimpleName()
-                    .equals(componentTypeName)) {
-                overrideComp = comp;
-                break;
-            }
-        }
-        if (overrideComp == null) {
-            return;
-        }
-
-        Object baseValue =
-                baseComp.properties().get(propertyName);
-        if (baseValue == null) {
-            return;
-        }
-        overrideComp.setProperty(
-                propertyName, baseValue);
-
-        // Check if all properties now match base
-        // — if so, remove the override entirely
-        boolean allMatch = true;
-        for (var entry
-                : overrideComp.properties().entrySet()) {
-            Object bv = baseComp.properties()
-                    .get(entry.getKey());
-            if (bv == null || !String.valueOf(bv).equals(
-                    String.valueOf(entry.getValue()))) {
-                allMatch = false;
-                break;
-            }
-        }
-        if (allMatch) {
-            entity.removeComponent(componentTypeName);
-        }
-
-        m_model.markModified();
-        refreshEntityView(entity);
     }
 
     private void refreshEntityView(EditorEntity entity) {
@@ -900,51 +498,8 @@ public class MapViewPanel extends BorderPane {
         m_panCanvas.requestRedraw();
     }
 
-    private static Object parseValue(
-            String value, Object original) {
-        if (original instanceof Integer) {
-            try {
-                return Integer.parseInt(value);
-            } catch (NumberFormatException e) {
-                return original;
-            }
-        }
-        if (original instanceof Long) {
-            try {
-                return Long.parseLong(value);
-            } catch (NumberFormatException e) {
-                return original;
-            }
-        }
-        if (original instanceof Double) {
-            try {
-                return Double.parseDouble(value);
-            } catch (NumberFormatException e) {
-                return original;
-            }
-        }
-        if (original instanceof Float) {
-            try {
-                return Float.parseFloat(value);
-            } catch (NumberFormatException e) {
-                return original;
-            }
-        }
-        if (original instanceof Boolean) {
-            return Boolean.parseBoolean(value);
-        }
-        return value;
-    }
-
-    private void clearSelection() {
-        m_selectedEntityIndex = null;
-        m_renderer.setSelectedCell(null, null);
-        m_selectedCellOverlay.clear();
-        m_panCanvas.requestRedraw();
-    }
-
     private void focusEntity(EditorEntity entity) {
-        var pos = getEntityPos(entity);
+        var pos = entity.getEntityPos();
         if (pos == null) {
             return;
         }
@@ -970,7 +525,7 @@ public class MapViewPanel extends BorderPane {
         var entities = m_model.getEntities();
         for (int i = 0; i < entities.size(); i++) {
             var e = entities.get(i);
-            var ePos = getEntityPos(e);
+            var ePos = e.getEntityPos();
             if (ePos != null
                     && ePos.x() == col
                     && ePos.y() == row
@@ -1052,7 +607,7 @@ public class MapViewPanel extends BorderPane {
         var markers =
                 new ArrayList<MapRenderer.EntityMarker>();
         for (EditorEntity entity : entities) {
-            var pos = getEntityPos(entity);
+            var pos = entity.getEntityPos();
             if (pos == null || pos.z() != zLevel) {
                 continue;
             }

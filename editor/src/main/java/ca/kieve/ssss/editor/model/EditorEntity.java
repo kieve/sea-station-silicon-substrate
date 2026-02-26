@@ -9,6 +9,8 @@ import java.util.Collections;
 import java.util.List;
 
 public class EditorEntity {
+    public record EntityPos(int x, int y, int z) {}
+
     private String m_id;
     private final List<ComponentDefinition> m_components;
 
@@ -47,6 +49,25 @@ public class EditorEntity {
             if (comp.type() == Position.class) {
                 return comp;
             }
+        }
+        return null;
+    }
+
+    public EntityPos getEntityPos() {
+        var posComp = getPositionComponent();
+        if (posComp == null) {
+            return null;
+        }
+        Object xVal = posComp.properties().get("x");
+        Object yVal = posComp.properties().get("y");
+        Object zVal = posComp.properties().get("z");
+        if (xVal instanceof Number nx
+                && yVal instanceof Number ny
+                && zVal instanceof Number nz) {
+            return new EntityPos(
+                    nx.intValue(),
+                    ny.intValue(),
+                    nz.intValue());
         }
         return null;
     }
