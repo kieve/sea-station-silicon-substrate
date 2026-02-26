@@ -22,7 +22,11 @@
       "Bash(find:*)",
       "WebFetch(domain:checkstyle.sourceforge.io)",
       "WebFetch(domain:docs.gradle.org)",
-      "Bash(grep \\\\[ERROR\\\\]:*)"
+      "Bash(grep \\\\[ERROR\\\\]:*)",
+      "WebFetch(domain:javaparser.org)",
+      "WebFetch(domain:tomassetti.me)",
+      "WebFetch(domain:www.tabnine.com)",
+      "WebFetch(domain:www.javadoc.io)"
     ],
     "deny": [],
     "ask": []
