@@ -362,27 +362,27 @@ public class MapViewPanel extends BorderPane {
     }
 
     private void onTabChanged(Tab newTab) {
-        if (newTab == m_blocksTab) {
-            setAddOverrideVisible(false);
-            String sel =
-                    m_blockPanel.getSelectedBlock();
-            if (sel != null) {
-                var blockDef =
-                        m_model.getBlocks().get(sel);
-                if (blockDef != null) {
-                    m_componentPanel.showEntity(
-                            blockDef.bpId());
-                } else {
-                    m_componentPanel.clear();
-                }
-            } else {
-                m_componentPanel.clear();
-            }
-        } else {
+        if (newTab != m_blocksTab) {
             setAddOverrideVisible(
                     m_selectedEntityIndex != null);
             m_componentPanel.clear();
+            return;
         }
+
+        setAddOverrideVisible(false);
+        String sel = m_blockPanel.getSelectedBlock();
+        if (sel == null) {
+            m_componentPanel.clear();
+            return;
+        }
+
+        var blockDef = m_model.getBlocks().get(sel);
+        if (blockDef == null) {
+            m_componentPanel.clear();
+            return;
+        }
+
+        m_componentPanel.showEntity(blockDef.bpId());
     }
 
     public void refreshBlockTypes() {
