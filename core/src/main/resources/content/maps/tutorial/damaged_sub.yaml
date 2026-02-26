@@ -1,0 +1,44 @@
+---
+blocks:
+  air:
+    bpId: air
+    layoutChar: a
+  floor:
+    bpId: block_steel
+    layoutChar: b
+  wall:
+    bpId: block_steel
+    layoutChar: c
+layers:
+  "0": |
+    ccccccccc
+    cbbbbbbbc
+    cbbbbbbbc
+    cbbbbbbbc
+    cbbbbbbbc
+    cbbbbbbbc
+    ccccccccc
+  "1": |
+    ccccccccc
+    caaaaaaac
+    caaaaaaac
+    caaaaaaac
+    caaaaaaac
+    caaaaaaac
+    ccccccccc
+  "2": |
+    ccccccccc
+    ccccccccc
+    ccccccccc
+    ccccccccc
+    ccccccccc
+    ccccccccc
+    ccccccccc
+floorGlyph: interpunct
+entities:
+- id: player
+  components:
+  - type: Position
+    x: 4
+    "y": 3
+    z: 1

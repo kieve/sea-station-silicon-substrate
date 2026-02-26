@@ -13,6 +13,7 @@ import ca.kieve.ssss.editor.model.EditorMapModel;
 import ca.kieve.ssss.editor.ui.PanCanvas;
 import ca.kieve.ssss.editor.ui.fx.EditorButton;
 import ca.kieve.ssss.editor.util.DialogUtil;
+import ca.kieve.ssss.editor.util.MapPathUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -220,7 +221,7 @@ public class MapViewPanel extends BorderPane {
         // Bottom: info bar
         m_infoBar = new InfoBar();
         m_infoBar.setFileName(
-                mapFile != null ? mapFile.getName() : "");
+                MapPathUtil.getRelativePath(mapFile));
 
         // Floating Z-level overlay
         m_zOverlay = new ZLevelOverlay();
@@ -343,11 +344,10 @@ public class MapViewPanel extends BorderPane {
     public void saveAs(File file) {
         try {
             MapSaver.save(m_model, file);
-            m_infoBar.setFileName(file.getName());
+            m_infoBar.setFileName(MapPathUtil.getRelativePath(file));
         } catch (IOException ex) {
             var alert = new Alert(Alert.AlertType.ERROR);
-            DialogUtil.style(
-                    alert, "Failed to Save Map");
+            DialogUtil.style(alert, "Failed to Save Map");
             alert.setContentText(ex.getMessage());
             alert.showAndWait();
         }

@@ -13,13 +13,13 @@ import ca.kieve.ssss.editor.ui.WindowResizeHandler;
 import ca.kieve.ssss.editor.ui.WindowsAeroSnap;
 import ca.kieve.ssss.editor.util.DialogUtil;
 import ca.kieve.ssss.editor.util.GameLauncher;
+import ca.kieve.ssss.editor.util.MapPathUtil;
 
 import atlantafx.base.theme.PrimerDark;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -89,7 +89,7 @@ public class EditorFxApp extends Application {
         m_stage = stage;
         DialogUtil.setOwner(stage);
 
-        m_lastDirectory = resolveDefaultMapsDir();
+        m_lastDirectory = MapPathUtil.resolveMapsDir();
 
         m_tabPane = new TabPane();
         m_tabPane.getStylesheets().add(inline(CSS));
@@ -315,7 +315,8 @@ public class EditorFxApp extends Application {
         }
 
         // Update system config to point to this map
-        String mapFilename = panel.getModel().getFile().getName();
+        String mapFilename = MapPathUtil.getRelativePath(
+                panel.getModel().getFile());
         var configPanel = getSystemConfigPanel();
         if (configPanel != null) {
             configPanel.getModel().setLaunchMap(mapFilename);
@@ -465,7 +466,7 @@ public class EditorFxApp extends Application {
     private void initSystemConfigTab() {
         File configFile = resolveSystemConfigFile();
         SystemConfigModel model = loadSystemConfigModel(configFile);
-        List<String> maps = listAvailableMaps();
+        List<String> maps = MapPathUtil.listAvailableMaps();
 
         var panel = new SystemConfigPanel(model, maps);
 
@@ -516,39 +517,4 @@ public class EditorFxApp extends Application {
         }
     }
 
-    private List<String> listAvailableMaps() {
-        File mapsDir = resolveDefaultMapsDir();
-        if (mapsDir == null || !mapsDir.isDirectory()) {
-            return List.of();
-        }
-        File[] files = mapsDir.listFiles(
-                (dir, name) -> name.endsWith(".yaml"));
-        if (files == null) {
-            return List.of();
-        }
-        var names = new ArrayList<String>();
-        for (File f : files) {
-            names.add(f.getName());
-        }
-        names.sort(String::compareTo);
-        return names;
-    }
-
-    private File resolveDefaultMapsDir() {
-        String mapsRelPath =
-                "core/src/main/resources/content/maps";
-
-        Path userDir = Path.of(System.getProperty("user.dir"));
-        Path fromUserDir = userDir.resolve(mapsRelPath);
-        if (fromUserDir.toFile().isDirectory()) {
-            return fromUserDir.toFile();
-        }
-
-        Path fromParent = userDir.getParent().resolve(mapsRelPath);
-        if (fromParent.toFile().isDirectory()) {
-            return fromParent.toFile();
-        }
-
-        return null;
-    }
 }
