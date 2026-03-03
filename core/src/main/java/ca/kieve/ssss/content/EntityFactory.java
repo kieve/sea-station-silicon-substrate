@@ -1,12 +1,12 @@
 package ca.kieve.ssss.content;
 
+import com.badlogic.gdx.graphics.Color;
+import dev.dominion.ecs.api.Entity;
+
 import ca.kieve.ssss.component.ColorComp;
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.util.Vec3i;
-
-import com.badlogic.gdx.graphics.Color;
-import dev.dominion.ecs.api.Entity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,14 +51,12 @@ public class EntityFactory {
     ) {
         // Create a virtual definition with the base entity as parent
         // and overrides as components - reuses resolveComponents merge logic
-        EntityDefinition overrideDef =
-            new EntityDefinition(List.of(entityId), overrides);
+        EntityDefinition overrideDef = new EntityDefinition(List.of(entityId), overrides);
 
         // Set GameContext so ComponentFactory can create special components
         m_registry.getComponentFactory().setGameContext(context);
 
-        List<Object> components =
-            new ArrayList<>(overrideDef.instantiateComponents(m_registry));
+        List<Object> components = new ArrayList<>(overrideDef.instantiateComponents(m_registry));
 
         Entity entity = context.ecs().createEntity(components.toArray());
 

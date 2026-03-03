@@ -1,5 +1,9 @@
 package ca.kieve.ssss;
 
+import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+
 import ca.kieve.ssss.component.CameraComp;
 import ca.kieve.ssss.content.MapEntityDefinition;
 import ca.kieve.ssss.context.GameContext;
@@ -29,10 +33,6 @@ import ca.kieve.ssss.world.StaticTestMapGenerator;
 import ca.kieve.ssss.world.WorldEntityFactory;
 import ca.kieve.ssss.world.WorldModel;
 
-import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-
 import java.util.List;
 
 public class GameEngine {
@@ -56,7 +56,8 @@ public class GameEngine {
     }
 
     private void createUpdateSystems() {
-        m_gameContext.updateSystems().addAll(List.of(
+        m_gameContext.updateSystems().addAll(
+            List.of(
                 new ClockSystem(m_gameContext),
                 new InteractSystem(m_gameContext),
                 new OpenSystem(m_gameContext),
@@ -72,13 +73,15 @@ public class GameEngine {
                 new CameraSystem(m_gameContext),
                 new SanityCheckSystem(m_gameContext),
                 new EventSystem(m_gameContext)
-        ));
+            )
+        );
     }
 
     public void initializeRenderSystems(
-            SpriteBatch spriteBatch,
-            ShapeRenderer shapeRenderer,
-            Camera camera) {
+        SpriteBatch spriteBatch,
+        ShapeRenderer shapeRenderer,
+        Camera camera
+    ) {
         // Assign the libGDX camera to the entity with CameraComp
         var cameraResults = m_gameContext.ecs().findEntitiesWith(CameraComp.class);
         for (var result : cameraResults) {
@@ -86,27 +89,29 @@ public class GameEngine {
         }
 
         var tileGlyphRenderSystem = new TileGlyphRenderSystem(
-                m_gameContext,
-                spriteBatch,
-                shapeRenderer,
-                m_mapGenerator.getFloorGlyphId());
+            m_gameContext,
+            spriteBatch,
+            shapeRenderer,
+            m_mapGenerator.getFloorGlyphId()
+        );
         tileGlyphRenderSystem.setDebugGrid(DEBUG_GRID);
 
-        var debugRectRenderSystem = new DebugRectRenderSystem(
-                m_gameContext, shapeRenderer);
+        var debugRectRenderSystem = new DebugRectRenderSystem(m_gameContext, shapeRenderer);
 
         var highlightProviders = List.of(
-                m_gameContext.examine(),
-                m_gameContext.eject(),
-                m_gameContext.interact());
+            m_gameContext.examine(),
+            m_gameContext.eject(),
+            m_gameContext.interact()
+        );
         var tileHighlightRenderSystem = new TileHighlightRenderSystem(
-                m_gameContext, shapeRenderer, highlightProviders);
+            m_gameContext,
+            shapeRenderer,
+            highlightProviders
+        );
 
-        m_gameContext.renderSystems().addAll(List.of(
-                tileGlyphRenderSystem,
-                debugRectRenderSystem,
-                tileHighlightRenderSystem
-        ));
+        m_gameContext.renderSystems().addAll(
+            List.of(tileGlyphRenderSystem, debugRectRenderSystem, tileHighlightRenderSystem)
+        );
     }
 
     private void createEntities() {
@@ -117,7 +122,10 @@ public class GameEngine {
         var factory = m_gameContext.entityFactory();
         for (MapEntityDefinition entityDef : m_mapGenerator.getEntities()) {
             factory.createEntityWithOverrides(
-                    m_gameContext, entityDef.id(), entityDef.components());
+                m_gameContext,
+                entityDef.id(),
+                entityDef.components()
+            );
         }
 
         // Run map init systems for post-spawn processing

@@ -1,17 +1,17 @@
 package ca.kieve.ssss.ui.node;
 
-import static ca.kieve.ssss.repository.FontRepo.UI_UBUNTU_24;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
 import ca.kieve.ssss.context.LogContext.LogEntry;
 import ca.kieve.ssss.repository.FontRepo;
 import ca.kieve.ssss.ui.core.UiNode;
 import ca.kieve.ssss.ui.core.UiRenderContext;
 
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import static ca.kieve.ssss.repository.FontRepo.UI_UBUNTU_24;
 
 /**
  * UI widget that displays the game log messages.
@@ -79,8 +79,8 @@ public class LogPanel extends UiNode {
 
             // Wrap the message (first line includes prefix, continuation lines get indent)
             String fullLine = prefix + message;
-            List<String> wrapped =
-                FontRepo.wrapText(UI_UBUNTU_24, fullLine, availableWidth, indent);
+            List<String> wrapped = FontRepo
+                .wrapText(UI_UBUNTU_24, fullLine, availableWidth, indent);
             allWrappedLines.addAll(wrapped);
         }
 

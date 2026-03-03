@@ -16,12 +16,7 @@ import java.util.List;
  * fields, respecting {@link EditorIgnore} and {@link EditorRef} annotations.
  */
 public final class ComponentIntrospector {
-
-    public record FieldInfo(
-            String name,
-            Class<?> type,
-            EditorRef.Source refSource
-    ) {
+    public record FieldInfo(String name, Class<?> type, EditorRef.Source refSource) {
         public FieldInfo(String name, Class<?> type) {
             this(name, type, null);
         }
@@ -35,8 +30,8 @@ public final class ComponentIntrospector {
      * Discovers editable fields for a component by its simple type name
      * (e.g. "Health", "Position").
      *
-     * @return editable fields, or empty list if the type cannot be resolved
-     *         or is a marker / enum component
+     * @return editable fields, or empty list if the type cannot be resolved or is a marker / enum
+     *         component
      */
     public static List<FieldInfo> getEditableFields(String typeName) {
         Class<?> clazz = ComponentTypeDeserializer.resolveType(typeName);
@@ -90,8 +85,7 @@ public final class ComponentIntrospector {
      * Returns the enum constant names for an enum component by its simple
      * type name.
      *
-     * @return constant names, or empty list if the type cannot be resolved
-     *         or is not an enum
+     * @return constant names, or empty list if the type cannot be resolved or is not an enum
      */
     public static List<String> getEnumConstants(String typeName) {
         Class<?> clazz = ComponentTypeDeserializer.resolveType(typeName);
@@ -112,8 +106,7 @@ public final class ComponentIntrospector {
         return getEditableFields(componentClass).isEmpty();
     }
 
-    private static void discoverRecordFields(
-            Class<?> componentClass, List<FieldInfo> result) {
+    private static void discoverRecordFields(Class<?> componentClass, List<FieldInfo> result) {
         for (RecordComponent rc : componentClass.getRecordComponents()) {
             if (rc.isAnnotationPresent(EditorIgnore.class)) {
                 continue;
@@ -124,16 +117,14 @@ public final class ComponentIntrospector {
             }
             EditorRef ref = rc.getAnnotation(EditorRef.class);
             if (ref != null) {
-                result.add(new FieldInfo(
-                        ref.value(), String.class, ref.source()));
+                result.add(new FieldInfo(ref.value(), String.class, ref.source()));
             } else {
                 result.add(new FieldInfo(rc.getName(), rc.getType()));
             }
         }
     }
 
-    private static void discoverClassFields(
-            Class<?> componentClass, List<FieldInfo> result) {
+    private static void discoverClassFields(Class<?> componentClass, List<FieldInfo> result) {
         for (Field field : componentClass.getDeclaredFields()) {
             if (Modifier.isStatic(field.getModifiers())) {
                 continue;
@@ -150,8 +141,7 @@ public final class ComponentIntrospector {
             }
             EditorRef ref = field.getAnnotation(EditorRef.class);
             if (ref != null) {
-                result.add(new FieldInfo(
-                        ref.value(), String.class, ref.source()));
+                result.add(new FieldInfo(ref.value(), String.class, ref.source()));
             } else {
                 result.add(new FieldInfo(field.getName(), field.getType()));
             }
@@ -160,12 +150,12 @@ public final class ComponentIntrospector {
 
     private static boolean shouldDecompose(RecordComponent rc) {
         return rc.isAnnotationPresent(EditorDecompose.class)
-                || rc.getType().isAnnotationPresent(EditorDecompose.class);
+            || rc.getType().isAnnotationPresent(EditorDecompose.class);
     }
 
     private static boolean shouldDecompose(Field field) {
         return field.isAnnotationPresent(EditorDecompose.class)
-                || field.getType().isAnnotationPresent(EditorDecompose.class);
+            || field.getType().isAnnotationPresent(EditorDecompose.class);
     }
 
     private static void decomposeFields(Class<?> type, List<FieldInfo> result) {
@@ -180,5 +170,6 @@ public final class ComponentIntrospector {
         }
     }
 
-    private ComponentIntrospector() {}
+    private ComponentIntrospector() {
+    }
 }

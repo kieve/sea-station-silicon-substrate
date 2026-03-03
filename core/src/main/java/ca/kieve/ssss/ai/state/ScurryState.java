@@ -1,9 +1,6 @@
 package ca.kieve.ssss.ai.state;
 
-import static ca.kieve.ssss.util.Vec3i.EAST;
-import static ca.kieve.ssss.util.Vec3i.NORTH;
-import static ca.kieve.ssss.util.Vec3i.SOUTH;
-import static ca.kieve.ssss.util.Vec3i.WEST;
+import dev.dominion.ecs.api.Entity;
 
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.component.ScurryConfig;
@@ -12,7 +9,10 @@ import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.util.SolidUtil;
 import ca.kieve.ssss.util.Vec3i;
 
-import dev.dominion.ecs.api.Entity;
+import static ca.kieve.ssss.util.Vec3i.EAST;
+import static ca.kieve.ssss.util.Vec3i.NORTH;
+import static ca.kieve.ssss.util.Vec3i.SOUTH;
+import static ca.kieve.ssss.util.Vec3i.WEST;
 
 /**
  * AI state that makes an entity run in a straight line until hitting a wall,
@@ -83,16 +83,17 @@ public class ScurryState extends AiState {
 
         if (!m_wallFollowing) {
             executeStraightLine(gameContext, pos, velocity, entity);
-        } else {
-            executeWallFollowing(gameContext, pos, velocity, entity);
+            return;
         }
+        executeWallFollowing(gameContext, pos, velocity, entity);
     }
 
     private void executeStraightLine(
-            GameContext gameContext,
-            Vec3i pos,
-            Velocity velocity,
-            Entity entity) {
+        GameContext gameContext,
+        Vec3i pos,
+        Velocity velocity,
+        Entity entity
+    ) {
         Vec3i ahead = pos.add(m_direction);
 
         if (SolidUtil.hasWallFor(gameContext, ahead, entity)) {
@@ -105,21 +106,24 @@ public class ScurryState extends AiState {
                 m_direction = rotateCounterClockwise(m_direction);
             }
             // Don't move this tick - let next tick handle movement
-        } else if (SolidUtil.hasMovingSolidFor(gameContext, ahead, entity)) {
+            return;
+        }
+        if (SolidUtil.hasMovingSolidFor(gameContext, ahead, entity)) {
             // Hit moving entity - pick new random direction to find a wall
             m_direction = pickRandomDirection(gameContext);
             // Don't move this tick
-        } else {
-            // Path clear - move forward
-            velocity.instant().set(m_direction);
+            return;
         }
+        // Path clear - move forward
+        velocity.instant().set(m_direction);
     }
 
     private void executeWallFollowing(
-            GameContext gameContext,
-            Vec3i pos,
-            Velocity velocity,
-            Entity entity) {
+        GameContext gameContext,
+        Vec3i pos,
+        Velocity velocity,
+        Entity entity
+    ) {
         // Wall should be on the opposite side of our turn direction:
         // CW (turn right) -> wall on left
         // CCW (turn left) -> wall on right
@@ -145,7 +149,9 @@ public class ScurryState extends AiState {
                 m_direction = rotateClockwise(m_direction);
             }
             velocity.instant().set(m_direction);
-        } else if (SolidUtil.hasWallFor(gameContext, ahead, entity)) {
+            return;
+        }
+        if (SolidUtil.hasWallFor(gameContext, ahead, entity)) {
             // Concave corner - wall blocks path, turn away
             if (m_clockwise) {
                 m_direction = rotateClockwise(m_direction);
@@ -153,10 +159,10 @@ public class ScurryState extends AiState {
                 m_direction = rotateCounterClockwise(m_direction);
             }
             // Don't move this tick
-        } else {
-            // Normal following - move forward
-            velocity.instant().set(m_direction);
+            return;
         }
+        // Normal following - move forward
+        velocity.instant().set(m_direction);
     }
 
     private static Vec3i rotateClockwise(Vec3i dir) {

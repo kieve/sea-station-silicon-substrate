@@ -14,6 +14,10 @@ buildscript {
   }
 }
 
+plugins {
+  id 'ca.kieve.java-formatter' apply false
+}
+
 allprojects {
   group = 'ca.kieve.ssss'
   apply plugin: 'idea'

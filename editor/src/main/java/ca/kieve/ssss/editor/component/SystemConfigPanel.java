@@ -1,13 +1,5 @@
 package ca.kieve.ssss.editor.component;
 
-import ca.kieve.ssss.editor.SystemConfigSaver;
-import ca.kieve.ssss.editor.model.SystemConfigModel;
-import ca.kieve.ssss.editor.ui.fx.EditorButton;
-import ca.kieve.ssss.editor.ui.fx.EditorLabel;
-import ca.kieve.ssss.editor.util.DialogUtil;
-
-import java.io.IOException;
-import java.util.List;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -16,6 +8,15 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+
+import ca.kieve.ssss.editor.SystemConfigSaver;
+import ca.kieve.ssss.editor.model.SystemConfigModel;
+import ca.kieve.ssss.editor.ui.fx.EditorButton;
+import ca.kieve.ssss.editor.ui.fx.EditorLabel;
+import ca.kieve.ssss.editor.util.DialogUtil;
+
+import java.io.IOException;
+import java.util.List;
 
 public class SystemConfigPanel extends BorderPane {
     private static final int TOOLBAR_SPACING = 8;
@@ -70,15 +71,13 @@ public class SystemConfigPanel extends BorderPane {
 
         var launchMapLabel = new EditorLabel("Launch Map");
         m_model.launchMapDirtyProperty().addListener(
-                (obs, oldVal, newVal) ->
-                        launchMapLabel.setText(newVal
-                                ? "Launch Map *"
-                                : "Launch Map"));
+            (obs, oldVal, newVal) -> launchMapLabel
+                .setText(newVal ? "Launch Map *" : "Launch Map")
+        );
 
-        var launchMapCombo = new ComboBox<>(
-                FXCollections.observableArrayList(availableMaps));
+        var launchMapCombo = new ComboBox<>(FXCollections.observableArrayList(availableMaps));
         launchMapCombo.valueProperty()
-                .bindBidirectional(m_model.launchMapProperty());
+            .bindBidirectional(m_model.launchMapProperty());
 
         grid.add(launchMapLabel, 0, 0);
         grid.add(launchMapCombo, 1, 0);

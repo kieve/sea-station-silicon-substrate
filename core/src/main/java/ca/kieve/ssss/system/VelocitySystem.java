@@ -20,33 +20,32 @@ public class VelocitySystem extends System {
 
     @Override
     public void tick() {
-        var searchResults = m_gameContext.ecs().findEntitiesWith(
-            Position.class,
-            Velocity.class
-        );
+        var searchResults = m_gameContext.ecs().findEntitiesWith(Position.class, Velocity.class);
 
         searchResults.stream()
-            .sorted(Comparator.comparingInt(result ->
-                result.entity().has(PlayerController.class) ? -1 : 0))
+            .sorted(
+                Comparator
+                    .comparingInt(result -> result.entity().has(PlayerController.class) ? -1 : 0)
+            )
             .forEach(withResult -> {
-            var pos = withResult.comp1().getPosition();
-            var velocity = withResult.comp2();
-            var instantVelocity = velocity.instant();
+                var pos = withResult.comp1().getPosition();
+                var velocity = withResult.comp2();
+                var instantVelocity = velocity.instant();
 
-            var oldPos = pos.copy();
-            var newPos = pos.copy();
+                var oldPos = pos.copy();
+                var newPos = pos.copy();
 
-            newPos.addMut(instantVelocity);
-            m_instantsToZero.add(instantVelocity);
+                newPos.addMut(instantVelocity);
+                m_instantsToZero.add(instantVelocity);
 
-            var entity = withResult.entity();
-            if (SolidUtil.isBlockedFor(m_gameContext, newPos, entity)) {
-                return;
-            }
+                var entity = withResult.entity();
+                if (SolidUtil.isBlockedFor(m_gameContext, newPos, entity)) {
+                    return;
+                }
 
-            pos.set(newPos);
-            m_gameContext.pos().move(entity, oldPos, pos);
-        });
+                pos.set(newPos);
+                m_gameContext.pos().move(entity, oldPos, pos);
+            });
     }
 
     @Override

@@ -1,38 +1,36 @@
 package ca.kieve.ssss.editor.component;
 
-import static ca.kieve.ssss.editor.util.CssUtil.inline;
-
-import ca.kieve.ssss.editor.EditorTheme;
-import ca.kieve.ssss.editor.ui.fx.EditorButton;
-import ca.kieve.ssss.editor.ui.fx.EditorLabel;
-
 import javafx.beans.property.DoubleProperty;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 
+import ca.kieve.ssss.editor.EditorTheme;
+import ca.kieve.ssss.editor.ui.fx.EditorButton;
+import ca.kieve.ssss.editor.ui.fx.EditorLabel;
+
+import static ca.kieve.ssss.editor.util.CssUtil.inline;
+
 public class ZoomOverlay extends HBox {
-    private static final String STYLE_ZOOM_RESET_BUTTON =
-            "editor-zoom-reset-button";
+    private static final String STYLE_ZOOM_RESET_BUTTON = "editor-zoom-reset-button";
 
     // language=css
-    private static final String CSS =
-            EditorTheme.OVERLAY_CSS + """
-            .%1$s {
-                -fx-background-color: transparent;
-                -fx-background-radius: 3;
-                -fx-padding: 0 4;
-                -fx-min-width: 22;
-                -fx-min-height: 20;
-                -fx-pref-width: 22;
-                -fx-pref-height: 20;
-                -fx-font-size: 12;
-                -fx-cursor: hand;
-            }
-            .%1$s:hover {
-                -fx-background-color: -color-neutral-muted;
-            }
-            """.formatted(STYLE_ZOOM_RESET_BUTTON);
+    private static final String CSS = EditorTheme.OVERLAY_CSS + """
+        .%1$s {
+            -fx-background-color: transparent;
+            -fx-background-radius: 3;
+            -fx-padding: 0 4;
+            -fx-min-width: 22;
+            -fx-min-height: 20;
+            -fx-pref-width: 22;
+            -fx-pref-height: 20;
+            -fx-font-size: 12;
+            -fx-cursor: hand;
+        }
+        .%1$s:hover {
+            -fx-background-color: -color-neutral-muted;
+        }
+        """.formatted(STYLE_ZOOM_RESET_BUTTON);
 
     private final Label m_zoomLabel;
     private Runnable m_onReset;
@@ -62,8 +60,7 @@ public class ZoomOverlay extends HBox {
     }
 
     public void bindZoom(DoubleProperty zoomProperty) {
-        zoomProperty.addListener((obs, oldVal, newVal) ->
-                updateLabel(newVal.doubleValue()));
+        zoomProperty.addListener((obs, oldVal, newVal) -> updateLabel(newVal.doubleValue()));
         updateLabel(zoomProperty.get());
     }
 
@@ -72,7 +69,6 @@ public class ZoomOverlay extends HBox {
     }
 
     private void updateLabel(double zoom) {
-        m_zoomLabel.setText(
-                Math.round(zoom * 100) + "%");
+        m_zoomLabel.setText(Math.round(zoom * 100) + "%");
     }
 }

@@ -16,7 +16,8 @@ public final class ReflectionFactory {
     private static final String CONDITION_PACKAGE = "ca.kieve.ssss.ai.condition.";
     private static final String RESET_PACKAGE = "ca.kieve.ssss.ai.reset.";
 
-    private ReflectionFactory() {}
+    private ReflectionFactory() {
+    }
 
     /**
      * Creates an AiState instance from its class name.
@@ -78,7 +79,8 @@ public final class ReflectionFactory {
 
             if (!expectedType.isAssignableFrom(clazz)) {
                 throw new IllegalArgumentException(
-                    "Class " + fullClassName + " does not implement " + expectedType.getSimpleName()
+                    "Class " + fullClassName + " does not implement "
+                        + expectedType.getSimpleName()
                 );
             }
 

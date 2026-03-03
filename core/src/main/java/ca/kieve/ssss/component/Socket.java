@@ -1,8 +1,8 @@
 package ca.kieve.ssss.component;
 
-import ca.kieve.ssss.annotations.EditorIgnore;
-
 import dev.dominion.ecs.api.Entity;
+
+import ca.kieve.ssss.annotations.EditorIgnore;
 
 /**
  * Marks an entity as a robotic body that can be controlled by a SocketPlug entity.

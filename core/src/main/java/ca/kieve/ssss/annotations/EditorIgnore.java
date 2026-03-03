@@ -12,6 +12,6 @@ import java.lang.annotation.Target;
  * serialized to/from YAML.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD, ElementType.RECORD_COMPONENT})
+@Target({ ElementType.FIELD, ElementType.RECORD_COMPONENT })
 public @interface EditorIgnore {
 }

@@ -1,9 +1,9 @@
 package ca.kieve.ssss.event;
 
+import dev.dominion.ecs.api.Entity;
+
 import ca.kieve.ssss.component.Socket;
 import ca.kieve.ssss.component.SocketPlug;
-
-import dev.dominion.ecs.api.Entity;
 
 /**
  * Event data for EJECT events.
@@ -14,4 +14,5 @@ public record EjectEvent(
     SocketPlug socketPlug,
     Entity bodyEntity,
     Socket socket
-) implements Event {}
+) implements Event {
+}

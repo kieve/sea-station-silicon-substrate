@@ -9,7 +9,6 @@ import ca.kieve.ssss.util.Vec3i;
  * This optimization prevents creating entities for blocks that will never be visible.
  */
 public class WorldEntityFactory {
-
     private WorldEntityFactory() {
         // Do not instantiate
     }
@@ -19,7 +18,7 @@ public class WorldEntityFactory {
      * An exposed block is a solid block that has at least one adjacent air block.
      *
      * @param context The game context
-     * @param world   The world model to convert
+     * @param world The world model to convert
      * @return The number of block entities created
      */
     public static int createEntities(GameContext context, WorldModel world) {
@@ -60,7 +59,7 @@ public class WorldEntityFactory {
      * Use this for debugging or small maps where optimization isn't needed.
      *
      * @param context The game context
-     * @param world   The world model to convert
+     * @param world The world model to convert
      * @return The number of block entities created
      */
     public static int createAllEntities(GameContext context, WorldModel world) {

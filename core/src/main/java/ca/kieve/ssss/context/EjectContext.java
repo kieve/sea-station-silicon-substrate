@@ -1,12 +1,12 @@
 package ca.kieve.ssss.context;
 
+import com.badlogic.gdx.graphics.Color;
+
 import ca.kieve.ssss.component.Socket;
 import ca.kieve.ssss.component.Solid;
 import ca.kieve.ssss.ui.TileHighlight;
 import ca.kieve.ssss.ui.TileHighlightProvider;
 import ca.kieve.ssss.util.Vec3i;
-
-import com.badlogic.gdx.graphics.Color;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,11 +16,13 @@ import java.util.Map;
 public class EjectContext implements TileHighlightProvider {
     private static final Color VALID_COLOR = Color.GREEN;
     private static final Color INVALID_COLOR = Color.RED;
+
+    private final Map<Vec3i, Boolean> m_validDirections = new HashMap<>();
+
     private RenderContext m_renderContext;
     private PositionContext m_positionContext;
     private boolean m_active = false;
     private Vec3i m_currentPos = new Vec3i(0, 0, 0);
-    private final Map<Vec3i, Boolean> m_validDirections = new HashMap<>();
 
     @Override
     public boolean isHighlightActive() {
@@ -34,9 +36,9 @@ public class EjectContext implements TileHighlightProvider {
             Vec3i direction = entry.getKey();
             boolean isValid = entry.getValue();
             Vec3i targetPos = m_currentPos.add(direction);
-            highlights.add(new TileHighlight(
-                targetPos.x, targetPos.y,
-                isValid ? VALID_COLOR : INVALID_COLOR));
+            highlights.add(
+                new TileHighlight(targetPos.x, targetPos.y, isValid ? VALID_COLOR : INVALID_COLOR)
+            );
         }
         return highlights;
     }
@@ -87,7 +89,7 @@ public class EjectContext implements TileHighlightProvider {
             return;
         }
 
-        Vec3i[] directions = {Vec3i.NORTH, Vec3i.SOUTH, Vec3i.EAST, Vec3i.WEST};
+        Vec3i[] directions = { Vec3i.NORTH, Vec3i.SOUTH, Vec3i.EAST, Vec3i.WEST };
         for (Vec3i dir : directions) {
             Vec3i targetPos = m_currentPos.add(dir);
             var entities = m_positionContext.getAt(targetPos);

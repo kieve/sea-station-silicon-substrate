@@ -11,11 +11,10 @@ public class Speed implements Component {
 
     @Override
     public String toString() {
-        return "Speed{" +
-            "val=" + val +
-            ", canActAt=" + canActAt +
-            ", canAct=" + canAct +
-            '}';
+        return "Speed{"
+            + "val=" + val
+            + ", canActAt=" + canActAt
+            + ", canAct=" + canAct
+            + '}';
     }
-
 }

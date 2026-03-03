@@ -7,4 +7,5 @@ import dev.dominion.ecs.api.Entity;
  * Created by InteractSystem when player bumps into an examinable entity.
  * Consumed by ExamineSystem.
  */
-public record ExamineEvent(Entity target) implements Event {}
+public record ExamineEvent(Entity target) implements Event {
+}

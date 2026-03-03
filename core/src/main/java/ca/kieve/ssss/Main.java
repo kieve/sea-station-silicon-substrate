@@ -1,16 +1,16 @@
 package ca.kieve.ssss;
 
-import ca.kieve.ssss.content.ContentLoader;
-import ca.kieve.ssss.content.ContentRegistry;
-import ca.kieve.ssss.context.GameContext;
-import ca.kieve.ssss.screen.PlayScreen;
-import ca.kieve.ssss.ui.core.UiScreen;
-
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.ScreenUtils;
+
+import ca.kieve.ssss.content.ContentLoader;
+import ca.kieve.ssss.content.ContentRegistry;
+import ca.kieve.ssss.context.GameContext;
+import ca.kieve.ssss.screen.PlayScreen;
+import ca.kieve.ssss.ui.core.UiScreen;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends ApplicationAdapter {

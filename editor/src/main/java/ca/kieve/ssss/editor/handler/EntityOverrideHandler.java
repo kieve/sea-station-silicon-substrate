@@ -18,6 +18,7 @@ public class EntityOverrideHandler {
     }
 
     private final EditorMapModel m_model;
+
     private EntityViewRefresher m_refresher;
 
     public EntityOverrideHandler(EditorMapModel model) {
@@ -39,8 +40,12 @@ public class EntityOverrideHandler {
         return entities.get(entityIndex);
     }
 
-    public void onPropertyEdited(Integer entityIndex, String componentTypeName,
-            String propertyName, String newValue) {
+    public void onPropertyEdited(
+        Integer entityIndex,
+        String componentTypeName,
+        String propertyName,
+        String newValue
+    ) {
         EditorEntity entity = getEntity(entityIndex);
         if (entity == null) {
             return;
@@ -91,8 +96,7 @@ public class EntityOverrideHandler {
         m_refresher.refreshEntityView(entity);
     }
 
-    public void handleOverrideAdded(Integer entityIndex,
-            String componentTypeName) {
+    public void handleOverrideAdded(Integer entityIndex, String componentTypeName) {
         EditorEntity entity = getEntity(entityIndex);
         if (entity == null) {
             return;
@@ -121,8 +125,7 @@ public class EntityOverrideHandler {
             }
         } else {
             // New component not in base (ADDED)
-            Class<?> clazz =
-                    ComponentTypeDeserializer.resolveType(componentTypeName);
+            Class<?> clazz = ComponentTypeDeserializer.resolveType(componentTypeName);
             if (clazz == null) {
                 return;
             }
@@ -134,8 +137,7 @@ public class EntityOverrideHandler {
         m_refresher.refreshEntityView(entity);
     }
 
-    public void handleOverrideRemoved(Integer entityIndex,
-            String componentTypeName) {
+    public void handleOverrideRemoved(Integer entityIndex, String componentTypeName) {
         EditorEntity entity = getEntity(entityIndex);
         if (entity == null) {
             return;
@@ -146,8 +148,11 @@ public class EntityOverrideHandler {
         m_refresher.refreshEntityView(entity);
     }
 
-    public void handlePropertyReverted(Integer entityIndex,
-            String componentTypeName, String propertyName) {
+    public void handlePropertyReverted(
+        Integer entityIndex,
+        String componentTypeName,
+        String propertyName
+    ) {
         EditorEntity entity = getEntity(entityIndex);
         if (entity == null) {
             return;
@@ -196,8 +201,7 @@ public class EntityOverrideHandler {
         boolean allMatch = true;
         for (var entry : overrideComp.properties().entrySet()) {
             Object bv = baseComp.properties().get(entry.getKey());
-            if (bv == null || !String.valueOf(bv).equals(
-                    String.valueOf(entry.getValue()))) {
+            if (bv == null || !String.valueOf(bv).equals(String.valueOf(entry.getValue()))) {
                 allMatch = false;
                 break;
             }
@@ -231,8 +235,7 @@ public class EntityOverrideHandler {
         }
 
         var result = ComponentAddDialog.showAdd(excludeTypes);
-        result.ifPresent(r ->
-                handleOverrideAdded(entityIndex, r.componentTypeName()));
+        result.ifPresent(r -> handleOverrideAdded(entityIndex, r.componentTypeName()));
     }
 
     static Object parseValue(String value, Object original) {

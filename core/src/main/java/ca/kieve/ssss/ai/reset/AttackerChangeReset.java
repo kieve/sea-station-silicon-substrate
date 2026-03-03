@@ -1,8 +1,8 @@
 package ca.kieve.ssss.ai.reset;
 
-import ca.kieve.ssss.component.LastAttacker;
-
 import dev.dominion.ecs.api.Entity;
+
+import ca.kieve.ssss.component.LastAttacker;
 
 import java.util.Map;
 

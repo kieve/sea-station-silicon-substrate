@@ -1,5 +1,7 @@
 package ca.kieve.ssss.util;
 
+import dev.dominion.ecs.api.Entity;
+
 import ca.kieve.ssss.component.Descriptor;
 import ca.kieve.ssss.component.Inventory;
 import ca.kieve.ssss.component.LockId;
@@ -7,13 +9,11 @@ import ca.kieve.ssss.component.Lockable;
 import ca.kieve.ssss.component.Openable;
 import ca.kieve.ssss.context.GameContext;
 
-import dev.dominion.ecs.api.Entity;
-
 public final class LockableUtil {
-    private LockableUtil() {}
+    private LockableUtil() {
+    }
 
-    public static boolean unlock(
-            GameContext context, Entity player, Entity target) {
+    public static boolean unlock(GameContext context, Entity player, Entity target) {
         var lockId = target.get(LockId.class);
         if (lockId == null) {
             context.log().log("It's locked, but has no keyhole.");
@@ -30,7 +30,7 @@ public final class LockableUtil {
         for (var item : inventory.items()) {
             var itemLockId = item.get(LockId.class);
             if (itemLockId != null
-                    && itemLockId.lockId().equals(lockId.lockId())) {
+                && itemLockId.lockId().equals(lockId.lockId())) {
                 matchingKey = item;
                 break;
             }

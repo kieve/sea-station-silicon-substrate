@@ -1,5 +1,7 @@
 package ca.kieve.ssss.util;
 
+import dev.dominion.ecs.api.Entity;
+
 import ca.kieve.ssss.component.MaxPassableSize;
 import ca.kieve.ssss.component.Openable;
 import ca.kieve.ssss.component.Size;
@@ -7,13 +9,12 @@ import ca.kieve.ssss.component.Solid;
 import ca.kieve.ssss.component.Velocity;
 import ca.kieve.ssss.context.GameContext;
 
-import dev.dominion.ecs.api.Entity;
-
 /**
  * Utility methods for checking solid entities at positions.
  */
 public final class SolidUtil {
-    private SolidUtil() {}
+    private SolidUtil() {
+    }
 
     /**
      * Checks if an entity is effectively solid.

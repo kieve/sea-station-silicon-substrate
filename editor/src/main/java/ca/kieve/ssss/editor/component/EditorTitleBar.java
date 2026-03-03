@@ -1,16 +1,5 @@
 package ca.kieve.ssss.editor.component;
 
-import static ca.kieve.ssss.editor.util.CssUtil.inline;
-
-import ca.kieve.ssss.editor.ui.AppIcon;
-import ca.kieve.ssss.editor.ui.WindowsAeroSnap;
-import ca.kieve.ssss.editor.ui.fx.EditorButton;
-import ca.kieve.ssss.editor.ui.fx.EditorLabel;
-import ca.kieve.ssss.editor.ui.fx.EditorMenuButton;
-import ca.kieve.ssss.editor.ui.fx.EditorSplitMenuButton;
-import ca.kieve.ssss.editor.ui.fx.EditorToggleButton;
-
-import java.util.function.BooleanSupplier;
 import javafx.animation.PauseTransition;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -40,12 +29,36 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import ca.kieve.ssss.editor.ui.AppIcon;
+import ca.kieve.ssss.editor.ui.WindowsAeroSnap;
+import ca.kieve.ssss.editor.ui.fx.EditorButton;
+import ca.kieve.ssss.editor.ui.fx.EditorLabel;
+import ca.kieve.ssss.editor.ui.fx.EditorMenuButton;
+import ca.kieve.ssss.editor.ui.fx.EditorSplitMenuButton;
+import ca.kieve.ssss.editor.ui.fx.EditorToggleButton;
+
+import java.util.function.BooleanSupplier;
+
+import static ca.kieve.ssss.editor.util.CssUtil.inline;
+
 /**
  * Unified title bar combining menu, tab toggles, and window
  * controls in a single row, replacing the OS title bar + menu
  * bar + tab header.
  */
 public class EditorTitleBar extends HBox {
+    public record Actions(
+        Runnable onNewMap,
+        Runnable onLoadMap,
+        Runnable onSave,
+        Runnable onSaveAs,
+        Runnable onLaunchGame,
+        Runnable onLaunchGameGradle,
+        Runnable onLaunchCurrentMap,
+        Runnable onClose
+    ) {
+    }
+
     private static final double HEIGHT = 32;
     private static final int APP_ICON_SIZE = 16;
     private static final int ICON_MARGIN_RIGHT = 4;
@@ -56,108 +69,93 @@ public class EditorTitleBar extends HBox {
     private static final int PLAY_ICON_MID = 5;
     private static final int PLAY_COOLDOWN_SECONDS = 5;
 
-    private static final String STYLE_TITLE_BAR =
-            "editor-title-bar";
+    private static final String STYLE_TITLE_BAR = "editor-title-bar";
     private static final String STYLE_TITLE_TAB = "title-tab";
-    private static final String STYLE_WINDOW_BUTTON =
-            "window-button";
-    private static final String STYLE_WINDOW_BUTTON_CLOSE =
-            "window-button-close";
-    private static final String STYLE_SPLIT_MENU_BTN =
-            "split-menu-btn";
+    private static final String STYLE_WINDOW_BUTTON = "window-button";
+    private static final String STYLE_WINDOW_BUTTON_CLOSE = "window-button-close";
+    private static final String STYLE_SPLIT_MENU_BTN = "split-menu-btn";
 
     // language=css
     private static final String CSS = """
-            .%1$s {
-                -fx-pref-height: 32;
-                -fx-min-height: 32;
-                -fx-max-height: 32;
-                -fx-background-color: -color-bg-subtle;
-                -fx-alignment: center-left;
-                -fx-padding: 0 0 0 4;
-            }
-            .%2$s {
-                -fx-background-color: transparent;
-                -fx-background-radius: 0;
-                -fx-border-color: transparent \
-                    transparent transparent transparent;
-                -fx-border-width: 0 0 2 0;
-                -fx-padding: 6 14;
-                -fx-text-fill: -color-fg-muted;
-                -fx-cursor: hand;
-            }
-            .%2$s:selected {
-                -fx-border-color: transparent \
-                    transparent -color-accent-fg transparent;
-                -fx-text-fill: -color-fg-default;
-            }
-            .%2$s:hover {
-                -fx-background-color: -color-neutral-muted;
-            }
-            .%3$s {
-                -fx-background-color: transparent;
-                -fx-background-radius: 0;
-                -fx-pref-width: 46;
-                -fx-pref-height: 32;
-                -fx-min-width: 46;
-                -fx-min-height: 32;
-                -fx-padding: 0;
-                -fx-text-fill: -color-fg-default;
-                -fx-cursor: hand;
-            }
-            .%3$s:hover {
-                -fx-background-color: -color-neutral-muted;
-            }
-            .%4$s:hover {
-                -fx-background-color: #e81123;
-                -fx-text-fill: white;
-            }
-            .%5$s {
-                -fx-background-color: transparent;
-                -fx-background-radius: 0;
-                -fx-padding: 0;
-            }
-            .%5$s > .label {
-                -fx-pref-width: 32;
-                -fx-pref-height: 32;
-                -fx-min-width: 32;
-                -fx-min-height: 32;
-                -fx-padding: 0;
-                -fx-alignment: center;
-                -fx-cursor: hand;
-            }
-            .%5$s > .arrow-button {
-                -fx-pref-height: 32;
-                -fx-min-height: 32;
-                -fx-padding: 0 10 0 10;
-                -fx-background-color: transparent;
-                -fx-cursor: hand;
-            }
-            .%5$s > .label:hover,
-            .%5$s > .arrow-button:hover {
-                -fx-background-color: -color-neutral-muted;
-            }
-            """.formatted(
-            STYLE_TITLE_BAR,
-            STYLE_TITLE_TAB,
-            STYLE_WINDOW_BUTTON,
-            STYLE_WINDOW_BUTTON_CLOSE,
-            STYLE_SPLIT_MENU_BTN);
+        .%1$s {
+            -fx-pref-height: 32;
+            -fx-min-height: 32;
+            -fx-max-height: 32;
+            -fx-background-color: -color-bg-subtle;
+            -fx-alignment: center-left;
+            -fx-padding: 0 0 0 4;
+        }
+        .%2$s {
+            -fx-background-color: transparent;
+            -fx-background-radius: 0;
+            -fx-border-color: transparent \
+                transparent transparent transparent;
+            -fx-border-width: 0 0 2 0;
+            -fx-padding: 6 14;
+            -fx-text-fill: -color-fg-muted;
+            -fx-cursor: hand;
+        }
+        .%2$s:selected {
+            -fx-border-color: transparent \
+                transparent -color-accent-fg transparent;
+            -fx-text-fill: -color-fg-default;
+        }
+        .%2$s:hover {
+            -fx-background-color: -color-neutral-muted;
+        }
+        .%3$s {
+            -fx-background-color: transparent;
+            -fx-background-radius: 0;
+            -fx-pref-width: 46;
+            -fx-pref-height: 32;
+            -fx-min-width: 46;
+            -fx-min-height: 32;
+            -fx-padding: 0;
+            -fx-text-fill: -color-fg-default;
+            -fx-cursor: hand;
+        }
+        .%3$s:hover {
+            -fx-background-color: -color-neutral-muted;
+        }
+        .%4$s:hover {
+            -fx-background-color: #e81123;
+            -fx-text-fill: white;
+        }
+        .%5$s {
+            -fx-background-color: transparent;
+            -fx-background-radius: 0;
+            -fx-padding: 0;
+        }
+        .%5$s > .label {
+            -fx-pref-width: 32;
+            -fx-pref-height: 32;
+            -fx-min-width: 32;
+            -fx-min-height: 32;
+            -fx-padding: 0;
+            -fx-alignment: center;
+            -fx-cursor: hand;
+        }
+        .%5$s > .arrow-button {
+            -fx-pref-height: 32;
+            -fx-min-height: 32;
+            -fx-padding: 0 10 0 10;
+            -fx-background-color: transparent;
+            -fx-cursor: hand;
+        }
+        .%5$s > .label:hover,
+        .%5$s > .arrow-button:hover {
+            -fx-background-color: -color-neutral-muted;
+        }
+        """.formatted(
+        STYLE_TITLE_BAR,
+        STYLE_TITLE_TAB,
+        STYLE_WINDOW_BUTTON,
+        STYLE_WINDOW_BUTTON_CLOSE,
+        STYLE_SPLIT_MENU_BTN
+        );
 
-    private static final String ICON_STROKE_STYLE =
-            "-fx-stroke: -color-fg-default;"
-                    + " -fx-stroke-width: 1;";
-
-    public record Actions(
-            Runnable onNewMap,
-            Runnable onLoadMap,
-            Runnable onSave,
-            Runnable onSaveAs,
-            Runnable onLaunchGame,
-            Runnable onLaunchGameGradle,
-            Runnable onLaunchCurrentMap,
-            Runnable onClose) {
-    }
+    private static final String ICON_STROKE_STYLE = "-fx-stroke: -color-fg-default;"
+        + " -fx-stroke-width: 1;";
 
     private final Stage m_stage;
     private final TabPane m_tabPane;
@@ -166,8 +164,7 @@ public class EditorTitleBar extends HBox {
     private final Button m_maxBtn;
     private final BooleanSupplier m_canCloseTab;
 
-    private final BooleanProperty m_maximized =
-            new SimpleBooleanProperty(false);
+    private final BooleanProperty m_maximized = new SimpleBooleanProperty(false);
 
     private double m_dragOffsetX;
     private double m_dragOffsetY;
@@ -180,10 +177,11 @@ public class EditorTitleBar extends HBox {
     private double m_restoreH;
 
     public EditorTitleBar(
-            Stage stage,
-            TabPane tabPane,
-            Actions actions,
-            BooleanSupplier canCloseTab) {
+        Stage stage,
+        TabPane tabPane,
+        Actions actions,
+        BooleanSupplier canCloseTab
+    ) {
         m_stage = stage;
         m_tabPane = tabPane;
         m_canCloseTab = canCloseTab;
@@ -218,17 +216,21 @@ public class EditorTitleBar extends HBox {
         var saveAsItem = new MenuItem("Save As...");
         saveAsItem.setOnAction(e -> actions.onSaveAs().run());
 
-        var fileMenu = new EditorMenuButton("File", null,
-                newMapItem,
-                loadMapItem,
-                new SeparatorMenuItem(),
-                saveItem,
-                saveAsItem);
+        var fileMenu = new EditorMenuButton(
+            "File",
+            null,
+            newMapItem,
+            loadMapItem,
+            new SeparatorMenuItem(),
+            saveItem,
+            saveAsItem
+        );
 
         var playBtn = createPlayButton(
-                actions.onLaunchGame(),
-                actions.onLaunchGameGradle(),
-                actions.onLaunchCurrentMap());
+            actions.onLaunchGame(),
+            actions.onLaunchGameGradle(),
+            actions.onLaunchCurrentMap()
+        );
 
         // Spacer pushes window buttons to the right
         var spacer = new Region();
@@ -249,9 +251,7 @@ public class EditorTitleBar extends HBox {
 
         var closeBtn = new EditorButton();
         closeBtn.setGraphic(createCloseIcon());
-        closeBtn.getStyleClass().addAll(
-                STYLE_WINDOW_BUTTON,
-                STYLE_WINDOW_BUTTON_CLOSE);
+        closeBtn.getStyleClass().addAll(STYLE_WINDOW_BUTTON, STYLE_WINDOW_BUTTON_CLOSE);
         closeBtn.setOnAction(e -> actions.onClose().run());
         closeBtn.setFocusTraversable(false);
 
@@ -259,9 +259,7 @@ public class EditorTitleBar extends HBox {
         windowButtons.setAlignment(Pos.CENTER_RIGHT);
         windowButtons.setSpacing(0);
 
-        getChildren().addAll(
-                appIcon, fileMenu, playBtn,
-                m_tabBox, spacer, windowButtons);
+        getChildren().addAll(appIcon, fileMenu, playBtn, m_tabBox, spacer, windowButtons);
 
         // Sync initial tabs
         for (Tab tab : m_tabPane.getTabs()) {
@@ -280,30 +278,31 @@ public class EditorTitleBar extends HBox {
     private void initListeners() {
         // Listen for tab list changes
         m_tabPane.getTabs().addListener(
-                (ListChangeListener<Tab>) change -> {
-                    while (change.next()) {
-                        for (Tab r : change.getRemoved()) {
-                            removeTabToggle(r);
-                        }
-                        for (Tab a : change.getAddedSubList()) {
-                            addTabToggle(a);
-                        }
+            (ListChangeListener<Tab>) change -> {
+                while (change.next()) {
+                    for (Tab r : change.getRemoved()) {
+                        removeTabToggle(r);
                     }
-                });
+                    for (Tab a : change.getAddedSubList()) {
+                        addTabToggle(a);
+                    }
+                }
+            }
+        );
 
         // Sync toggle -> tab selection
         m_toggleGroup.selectedToggleProperty().addListener(
-                (obs, oldVal, newVal) -> {
-                    if (newVal instanceof ToggleButton btn) {
-                        Tab tab = (Tab) btn.getUserData();
-                        m_tabPane.getSelectionModel().select(tab);
-                    }
-                });
+            (obs, oldVal, newVal) -> {
+                if (newVal instanceof ToggleButton btn) {
+                    Tab tab = (Tab) btn.getUserData();
+                    m_tabPane.getSelectionModel().select(tab);
+                }
+            }
+        );
 
         // Sync tab selection -> toggle
         m_tabPane.getSelectionModel().selectedItemProperty()
-                .addListener(
-                        (obs, oldVal, newVal) -> syncSelection());
+            .addListener((obs, oldVal, newVal) -> syncSelection());
     }
 
     private void initDragHandlers() {
@@ -312,7 +311,7 @@ public class EditorTitleBar extends HBox {
         // to manual JavaFX drag on non-Windows platforms.
         setOnMousePressed(e -> {
             if (e.getTarget() != this
-                    && !(e.getTarget() instanceof Region)) {
+                && !(e.getTarget() instanceof Region)) {
                 return;
             }
 
@@ -359,27 +358,28 @@ public class EditorTitleBar extends HBox {
             m_stage.setWidth(m_restoreW);
             m_stage.setHeight(m_restoreH);
             m_maxBtn.setGraphic(createMaximizeIcon());
-        } else {
-            m_restoreX = m_stage.getX();
-            m_restoreY = m_stage.getY();
-            m_restoreW = m_stage.getWidth();
-            m_restoreH = m_stage.getHeight();
-
-            Rectangle2D bounds =
-                    Screen.getScreensForRectangle(
-                            m_stage.getX(),
-                            m_stage.getY(),
-                            m_stage.getWidth(),
-                            m_stage.getHeight())
-                    .getFirst()
-                    .getVisualBounds();
-            m_maximized.set(true);
-            m_stage.setX(bounds.getMinX());
-            m_stage.setY(bounds.getMinY());
-            m_stage.setWidth(bounds.getWidth());
-            m_stage.setHeight(bounds.getHeight());
-            m_maxBtn.setGraphic(createRestoreIcon());
+            return;
         }
+
+        m_restoreX = m_stage.getX();
+        m_restoreY = m_stage.getY();
+        m_restoreW = m_stage.getWidth();
+        m_restoreH = m_stage.getHeight();
+
+        Rectangle2D bounds = Screen.getScreensForRectangle(
+            m_stage.getX(),
+            m_stage.getY(),
+            m_stage.getWidth(),
+            m_stage.getHeight()
+        )
+            .getFirst()
+            .getVisualBounds();
+        m_maximized.set(true);
+        m_stage.setX(bounds.getMinX());
+        m_stage.setY(bounds.getMinY());
+        m_stage.setWidth(bounds.getWidth());
+        m_stage.setHeight(bounds.getHeight());
+        m_maxBtn.setGraphic(createRestoreIcon());
     }
 
     private void addTabToggle(Tab tab) {
@@ -390,8 +390,7 @@ public class EditorTitleBar extends HBox {
         btn.setFocusTraversable(false);
 
         // Keep button text in sync with tab text
-        tab.textProperty().addListener(
-                (obs, oldVal, newVal) -> btn.setText(newVal));
+        tab.textProperty().addListener((obs, oldVal, newVal) -> btn.setText(newVal));
 
         // Add close button for closable tabs
         if (tab.isClosable()) {
@@ -431,7 +430,7 @@ public class EditorTitleBar extends HBox {
         }
         for (var node : m_tabBox.getChildren()) {
             if (node instanceof ToggleButton btn
-                    && btn.getUserData() == selected) {
+                && btn.getUserData() == selected) {
                 btn.setSelected(true);
                 break;
             }
@@ -439,9 +438,10 @@ public class EditorTitleBar extends HBox {
     }
 
     private static SplitMenuButton createPlayButton(
-            Runnable onLaunchGame,
-            Runnable onLaunchGameGradle,
-            Runnable onLaunchCurrentMap) {
+        Runnable onLaunchGame,
+        Runnable onLaunchGameGradle,
+        Runnable onLaunchCurrentMap
+    ) {
         var gradleItem = new MenuItem("Launch with Gradle Build");
         var currentMapItem = new MenuItem("Launch Current Map");
         var btn = new EditorSplitMenuButton(currentMapItem, gradleItem);
@@ -449,8 +449,7 @@ public class EditorTitleBar extends HBox {
         btn.getStyleClass().add(STYLE_SPLIT_MENU_BTN);
         btn.setFocusTraversable(false);
 
-        var cooldown = new PauseTransition(
-                Duration.seconds(PLAY_COOLDOWN_SECONDS));
+        var cooldown = new PauseTransition(Duration.seconds(PLAY_COOLDOWN_SECONDS));
         cooldown.setOnFinished(e -> btn.setDisable(false));
 
         Runnable startCooldown = () -> {
@@ -477,10 +476,7 @@ public class EditorTitleBar extends HBox {
     }
 
     private static Node createPlayIcon() {
-        var triangle = new Polygon(
-                0, 0,
-                0, ICON_SIZE,
-                PLAY_ICON_WIDTH, PLAY_ICON_MID);
+        var triangle = new Polygon(0, 0, 0, ICON_SIZE, PLAY_ICON_WIDTH, PLAY_ICON_MID);
         triangle.setStyle("-fx-fill: -color-success-fg;");
         return triangle;
     }
@@ -502,15 +498,11 @@ public class EditorTitleBar extends HBox {
 
     private static Node createRestoreIcon() {
         // Two overlapping rectangles like Win11
-        var back = new Rectangle(
-                RESTORE_ICON_OFFSET, 0,
-                RESTORE_ICON_SIZE, RESTORE_ICON_SIZE);
+        var back = new Rectangle(RESTORE_ICON_OFFSET, 0, RESTORE_ICON_SIZE, RESTORE_ICON_SIZE);
         back.setFill(null);
         back.setStyle(ICON_STROKE_STYLE);
 
-        var front = new Rectangle(
-                0, RESTORE_ICON_OFFSET,
-                RESTORE_ICON_SIZE, RESTORE_ICON_SIZE);
+        var front = new Rectangle(0, RESTORE_ICON_OFFSET, RESTORE_ICON_SIZE, RESTORE_ICON_SIZE);
         front.setFill(null);
         front.setStyle(ICON_STROKE_STYLE + "-fx-fill: -color-bg-subtle;");
 

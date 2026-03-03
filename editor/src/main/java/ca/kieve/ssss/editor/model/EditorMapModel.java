@@ -1,5 +1,8 @@
 package ca.kieve.ssss.editor.model;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+
 import ca.kieve.ssss.content.ComponentDefinition;
 import ca.kieve.ssss.content.MapBlockDefinition;
 import ca.kieve.ssss.content.MapDefinition;
@@ -11,37 +14,31 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 
 public class EditorMapModel {
-    private final Map<String, MapBlockDefinition> m_blocks =
-            new HashMap<>();
-    private final TreeMap<Integer, SparseGrid> m_layers =
-            new TreeMap<>();
+    private final Map<String, MapBlockDefinition> m_blocks = new HashMap<>();
+    private final TreeMap<Integer, SparseGrid> m_layers = new TreeMap<>();
+    private final BooleanProperty m_modified = new SimpleBooleanProperty(false);
+
     private String m_floorGlyph;
     private List<EditorEntity> m_entities;
-    private final BooleanProperty m_modified =
-            new SimpleBooleanProperty(false);
     private File m_file;
 
-    public static EditorMapModel fromDefinition(
-            MapDefinition def, File file) {
+    public static EditorMapModel fromDefinition(MapDefinition def, File file) {
         var model = new EditorMapModel();
         model.m_file = file;
         model.m_floorGlyph = def.floorGlyph();
         model.m_entities = new ArrayList<>(
-                def.entities().stream()
-                        .map(EditorEntity::fromDefinition)
-                        .toList());
+            def.entities().stream()
+                .map(EditorEntity::fromDefinition)
+                .toList()
+        );
         model.m_blocks.putAll(def.blocks());
 
         // Build a reverse map: layoutChar -> block name
         Map<Character, String> charToName = new HashMap<>();
         for (var entry : def.blocks().entrySet()) {
-            charToName.put(
-                    entry.getValue().layoutChar(),
-                    entry.getKey());
+            charToName.put(entry.getValue().layoutChar(), entry.getKey());
         }
 
         for (var entry : def.layers().entrySet()) {
@@ -65,21 +62,16 @@ public class EditorMapModel {
 
     public MapDefinition toDefinition() {
         // Auto-assign layoutChars sequentially
-        String charPool =
-                "abcdefghijklmnopqrstuvwxyz0123456789";
-        Map<String, MapBlockDefinition> blocks =
-                new HashMap<>();
+        String charPool = "abcdefghijklmnopqrstuvwxyz0123456789";
+        Map<String, MapBlockDefinition> blocks = new HashMap<>();
         int charIndex = 0;
         for (var entry : m_blocks.entrySet().stream()
-                .sorted(Map.Entry.comparingByKey())
-                .toList()) {
+            .sorted(Map.Entry.comparingByKey())
+            .toList()) {
             char layoutChar = charIndex < charPool.length()
-                    ? charPool.charAt(charIndex)
-                    : (char) ('!' + charIndex);
-            blocks.put(entry.getKey(),
-                    new MapBlockDefinition(
-                            entry.getValue().bpId(),
-                            layoutChar));
+                ? charPool.charAt(charIndex)
+                : (char) ('!' + charIndex);
+            blocks.put(entry.getKey(), new MapBlockDefinition(entry.getValue().bpId(), layoutChar));
             charIndex++;
         }
 
@@ -121,80 +113,63 @@ public class EditorMapModel {
                     }
                 }
                 for (int c = minCol; c <= rowEnd; c++) {
-                    String blockName =
-                            grid.getCell(r, c);
-                    if (blockName != null) {
-                        var blockDef =
-                                blocks.get(blockName);
-                        sb.append(blockDef != null
-                                ? blockDef.layoutChar()
-                                : ' ');
-                    } else {
+                    String blockName = grid.getCell(r, c);
+                    if (blockName == null) {
                         sb.append(' ');
+                        continue;
                     }
+                    var blockDef = blocks.get(blockName);
+                    sb.append(blockDef != null ? blockDef.layoutChar() : ' ');
                 }
             }
             sb.append('\n');
-            layers.put(
-                    String.valueOf(entry.getKey()),
-                    sb.toString());
+            layers.put(String.valueOf(entry.getKey()), sb.toString());
         }
 
         // Adjust entity positions so they are relative to the
         // bounding-box origin
-        List<MapEntityDefinition> entityDefs =
-                m_entities.stream()
-                        .map(EditorEntity::toDefinition)
-                        .toList();
-        List<MapEntityDefinition> entities =
-                adjustEntityPositions(
-                        entityDefs, -minCol, -minRow);
+        List<MapEntityDefinition> entityDefs = m_entities.stream()
+            .map(EditorEntity::toDefinition)
+            .toList();
+        List<MapEntityDefinition> entities = adjustEntityPositions(entityDefs, -minCol, -minRow);
 
-        return new MapDefinition(
-                blocks, layers, m_floorGlyph, entities);
+        return new MapDefinition(blocks, layers, m_floorGlyph, entities);
     }
 
-    private static List<MapEntityDefinition>
-            adjustEntityPositions(
-                    List<MapEntityDefinition> entities,
-                    int xAdj, int yAdj) {
+    private static List<MapEntityDefinition> adjustEntityPositions(
+        List<MapEntityDefinition> entities,
+        int xAdj,
+        int yAdj
+    ) {
         if ((xAdj == 0 && yAdj == 0)
-                || entities.isEmpty()) {
+            || entities.isEmpty()) {
             return entities;
         }
         return entities.stream()
-                .map(e -> adjustEntity(e, xAdj, yAdj))
-                .toList();
+            .map(e -> adjustEntity(e, xAdj, yAdj))
+            .toList();
     }
 
-    private static MapEntityDefinition adjustEntity(
-            MapEntityDefinition e,
-            int xAdj, int yAdj) {
+    private static MapEntityDefinition adjustEntity(MapEntityDefinition e, int xAdj, int yAdj) {
         var adjusted = e.components().stream().map(comp -> {
-            if (!"Position".equals(
-                    comp.type().getSimpleName())) {
+            if (!"Position".equals(comp.type().getSimpleName())) {
                 return comp;
             }
-            var copy =
-                    new ComponentDefinition(comp.type());
+            var copy = new ComponentDefinition(comp.type());
             for (var p : comp.properties().entrySet()) {
-                copy.setProperty(
-                        p.getKey(), p.getValue());
+                copy.setProperty(p.getKey(), p.getValue());
             }
             Object xVal = copy.properties().get("x");
             Object yVal = copy.properties().get("y");
             if (xVal instanceof Number n) {
-                copy.setProperty(
-                        "x", n.intValue() + xAdj);
+                copy.setProperty("x", n.intValue() + xAdj);
             }
             if (yVal instanceof Number n) {
-                copy.setProperty(
-                        "y", n.intValue() + yAdj);
+                copy.setProperty("y", n.intValue() + yAdj);
             }
             return copy;
         }).toList();
-        return new MapEntityDefinition(
-                e.id(), adjusted);
+        return new MapEntityDefinition(e.id(), adjusted);
     }
 
     public String getCell(int z, int row, int col) {
@@ -205,8 +180,7 @@ public class EditorMapModel {
         return grid.getCell(row, col);
     }
 
-    public boolean setCell(
-            int z, int row, int col, String blockName) {
+    public boolean setCell(int z, int row, int col, String blockName) {
         var grid = m_layers.get(z);
         if (grid == null) {
             return false;
@@ -237,7 +211,8 @@ public class EditorMapModel {
 
     public int addZLayer() {
         int z = m_layers.isEmpty()
-                ? 0 : m_layers.lastKey() + 1;
+            ? 0
+            : m_layers.lastKey() + 1;
         m_layers.put(z, new SparseGrid());
         m_modified.set(true);
         return z;
@@ -255,8 +230,7 @@ public class EditorMapModel {
         return m_blocks;
     }
 
-    public void addBlock(
-            String name, MapBlockDefinition block) {
+    public void addBlock(String name, MapBlockDefinition block) {
         m_blocks.put(name, block);
         m_modified.set(true);
     }
@@ -275,8 +249,7 @@ public class EditorMapModel {
         return false;
     }
 
-    public void replaceBlockInLayers(
-            String oldName, String newName) {
+    public void replaceBlockInLayers(String oldName, String newName) {
         for (var grid : m_layers.values()) {
             grid.replaceValue(oldName, newName);
         }

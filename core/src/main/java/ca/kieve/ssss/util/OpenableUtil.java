@@ -1,5 +1,8 @@
 package ca.kieve.ssss.util;
 
+import com.badlogic.gdx.graphics.Color;
+import dev.dominion.ecs.api.Entity;
+
 import ca.kieve.ssss.component.ColorComp;
 import ca.kieve.ssss.component.Descriptor;
 import ca.kieve.ssss.component.Item;
@@ -8,11 +11,9 @@ import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.component.TileGlyph;
 import ca.kieve.ssss.context.GameContext;
 
-import com.badlogic.gdx.graphics.Color;
-import dev.dominion.ecs.api.Entity;
-
 public final class OpenableUtil {
-    private OpenableUtil() {}
+    private OpenableUtil() {
+    }
 
     public static void open(GameContext context, Entity entity) {
         var openable = entity.get(Openable.class);
@@ -32,8 +33,7 @@ public final class OpenableUtil {
     public static boolean tryClose(GameContext context, Entity entity) {
         var position = entity.get(Position.class);
         if (position != null) {
-            var entitiesAtPos = context.pos().getAt(
-                position.getPosition());
+            var entitiesAtPos = context.pos().getAt(position.getPosition());
             for (var other : entitiesAtPos) {
                 if (other == entity) {
                     continue;
@@ -63,8 +63,7 @@ public final class OpenableUtil {
         context.log().log("The " + name + " closes.");
     }
 
-    private static void swapGlyph(
-            GameContext context, Entity entity, String glyphId) {
+    private static void swapGlyph(GameContext context, Entity entity, String glyphId) {
         var glyphFactory = context.entityFactory().getGlyphFactory();
         entity.removeType(TileGlyph.class);
         entity.add(glyphFactory.getGlyph(glyphId));

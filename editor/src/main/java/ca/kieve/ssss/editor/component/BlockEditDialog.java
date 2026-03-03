@@ -1,11 +1,5 @@
 package ca.kieve.ssss.editor.component;
 
-import ca.kieve.ssss.content.MapBlockDefinition;
-import ca.kieve.ssss.editor.ui.fx.EditorLabel;
-import ca.kieve.ssss.editor.util.DialogUtil;
-
-import java.util.List;
-import java.util.Optional;
 import javafx.geometry.Insets;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
@@ -13,25 +7,30 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 
+import ca.kieve.ssss.content.MapBlockDefinition;
+import ca.kieve.ssss.editor.ui.fx.EditorLabel;
+import ca.kieve.ssss.editor.util.DialogUtil;
+
+import java.util.List;
+import java.util.Optional;
+
 public class BlockEditDialog
-        extends Dialog<BlockEditDialog.Result> {
-    public record Result(
-            String name, MapBlockDefinition blockDef) {}
+    extends
+    Dialog<BlockEditDialog.Result> {
+    public record Result(String name, MapBlockDefinition blockDef) {
+    }
 
     private final TextField m_nameField;
     private final ComboBox<String> m_typeCombo;
 
     public BlockEditDialog(
-            List<String> blockTypes,
-            String existingName,
-            MapBlockDefinition existingDef
+        List<String> blockTypes,
+        String existingName,
+        MapBlockDefinition existingDef
     ) {
-        DialogUtil.style(this,
-                existingDef != null
-                        ? "Edit Block" : "Add Block");
+        DialogUtil.style(this, existingDef != null ? "Edit Block" : "Add Block");
 
-        m_nameField = new TextField(
-                existingName != null ? existingName : "");
+        m_nameField = new TextField(existingName != null ? existingName : "");
         m_nameField.setPromptText("Block name");
         if (existingName != null) {
             m_nameField.setDisable(true);
@@ -55,8 +54,7 @@ public class BlockEditDialog
         grid.add(m_typeCombo, 1, 1);
 
         getDialogPane().setContent(grid);
-        getDialogPane().getButtonTypes().addAll(
-                ButtonType.OK, ButtonType.CANCEL);
+        getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
         setResultConverter(btn -> {
             if (btn != ButtonType.OK) {
@@ -67,26 +65,21 @@ public class BlockEditDialog
             if (name.isEmpty() || bpId == null) {
                 return null;
             }
-            return new Result(
-                    name,
-                    new MapBlockDefinition(bpId, ' '));
+            return new Result(name, new MapBlockDefinition(bpId, ' '));
         });
     }
 
-    public static Optional<Result> showAdd(
-            List<String> blockTypes) {
-        var dialog = new BlockEditDialog(
-                blockTypes, null, null);
+    public static Optional<Result> showAdd(List<String> blockTypes) {
+        var dialog = new BlockEditDialog(blockTypes, null, null);
         return dialog.showAndWait();
     }
 
     public static Optional<Result> showEdit(
-            List<String> blockTypes,
-            String name,
-            MapBlockDefinition def
+        List<String> blockTypes,
+        String name,
+        MapBlockDefinition def
     ) {
-        var dialog = new BlockEditDialog(
-                blockTypes, name, def);
+        var dialog = new BlockEditDialog(blockTypes, name, def);
         return dialog.showAndWait();
     }
 }

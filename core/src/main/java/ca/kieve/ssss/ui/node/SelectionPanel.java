@@ -1,17 +1,17 @@
 package ca.kieve.ssss.ui.node;
 
-import static ca.kieve.ssss.repository.FontRepo.UI_UBUNTU_24;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
 import ca.kieve.ssss.repository.FontRepo;
 import ca.kieve.ssss.ui.core.UiNode;
 import ca.kieve.ssss.ui.core.UiRenderContext;
 
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import static ca.kieve.ssss.repository.FontRepo.UI_UBUNTU_24;
 
 public abstract class SelectionPanel extends UiNode {
     private static final int PADDING = 5;
@@ -96,15 +96,19 @@ public abstract class SelectionPanel extends UiNode {
             float capHeight = UI_UBUNTU_24.getCapHeight();
             float arrowX = panelX + PADDING;
             float arrowCenterY = panelY + PADDING
-                    + m_selectedIndex * lineHeight
-                    + capHeight / 2;
+                + m_selectedIndex * lineHeight
+                + capHeight / 2;
 
             sr.begin(ShapeType.Filled);
             sr.setColor(Color.WHITE);
             sr.triangle(
-                    arrowX, arrowCenterY - ARROW_HEIGHT / 2f,
-                    arrowX, arrowCenterY + ARROW_HEIGHT / 2f,
-                    arrowX + ARROW_WIDTH, arrowCenterY);
+                arrowX,
+                arrowCenterY - ARROW_HEIGHT / 2f,
+                arrowX,
+                arrowCenterY + ARROW_HEIGHT / 2f,
+                arrowX + ARROW_WIDTH,
+                arrowCenterY
+            );
             sr.end();
         }
 
@@ -114,12 +118,7 @@ public abstract class SelectionPanel extends UiNode {
         batch.begin();
         batch.setProjectionMatrix(renderContext.camera().combined);
         FontRepo.setFontColor(UI_UBUNTU_24, Color.WHITE);
-        FontRepo.draw(
-                UI_UBUNTU_24,
-                batch,
-                text,
-                textX,
-                panelY + PADDING);
+        FontRepo.draw(UI_UBUNTU_24, batch, text, textX, panelY + PADDING);
         batch.end();
     }
 }

@@ -1,20 +1,23 @@
 package ca.kieve.ssss.editor.component;
 
-import ca.kieve.ssss.editor.EditorContext;
-import ca.kieve.ssss.editor.ui.fx.EditorLabel;
-import ca.kieve.ssss.editor.util.DialogUtil;
-
-import java.util.List;
-import java.util.Optional;
 import javafx.geometry.Insets;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.layout.GridPane;
 
+import ca.kieve.ssss.editor.EditorContext;
+import ca.kieve.ssss.editor.ui.fx.EditorLabel;
+import ca.kieve.ssss.editor.util.DialogUtil;
+
+import java.util.List;
+import java.util.Optional;
+
 public class EntityAddDialog
-        extends Dialog<EntityAddDialog.Result> {
-    public record Result(String entityId) {}
+    extends
+    Dialog<EntityAddDialog.Result> {
+    public record Result(String entityId) {
+    }
 
     private final ComboBox<String> m_entityCombo;
 
@@ -35,8 +38,7 @@ public class EntityAddDialog
         grid.add(m_entityCombo, 1, 0);
 
         getDialogPane().setContent(grid);
-        getDialogPane().getButtonTypes().addAll(
-                ButtonType.OK, ButtonType.CANCEL);
+        getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
         setResultConverter(btn -> {
             if (btn != ButtonType.OK) {
@@ -44,7 +46,7 @@ public class EntityAddDialog
             }
             String entityId = m_entityCombo.getValue();
             if (entityId == null
-                    || entityId.isEmpty()) {
+                || entityId.isEmpty()) {
                 return null;
             }
             return new Result(entityId);
@@ -52,12 +54,10 @@ public class EntityAddDialog
     }
 
     public static Optional<Result> showAdd() {
-        var registry =
-                EditorContext.getInstance().getRegistry();
-        List<String> entityIds =
-                registry.getEntityIds().stream()
-                        .sorted()
-                        .toList();
+        var registry = EditorContext.getInstance().getRegistry();
+        List<String> entityIds = registry.getEntityIds().stream()
+            .sorted()
+            .toList();
         var dialog = new EntityAddDialog(entityIds);
         return dialog.showAndWait();
     }

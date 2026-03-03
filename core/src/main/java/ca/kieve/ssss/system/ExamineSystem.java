@@ -1,23 +1,9 @@
 package ca.kieve.ssss.system;
 
-import static ca.kieve.ssss.context.InputContext.Mode.MODE_EXAMINE;
-import static ca.kieve.ssss.context.InputContext.Mode.MODE_NORMAL;
-import static ca.kieve.ssss.input.InputAction.CANCEL;
-import static ca.kieve.ssss.input.InputAction.CONFIRM;
-import static ca.kieve.ssss.input.InputAction.DOWN;
-import static ca.kieve.ssss.input.InputAction.EXAMINE;
-import static ca.kieve.ssss.input.InputAction.LEFT;
-import static ca.kieve.ssss.input.InputAction.RIGHT;
-import static ca.kieve.ssss.input.InputAction.UP;
-import static ca.kieve.ssss.system.ExamineSystem.ExamineItem.ItemType.*;
-import static ca.kieve.ssss.util.Vec3i.EAST;
-import static ca.kieve.ssss.util.Vec3i.NORTH;
-import static ca.kieve.ssss.util.Vec3i.SOUTH;
-import static ca.kieve.ssss.util.Vec3i.WEST;
+import dev.dominion.ecs.api.Entity;
 
 import ca.kieve.ssss.component.Descriptor;
 import ca.kieve.ssss.component.Player;
-import ca.kieve.ssss.component.PlayerController;
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.component.SocketPlug;
 import ca.kieve.ssss.context.ExamineContext;
@@ -27,14 +13,27 @@ import ca.kieve.ssss.event.ExamineEvent;
 import ca.kieve.ssss.util.DescriptionComposer;
 import ca.kieve.ssss.util.Vec3i;
 
-import dev.dominion.ecs.api.Entity;
-
 import java.util.ArrayList;
 import java.util.List;
 
-public class ExamineSystem extends System {
-    private final InputContext m_input;
+import static ca.kieve.ssss.context.InputContext.Mode.MODE_EXAMINE;
+import static ca.kieve.ssss.context.InputContext.Mode.MODE_NORMAL;
+import static ca.kieve.ssss.input.InputAction.CANCEL;
+import static ca.kieve.ssss.input.InputAction.CONFIRM;
+import static ca.kieve.ssss.input.InputAction.DOWN;
+import static ca.kieve.ssss.input.InputAction.EXAMINE;
+import static ca.kieve.ssss.input.InputAction.LEFT;
+import static ca.kieve.ssss.input.InputAction.RIGHT;
+import static ca.kieve.ssss.input.InputAction.UP;
+import static ca.kieve.ssss.system.ExamineSystem.ExamineItem.ItemType.CEILING;
+import static ca.kieve.ssss.system.ExamineSystem.ExamineItem.ItemType.FLOOR;
+import static ca.kieve.ssss.system.ExamineSystem.ExamineItem.ItemType.MAIN;
+import static ca.kieve.ssss.util.Vec3i.EAST;
+import static ca.kieve.ssss.util.Vec3i.NORTH;
+import static ca.kieve.ssss.util.Vec3i.SOUTH;
+import static ca.kieve.ssss.util.Vec3i.WEST;
 
+public class ExamineSystem extends System {
     /**
      * Represents an item in the examine selection list.
      * Can be an entity at main level, floor level, or ceiling level.
@@ -46,6 +45,8 @@ public class ExamineSystem extends System {
             CEILING
         }
     }
+
+    private final InputContext m_input;
 
     public ExamineSystem(GameContext gameContext) {
         super(gameContext);
@@ -131,9 +132,7 @@ public class ExamineSystem extends System {
         var items = new ArrayList<ExamineItem>();
 
         var mainPos = examineContext.getCrosshairPos();
-        var mainEntities = ExamineContext.sortEntitiesByZIndex(
-            m_gameContext.pos().getAt(mainPos)
-        );
+        var mainEntities = ExamineContext.sortEntitiesByZIndex(m_gameContext.pos().getAt(mainPos));
         for (var entity : mainEntities) {
             items.add(new ExamineItem(entity, MAIN));
         }
@@ -182,9 +181,9 @@ public class ExamineSystem extends System {
 
     private void logExamineItem(ExamineItem item) {
         String prefix = switch (item.type()) {
-            case MAIN -> "";
-            case FLOOR -> "[Floor] ";
-            case CEILING -> "[Ceiling] ";
+        case MAIN -> "";
+        case FLOOR -> "[Floor] ";
+        case CEILING -> "[Ceiling] ";
         };
         m_gameContext.log().log(prefix + DescriptionComposer.compose(item.entity()));
     }

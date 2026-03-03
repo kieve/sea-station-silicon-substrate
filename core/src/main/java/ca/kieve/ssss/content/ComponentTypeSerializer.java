@@ -9,9 +9,10 @@ import java.io.IOException;
 public class ComponentTypeSerializer extends JsonSerializer<Class<?>> {
     @Override
     public void serialize(
-            Class<?> value,
-            JsonGenerator gen,
-            SerializerProvider serializers) throws IOException {
+        Class<?> value,
+        JsonGenerator gen,
+        SerializerProvider serializers
+    ) throws IOException {
         gen.writeString(value.getSimpleName());
     }
 }

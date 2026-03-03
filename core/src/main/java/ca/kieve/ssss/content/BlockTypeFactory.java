@@ -26,8 +26,7 @@ public class BlockTypeFactory {
         return hasComponentType(def, Opaque.class);
     }
 
-    private boolean hasComponentType(
-            EntityDefinition def, Class<?> componentType) {
+    private boolean hasComponentType(EntityDefinition def, Class<?> componentType) {
         var components = def.resolveComponents(m_registry);
         for (var comp : components) {
             if (comp.type() == componentType) {

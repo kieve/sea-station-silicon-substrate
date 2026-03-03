@@ -20,22 +20,21 @@ import java.lang.annotation.Target;
  * values come from the entity registry.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD, ElementType.RECORD_COMPONENT})
+@Target({ ElementType.FIELD, ElementType.RECORD_COMPONENT })
 public @interface EditorRef {
-    /**
-     * The YAML property name for this field.
-     */
-    String value();
-
-    /**
-     * Which content registry provides the valid
-     * values for this reference.
-     */
-    Source source();
-
     enum Source {
         ENTITY,
         GLYPH,
         BEHAVIOR
     }
+
+    /**
+     * The YAML property name for this field.
+     */
+    String value();
+    /**
+     * Which content registry provides the valid
+     * values for this reference.
+     */
+    Source source();
 }

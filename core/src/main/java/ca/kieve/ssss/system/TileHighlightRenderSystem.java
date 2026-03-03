@@ -1,11 +1,11 @@
 package ca.kieve.ssss.system;
 
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.ui.TileHighlight;
 import ca.kieve.ssss.ui.TileHighlightProvider;
-
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
 import java.util.List;
 

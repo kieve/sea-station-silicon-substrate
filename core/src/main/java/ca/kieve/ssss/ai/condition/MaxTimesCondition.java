@@ -30,8 +30,8 @@ public class MaxTimesCondition implements Condition {
 
     private MaxTimesConditionData getOrCreateData(ConditionContext context) {
         int priority = context.statePriority();
-        MaxTimesConditionData data = (MaxTimesConditionData)
-            context.state().getConditionData(priority);
+        MaxTimesConditionData data = (MaxTimesConditionData) context.state()
+            .getConditionData(priority);
         if (data == null) {
             data = new MaxTimesConditionData();
             context.state().setConditionData(priority, data);

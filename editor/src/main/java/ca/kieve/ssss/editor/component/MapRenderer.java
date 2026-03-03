@@ -1,5 +1,11 @@
 package ca.kieve.ssss.editor.component;
 
+import javafx.geometry.VPos;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.TextAlignment;
+
 import ca.kieve.ssss.editor.BlockColorResolver;
 import ca.kieve.ssss.editor.BlockGlyphResolver;
 import ca.kieve.ssss.editor.EditorContext;
@@ -8,27 +14,23 @@ import ca.kieve.ssss.editor.model.SparseGrid;
 
 import java.util.List;
 import java.util.Map;
-import javafx.geometry.VPos;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.TextAlignment;
 
 /**
  * Game-specific map drawing logic. Renders a SparseGrid
  * to a GraphicsContext using block color/glyph resolution.
  */
 public class MapRenderer {
-    public static final int CELL_SIZE = 24;
-    private static final Font GLYPH_FONT =
-            new Font("Consolas", CELL_SIZE * 0.75);
-    private static final double MARKER_RATIO = 0.3;
+    public record EntityMarker(int row, int col, Color color) {
+    }
 
-    public record EntityMarker(
-            int row, int col, Color color) {}
+    public static final int CELL_SIZE = 24;
+
+    private static final Font GLYPH_FONT = new Font("Consolas", CELL_SIZE * 0.75);
+    private static final double MARKER_RATIO = 0.3;
 
     private final BlockColorResolver m_colorResolver;
     private final BlockGlyphResolver m_glyphResolver;
+
     private Map<String, String> m_nameToBpId = Map.of();
     private List<EntityMarker> m_entityMarkers = List.of();
 
@@ -44,18 +46,15 @@ public class MapRenderer {
         m_glyphResolver = ctx.getGlyphResolver();
     }
 
-    public void updateNameToBpId(
-            Map<String, String> nameToBpId) {
+    public void updateNameToBpId(Map<String, String> nameToBpId) {
         m_nameToBpId = nameToBpId;
     }
 
-    public void loadEntities(
-            List<EntityMarker> markers) {
+    public void loadEntities(List<EntityMarker> markers) {
         m_entityMarkers = markers;
     }
 
-    public void setSelectedCell(
-            Integer row, Integer col) {
+    public void setSelectedCell(Integer row, Integer col) {
         m_selectedRow = row;
         m_selectedCol = col;
     }
@@ -93,13 +92,15 @@ public class MapRenderer {
     /** X pixel offset of the map origin (minCol). */
     public double getMapOriginX() {
         return m_grid != null
-                ? m_grid.getMinCol() * CELL_SIZE : 0;
+            ? m_grid.getMinCol() * CELL_SIZE
+            : 0;
     }
 
     /** Y pixel offset of the map origin (flipped). */
     public double getMapOriginY() {
         return m_grid != null
-                ? -m_grid.getMaxRow() * CELL_SIZE : 0;
+            ? -m_grid.getMaxRow() * CELL_SIZE
+            : 0;
     }
 
     /**
@@ -115,12 +116,14 @@ public class MapRenderer {
      *
      * @param zoom zoom factor (1.0 = 100%)
      */
-    public void render(GraphicsContext gc,
-                       double viewWidth,
-                       double viewHeight,
-                       double cameraX,
-                       double cameraY,
-                       double zoom) {
+    public void render(
+        GraphicsContext gc,
+        double viewWidth,
+        double viewHeight,
+        double cameraX,
+        double cameraY,
+        double zoom
+    ) {
         if (m_grid == null) {
             return;
         }
@@ -130,15 +133,11 @@ public class MapRenderer {
 
         double cell = CELL_SIZE * zoom;
 
-        drawInfiniteGrid(
-                gc, viewWidth, viewHeight,
-                cameraX, cameraY, cell);
+        drawInfiniteGrid(gc, viewWidth, viewHeight, cameraX, cameraY, cell);
 
         if (m_cachedFont == null
-                || m_cachedFontZoom != zoom) {
-            m_cachedFont = new Font(
-                    GLYPH_FONT.getFamily(),
-                    CELL_SIZE * 0.75 * zoom);
+            || m_cachedFontZoom != zoom) {
+            m_cachedFont = new Font(GLYPH_FONT.getFamily(), CELL_SIZE * 0.75 * zoom);
             m_cachedFontZoom = zoom;
         }
         Font scaledFont = m_cachedFont;
@@ -149,13 +148,13 @@ public class MapRenderer {
 
             int flippedRow = -pos.row();
             double x = (pos.col() * CELL_SIZE
-                    - cameraX) * zoom;
+                - cameraX) * zoom;
             double y = (flippedRow * CELL_SIZE
-                    - cameraY) * zoom;
+                - cameraY) * zoom;
 
             if (x + cell < 0 || x > viewWidth
-                    || y + cell < 0
-                    || y > viewHeight) {
+                || y + cell < 0
+                || y > viewHeight) {
                 continue;
             }
 
@@ -177,10 +176,7 @@ public class MapRenderer {
             gc.setTextAlign(TextAlignment.CENTER);
             gc.setTextBaseline(VPos.CENTER);
             gc.setFill(color);
-            gc.fillText(
-                    String.valueOf(glyph),
-                    x + cell / 2.0,
-                    y + cell / 2.0);
+            gc.fillText(String.valueOf(glyph), x + cell / 2.0, y + cell / 2.0);
 
             gc.setStroke(EditorTheme.GRID_COLOR);
             gc.setLineWidth(0.5);
@@ -193,13 +189,13 @@ public class MapRenderer {
         for (var marker : m_entityMarkers) {
             int flippedRow = -marker.row();
             double x = (marker.col() * CELL_SIZE
-                    - cameraX) * zoom;
+                - cameraX) * zoom;
             double y = (flippedRow * CELL_SIZE
-                    - cameraY) * zoom;
+                - cameraY) * zoom;
 
             if (x + cell < 0 || x > viewWidth
-                    || y + cell < 0
-                    || y > viewHeight) {
+                || y + cell < 0
+                || y > viewHeight) {
                 continue;
             }
 
@@ -207,57 +203,49 @@ public class MapRenderer {
             double cy = y + radius + pad;
 
             gc.setFill(Color.gray(0.1, 0.7));
-            gc.fillOval(
-                    cx - radius - 1,
-                    cy - radius - 1,
-                    diameter + 2,
-                    diameter + 2);
+            gc.fillOval(cx - radius - 1, cy - radius - 1, diameter + 2, diameter + 2);
 
             gc.setFill(marker.color());
-            gc.fillOval(
-                    cx - radius,
-                    cy - radius,
-                    diameter,
-                    diameter);
+            gc.fillOval(cx - radius, cy - radius, diameter, diameter);
         }
 
-        if (m_selectedRow != null
-                && m_selectedCol != null) {
-            int flippedRow = -m_selectedRow;
-            double sx = (m_selectedCol * CELL_SIZE
-                    - cameraX) * zoom;
-            double sy = (flippedRow * CELL_SIZE
-                    - cameraY) * zoom;
-
-            gc.setStroke(EditorTheme.SELECTION_COLOR);
-            gc.setLineWidth(2);
-            gc.strokeRect(sx, sy, cell, cell);
+        if (m_selectedRow == null
+            || m_selectedCol == null) {
+            return;
         }
+
+        int flippedRow = -m_selectedRow;
+        double sx = (m_selectedCol * CELL_SIZE
+            - cameraX) * zoom;
+        double sy = (flippedRow * CELL_SIZE
+            - cameraY) * zoom;
+
+        gc.setStroke(EditorTheme.SELECTION_COLOR);
+        gc.setLineWidth(2);
+        gc.strokeRect(sx, sy, cell, cell);
     }
 
-    private void drawInfiniteGrid(GraphicsContext gc,
-                                  double viewWidth,
-                                  double viewHeight,
-                                  double cameraX,
-                                  double cameraY,
-                                  double cell) {
+    private void drawInfiniteGrid(
+        GraphicsContext gc,
+        double viewWidth,
+        double viewHeight,
+        double cameraX,
+        double cameraY,
+        double cell
+    ) {
         gc.setStroke(EditorTheme.INFINITE_GRID_COLOR);
         gc.setLineWidth(0.5);
 
         double scaledCamX = cameraX * (cell / CELL_SIZE);
         double scaledCamY = cameraY * (cell / CELL_SIZE);
 
-        double offsetX =
-                -((scaledCamX % cell) + cell) % cell;
-        double offsetY =
-                -((scaledCamY % cell) + cell) % cell;
+        double offsetX = -((scaledCamX % cell) + cell) % cell;
+        double offsetY = -((scaledCamY % cell) + cell) % cell;
 
-        for (double x = offsetX; x <= viewWidth;
-                x += cell) {
+        for (double x = offsetX; x <= viewWidth; x += cell) {
             gc.strokeLine(x, 0, x, viewHeight);
         }
-        for (double y = offsetY; y <= viewHeight;
-                y += cell) {
+        for (double y = offsetY; y <= viewHeight; y += cell) {
             gc.strokeLine(0, y, viewWidth, y);
         }
     }

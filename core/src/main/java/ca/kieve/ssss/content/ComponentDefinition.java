@@ -17,8 +17,7 @@ public class ComponentDefinition {
     @JsonCreator
     public ComponentDefinition(
         @JsonProperty("type")
-        @JsonDeserialize(using = ComponentTypeDeserializer.class)
-        Class<?> type
+        @JsonDeserialize(using = ComponentTypeDeserializer.class) Class<?> type
     ) {
         m_type = type;
         m_properties = new HashMap<>();

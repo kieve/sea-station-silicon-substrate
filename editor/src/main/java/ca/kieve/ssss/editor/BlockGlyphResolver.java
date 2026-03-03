@@ -19,11 +19,12 @@ public class BlockGlyphResolver {
         var def = m_registry.getEntityDefinition(bpId);
         var components = def.resolveComponents(m_registry);
         for (ComponentDefinition comp : components) {
-            if (comp.type() == TileGlyph.class) {
-                Object glyphId = comp.properties().get("glyphId");
-                if (glyphId instanceof String id && m_registry.hasGlyph(id)) {
-                    return m_registry.getGlyphDefinition(id).character();
-                }
+            if (comp.type() != TileGlyph.class) {
+                continue;
+            }
+            Object glyphId = comp.properties().get("glyphId");
+            if (glyphId instanceof String id && m_registry.hasGlyph(id)) {
+                return m_registry.getGlyphDefinition(id).character();
             }
         }
 

@@ -1,25 +1,26 @@
 package ca.kieve.ssss.context;
 
-import static ca.kieve.ssss.util.Vec3i.ZERO;
+import dev.dominion.ecs.api.Entity;
 
 import ca.kieve.ssss.util.Vec3i;
-
-import dev.dominion.ecs.api.Entity;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static ca.kieve.ssss.util.Vec3i.ZERO;
+
 public class PositionContext {
     private static final int XY_SIZE = 200;
     private static final int Z_SIZE = 20;
 
-    private final
-        ArrayList< // X
+    private final ArrayList< // X
         ArrayList< // Y
-        ArrayList< // Z
-        ArrayList<Entity>
-        >>> m_cache;
+            ArrayList< // Z
+                ArrayList<Entity>
+            >
+        >
+    > m_cache;
 
     public PositionContext() {
         m_cache = new ArrayList<>();

@@ -1,9 +1,5 @@
 package ca.kieve.ssss.editor.ui;
 
-import ca.kieve.ssss.editor.EditorTheme;
-
-import java.util.EnumSet;
-import java.util.Set;
 import javafx.animation.AnimationTimer;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -16,6 +12,11 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
+import ca.kieve.ssss.editor.EditorTheme;
+
+import java.util.EnumSet;
+import java.util.Set;
+
 /**
  * A reusable pannable canvas viewport. Contains an auto-sizing Canvas with
  * clipping, middle-click drag panning, and WASD/arrow key panning.
@@ -24,8 +25,15 @@ public class PanCanvas extends Pane {
     private static final double PAN_SPEED = 360.0;
 
     private static final Set<KeyCode> PAN_KEYS = EnumSet.of(
-            KeyCode.LEFT, KeyCode.RIGHT, KeyCode.UP, KeyCode.DOWN,
-            KeyCode.A, KeyCode.D, KeyCode.W, KeyCode.S);
+        KeyCode.LEFT,
+        KeyCode.RIGHT,
+        KeyCode.UP,
+        KeyCode.DOWN,
+        KeyCode.A,
+        KeyCode.D,
+        KeyCode.W,
+        KeyCode.S
+    );
 
     private static final double MIN_ZOOM = 0.25;
     private static final double MAX_ZOOM = 4.0;
@@ -33,12 +41,9 @@ public class PanCanvas extends Pane {
 
     private final Canvas m_canvas = new Canvas();
     private final Set<KeyCode> m_heldKeys = EnumSet.noneOf(KeyCode.class);
-    private final EventHandler<KeyEvent> m_sceneKeyPressFilter =
-            this::handleKeyPressed;
-    private final EventHandler<KeyEvent> m_sceneKeyReleaseFilter =
-            this::handleKeyReleased;
-    private final DoubleProperty m_zoom =
-            new SimpleDoubleProperty(1.0);
+    private final EventHandler<KeyEvent> m_sceneKeyPressFilter = this::handleKeyPressed;
+    private final EventHandler<KeyEvent> m_sceneKeyReleaseFilter = this::handleKeyReleased;
+    private final DoubleProperty m_zoom = new SimpleDoubleProperty(1.0);
 
     private double m_cameraX;
     private double m_cameraY;
@@ -55,8 +60,7 @@ public class PanCanvas extends Pane {
 
     public PanCanvas() {
         getChildren().add(m_canvas);
-        setStyle("-fx-background-color: #"
-                + toHex(EditorTheme.CANVAS_BACKGROUND) + ";");
+        setStyle("-fx-background-color: #" + toHex(EditorTheme.CANVAS_BACKGROUND) + ";");
 
         var clip = new Rectangle();
         clip.widthProperty().bind(widthProperty());
@@ -106,8 +110,7 @@ public class PanCanvas extends Pane {
     public void zoom(int direction, double anchorX, double anchorY) {
         double oldZoom = m_zoom.get();
         double factor = direction > 0 ? ZOOM_STEP : 1.0 / ZOOM_STEP;
-        double newZoom = Math.clamp(
-                oldZoom * factor, MIN_ZOOM, MAX_ZOOM);
+        double newZoom = Math.clamp(oldZoom * factor, MIN_ZOOM, MAX_ZOOM);
         if (newZoom == oldZoom) {
             return;
         }
@@ -150,10 +153,8 @@ public class PanCanvas extends Pane {
     public void centerOn(double worldX, double worldY) {
         double zoom = m_zoom.get();
         if (m_canvas.getWidth() > 0 && m_canvas.getHeight() > 0) {
-            m_cameraX =
-                    worldX - m_canvas.getWidth() / (2.0 * zoom);
-            m_cameraY =
-                    worldY - m_canvas.getHeight() / (2.0 * zoom);
+            m_cameraX = worldX - m_canvas.getWidth() / (2.0 * zoom);
+            m_cameraY = worldY - m_canvas.getHeight() / (2.0 * zoom);
         } else {
             m_needsCenter = true;
             m_pendingCenterX = worldX;
@@ -169,14 +170,14 @@ public class PanCanvas extends Pane {
 
     private void onViewportResized() {
         if (m_needsCenter
-                && m_canvas.getWidth() > 0
-                && m_canvas.getHeight() > 0) {
+            && m_canvas.getWidth() > 0
+            && m_canvas.getHeight() > 0) {
             m_needsCenter = false;
             double zoom = m_zoom.get();
             m_cameraX = m_pendingCenterX
-                    - m_canvas.getWidth() / (2.0 * zoom);
+                - m_canvas.getWidth() / (2.0 * zoom);
             m_cameraY = m_pendingCenterY
-                    - m_canvas.getHeight() / (2.0 * zoom);
+                - m_canvas.getHeight() / (2.0 * zoom);
         }
         requestRedraw();
     }
@@ -194,14 +195,15 @@ public class PanCanvas extends Pane {
         });
 
         setOnMouseDragged(e -> {
-            if (e.getButton() == MouseButton.MIDDLE) {
-                double zoom = m_zoom.get();
-                m_cameraX = m_dragStartCameraX
-                        - (e.getScreenX() - m_dragStartX) / zoom;
-                m_cameraY = m_dragStartCameraY
-                        - (e.getScreenY() - m_dragStartY) / zoom;
-                requestRedraw();
+            if (e.getButton() != MouseButton.MIDDLE) {
+                return;
             }
+            double zoom = m_zoom.get();
+            m_cameraX = m_dragStartCameraX
+                - (e.getScreenX() - m_dragStartX) / zoom;
+            m_cameraY = m_dragStartCameraY
+                - (e.getScreenY() - m_dragStartY) / zoom;
+            requestRedraw();
         });
 
         setFocusTraversable(true);
@@ -211,28 +213,23 @@ public class PanCanvas extends Pane {
         // switching. Only active when this canvas has focus.
         sceneProperty().addListener((obs, oldScene, newScene) -> {
             if (oldScene != null) {
-                oldScene.removeEventFilter(
-                        KeyEvent.KEY_PRESSED, m_sceneKeyPressFilter);
-                oldScene.removeEventFilter(
-                        KeyEvent.KEY_RELEASED,
-                        m_sceneKeyReleaseFilter);
+                oldScene.removeEventFilter(KeyEvent.KEY_PRESSED, m_sceneKeyPressFilter);
+                oldScene.removeEventFilter(KeyEvent.KEY_RELEASED, m_sceneKeyReleaseFilter);
             }
             if (newScene != null) {
-                newScene.addEventFilter(
-                        KeyEvent.KEY_PRESSED, m_sceneKeyPressFilter);
-                newScene.addEventFilter(
-                        KeyEvent.KEY_RELEASED,
-                        m_sceneKeyReleaseFilter);
+                newScene.addEventFilter(KeyEvent.KEY_PRESSED, m_sceneKeyPressFilter);
+                newScene.addEventFilter(KeyEvent.KEY_RELEASED, m_sceneKeyReleaseFilter);
             }
         });
 
         // Clear held keys when focus is lost
         focusedProperty().addListener(
-                (obs, wasFocused, nowFocused) -> {
-            if (!nowFocused) {
-                m_heldKeys.clear();
+            (obs, wasFocused, nowFocused) -> {
+                if (!nowFocused) {
+                    m_heldKeys.clear();
+                }
             }
-        });
+        );
 
         new AnimationTimer() {
             private long m_lastNanos;
@@ -253,27 +250,28 @@ public class PanCanvas extends Pane {
                 double dx = 0;
                 double dy = 0;
                 if (m_heldKeys.contains(KeyCode.LEFT)
-                        || m_heldKeys.contains(KeyCode.A)) {
+                    || m_heldKeys.contains(KeyCode.A)) {
                     dx -= PAN_SPEED * dt;
                 }
                 if (m_heldKeys.contains(KeyCode.RIGHT)
-                        || m_heldKeys.contains(KeyCode.D)) {
+                    || m_heldKeys.contains(KeyCode.D)) {
                     dx += PAN_SPEED * dt;
                 }
                 if (m_heldKeys.contains(KeyCode.UP)
-                        || m_heldKeys.contains(KeyCode.W)) {
+                    || m_heldKeys.contains(KeyCode.W)) {
                     dy -= PAN_SPEED * dt;
                 }
                 if (m_heldKeys.contains(KeyCode.DOWN)
-                        || m_heldKeys.contains(KeyCode.S)) {
+                    || m_heldKeys.contains(KeyCode.S)) {
                     dy += PAN_SPEED * dt;
                 }
-                if (dx != 0 || dy != 0) {
-                    double zoom = m_zoom.get();
-                    m_cameraX += dx / zoom;
-                    m_cameraY += dy / zoom;
-                    requestRedraw();
+                if (dx == 0 && dy == 0) {
+                    return;
                 }
+                double zoom = m_zoom.get();
+                m_cameraX += dx / zoom;
+                m_cameraY += dy / zoom;
+                requestRedraw();
             }
         }.start();
     }
@@ -296,9 +294,11 @@ public class PanCanvas extends Pane {
     }
 
     private static String toHex(Color color) {
-        return String.format("%02x%02x%02x",
-                (int) (color.getRed() * 255),
-                (int) (color.getGreen() * 255),
-                (int) (color.getBlue() * 255));
+        return String.format(
+            "%02x%02x%02x",
+            (int) (color.getRed() * 255),
+            (int) (color.getGreen() * 255),
+            (int) (color.getBlue() * 255)
+        );
     }
 }

@@ -20,8 +20,8 @@ public class RenderingHint implements Component {
 
     @Override
     public String toString() {
-        return "RenderingHint{" +
-            "zIndex=" + zIndex +
-            '}';
+        return "RenderingHint{"
+            + "zIndex=" + zIndex
+            + '}';
     }
 }

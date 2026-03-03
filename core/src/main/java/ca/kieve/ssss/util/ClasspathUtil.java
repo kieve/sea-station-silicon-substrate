@@ -20,14 +20,11 @@ public final class ClasspathUtil {
      * Works whether the classes live in a filesystem
      * directory or inside a JAR.
      *
-     * @param url     the URL from
-     *                ClassLoader.getResource(pkgPath)
-     * @param pkgPath the package path using forward
-     *                slashes (e.g. "com/example/pkg")
+     * @param url the URL from ClassLoader.getResource(pkgPath)
+     * @param pkgPath the package path using forward slashes (e.g. "com/example/pkg")
      * @return simple names without ".class" suffix
      */
-    public static List<String> listClassNames(
-            URL url, String pkgPath) {
+    public static List<String> listClassNames(URL url, String pkgPath) {
         if ("file".equals(url.getProtocol())) {
             return listFromDirectory(url);
         }
@@ -37,8 +34,7 @@ public final class ClasspathUtil {
         return List.of();
     }
 
-    private static List<String> listFromDirectory(
-            URL url) {
+    private static List<String> listFromDirectory(URL url) {
         var result = new ArrayList<String>();
         File dir;
         try {
@@ -59,25 +55,22 @@ public final class ClasspathUtil {
         return result;
     }
 
-    private static List<String> listFromJar(
-            URL url, String pkgPath) {
+    private static List<String> listFromJar(URL url, String pkgPath) {
         var result = new ArrayList<String>();
         try {
-            var conn = (JarURLConnection)
-                    url.openConnection();
+            var conn = (JarURLConnection) url.openConnection();
             JarFile jar = conn.getJarFile();
             String prefix = pkgPath.endsWith("/")
-                    ? pkgPath
-                    : pkgPath + "/";
+                ? pkgPath
+                : pkgPath + "/";
             var entries = jar.entries();
             while (entries.hasMoreElements()) {
-                String entryName =
-                        entries.nextElement().getName();
+                String entryName = entries.nextElement().getName();
                 if (!entryName.startsWith(prefix)) {
                     continue;
                 }
                 String relative = entryName
-                        .substring(prefix.length());
+                    .substring(prefix.length());
                 if (relative.contains("/")) {
                     continue;
                 }
@@ -88,18 +81,17 @@ public final class ClasspathUtil {
         return result;
     }
 
-    private static void extractClassName(
-            String fileName, List<String> out) {
+    private static void extractClassName(String fileName, List<String> out) {
         if (!fileName.endsWith(".class")) {
             return;
         }
-        String simpleName = fileName.substring(
-                0, fileName.length() - 6);
+        String simpleName = fileName.substring(0, fileName.length() - 6);
         if (simpleName.contains("$")) {
             return;
         }
         out.add(simpleName);
     }
 
-    private ClasspathUtil() {}
+    private ClasspathUtil() {
+    }
 }

@@ -1,28 +1,27 @@
 package ca.kieve.ssss.editor.component;
 
-import static ca.kieve.ssss.editor.util.CssUtil.inline;
-
-import ca.kieve.ssss.editor.ui.fx.EditorLabel;
-
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 
+import ca.kieve.ssss.editor.ui.fx.EditorLabel;
+
+import static ca.kieve.ssss.editor.util.CssUtil.inline;
+
 public class InfoBar extends HBox {
-    private static final String STYLE_INFO_BAR =
-            "editor-info-bar";
+    private static final String STYLE_INFO_BAR = "editor-info-bar";
 
     // language=css
     private static final String CSS = """
-            .%s {
-                -fx-background-color: -color-bg-subtle;
-                -fx-padding: 2 8;
-                -fx-font-size: 11;
-                -fx-spacing: 8;
-            }
-            """.formatted(STYLE_INFO_BAR);
+        .%s {
+            -fx-background-color: -color-bg-subtle;
+            -fx-padding: 2 8;
+            -fx-font-size: 11;
+            -fx-spacing: 8;
+        }
+        """.formatted(STYLE_INFO_BAR);
 
     private final Label m_fileLabel;
     private final Label m_dimensionsLabel;

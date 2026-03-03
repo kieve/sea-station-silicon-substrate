@@ -9,27 +9,24 @@ import java.util.Collections;
 import java.util.List;
 
 public class EditorEntity {
-    public record EntityPos(int x, int y, int z) {}
+    public record EntityPos(int x, int y, int z) {
+    }
 
-    private String m_id;
     private final List<ComponentDefinition> m_components;
 
-    public EditorEntity(
-            String id,
-            List<ComponentDefinition> components) {
+    private String m_id;
+
+    public EditorEntity(String id, List<ComponentDefinition> components) {
         m_id = id;
         m_components = new ArrayList<>(components);
     }
 
-    public static EditorEntity fromDefinition(
-            MapEntityDefinition def) {
-        return new EditorEntity(
-                def.id(), def.components());
+    public static EditorEntity fromDefinition(MapEntityDefinition def) {
+        return new EditorEntity(def.id(), def.components());
     }
 
     public MapEntityDefinition toDefinition() {
-        return new MapEntityDefinition(
-                m_id, List.copyOf(m_components));
+        return new MapEntityDefinition(m_id, List.copyOf(m_components));
     }
 
     public String id() {
@@ -62,22 +59,18 @@ public class EditorEntity {
         Object yVal = posComp.properties().get("y");
         Object zVal = posComp.properties().get("z");
         if (xVal instanceof Number nx
-                && yVal instanceof Number ny
-                && zVal instanceof Number nz) {
-            return new EntityPos(
-                    nx.intValue(),
-                    ny.intValue(),
-                    nz.intValue());
+            && yVal instanceof Number ny
+            && zVal instanceof Number nz) {
+            return new EntityPos(nx.intValue(), ny.intValue(), nz.intValue());
         }
         return null;
     }
 
-    public void setComponentOverride(
-            ComponentDefinition comp) {
+    public void setComponentOverride(ComponentDefinition comp) {
         String typeName = comp.type().getSimpleName();
         for (int i = 0; i < m_components.size(); i++) {
             if (m_components.get(i).type().getSimpleName()
-                    .equals(typeName)) {
+                .equals(typeName)) {
                 m_components.set(i, comp);
                 return;
             }
@@ -86,15 +79,11 @@ public class EditorEntity {
     }
 
     public boolean hasComponent(String typeName) {
-        return m_components.stream().anyMatch(comp ->
-                comp.type().getSimpleName()
-                        .equals(typeName));
+        return m_components.stream().anyMatch(comp -> comp.type().getSimpleName().equals(typeName));
     }
 
     public void removeComponent(String typeName) {
-        m_components.removeIf(comp ->
-                comp.type().getSimpleName()
-                        .equals(typeName));
+        m_components.removeIf(comp -> comp.type().getSimpleName().equals(typeName));
     }
 
     public void movePosition(int x, int y, int z) {
@@ -106,8 +95,7 @@ public class EditorEntity {
             return;
         }
 
-        var newPos =
-                new ComponentDefinition(Position.class);
+        var newPos = new ComponentDefinition(Position.class);
         newPos.setProperty("x", x);
         newPos.setProperty("y", y);
         newPos.setProperty("z", z);

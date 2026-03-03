@@ -12,18 +12,18 @@ import java.util.Map;
  * YAML-loaded state definition within a behavior.
  */
 public record StateDefinition(
-        String state,
-        int priority,
-        List<ConditionDefinition> conditions,
-        Map<String, Object> properties
+    String state,
+    int priority,
+    List<ConditionDefinition> conditions,
+    Map<String, Object> properties
 ) {
     private static final String IS_DEAD_CONDITION = "IsDead";
 
     @JsonCreator
     public StateDefinition(
-            @JsonProperty("state") String state,
-            @JsonProperty("priority") int priority,
-            @JsonProperty("conditions") List<ConditionDefinition> conditions
+        @JsonProperty("state") String state,
+        @JsonProperty("priority") int priority,
+        @JsonProperty("conditions") List<ConditionDefinition> conditions
     ) {
         this(state, priority, conditions, new HashMap<>());
     }

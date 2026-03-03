@@ -1,12 +1,12 @@
 package ca.kieve.ssss.content;
 
-import ca.kieve.ssss.ai.behavior.BehaviorDefinition;
-import ca.kieve.ssss.component.Identifier;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+
+import ca.kieve.ssss.ai.behavior.BehaviorDefinition;
+import ca.kieve.ssss.component.Identifier;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,6 +14,14 @@ import java.util.List;
 import java.util.Map;
 
 public class ContentLoader {
+    public static class GlyphsFile {
+        public Map<String, GlyphDefinition> glyphs;
+    }
+
+    public static class FontsFile {
+        public Map<String, FontDefinition> fonts;
+    }
+
     private static final String CONTENT_PATH = "content/";
     private static final String FONTS_FILE = "fonts.yaml";
     private static final String GLYPHS_FILE = "glyphs.yaml";
@@ -53,8 +61,7 @@ public class ContentLoader {
         }
 
         try {
-            SystemConfig config = m_yamlMapper.readValue(
-                    file.readString(), SystemConfig.class);
+            SystemConfig config = m_yamlMapper.readValue(file.readString(), SystemConfig.class);
             m_registry.setSystemConfig(config);
         } catch (IOException e) {
             throw new RuntimeException("Failed to load " + SYSTEM_FILE, e);
@@ -68,8 +75,7 @@ public class ContentLoader {
         }
 
         try {
-            FontsFile data = m_yamlMapper.readValue(
-                    file.readString(), FontsFile.class);
+            FontsFile data = m_yamlMapper.readValue(file.readString(), FontsFile.class);
             if (data.fonts != null) {
                 for (Map.Entry<String, FontDefinition> entry : data.fonts.entrySet()) {
                     m_registry.registerFont(entry.getKey(), entry.getValue());
@@ -87,8 +93,7 @@ public class ContentLoader {
         }
 
         try {
-            GlyphsFile data = m_yamlMapper.readValue(
-                    file.readString(), GlyphsFile.class);
+            GlyphsFile data = m_yamlMapper.readValue(file.readString(), GlyphsFile.class);
             if (data.glyphs != null) {
                 for (Map.Entry<String, GlyphDefinition> entry : data.glyphs.entrySet()) {
                     m_registry.registerGlyph(entry.getKey(), entry.getValue());
@@ -107,8 +112,9 @@ public class ContentLoader {
 
         try {
             var iterator = m_yamlMapper.readValues(
-                    m_yamlMapper.getFactory().createParser(file.readString()),
-                    BehaviorDefinition.class);
+                m_yamlMapper.getFactory().createParser(file.readString()),
+                BehaviorDefinition.class
+            );
 
             while (iterator.hasNext()) {
                 BehaviorDefinition def = iterator.next();
@@ -161,8 +167,9 @@ public class ContentLoader {
 
             try {
                 var iterator = m_yamlMapper.readValues(
-                        m_yamlMapper.getFactory().createParser(file.readString()),
-                        EntityDefinition.class);
+                    m_yamlMapper.getFactory().createParser(file.readString()),
+                    EntityDefinition.class
+                );
 
                 while (iterator.hasNext()) {
                     EntityDefinition def = iterator.next();
@@ -177,22 +184,16 @@ public class ContentLoader {
 
     private String extractEntityId(EntityDefinition def) {
         for (ComponentDefinition comp : def.components()) {
-            if (comp.type() == Identifier.class) {
-                Object key = comp.properties().get("key");
-                if (key != null) {
-                    return key.toString();
-                }
+            if (comp.type() != Identifier.class) {
+                continue;
+            }
+            Object key = comp.properties().get("key");
+            if (key != null) {
+                return key.toString();
             }
         }
         throw new RuntimeException(
-                "Entity definition missing Identifier component with 'key' property");
-    }
-
-    public static class GlyphsFile {
-        public Map<String, GlyphDefinition> glyphs;
-    }
-
-    public static class FontsFile {
-        public Map<String, FontDefinition> fonts;
+            "Entity definition missing Identifier component with 'key' property"
+        );
     }
 }

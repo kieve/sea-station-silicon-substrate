@@ -1,28 +1,6 @@
 package ca.kieve.ssss.editor;
 
-import static ca.kieve.ssss.editor.util.CssUtil.inline;
-
-import ca.kieve.ssss.content.MapDefinition;
-import ca.kieve.ssss.content.SystemConfig;
-import ca.kieve.ssss.editor.component.EditorTitleBar;
-import ca.kieve.ssss.editor.component.MapViewPanel;
-import ca.kieve.ssss.editor.component.SystemConfigPanel;
-import ca.kieve.ssss.editor.model.SystemConfigModel;
-import ca.kieve.ssss.editor.ui.AppIcon;
-import ca.kieve.ssss.editor.ui.WindowResizeHandler;
-import ca.kieve.ssss.editor.ui.WindowsAeroSnap;
-import ca.kieve.ssss.editor.util.DialogUtil;
-import ca.kieve.ssss.editor.util.GameLauncher;
-import ca.kieve.ssss.editor.util.MapPathUtil;
-
 import atlantafx.base.theme.PrimerDark;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -40,21 +18,44 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 
-public class EditorFxApp extends Application {
-    private static final KeyCodeCombination NEW_COMBO =
-            new KeyCodeCombination(
-                    KeyCode.N, KeyCombination.CONTROL_DOWN);
-    private static final KeyCodeCombination SAVE_COMBO =
-            new KeyCodeCombination(
-                    KeyCode.S, KeyCombination.CONTROL_DOWN);
-    private static final KeyCodeCombination SAVE_AS_COMBO =
-            new KeyCodeCombination(
-                    KeyCode.S,
-                    KeyCombination.CONTROL_DOWN,
-                    KeyCombination.SHIFT_DOWN);
+import ca.kieve.ssss.content.MapDefinition;
+import ca.kieve.ssss.content.SystemConfig;
+import ca.kieve.ssss.editor.component.EditorTitleBar;
+import ca.kieve.ssss.editor.component.MapViewPanel;
+import ca.kieve.ssss.editor.component.SystemConfigPanel;
+import ca.kieve.ssss.editor.model.SystemConfigModel;
+import ca.kieve.ssss.editor.ui.AppIcon;
+import ca.kieve.ssss.editor.ui.WindowResizeHandler;
+import ca.kieve.ssss.editor.ui.WindowsAeroSnap;
+import ca.kieve.ssss.editor.util.DialogUtil;
+import ca.kieve.ssss.editor.util.GameLauncher;
+import ca.kieve.ssss.editor.util.MapPathUtil;
 
-    private static final String STYLE_HIDDEN_TAB_HEADER =
-            "editor-hidden-tab-header";
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import static ca.kieve.ssss.editor.util.CssUtil.inline;
+
+public class EditorFxApp extends Application {
+    private static final KeyCodeCombination NEW_COMBO = new KeyCodeCombination(
+        KeyCode.N,
+        KeyCombination.CONTROL_DOWN
+    );
+    private static final KeyCodeCombination SAVE_COMBO = new KeyCodeCombination(
+        KeyCode.S,
+        KeyCombination.CONTROL_DOWN
+    );
+    private static final KeyCodeCombination SAVE_AS_COMBO = new KeyCodeCombination(
+        KeyCode.S,
+        KeyCombination.CONTROL_DOWN,
+        KeyCombination.SHIFT_DOWN
+    );
+
+    private static final String STYLE_HIDDEN_TAB_HEADER = "editor-hidden-tab-header";
 
     private static final int MIN_STAGE_WIDTH = 400;
     private static final int MIN_STAGE_HEIGHT = 300;
@@ -67,13 +68,13 @@ public class EditorFxApp extends Application {
 
     // language=css
     private static final String CSS = """
-            .%s > .tab-header-area {
-                -fx-max-height: 0;
-                -fx-pref-height: 0;
-                -fx-min-height: 0;
-                visibility: hidden;
-            }
-            """.formatted(STYLE_HIDDEN_TAB_HEADER);
+        .%s > .tab-header-area {
+            -fx-max-height: 0;
+            -fx-pref-height: 0;
+            -fx-min-height: 0;
+            visibility: hidden;
+        }
+        """.formatted(STYLE_HIDDEN_TAB_HEADER);
 
     private TabPane m_tabPane;
     private Tab m_mapTab;
@@ -83,8 +84,7 @@ public class EditorFxApp extends Application {
 
     @Override
     public void start(Stage stage) {
-        Application.setUserAgentStylesheet(
-                new PrimerDark().getUserAgentStylesheet());
+        Application.setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
 
         m_stage = stage;
         DialogUtil.setOwner(stage);
@@ -100,25 +100,25 @@ public class EditorFxApp extends Application {
         stage.setMinHeight(MIN_STAGE_HEIGHT);
 
         stage.getIcons().addAll(
-                AppIcon.create(ICON_128),
-                AppIcon.create(ICON_64),
-                AppIcon.create(ICON_32),
-                AppIcon.create(ICON_16));
+            AppIcon.create(ICON_128),
+            AppIcon.create(ICON_64),
+            AppIcon.create(ICON_32),
+            AppIcon.create(ICON_16)
+        );
 
         initSystemConfigTab();
 
         var actions = new EditorTitleBar.Actions(
-                this::onNewMap,
-                this::onLoadMap,
-                this::onSave,
-                this::onSaveAs,
-                this::onLaunchGame,
-                this::onLaunchGameGradle,
-                this::onLaunchCurrentMap,
-                this::onClose);
-        var titleBar = new EditorTitleBar(
-                stage, m_tabPane, actions,
-                this::checkUnsavedChanges);
+            this::onNewMap,
+            this::onLoadMap,
+            this::onSave,
+            this::onSaveAs,
+            this::onLaunchGame,
+            this::onLaunchGameGradle,
+            this::onLaunchCurrentMap,
+            this::onClose
+        );
+        var titleBar = new EditorTitleBar(stage, m_tabPane, actions, this::checkUnsavedChanges);
 
         var root = new BorderPane();
         root.setTop(titleBar);
@@ -151,8 +151,8 @@ public class EditorFxApp extends Application {
             }
             int cur = m_tabPane.getSelectionModel().getSelectedIndex();
             int next = e.isShiftDown()
-                    ? (cur - 1 + count) % count
-                    : (cur + 1) % count;
+                ? (cur - 1 + count) % count
+                : (cur + 1) % count;
             m_tabPane.getSelectionModel().select(next);
             e.consume();
         });
@@ -160,8 +160,7 @@ public class EditorFxApp extends Application {
         // Intercept window close for unsaved changes
         stage.setOnCloseRequest(this::handleCloseRequest);
 
-        WindowResizeHandler.install(
-                scene, stage, titleBar.maximizedProperty());
+        WindowResizeHandler.install(scene, stage, titleBar.maximizedProperty());
 
         stage.setScene(scene);
         stage.setAlwaysOnTop(true);
@@ -185,8 +184,7 @@ public class EditorFxApp extends Application {
         if (m_systemConfigTab == null) {
             return null;
         }
-        if (m_systemConfigTab.getContent()
-                instanceof SystemConfigPanel scp) {
+        if (m_systemConfigTab.getContent() instanceof SystemConfigPanel scp) {
             return scp;
         }
         return null;
@@ -197,16 +195,13 @@ public class EditorFxApp extends Application {
             return;
         }
 
-        var mapDef = new MapDefinition(
-                Map.of(), Map.of("0", "\n"),
-                "interpunct", List.of());
+        var mapDef = new MapDefinition(Map.of(), Map.of("0", "\n"), "interpunct", List.of());
         var mapViewPanel = new MapViewPanel(mapDef, null);
         openMapTab(mapViewPanel, "untitled");
     }
 
     private void onSave() {
-        Tab selected =
-                m_tabPane.getSelectionModel().getSelectedItem();
+        Tab selected = m_tabPane.getSelectionModel().getSelectedItem();
         if (selected == m_systemConfigTab) {
             onSaveSystemConfig();
             return;
@@ -242,16 +237,14 @@ public class EditorFxApp extends Application {
 
         var chooser = new FileChooser();
         chooser.setTitle("Save Map As");
-        chooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter(
-                        "YAML files", "*.yaml"));
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("YAML files", "*.yaml"));
 
         File currentFile = panel.getModel().getFile();
         if (currentFile != null) {
             chooser.setInitialDirectory(currentFile.getParentFile());
             chooser.setInitialFileName(currentFile.getName());
         } else if (m_lastDirectory != null
-                && m_lastDirectory.isDirectory()) {
+            && m_lastDirectory.isDirectory()) {
             chooser.setInitialDirectory(m_lastDirectory);
         }
 
@@ -268,8 +261,11 @@ public class EditorFxApp extends Application {
     private void onLaunchGame() {
         try {
             GameLauncher.launchDirect(
-                    m_stage.getX(), m_stage.getY(),
-                    m_stage.getWidth(), m_stage.getHeight());
+                m_stage.getX(),
+                m_stage.getY(),
+                m_stage.getWidth(),
+                m_stage.getHeight()
+            );
         } catch (IOException ex) {
             var alert = new Alert(Alert.AlertType.ERROR);
             DialogUtil.style(alert, "Failed to Launch Game");
@@ -281,8 +277,11 @@ public class EditorFxApp extends Application {
     private void onLaunchGameGradle() {
         try {
             GameLauncher.launchGradle(
-                    m_stage.getX(), m_stage.getY(),
-                    m_stage.getWidth(), m_stage.getHeight());
+                m_stage.getX(),
+                m_stage.getY(),
+                m_stage.getWidth(),
+                m_stage.getHeight()
+            );
         } catch (IOException ex) {
             var alert = new Alert(Alert.AlertType.ERROR);
             DialogUtil.style(alert, "Failed to Launch Game");
@@ -296,8 +295,7 @@ public class EditorFxApp extends Application {
         if (panel == null) {
             var alert = new Alert(Alert.AlertType.ERROR);
             DialogUtil.style(alert, "No Map Open");
-            alert.setContentText(
-                    "Open a map before using Launch Current Map.");
+            alert.setContentText("Open a map before using Launch Current Map.");
             alert.showAndWait();
             return;
         }
@@ -315,19 +313,15 @@ public class EditorFxApp extends Application {
         }
 
         // Update system config to point to this map
-        String mapFilename = MapPathUtil.getRelativePath(
-                panel.getModel().getFile());
+        String mapFilename = MapPathUtil.getRelativePath(panel.getModel().getFile());
         var configPanel = getSystemConfigPanel();
         if (configPanel != null) {
             configPanel.getModel().setLaunchMap(mapFilename);
             try {
-                SystemConfigSaver.save(
-                        configPanel.getModel(),
-                        configPanel.getModel().getFile());
+                SystemConfigSaver.save(configPanel.getModel(), configPanel.getModel().getFile());
             } catch (IOException ex) {
                 var alert = new Alert(Alert.AlertType.ERROR);
-                DialogUtil.style(
-                        alert, "Failed to Save System Config");
+                DialogUtil.style(alert, "Failed to Save System Config");
                 alert.setContentText(ex.getMessage());
                 alert.showAndWait();
                 return;
@@ -338,8 +332,7 @@ public class EditorFxApp extends Application {
     }
 
     private void onClose() {
-        var closeEvent = new WindowEvent(
-                m_stage, WindowEvent.WINDOW_CLOSE_REQUEST);
+        var closeEvent = new WindowEvent(m_stage, WindowEvent.WINDOW_CLOSE_REQUEST);
         m_stage.fireEvent(closeEvent);
     }
 
@@ -371,18 +364,18 @@ public class EditorFxApp extends Application {
             return true;
         }
 
-        var saveBtn = new ButtonType(
-                "Save", ButtonBar.ButtonData.YES);
-        var dontSaveBtn = new ButtonType(
-                "Don't Save", ButtonBar.ButtonData.NO);
-        var cancelBtn = new ButtonType(
-                "Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+        var saveBtn = new ButtonType("Save", ButtonBar.ButtonData.YES);
+        var dontSaveBtn = new ButtonType("Don't Save", ButtonBar.ButtonData.NO);
+        var cancelBtn = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
 
         var alert = new Alert(
-                Alert.AlertType.CONFIRMATION,
-                "You have unsaved changes. "
-                        + "\nDo you want to save before closing?",
-                saveBtn, dontSaveBtn, cancelBtn);
+            Alert.AlertType.CONFIRMATION,
+            "You have unsaved changes. "
+                + "\nDo you want to save before closing?",
+            saveBtn,
+            dontSaveBtn,
+            cancelBtn
+        );
         DialogUtil.style(alert, "Unsaved Changes");
 
         Optional<ButtonType> result = alert.showAndWait();
@@ -409,9 +402,7 @@ public class EditorFxApp extends Application {
     private void onLoadMap() {
         var chooser = new FileChooser();
         chooser.setTitle("Load Map");
-        chooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter(
-                        "YAML files", "*.yaml"));
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("YAML files", "*.yaml"));
 
         if (m_lastDirectory != null && m_lastDirectory.isDirectory()) {
             chooser.setInitialDirectory(m_lastDirectory);
@@ -439,8 +430,7 @@ public class EditorFxApp extends Application {
         }
     }
 
-    private void openMapTab(
-            MapViewPanel mapViewPanel, String displayName) {
+    private void openMapTab(MapViewPanel mapViewPanel, String displayName) {
         if (m_mapTab == null) {
             m_mapTab = new Tab();
             m_mapTab.setOnClosed(e -> m_mapTab = null);
@@ -452,13 +442,13 @@ public class EditorFxApp extends Application {
 
         // Bind modified state to tab text
         mapViewPanel.getModel().modifiedProperty()
-                .addListener((obs, oldVal, newVal) -> {
-                    File f = mapViewPanel.getModel().getFile();
-                    String name = f != null
-                            ? f.getName() : "untitled";
-                    m_mapTab.setText("Map - " + name
-                            + (newVal ? " *" : ""));
-                });
+            .addListener((obs, oldVal, newVal) -> {
+                File f = mapViewPanel.getModel().getFile();
+                String name = f != null
+                    ? f.getName()
+                    : "untitled";
+                m_mapTab.setText("Map - " + name + (newVal ? " *" : ""));
+            });
 
         m_tabPane.getSelectionModel().select(m_mapTab);
     }
@@ -476,16 +466,17 @@ public class EditorFxApp extends Application {
         m_systemConfigTab.setText("System Config");
 
         model.modifiedProperty().addListener(
-                (obs, oldVal, newVal) ->
-                        m_systemConfigTab.setText("System Config"
-                                + (newVal ? " *" : "")));
+            (obs, oldVal, newVal) -> m_systemConfigTab.setText(
+                "System Config"
+                    + (newVal ? " *" : "")
+            )
+        );
 
         m_tabPane.getTabs().add(m_systemConfigTab);
     }
 
     private File resolveSystemConfigFile() {
-        String configRelPath =
-                "core/src/main/resources/content/system.yaml";
+        String configRelPath = "core/src/main/resources/content/system.yaml";
 
         Path userDir = Path.of(System.getProperty("user.dir"));
         Path fromUserDir = userDir.resolve(configRelPath);
@@ -503,18 +494,13 @@ public class EditorFxApp extends Application {
 
     private SystemConfigModel loadSystemConfigModel(File configFile) {
         if (configFile == null || !configFile.exists()) {
-            return new SystemConfigModel(
-                    "static_test_map.yaml", configFile);
+            return new SystemConfigModel("static_test_map.yaml", configFile);
         }
         try {
-            SystemConfig config =
-                    SystemConfigLoader.load(configFile);
-            return new SystemConfigModel(
-                    config.launchMap(), configFile);
+            SystemConfig config = SystemConfigLoader.load(configFile);
+            return new SystemConfigModel(config.launchMap(), configFile);
         } catch (IOException ex) {
-            return new SystemConfigModel(
-                    "static_test_map.yaml", configFile);
+            return new SystemConfigModel("static_test_map.yaml", configFile);
         }
     }
-
 }

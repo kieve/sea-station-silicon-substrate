@@ -1,9 +1,9 @@
 package ca.kieve.ssss.editor;
 
-import ca.kieve.ssss.content.SystemConfig;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+
+import ca.kieve.ssss.content.SystemConfig;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,5 +15,6 @@ public final class SystemConfigLoader {
         return MAPPER.readValue(file, SystemConfig.class);
     }
 
-    private SystemConfigLoader() {}
+    private SystemConfigLoader() {
+    }
 }

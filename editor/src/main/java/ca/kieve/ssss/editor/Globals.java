@@ -5,9 +5,10 @@ public final class Globals {
 
     static {
         IS_WIN = System.getProperty("os.name", "")
-                .toLowerCase()
-                .startsWith("win");
+            .toLowerCase()
+            .startsWith("win");
     }
 
-    private Globals() {}
+    private Globals() {
+    }
 }

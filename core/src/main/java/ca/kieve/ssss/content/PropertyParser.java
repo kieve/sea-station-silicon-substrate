@@ -1,13 +1,12 @@
 package ca.kieve.ssss.content;
 
-import ca.kieve.ssss.util.Vec3i;
-
 import com.badlogic.gdx.graphics.Color;
+
+import ca.kieve.ssss.util.Vec3i;
 
 import java.lang.reflect.Field;
 
 public class PropertyParser {
-
     public static Object parseValue(Object value, Class<?> targetType) {
         if (value == null) {
             return null;
@@ -65,14 +64,15 @@ public class PropertyParser {
         }
 
         if (targetType.isEnum()) {
-            @SuppressWarnings({"unchecked", "rawtypes"})
+            @SuppressWarnings({ "unchecked", "rawtypes" })
             Object enumValue = Enum.valueOf((Class<Enum>) targetType, value.toString());
             return enumValue;
         }
 
         throw new IllegalArgumentException(
             "Cannot convert " + value.getClass().getSimpleName()
-                + " to " + targetType.getSimpleName());
+                + " to " + targetType.getSimpleName()
+        );
     }
 
     private static Color parseColor(String str) {

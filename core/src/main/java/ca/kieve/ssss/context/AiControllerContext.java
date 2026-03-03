@@ -1,14 +1,14 @@
 package ca.kieve.ssss.context;
 
+import dev.dominion.ecs.api.Dominion;
+import dev.dominion.ecs.api.Entity;
+
 import ca.kieve.ssss.ai.behavior.ConditionDefinition;
 import ca.kieve.ssss.ai.behavior.TargetType;
 import ca.kieve.ssss.ai.condition.Condition;
 import ca.kieve.ssss.component.LastAttacker;
 import ca.kieve.ssss.component.PlayerController;
 import ca.kieve.ssss.content.ReflectionFactory;
-
-import dev.dominion.ecs.api.Dominion;
-import dev.dominion.ecs.api.Entity;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,15 +34,15 @@ public class AiControllerContext {
      */
     public Entity resolveTarget(Entity entity, TargetType targetType, Dominion ecs) {
         return switch (targetType) {
-            case PLAYER -> {
-                var results = ecs.findEntitiesWith(PlayerController.class);
-                var it = results.iterator();
-                yield it.hasNext() ? it.next().entity() : null;
-            }
-            case LAST_ATTACKER -> {
-                var lastAttacker = entity.get(LastAttacker.class);
-                yield lastAttacker != null ? lastAttacker.attacker : null;
-            }
+        case PLAYER -> {
+            var results = ecs.findEntitiesWith(PlayerController.class);
+            var it = results.iterator();
+            yield it.hasNext() ? it.next().entity() : null;
+        }
+        case LAST_ATTACKER -> {
+            var lastAttacker = entity.get(LastAttacker.class);
+            yield lastAttacker != null ? lastAttacker.attacker : null;
+        }
         };
     }
 }

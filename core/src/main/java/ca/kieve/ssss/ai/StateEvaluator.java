@@ -1,5 +1,7 @@
 package ca.kieve.ssss.ai;
 
+import dev.dominion.ecs.api.Entity;
+
 import ca.kieve.ssss.ai.behavior.AiController;
 import ca.kieve.ssss.ai.behavior.BehaviorFactory;
 import ca.kieve.ssss.ai.behavior.ConditionDefinition;
@@ -10,8 +12,6 @@ import ca.kieve.ssss.ai.state.AiState;
 import ca.kieve.ssss.context.AiControllerContext;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.util.PerfClock;
-
-import dev.dominion.ecs.api.Entity;
 
 import java.util.List;
 
@@ -42,8 +42,7 @@ public class StateEvaluator {
         }
 
         int priority = stateDef.priority();
-        ConditionContext condContext = new ConditionContext(
-            m_gameContext, entity, state, priority);
+        ConditionContext condContext = new ConditionContext(m_gameContext, entity, state, priority);
 
         for (ConditionDefinition condDef : conditions) {
             Condition condition = m_aiContext.getCondition(condDef);
@@ -60,9 +59,9 @@ public class StateEvaluator {
      * States should be pre-sorted by priority.
      */
     public StateDefinition selectState(
-            Entity entity,
-            AiController controller,
-            List<StateDefinition> sortedStates
+        Entity entity,
+        AiController controller,
+        List<StateDefinition> sortedStates
     ) {
         m_perf.start("AI-selectState");
         try {
@@ -83,9 +82,9 @@ public class StateEvaluator {
      * Called after state selection to allow conditions to update their state.
      */
     public void notifyConditionsOfSelection(
-            Entity entity,
-            AiState state,
-            StateDefinition stateDef
+        Entity entity,
+        AiState state,
+        StateDefinition stateDef
     ) {
         List<ConditionDefinition> conditions = stateDef.conditions();
         if (conditions == null || conditions.isEmpty()) {
@@ -93,8 +92,7 @@ public class StateEvaluator {
         }
 
         int priority = stateDef.priority();
-        ConditionContext condContext = new ConditionContext(
-            m_gameContext, entity, state, priority);
+        ConditionContext condContext = new ConditionContext(m_gameContext, entity, state, priority);
 
         for (ConditionDefinition condDef : conditions) {
             Condition condition = m_aiContext.getCondition(condDef);

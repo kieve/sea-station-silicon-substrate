@@ -7,4 +7,5 @@ import dev.dominion.ecs.api.Entity;
  * Created by InteractSystem when player bumps into a socketable body.
  * Consumed by SocketSystem.
  */
-public record SocketEvent(Entity target) implements Event {}
+public record SocketEvent(Entity target) implements Event {
+}

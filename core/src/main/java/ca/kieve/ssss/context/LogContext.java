@@ -5,11 +5,13 @@ import java.util.List;
 import java.util.Queue;
 
 public class LogContext {
+    public record LogEntry(String message, int count) {
+    }
+
     private static final int MAX_MESSAGES = 30;
 
-    public record LogEntry(String message, int count) {}
-
     private final Queue<LogEntry> m_messages = new LinkedList<>();
+
     private int m_totalMessages = 0;
 
     public List<LogEntry> getMessages() {

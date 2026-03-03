@@ -34,24 +34,21 @@ public class ExaminePanel extends SelectionPanel {
 
         // Get entities at main level (crosshair position)
         var mainPos = examineContext.getCrosshairPos();
-        var mainEntities = ExamineContext.sortEntitiesByZIndex(
-            gc.pos().getAt(mainPos));
+        var mainEntities = ExamineContext.sortEntitiesByZIndex(gc.pos().getAt(mainPos));
         for (var entity : mainEntities) {
             items.add(new ExamineItem(entity, ExamineItem.ItemType.MAIN));
         }
 
         // Get entities at ceiling level (z+1)
         var ceilingPos = examineContext.getCeilingPos();
-        var ceilingEntities = ExamineContext.sortEntitiesByZIndex(
-            gc.pos().getAt(ceilingPos));
+        var ceilingEntities = ExamineContext.sortEntitiesByZIndex(gc.pos().getAt(ceilingPos));
         for (var entity : ceilingEntities) {
             items.add(new ExamineItem(entity, ExamineItem.ItemType.CEILING));
         }
 
         // Get entities at floor level (z-1)
         var floorPos = examineContext.getFloorPos();
-        var floorEntities = ExamineContext.sortEntitiesByZIndex(
-            gc.pos().getAt(floorPos));
+        var floorEntities = ExamineContext.sortEntitiesByZIndex(gc.pos().getAt(floorPos));
         for (var entity : floorEntities) {
             items.add(new ExamineItem(entity, ExamineItem.ItemType.FLOOR));
         }
@@ -61,9 +58,9 @@ public class ExaminePanel extends SelectionPanel {
         for (var item : items) {
             var name = item.entity().get(Descriptor.class).name();
             String displayName = switch (item.type()) {
-                case MAIN -> name;
-                case FLOOR -> name + " (Floor)";
-                case CEILING -> name + " (Ceiling)";
+            case MAIN -> name;
+            case FLOOR -> name + " (Floor)";
+            case CEILING -> name + " (Ceiling)";
             };
             m_entityNames.add(displayName);
         }

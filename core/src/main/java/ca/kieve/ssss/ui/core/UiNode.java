@@ -47,10 +47,7 @@ public abstract class UiNode {
     }
 
     public UiPosition getScreenPosition() {
-        return new UiPosition(
-            m_origin.x() + m_position.x(),
-            m_origin.y() + m_position.y()
-        );
+        return new UiPosition(m_origin.x() + m_position.x(), m_origin.y() + m_position.y());
     }
 
     public abstract void update(UiRenderContext renderContext, float delta);

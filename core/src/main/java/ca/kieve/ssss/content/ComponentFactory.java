@@ -1,13 +1,13 @@
 package ca.kieve.ssss.content;
 
+import dev.dominion.ecs.api.Entity;
+
 import ca.kieve.ssss.ai.behavior.AiController;
 import ca.kieve.ssss.ai.behavior.BehaviorDefinition;
 import ca.kieve.ssss.component.Equipment;
 import ca.kieve.ssss.component.Material;
 import ca.kieve.ssss.component.TileGlyph;
 import ca.kieve.ssss.context.GameContext;
-
-import dev.dominion.ecs.api.Entity;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Parameter;
@@ -59,19 +59,19 @@ public class ComponentFactory {
             return createWithProperties(componentType, properties);
         } catch (Exception e) {
             throw new RuntimeException(
-                "Failed to create component: " + definition.type().getSimpleName(), e);
+                "Failed to create component: " + definition.type().getSimpleName(),
+                e
+            );
         }
     }
 
     private TileGlyph createTileGlyph(Map<String, Object> properties) {
         if (properties == null || !properties.containsKey("glyphId")) {
-            throw new IllegalArgumentException(
-                "TileGlyph component requires glyphId property");
+            throw new IllegalArgumentException("TileGlyph component requires glyphId property");
         }
 
         if (m_gameContext == null) {
-            throw new IllegalStateException(
-                "GameContext must be set before creating TileGlyph");
+            throw new IllegalStateException("GameContext must be set before creating TileGlyph");
         }
 
         String glyphId = properties.get("glyphId").toString();
@@ -86,7 +86,8 @@ public class ComponentFactory {
 
         if (m_gameContext == null) {
             throw new IllegalStateException(
-                "GameContext must be set before creating Equipment with weaponId");
+                "GameContext must be set before creating Equipment with weaponId"
+            );
         }
 
         String weaponId = properties.get("weaponId").toString();
@@ -104,8 +105,7 @@ public class ComponentFactory {
         }
 
         if (m_gameContext == null) {
-            throw new IllegalStateException(
-                "GameContext must be set before creating Material");
+            throw new IllegalStateException("GameContext must be set before creating Material");
         }
 
         String materialId = properties.get("id").toString();
@@ -125,8 +125,7 @@ public class ComponentFactory {
         String behaviorId = properties.get("behavior").toString();
         BehaviorDefinition behaviorDef = m_registry.getBehaviorDefinition(behaviorId);
         if (behaviorDef == null) {
-            throw new IllegalArgumentException(
-                "Unknown behavior: " + behaviorId);
+            throw new IllegalArgumentException("Unknown behavior: " + behaviorId);
         }
 
         return new AiController(behaviorDef.states());
@@ -136,7 +135,8 @@ public class ComponentFactory {
     private Object createEnumComponent(Class<?> enumType, Map<String, Object> properties) {
         if (properties == null || properties.isEmpty()) {
             throw new IllegalArgumentException(
-                "Enum component " + enumType.getSimpleName() + " requires a value property");
+                "Enum component " + enumType.getSimpleName() + " requires a value property"
+            );
         }
 
         // Support either "value" property or single property with any name
@@ -148,7 +148,8 @@ public class ComponentFactory {
         } else {
             throw new IllegalArgumentException(
                 "Enum component " + enumType.getSimpleName()
-                    + " requires 'value' property or single property");
+                    + " requires 'value' property or single property"
+            );
         }
 
         return Enum.valueOf((Class<Enum>) enumType, enumValue);
@@ -166,23 +167,22 @@ public class ComponentFactory {
         Constructor<?>[] constructors = componentClass.getConstructors();
 
         for (Constructor<?> constructor : constructors) {
-            if (constructor.getParameterCount() == properties.size()) {
-                Object[] convertedArgs = convertProperties(constructor, properties);
-                if (convertedArgs != null) {
-                    return constructor.newInstance(convertedArgs);
-                }
+            if (constructor.getParameterCount() != properties.size()) {
+                continue;
+            }
+            Object[] convertedArgs = convertProperties(constructor, properties);
+            if (convertedArgs != null) {
+                return constructor.newInstance(convertedArgs);
             }
         }
 
         throw new IllegalArgumentException(
             "No suitable constructor found for " + componentClass.getSimpleName()
-                + " with properties: " + properties.keySet());
+                + " with properties: " + properties.keySet()
+        );
     }
 
-    private Object[] convertProperties(
-        Constructor<?> constructor,
-        Map<String, Object> properties
-    ) {
+    private Object[] convertProperties(Constructor<?> constructor, Map<String, Object> properties) {
         Parameter[] params = constructor.getParameters();
         Object[] converted = new Object[params.length];
 

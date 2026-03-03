@@ -1,5 +1,8 @@
 package ca.kieve.ssss.ai.state;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.dominion.ecs.api.Entity;
+
 import ca.kieve.ssss.ai.StateEvaluator;
 import ca.kieve.ssss.ai.behavior.AiController;
 import ca.kieve.ssss.ai.behavior.BehaviorFactory;
@@ -9,9 +12,6 @@ import ca.kieve.ssss.ai.reset.ResetCondition;
 import ca.kieve.ssss.ai.reset.ResetContext;
 import ca.kieve.ssss.content.ReflectionFactory;
 import ca.kieve.ssss.context.GameContext;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.dominion.ecs.api.Entity;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -29,12 +29,12 @@ import java.util.Random;
  * - branches: List of branch definitions with name and nested states
  */
 public class RandomBranchState extends AiState {
+    private final BehaviorFactory m_behaviorFactory = new BehaviorFactory();
+    private final Map<String, Map<String, AiState>> m_nestedStates = new HashMap<>();
 
     private int m_priority;
     private String m_resetConditionType;
     private List<BranchDefinition> m_branches;
-    private final BehaviorFactory m_behaviorFactory = new BehaviorFactory();
-    private final Map<String, Map<String, AiState>> m_nestedStates = new HashMap<>();
     private StateEvaluator m_stateEvaluator;
 
     @Override
@@ -46,8 +46,8 @@ public class RandomBranchState extends AiState {
         m_resetConditionType = (String) properties.get("resetCondition");
 
         // Parse branches from YAML using Jackson
-        List<Map<String, Object>> branchMaps =
-            (List<Map<String, Object>>) properties.get("branches");
+        List<Map<String, Object>> branchMaps = (List<Map<String, Object>>) properties
+            .get("branches");
         m_branches = parseBranches(branchMaps);
 
         // Pre-create nested AiState instances for each branch
@@ -84,8 +84,8 @@ public class RandomBranchState extends AiState {
 
         // Check if we need to reset the branch selection
         ResetCondition resetCondition = data.getResetCondition();
-        if (data.getSelectedBranch() == null ||
-            (resetCondition != null && resetCondition.shouldReset(resetContext))) {
+        if (data.getSelectedBranch() == null
+            || (resetCondition != null && resetCondition.shouldReset(resetContext))) {
             // Make a new random selection
             selectRandomBranch(data, gameContext.random());
             if (resetCondition != null) {
@@ -123,12 +123,13 @@ public class RandomBranchState extends AiState {
         AiState selectedAiState = null;
         for (StateDefinition stateDef : sortedStates) {
             AiState state = branchStates.get(stateDef.state());
-            if (state != null &&
-                m_stateEvaluator.evaluateConditions(entity, state, stateDef)) {
-                selectedState = stateDef;
-                selectedAiState = state;
-                break;
+            if (state == null
+                || !m_stateEvaluator.evaluateConditions(entity, state, stateDef)) {
+                continue;
             }
+            selectedState = stateDef;
+            selectedAiState = state;
+            break;
         }
 
         if (selectedState == null || selectedAiState == null) {
@@ -140,9 +141,11 @@ public class RandomBranchState extends AiState {
 
         // Resolve target for the nested state
         Entity target = gameContext.aiController().resolveTarget(
-            entity, selectedState.target(), gameContext.ecs());
-        StateContext nestedContext = new StateContext(
-            gameContext, entity, controller, target);
+            entity,
+            selectedState.target(),
+            gameContext.ecs()
+        );
+        StateContext nestedContext = new StateContext(gameContext, entity, controller, target);
 
         selectedAiState.execute(nestedContext);
     }
@@ -180,16 +183,18 @@ public class RandomBranchState extends AiState {
 
         for (Map<String, Object> branchMap : branchMaps) {
             String name = (String) branchMap.get("name");
-            List<Map<String, Object>> stateMaps =
-                (List<Map<String, Object>>) branchMap.get("states");
+            List<Map<String, Object>> stateMaps = (List<Map<String, Object>>) branchMap
+                .get("states");
+
+            if (stateMaps == null) {
+                branches.add(new BranchDefinition(name, List.of()));
+                continue;
+            }
 
             List<StateDefinition> states = new ArrayList<>();
-            if (stateMaps != null) {
-                for (Map<String, Object> stateMap : stateMaps) {
-                    StateDefinition stateDef = mapper.convertValue(
-                        stateMap, StateDefinition.class);
-                    states.add(stateDef);
-                }
+            for (Map<String, Object> stateMap : stateMaps) {
+                StateDefinition stateDef = mapper.convertValue(stateMap, StateDefinition.class);
+                states.add(stateDef);
             }
 
             branches.add(new BranchDefinition(name, states));

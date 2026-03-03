@@ -5,5 +5,6 @@ public final class CssUtil {
         return "data:text/css," + css;
     }
 
-    private CssUtil() {}
+    private CssUtil() {
+    }
 }

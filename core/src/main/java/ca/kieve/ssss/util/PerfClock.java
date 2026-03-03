@@ -4,10 +4,17 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class PerfClock {
+    private static class PerfEntry {
+        long m_startTime;
+        long m_totalNanos;
+        int m_callCount;
+    }
+
     private static final double NANOS_PER_MS = 1_000_000.0;
     private static final boolean DEFAULT_ENABLED = false;
 
     private final Map<String, PerfEntry> m_entries = new LinkedHashMap<>();
+
     private boolean m_enabled = DEFAULT_ENABLED;
 
     public boolean isEnabled() {
@@ -23,7 +30,7 @@ public class PerfClock {
             return;
         }
         var entry = m_entries.computeIfAbsent(key, k -> new PerfEntry());
-        entry.m_startTime = java.lang.System.nanoTime();
+        entry.m_startTime = System.nanoTime();
     }
 
     public void end(String key) {
@@ -34,7 +41,7 @@ public class PerfClock {
         if (entry == null || entry.m_startTime == 0) {
             return;
         }
-        long elapsed = java.lang.System.nanoTime() - entry.m_startTime;
+        long elapsed = System.nanoTime() - entry.m_startTime;
         entry.m_totalNanos += elapsed;
         entry.m_callCount++;
         entry.m_startTime = 0;
@@ -59,25 +66,20 @@ public class PerfClock {
             double avgMs = entry.m_callCount > 0
                 ? totalMs / entry.m_callCount
                 : 0;
-            IO.println(String.format(
-                "[PerfClock] %-" + maxKeyLen + "s  calls=%-4d avg=%.2fms"
-                    + "  total=%.2fms",
-                key,
-                entry.m_callCount,
-                avgMs,
-                totalMs));
+            IO.println(
+                String.format(
+                    "[PerfClock] %-" + maxKeyLen + "s  calls=%-4d avg=%.2fms"
+                        + "  total=%.2fms",
+                    key,
+                    entry.m_callCount,
+                    avgMs,
+                    totalMs
+                )
+            );
         }
 
-        IO.println(String.format(
-            "[PerfClock] TURN TOTAL: %.2fms",
-            grandTotal / NANOS_PER_MS));
+        IO.println(String.format("[PerfClock] TURN TOTAL: %.2fms", grandTotal / NANOS_PER_MS));
 
         m_entries.clear();
-    }
-
-    private static class PerfEntry {
-        long m_startTime;
-        long m_totalNanos;
-        int m_callCount;
     }
 }

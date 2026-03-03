@@ -1,10 +1,5 @@
 package ca.kieve.ssss.ui.widget;
 
-import ca.kieve.ssss.context.GameContext;
-import ca.kieve.ssss.ui.core.UiRenderContext;
-import ca.kieve.ssss.ui.core.UiWindow;
-import ca.kieve.ssss.util.TickStage;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -12,6 +7,11 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+
+import ca.kieve.ssss.context.GameContext;
+import ca.kieve.ssss.ui.core.UiRenderContext;
+import ca.kieve.ssss.ui.core.UiWindow;
+import ca.kieve.ssss.util.TickStage;
 
 public class GameWindow extends UiWindow {
     public static final int TILE_SIZE = 32;
@@ -28,7 +28,10 @@ public class GameWindow extends UiWindow {
         m_viewport.setUnitsPerPixel(TILE_SCALE);
 
         m_gameContext.gameEngine().initializeRenderSystems(
-            m_spriteBatch, m_shapeRenderer, m_camera);
+            m_spriteBatch,
+            m_shapeRenderer,
+            m_camera
+        );
     }
 
     @Override
@@ -51,8 +54,8 @@ public class GameWindow extends UiWindow {
 
         // Recreate FrameBuffer if size changed
         if (m_frameBuffer == null
-                || screenWidth != m_lastWidth
-                || screenHeight != m_lastHeight) {
+            || screenWidth != m_lastWidth
+            || screenHeight != m_lastHeight) {
             if (m_frameBuffer != null) {
                 m_frameBuffer.dispose();
             }
@@ -107,11 +110,16 @@ public class GameWindow extends UiWindow {
         // FrameBuffer textures are Y-flipped, so flip V coordinates
         m_spriteBatch.draw(
             cachedTexture,
-            0, 0,
-            screenWidth, screenHeight,
-            0, 0,
-            cachedTexture.getWidth(), cachedTexture.getHeight(),
-            false, true  // flipX = false, flipY = true
+            0,
+            0,
+            screenWidth,
+            screenHeight,
+            0,
+            0,
+            cachedTexture.getWidth(),
+            cachedTexture.getHeight(),
+            false,
+            true // flipX = false, flipY = true
         );
         m_spriteBatch.end();
     }

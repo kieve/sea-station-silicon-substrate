@@ -1,5 +1,10 @@
 package ca.kieve.ssss.context;
 
+import com.github.yellowstonegames.grid.Coord;
+import com.github.yellowstonegames.path.DijkstraMap;
+import dev.dominion.ecs.api.Dominion;
+import dev.dominion.ecs.api.Entity;
+
 import ca.kieve.ssss.component.MaxPassableSize;
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.component.Size;
@@ -7,11 +12,6 @@ import ca.kieve.ssss.component.Solid;
 import ca.kieve.ssss.util.PerfClock;
 import ca.kieve.ssss.util.SolidUtil;
 import ca.kieve.ssss.util.Vec3i;
-
-import com.github.yellowstonegames.grid.Coord;
-import com.github.yellowstonegames.path.DijkstraMap;
-import dev.dominion.ecs.api.Dominion;
-import dev.dominion.ecs.api.Entity;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,16 +21,13 @@ import java.util.Map;
  * The map is rebuilt once per tick by PathingSystem.
  */
 public class PathingContext {
+    private record SizedLevel(int zLevel, Size size) {
+    }
+
     private static final int MAP_WIDTH = 28;
     private static final int MAP_HEIGHT = 17;
     private static final char PASSABLE = '.';
     private static final char BLOCKED = '#';
-
-    private record SizedLevel(int zLevel, Size size) {}
-
-    private Dominion m_ecs;
-    private PositionContext m_positionContext;
-    private PerfClock m_perf;
 
     // Per-Z-level dijkstra maps and grids (for non-size-aware queries)
     private final Map<Integer, DijkstraMap> m_dijkstraMaps = new HashMap<>();
@@ -46,6 +43,10 @@ public class PathingContext {
     // Track the last scanned goal per Z-level for caching
     private final Map<Integer, Coord> m_lastGoal = new HashMap<>();
     private final Map<SizedLevel, Coord> m_sizedLastGoal = new HashMap<>();
+
+    private Dominion m_ecs;
+    private PositionContext m_positionContext;
+    private PerfClock m_perf;
 
     public void init(GameContext gameContext) {
         m_ecs = gameContext.ecs();
@@ -172,10 +173,7 @@ public class PathingContext {
         }
     }
 
-    private Coord findNextStepSizedInternal(
-            Vec3i start,
-            Vec3i goal,
-            Entity mover) {
+    private Coord findNextStepSizedInternal(Vec3i start, Vec3i goal, Entity mover) {
         if (start.z != goal.z) {
             return null;
         }
@@ -194,7 +192,7 @@ public class PathingContext {
         // Check if goal is blocked and needs temporary unblocking
         boolean goalWasBlocked = false;
         if (goal.x >= 0 && goal.x < MAP_WIDTH
-                && goal.y >= 0 && goal.y < MAP_HEIGHT) {
+            && goal.y >= 0 && goal.y < MAP_HEIGHT) {
             if (grid[goal.x][goal.y] == BLOCKED) {
                 grid[goal.x][goal.y] = PASSABLE;
                 goalWasBlocked = true;
@@ -212,8 +210,7 @@ public class PathingContext {
         }
 
         Coord startCoord = Coord.get(start.x, start.y);
-        var path = dijkstra.findPath(
-            1, null, null, startCoord, goalCoord);
+        var path = dijkstra.findPath(1, null, null, startCoord, goalCoord);
 
         // Restore grid if we modified it
         if (goalWasBlocked) {
@@ -230,12 +227,13 @@ public class PathingContext {
     }
 
     private void ensureSizedMapExists(SizedLevel key) {
-        if (!m_sizedGrids.containsKey(key)) {
-            char[][] grid = new char[MAP_WIDTH][MAP_HEIGHT];
-            rebuildSizedGrid(key, grid);
-            m_sizedGrids.put(key, grid);
-            m_sizedDijkstraMaps.put(key, new DijkstraMap(grid));
+        if (m_sizedGrids.containsKey(key)) {
+            return;
         }
+        char[][] grid = new char[MAP_WIDTH][MAP_HEIGHT];
+        rebuildSizedGrid(key, grid);
+        m_sizedGrids.put(key, grid);
+        m_sizedDijkstraMaps.put(key, new DijkstraMap(grid));
     }
 
     private void rebuildSizedGrid(SizedLevel key, char[][] grid) {
@@ -255,23 +253,21 @@ public class PathingContext {
         solids.forEach(result -> {
             var pos = result.comp2().getPosition();
             if (pos.z == zLevel
-                    && pos.x >= 0 && pos.x < MAP_WIDTH
-                    && pos.y >= 0 && pos.y < MAP_HEIGHT) {
+                && pos.x >= 0 && pos.x < MAP_WIDTH
+                && pos.y >= 0 && pos.y < MAP_HEIGHT) {
                 grid[pos.x][pos.y] = BLOCKED;
             }
         });
 
         // Mark size-restricted passages as blocked if entity is too large
-        var restricted = m_ecs.findEntitiesWith(
-            MaxPassableSize.class, Position.class);
+        var restricted = m_ecs.findEntitiesWith(MaxPassableSize.class, Position.class);
         restricted.forEach(result -> {
             MaxPassableSize restriction = result.comp1();
             var pos = result.comp2().getPosition();
             if (pos.z == zLevel
-                    && pos.x >= 0 && pos.x < MAP_WIDTH
-                    && pos.y >= 0 && pos.y < MAP_HEIGHT
-                    && !SolidUtil.canSizePassThrough(
-                        size, restriction.maxSize())) {
+                && pos.x >= 0 && pos.x < MAP_WIDTH
+                && pos.y >= 0 && pos.y < MAP_HEIGHT
+                && !SolidUtil.canSizePassThrough(size, restriction.maxSize())) {
                 grid[pos.x][pos.y] = BLOCKED;
             }
         });
@@ -279,17 +275,18 @@ public class PathingContext {
     }
 
     private void ensureMapExists(int zLevel) {
-        if (!m_grids.containsKey(zLevel)) {
-            char[][] grid = new char[MAP_WIDTH][MAP_HEIGHT];
-            for (int x = 0; x < MAP_WIDTH; x++) {
-                for (int y = 0; y < MAP_HEIGHT; y++) {
-                    grid[x][y] = PASSABLE;
-                }
-            }
-            m_grids.put(zLevel, grid);
-            m_dijkstraMaps.put(zLevel, new DijkstraMap(grid));
-            m_dirty.put(zLevel, true);
+        if (m_grids.containsKey(zLevel)) {
+            return;
         }
+        char[][] grid = new char[MAP_WIDTH][MAP_HEIGHT];
+        for (int x = 0; x < MAP_WIDTH; x++) {
+            for (int y = 0; y < MAP_HEIGHT; y++) {
+                grid[x][y] = PASSABLE;
+            }
+        }
+        m_grids.put(zLevel, grid);
+        m_dijkstraMaps.put(zLevel, new DijkstraMap(grid));
+        m_dirty.put(zLevel, true);
     }
 
     private void rebuildGrid(int zLevel) {
@@ -310,8 +307,8 @@ public class PathingContext {
         solids.forEach(result -> {
             var pos = result.comp2().getPosition();
             if (pos.z == zLevel
-                    && pos.x >= 0 && pos.x < MAP_WIDTH
-                    && pos.y >= 0 && pos.y < MAP_HEIGHT) {
+                && pos.x >= 0 && pos.x < MAP_WIDTH
+                && pos.y >= 0 && pos.y < MAP_HEIGHT) {
                 grid[pos.x][pos.y] = BLOCKED;
             }
         });

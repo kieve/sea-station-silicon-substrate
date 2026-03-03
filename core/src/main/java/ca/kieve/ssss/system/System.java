@@ -17,10 +17,17 @@ public abstract class System implements Runnable {
         m_perfName = getClass().getSimpleName();
     }
 
-    public void awaitingUserInput() {}
-    public void preTick() {}
-    public void tick() {}
-    public void postTick() {}
+    public void awaitingUserInput() {
+    }
+
+    public void preTick() {
+    }
+
+    public void tick() {
+    }
+
+    public void postTick() {
+    }
 
     @Override
     public void run() {

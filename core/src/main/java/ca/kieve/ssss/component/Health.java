@@ -1,6 +1,6 @@
 package ca.kieve.ssss.component;
 
-public class Health implements Component{
+public class Health implements Component {
     public long maxHp;
     public long hp;
 

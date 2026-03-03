@@ -15,9 +15,7 @@ import java.util.Map;
  * Runtime state for AI behavior. Holds instantiated states.
  */
 public class AiController implements Component {
-    @EditorRef(
-            value = "behavior",
-            source = EditorRef.Source.BEHAVIOR)
+    @EditorRef(value = "behavior", source = EditorRef.Source.BEHAVIOR)
     private final List<StateDefinition> m_stateDefinitions;
     @EditorIgnore
     private final Map<String, AiState> m_states = new HashMap<>();

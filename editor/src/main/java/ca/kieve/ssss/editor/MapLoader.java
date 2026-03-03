@@ -1,9 +1,9 @@
 package ca.kieve.ssss.editor;
 
-import ca.kieve.ssss.content.MapDefinition;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+
+import ca.kieve.ssss.content.MapDefinition;
 
 import java.io.File;
 import java.io.IOException;

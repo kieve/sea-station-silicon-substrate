@@ -1,13 +1,6 @@
 package ca.kieve.ssss.ui.layout;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import org.junit.jupiter.api.Test;
 
 import ca.kieve.ssss.ui.TestUiNode;
 import ca.kieve.ssss.ui.core.UiNode;
@@ -16,7 +9,14 @@ import ca.kieve.ssss.ui.core.UiRenderContext;
 import ca.kieve.ssss.ui.core.UiSize;
 import ca.kieve.ssss.ui.core.UiWindow;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 class UiLayoutTest {
     private static class RenderCountingUiNode extends UiNode {
@@ -95,7 +95,8 @@ class UiLayoutTest {
     void addChildWithLayoutParamsAppliesParamsBeforeLayout() {
         TestUiLayout layout = new TestUiLayout();
         TestUiNode child = new TestUiNode();
-        UiLayoutParams layoutParams = new UiLayoutParams() { };
+        UiLayoutParams layoutParams = new UiLayoutParams() {
+        };
 
         layout.resetLayoutCallCount();
 

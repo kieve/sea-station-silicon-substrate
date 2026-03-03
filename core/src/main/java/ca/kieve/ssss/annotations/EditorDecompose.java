@@ -21,7 +21,9 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({
-        ElementType.TYPE,
-        ElementType.FIELD,
-        ElementType.RECORD_COMPONENT})
-public @interface EditorDecompose {}
+    ElementType.TYPE,
+    ElementType.FIELD,
+    ElementType.RECORD_COMPONENT
+})
+public @interface EditorDecompose {
+}

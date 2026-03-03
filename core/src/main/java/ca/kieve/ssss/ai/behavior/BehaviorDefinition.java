@@ -18,7 +18,8 @@ public record BehaviorDefinition(
         for (StateDefinition state : states) {
             if (!priorities.add(state.priority())) {
                 throw new IllegalArgumentException(
-                    "Duplicate priority " + state.priority() + " in behavior " + id);
+                    "Duplicate priority " + state.priority() + " in behavior " + id
+                );
             }
         }
     }

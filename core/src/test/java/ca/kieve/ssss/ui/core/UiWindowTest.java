@@ -1,15 +1,5 @@
 package ca.kieve.ssss.ui.core;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.mockito.Mockito.clearInvocations;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockConstruction;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import ca.kieve.ssss.context.GameContext;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.graphics.Camera;
@@ -20,19 +10,18 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedConstruction;
+
+import ca.kieve.ssss.context.GameContext;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockConstruction;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class UiWindowTest {
-    @BeforeEach
-    void setUp() {
-        Gdx.graphics = mock(Graphics.class);
-        when(Gdx.graphics.getHeight()).thenReturn(600);
-    }
-
-    @AfterEach
-    void tearDown() {
-        Gdx.graphics = null;
-    }
     private static class TestNode extends UiNode {
         UiRenderContext m_lastUpdateContext;
         float m_lastUpdateDelta;
@@ -59,7 +48,19 @@ class UiWindowTest {
         OrthographicCamera camera,
         SpriteBatch spriteBatch,
         ShapeRenderer shapeRenderer
-    ) {}
+    ) {
+    }
+
+    @BeforeEach
+    void setUp() {
+        Gdx.graphics = mock(Graphics.class);
+        when(Gdx.graphics.getHeight()).thenReturn(600);
+    }
+
+    @AfterEach
+    void tearDown() {
+        Gdx.graphics = null;
+    }
 
     @Test
     void constructorWithYDownTrueFlipsCameraOrientation() {
@@ -199,69 +200,71 @@ class UiWindowTest {
         assertEquals(0.25f, child.m_lastRenderDelta, 1e-6f);
     }
 
-    private TestWindowContext createWindow(
-            boolean yDown, float unitsPerPixel) {
+    private TestWindowContext createWindow(boolean yDown, float unitsPerPixel) {
         GameContext gameContext = mock(GameContext.class);
         OrthographicCamera camera = new OrthographicCamera();
 
-        try (var viewportConstruction =
-                 mockConstruction(ScreenViewport.class,
-                     (viewport, context) -> {
-                         when(viewport.getCamera())
-                             .thenReturn(camera);
-                         when(viewport.getUnitsPerPixel())
-                             .thenReturn(unitsPerPixel);
-                     });
-             var spriteBatchConstruction =
-                 mockConstruction(SpriteBatch.class);
-             var shapeRendererConstruction =
-                 mockConstruction(ShapeRenderer.class)) {
-
+        try (
+            var viewportConstruction = mockConstruction(
+                ScreenViewport.class,
+                (viewport, context) -> {
+                    when(viewport.getCamera())
+                        .thenReturn(camera);
+                    when(viewport.getUnitsPerPixel())
+                        .thenReturn(unitsPerPixel);
+                }
+            );
+            var spriteBatchConstruction = mockConstruction(SpriteBatch.class);
+            var shapeRendererConstruction = mockConstruction(ShapeRenderer.class)
+        ) {
             var window = new UiWindow(gameContext, yDown);
 
-            var viewport =
-                viewportConstruction.constructed().get(0);
-            var spriteBatch =
-                spriteBatchConstruction.constructed().get(0);
-            var shapeRenderer =
-                shapeRendererConstruction.constructed().get(0);
+            var viewport = viewportConstruction.constructed().get(0);
+            var spriteBatch = spriteBatchConstruction.constructed().get(0);
+            var shapeRenderer = shapeRendererConstruction.constructed().get(0);
 
             return new TestWindowContext(
-                window, gameContext, viewport,
-                camera, spriteBatch, shapeRenderer);
+                window,
+                gameContext,
+                viewport,
+                camera,
+                spriteBatch,
+                shapeRenderer
+            );
         }
     }
 
-    private TestWindowContext createWindow(
-            float unitsPerPixel) {
+    private TestWindowContext createWindow(float unitsPerPixel) {
         GameContext gameContext = mock(GameContext.class);
         OrthographicCamera camera = new OrthographicCamera();
 
-        try (var viewportConstruction =
-                 mockConstruction(ScreenViewport.class,
-                     (viewport, context) -> {
-                         when(viewport.getCamera())
-                             .thenReturn(camera);
-                         when(viewport.getUnitsPerPixel())
-                             .thenReturn(unitsPerPixel);
-                     });
-             var spriteBatchConstruction =
-                 mockConstruction(SpriteBatch.class);
-             var shapeRendererConstruction =
-                 mockConstruction(ShapeRenderer.class)) {
-
+        try (
+            var viewportConstruction = mockConstruction(
+                ScreenViewport.class,
+                (viewport, context) -> {
+                    when(viewport.getCamera())
+                        .thenReturn(camera);
+                    when(viewport.getUnitsPerPixel())
+                        .thenReturn(unitsPerPixel);
+                }
+            );
+            var spriteBatchConstruction = mockConstruction(SpriteBatch.class);
+            var shapeRendererConstruction = mockConstruction(ShapeRenderer.class)
+        ) {
             var window = new UiWindow(gameContext);
 
-            var viewport =
-                viewportConstruction.constructed().get(0);
-            var spriteBatch =
-                spriteBatchConstruction.constructed().get(0);
-            var shapeRenderer =
-                shapeRendererConstruction.constructed().get(0);
+            var viewport = viewportConstruction.constructed().get(0);
+            var spriteBatch = spriteBatchConstruction.constructed().get(0);
+            var shapeRenderer = shapeRendererConstruction.constructed().get(0);
 
             return new TestWindowContext(
-                window, gameContext, viewport,
-                camera, spriteBatch, shapeRenderer);
+                window,
+                gameContext,
+                viewport,
+                camera,
+                spriteBatch,
+                shapeRenderer
+            );
         }
     }
 }

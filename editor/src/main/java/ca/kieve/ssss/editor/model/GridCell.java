@@ -1,3 +1,4 @@
 package ca.kieve.ssss.editor.model;
 
-public record GridCell(int row, int col) {}
+public record GridCell(int row, int col) {
+}

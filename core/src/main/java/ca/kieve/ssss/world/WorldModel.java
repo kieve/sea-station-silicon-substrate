@@ -9,7 +9,6 @@ import ca.kieve.ssss.util.Vec3i;
  * Uses x-then-y-then-z indexing: blocks[x][y][z]
  */
 public class WorldModel {
-
     private static final String AIR = "air";
 
     private final int m_width;
@@ -21,9 +20,9 @@ public class WorldModel {
     /**
      * Creates a new world filled with air.
      *
-     * @param width  The size in the X direction
+     * @param width The size in the X direction
      * @param height The size in the Y direction
-     * @param depth  The size in the Z direction (number of vertical levels)
+     * @param depth The size in the Z direction (number of vertical levels)
      * @param blockTypeFactory Factory for querying block type properties
      */
     public WorldModel(int width, int height, int depth, BlockTypeFactory blockTypeFactory) {
@@ -93,8 +92,8 @@ public class WorldModel {
      */
     public boolean isInBounds(int x, int y, int z) {
         return x >= 0 && x < m_width
-                && y >= 0 && y < m_height
-                && z >= 0 && z < m_depth;
+            && y >= 0 && y < m_height
+            && z >= 0 && z < m_depth;
     }
 
     /**
@@ -173,11 +172,11 @@ public class WorldModel {
     public boolean isExposed(int x, int y, int z) {
         // Check all 6 adjacent positions
         return !isSolid(x - 1, y, z)
-                || !isSolid(x + 1, y, z)
-                || !isSolid(x, y - 1, z)
-                || !isSolid(x, y + 1, z)
-                || !isSolid(x, y, z - 1)
-                || !isSolid(x, y, z + 1);
+            || !isSolid(x + 1, y, z)
+            || !isSolid(x, y - 1, z)
+            || !isSolid(x, y + 1, z)
+            || !isSolid(x, y, z - 1)
+            || !isSolid(x, y, z + 1);
     }
 
     public int getWidth() {

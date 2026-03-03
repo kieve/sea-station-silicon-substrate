@@ -1,11 +1,11 @@
 package ca.kieve.ssss.ai.state;
 
+import com.github.yellowstonegames.grid.Coord;
+import dev.dominion.ecs.api.Entity;
+
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.component.Velocity;
 import ca.kieve.ssss.util.Vec3i;
-
-import com.github.yellowstonegames.grid.Coord;
-import dev.dominion.ecs.api.Entity;
 
 /**
  * State that pathfinds toward the target using the shared PathingContext.

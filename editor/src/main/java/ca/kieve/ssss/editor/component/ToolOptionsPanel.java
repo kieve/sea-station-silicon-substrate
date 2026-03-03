@@ -1,19 +1,18 @@
 package ca.kieve.ssss.editor.component;
 
-import static ca.kieve.ssss.editor.util.CssUtil.inline;
+import javafx.beans.property.BooleanProperty;
+import javafx.scene.control.CheckBox;
+import javafx.scene.layout.VBox;
 
 import ca.kieve.ssss.editor.EditorTheme;
 import ca.kieve.ssss.editor.ui.fx.EditorCheckBox;
 import ca.kieve.ssss.editor.ui.fx.EditorLabel;
 
-import javafx.beans.property.BooleanProperty;
-import javafx.scene.control.CheckBox;
-import javafx.scene.layout.VBox;
+import static ca.kieve.ssss.editor.util.CssUtil.inline;
 
 public class ToolOptionsPanel extends VBox {
     // language=css
-    private static final String CSS =
-            EditorTheme.OVERLAY_CSS;
+    private static final String CSS = EditorTheme.OVERLAY_CSS;
 
     private final CheckBox m_allLayersCheck;
 

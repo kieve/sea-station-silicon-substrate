@@ -9,7 +9,5 @@ import ca.kieve.ssss.util.Vec3i;
  * {@code initialDirection} means a random direction
  * will be chosen.
  */
-public record ScurryConfig(
-    boolean clockwise,
-    Vec3i initialDirection
-) implements Component {}
+public record ScurryConfig(boolean clockwise, Vec3i initialDirection) implements Component {
+}

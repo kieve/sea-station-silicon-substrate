@@ -1,5 +1,7 @@
 package ca.kieve.ssss.util;
 
+import dev.dominion.ecs.api.Entity;
+
 import ca.kieve.ssss.component.Attackable;
 import ca.kieve.ssss.component.Examinable;
 import ca.kieve.ssss.component.Health;
@@ -14,17 +16,19 @@ import ca.kieve.ssss.event.ExamineEvent;
 import ca.kieve.ssss.event.OpenEvent;
 import ca.kieve.ssss.event.SocketEvent;
 
-import dev.dominion.ecs.api.Entity;
-
 /**
  * Resolves which interaction should occur when bumping into an entity.
  * Priority order: Attack (if alive) > Socket (if dead) > Open > Examine
  */
 public final class InteractionResolver {
-    private InteractionResolver() {}
+    private InteractionResolver() {
+    }
 
     public static Event resolveBumpInteraction(
-            Entity controlled, SocketPlug socketPlug, Entity target) {
+        Entity controlled,
+        SocketPlug socketPlug,
+        Entity target
+    ) {
         // Attack: only if entity has health and is alive
         if (target.has(Attackable.class)) {
             var health = target.get(Health.class);
@@ -36,7 +40,7 @@ public final class InteractionResolver {
         // Socket: for dead entities or entities without health
         // Only allow socketing if player is not already socketed
         if (target.has(Socketable.class)
-                && socketPlug.currentBody == null) {
+            && socketPlug.currentBody == null) {
             var socket = target.get(Socket.class);
             if (socket != null && socket.destroyed) {
                 // Fall through to examine instead
@@ -50,7 +54,7 @@ public final class InteractionResolver {
 
         // Locked entities block bump interaction
         if (target.has(Lockable.class)
-                && target.get(Lockable.class).isLocked) {
+            && target.get(Lockable.class).isLocked) {
             // Fall through to Examinable
         }
         // Openable: bump to open unlocked doors
@@ -66,7 +70,7 @@ public final class InteractionResolver {
         // Skip if the mover can pass through
         if (target.has(Examinable.class)) {
             if (!SolidUtil.isSolid(target)
-                    && SolidUtil.canPassThrough(controlled, target)) {
+                && SolidUtil.canPassThrough(controlled, target)) {
                 return null;
             }
             return new ExamineEvent(target);

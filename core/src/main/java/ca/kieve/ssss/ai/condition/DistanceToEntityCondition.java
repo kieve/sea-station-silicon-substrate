@@ -1,10 +1,10 @@
 package ca.kieve.ssss.ai.condition;
 
+import dev.dominion.ecs.api.Entity;
+
 import ca.kieve.ssss.ai.behavior.TargetType;
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.util.Vec3i;
-
-import dev.dominion.ecs.api.Entity;
 
 import java.util.Map;
 
@@ -44,7 +44,7 @@ public class DistanceToEntityCondition implements Condition {
         }
 
         int dist = Math.abs(targetPos.x - entityPos.x)
-                 + Math.abs(targetPos.y - entityPos.y);
+            + Math.abs(targetPos.y - entityPos.y);
 
         return dist <= m_maxDistance;
     }

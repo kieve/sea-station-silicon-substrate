@@ -1,11 +1,12 @@
 package ca.kieve.ssss.editor;
 
+import javafx.scene.paint.Color;
+
 import ca.kieve.ssss.component.ColorComp;
 import ca.kieve.ssss.content.ComponentDefinition;
 import ca.kieve.ssss.content.ContentRegistry;
 
 import java.util.List;
-import javafx.scene.paint.Color;
 
 public class BlockColorResolver {
     private final ContentRegistry m_registry;
@@ -22,27 +23,26 @@ public class BlockColorResolver {
         var def = m_registry.getEntityDefinition(bpId);
         var components = def.resolveComponents(m_registry);
         for (ComponentDefinition comp : components) {
-            if (comp.type() == ColorComp.class) {
-                Object colorVal = comp.properties().get("color");
-                if (colorVal instanceof String colorStr) {
-                    return parseColor(colorStr);
-                }
+            if (comp.type() != ColorComp.class) {
+                continue;
+            }
+            Object colorVal = comp.properties().get("color");
+            if (colorVal instanceof String colorStr) {
+                return parseColor(colorStr);
             }
         }
 
         return Color.WHITE;
     }
 
-    public Color resolveWithOverrides(
-            String bpId,
-            List<ComponentDefinition> overrides) {
+    public Color resolveWithOverrides(String bpId, List<ComponentDefinition> overrides) {
         for (ComponentDefinition comp : overrides) {
-            if (comp.type() == ColorComp.class) {
-                Object colorVal =
-                        comp.properties().get("color");
-                if (colorVal instanceof String colorStr) {
-                    return parseColor(colorStr);
-                }
+            if (comp.type() != ColorComp.class) {
+                continue;
+            }
+            Object colorVal = comp.properties().get("color");
+            if (colorVal instanceof String colorStr) {
+                return parseColor(colorStr);
             }
         }
         return resolve(bpId);

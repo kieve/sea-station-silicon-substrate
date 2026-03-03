@@ -1,8 +1,5 @@
 package ca.kieve.ssss.repository;
 
-import static ca.kieve.ssss.ui.widget.GameWindow.TILE_SCALE;
-import static com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.DEFAULT_CHARS;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -14,13 +11,10 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFont
 import java.util.ArrayList;
 import java.util.List;
 
+import static ca.kieve.ssss.ui.widget.GameWindow.TILE_SCALE;
+import static com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.DEFAULT_CHARS;
+
 public class FontRepo {
-    private static final String EXTRA_CHARS = "█";
-
-    private FontRepo() {
-        // Do not instantiate
-    }
-
     public static final BitmapFont XIROD_32;
     public static final BitmapFont XIROD_24;
     public static final BitmapFont UBUNTU_32;
@@ -32,6 +26,12 @@ public class FontRepo {
         XIROD_24 = loadGameFont("fonts/Xirod.otf", 24);
         UBUNTU_32 = loadGameFont("fonts/UbuntuMono-R.ttf", 32);
         UI_UBUNTU_24 = loadUiFont("fonts/UbuntuMono-R.ttf", 24);
+    }
+
+    private static final String EXTRA_CHARS = "█";
+
+    private FontRepo() {
+        // Do not instantiate
     }
 
     private static BitmapFont loadGameFont(String path, int size) {
@@ -71,14 +71,15 @@ public class FontRepo {
      * @param font The font to use for measuring text width
      * @param text The text to wrap
      * @param maxWidth The maximum width in pixels
-     * @param continuationIndent String to prepend to continuation lines (e.g., "    " for 4 spaces)
+     * @param continuationIndent String to prepend to continuation lines (e.g., " " for 4 spaces)
      * @return List of wrapped lines
      */
     public static List<String> wrapText(
-            BitmapFont font,
-            String text,
-            float maxWidth,
-            String continuationIndent) {
+        BitmapFont font,
+        String text,
+        float maxWidth,
+        String continuationIndent
+    ) {
         List<String> lines = new ArrayList<>();
         if (text == null || text.isEmpty()) {
             return lines;
@@ -108,22 +109,22 @@ public class FontRepo {
                 } else {
                     currentLine.append(testLine);
                 }
-            } else {
-                // Adding to existing line
-                String testLine = currentLine + " " + word;
-                layout.setText(font, testLine);
-
-                if (layout.width > maxWidth) {
-                    // Word doesn't fit, start new line
-                    lines.add(currentLine.toString());
-                    isFirstLine = false;
-                    currentLine = new StringBuilder();
-                    String prefix = continuationIndent != null ? continuationIndent : "";
-                    currentLine.append(prefix).append(word);
-                } else {
-                    currentLine.append(" ").append(word);
-                }
+                continue;
             }
+            // Adding to existing line
+            String testLine = currentLine + " " + word;
+            layout.setText(font, testLine);
+
+            if (layout.width > maxWidth) {
+                // Word doesn't fit, start new line
+                lines.add(currentLine.toString());
+                isFirstLine = false;
+                currentLine = new StringBuilder();
+                String prefix = continuationIndent != null ? continuationIndent : "";
+                currentLine.append(prefix).append(word);
+                continue;
+            }
+            currentLine.append(" ").append(word);
         }
 
         // Add the last line if not empty

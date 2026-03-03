@@ -1,5 +1,8 @@
 package ca.kieve.ssss.context;
 
+import com.badlogic.gdx.graphics.Color;
+import dev.dominion.ecs.api.Entity;
+
 import ca.kieve.ssss.component.Item;
 import ca.kieve.ssss.component.Lockable;
 import ca.kieve.ssss.component.Openable;
@@ -9,27 +12,26 @@ import ca.kieve.ssss.ui.TileHighlight;
 import ca.kieve.ssss.ui.TileHighlightProvider;
 import ca.kieve.ssss.util.Vec3i;
 
-import com.badlogic.gdx.graphics.Color;
-import dev.dominion.ecs.api.Entity;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class InteractContext implements TileHighlightProvider {
-    private static final Color VALID_COLOR = Color.GREEN;
     public enum Phase {
         DIRECTION_SELECT,
         ITEM_SELECT
     }
+
+    private static final Color VALID_COLOR = Color.GREEN;
+
+    private final Map<Vec3i, Boolean> m_validDirections = new HashMap<>();
 
     private RenderContext m_renderContext;
     private PositionContext m_positionContext;
     private boolean m_active = false;
     private Phase m_phase = Phase.DIRECTION_SELECT;
     private Vec3i m_currentPos;
-    private final Map<Vec3i, Boolean> m_validDirections = new HashMap<>();
     private Vec3i m_targetPos;
     private List<Interaction> m_interactions = List.of();
     private int m_selectedIndex = 0;
@@ -48,8 +50,7 @@ public class InteractContext implements TileHighlightProvider {
             }
             Vec3i direction = entry.getKey();
             Vec3i targetPos = m_currentPos.add(direction);
-            highlights.add(new TileHighlight(
-                targetPos.x, targetPos.y, VALID_COLOR));
+            highlights.add(new TileHighlight(targetPos.x, targetPos.y, VALID_COLOR));
         }
         return highlights;
     }
@@ -127,8 +128,7 @@ public class InteractContext implements TileHighlightProvider {
         if (m_interactions.isEmpty()) {
             return;
         }
-        m_selectedIndex =
-            (m_selectedIndex - 1 + m_interactions.size()) % m_interactions.size();
+        m_selectedIndex = (m_selectedIndex - 1 + m_interactions.size()) % m_interactions.size();
     }
 
     private List<Interaction> resolveInteractions(Vec3i pos) {
@@ -142,21 +142,20 @@ public class InteractContext implements TileHighlightProvider {
                 var openable = entity.get(Openable.class);
                 var lockable = entity.get(Lockable.class);
                 boolean isLocked = lockable != null && lockable.isLocked;
-                if (!isLocked) {
-                    if (openable.isOpen) {
-                        result.add(new Interaction(Verb.CLOSE, entity));
-                    } else {
-                        result.add(new Interaction(Verb.OPEN, entity));
-                    }
+                if (!isLocked && openable.isOpen) {
+                    result.add(new Interaction(Verb.CLOSE, entity));
+                } else if (!isLocked) {
+                    result.add(new Interaction(Verb.OPEN, entity));
                 }
             }
-            if (entity.has(Lockable.class)) {
-                var lockable = entity.get(Lockable.class);
-                if (lockable.isLocked) {
-                    result.add(new Interaction(Verb.UNLOCK, entity));
-                } else {
-                    result.add(new Interaction(Verb.LOCK, entity));
-                }
+            if (!entity.has(Lockable.class)) {
+                continue;
+            }
+            var lockable = entity.get(Lockable.class);
+            if (lockable.isLocked) {
+                result.add(new Interaction(Verb.UNLOCK, entity));
+            } else {
+                result.add(new Interaction(Verb.LOCK, entity));
             }
         }
         return result;

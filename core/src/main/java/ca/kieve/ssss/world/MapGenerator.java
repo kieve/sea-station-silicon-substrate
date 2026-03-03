@@ -11,7 +11,6 @@ import java.util.List;
  * or load maps from files.
  */
 public interface MapGenerator {
-
     /**
      * Generates a WorldModel containing the 3D block data.
      *

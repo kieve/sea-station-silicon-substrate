@@ -31,26 +31,17 @@ public final class WindowResizeHandler {
     private double m_startStageW;
     private double m_startStageH;
 
-    private WindowResizeHandler(
-            Stage stage, BooleanProperty maximized) {
+    private WindowResizeHandler(Stage stage, BooleanProperty maximized) {
         m_stage = stage;
         m_maximized = maximized;
     }
 
-    public static void install(
-            Scene scene,
-            Stage stage,
-            BooleanProperty maximized) {
-        var handler =
-                new WindowResizeHandler(stage, maximized);
-        scene.addEventFilter(
-                MouseEvent.MOUSE_MOVED, handler::onMouseMoved);
-        scene.addEventFilter(
-                MouseEvent.MOUSE_PRESSED, handler::onMousePressed);
-        scene.addEventFilter(
-                MouseEvent.MOUSE_DRAGGED, handler::onMouseDragged);
-        scene.addEventFilter(
-                MouseEvent.MOUSE_RELEASED, handler::onMouseReleased);
+    public static void install(Scene scene, Stage stage, BooleanProperty maximized) {
+        var handler = new WindowResizeHandler(stage, maximized);
+        scene.addEventFilter(MouseEvent.MOUSE_MOVED, handler::onMouseMoved);
+        scene.addEventFilter(MouseEvent.MOUSE_PRESSED, handler::onMousePressed);
+        scene.addEventFilter(MouseEvent.MOUSE_DRAGGED, handler::onMouseDragged);
+        scene.addEventFilter(MouseEvent.MOUSE_RELEASED, handler::onMouseReleased);
     }
 
     private void onMouseMoved(MouseEvent e) {
@@ -72,17 +63,17 @@ public final class WindowResizeHandler {
 
         m_resizing = true;
         m_resizeN = cursor == Cursor.N_RESIZE
-                || cursor == Cursor.NE_RESIZE
-                || cursor == Cursor.NW_RESIZE;
+            || cursor == Cursor.NE_RESIZE
+            || cursor == Cursor.NW_RESIZE;
         m_resizeS = cursor == Cursor.S_RESIZE
-                || cursor == Cursor.SE_RESIZE
-                || cursor == Cursor.SW_RESIZE;
+            || cursor == Cursor.SE_RESIZE
+            || cursor == Cursor.SW_RESIZE;
         m_resizeE = cursor == Cursor.E_RESIZE
-                || cursor == Cursor.NE_RESIZE
-                || cursor == Cursor.SE_RESIZE;
+            || cursor == Cursor.NE_RESIZE
+            || cursor == Cursor.SE_RESIZE;
         m_resizeW = cursor == Cursor.W_RESIZE
-                || cursor == Cursor.NW_RESIZE
-                || cursor == Cursor.SW_RESIZE;
+            || cursor == Cursor.NW_RESIZE
+            || cursor == Cursor.SW_RESIZE;
 
         m_startX = e.getScreenX();
         m_startY = e.getScreenY();
@@ -145,14 +136,30 @@ public final class WindowResizeHandler {
         boolean left = x < BORDER;
         boolean right = x > w - BORDER;
 
-        if (top && left) { return Cursor.NW_RESIZE; }
-        if (top && right) { return Cursor.NE_RESIZE; }
-        if (bottom && left) { return Cursor.SW_RESIZE; }
-        if (bottom && right) { return Cursor.SE_RESIZE; }
-        if (top) { return Cursor.N_RESIZE; }
-        if (bottom) { return Cursor.S_RESIZE; }
-        if (left) { return Cursor.W_RESIZE; }
-        if (right) { return Cursor.E_RESIZE; }
+        if (top && left) {
+            return Cursor.NW_RESIZE;
+        }
+        if (top && right) {
+            return Cursor.NE_RESIZE;
+        }
+        if (bottom && left) {
+            return Cursor.SW_RESIZE;
+        }
+        if (bottom && right) {
+            return Cursor.SE_RESIZE;
+        }
+        if (top) {
+            return Cursor.N_RESIZE;
+        }
+        if (bottom) {
+            return Cursor.S_RESIZE;
+        }
+        if (left) {
+            return Cursor.W_RESIZE;
+        }
+        if (right) {
+            return Cursor.E_RESIZE;
+        }
 
         return Cursor.DEFAULT;
     }

@@ -1,5 +1,7 @@
 package ca.kieve.ssss.system;
 
+import dev.dominion.ecs.api.Entity;
+
 import ca.kieve.ssss.component.Health;
 import ca.kieve.ssss.component.Hidden;
 import ca.kieve.ssss.component.Player;
@@ -16,8 +18,6 @@ import ca.kieve.ssss.context.PositionContext;
 import ca.kieve.ssss.event.EjectEvent;
 import ca.kieve.ssss.event.SocketEvent;
 import ca.kieve.ssss.util.Vec3i;
-
-import dev.dominion.ecs.api.Entity;
 
 /**
  * Handles the Socket mechanic where the player (a "microchip") can swap control
@@ -143,8 +143,11 @@ public class SocketSystem extends System {
      * Handles swapping the player into a new socket, ejecting from the old one if needed.
      */
     private void handleSocketSwap(
-            Entity playerEntity, SocketPlug socketPlug,
-            Entity newBodyEntity, Socket newSocket) {
+        Entity playerEntity,
+        SocketPlug socketPlug,
+        Entity newBodyEntity,
+        Socket newSocket
+    ) {
         // First, check if player is currently socketed into another body
         if (socketPlug.currentBody != null) {
             var oldSocket = socketPlug.currentBody.get(Socket.class);
@@ -170,10 +173,10 @@ public class SocketSystem extends System {
      * positioning the player in a valid adjacent tile.
      */
     public void ejectFromSocket(
-            Entity playerEntity,
-            SocketPlug socketPlug,
-            Entity bodyEntity,
-            Socket socket
+        Entity playerEntity,
+        SocketPlug socketPlug,
+        Entity bodyEntity,
+        Socket socket
     ) {
         // Handle forced eject positioning before clearing socket state
         if (socket.destroyed) {
@@ -262,8 +265,10 @@ public class SocketSystem extends System {
      * Player's Speed is NOT transferred - systems query the controlled entity instead.
      */
     private void transferControlToBody(
-            Entity playerEntity, SocketPlug socketPlug,
-            Entity bodyEntity) {
+        Entity playerEntity,
+        SocketPlug socketPlug,
+        Entity bodyEntity
+    ) {
         var playerController = playerEntity.get(PlayerController.class);
         if (playerController == null) {
             return;

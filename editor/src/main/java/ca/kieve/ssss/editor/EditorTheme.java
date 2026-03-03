@@ -13,18 +13,18 @@ public final class EditorTheme {
     public static final Color ENTITY_MARKER_COLOR = Color.LIMEGREEN;
     public static final Color SELECTION_COLOR = Color.CYAN;
 
-    public static final String STYLE_OVERLAY =
-            "editor-overlay";
+    public static final String STYLE_OVERLAY = "editor-overlay";
 
     // language=css
     public static final String OVERLAY_CSS = """
-            .%s {
-                -fx-background-color: rgba(30, 30, 30, 0.85);
-                -fx-background-radius: 6;
-                -fx-padding: 4 8;
-                -fx-font-size: 11;
-            }
-            """.formatted(STYLE_OVERLAY);
+        .%s {
+            -fx-background-color: rgba(30, 30, 30, 0.85);
+            -fx-background-radius: 6;
+            -fx-padding: 4 8;
+            -fx-font-size: 11;
+        }
+        """.formatted(STYLE_OVERLAY);
 
-    private EditorTheme() {}
+    private EditorTheme() {
+    }
 }

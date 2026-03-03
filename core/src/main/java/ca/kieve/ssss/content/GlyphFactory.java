@@ -1,18 +1,18 @@
 package ca.kieve.ssss.content;
 
-import static ca.kieve.ssss.ui.widget.GameWindow.TILE_SCALE;
-import static ca.kieve.ssss.ui.widget.GameWindow.TILE_SIZE;
-import static com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.DEFAULT_CHARS;
-
-import ca.kieve.ssss.component.TileGlyph;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 
+import ca.kieve.ssss.component.TileGlyph;
+
 import java.util.HashMap;
 import java.util.Map;
+
+import static ca.kieve.ssss.ui.widget.GameWindow.TILE_SCALE;
+import static ca.kieve.ssss.ui.widget.GameWindow.TILE_SIZE;
+import static com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.DEFAULT_CHARS;
 
 public class GlyphFactory {
     private static final String EXTRA_CHARS = "█";
@@ -55,8 +55,7 @@ public class GlyphFactory {
     }
 
     private BitmapFont loadGameFont(String path, int size) {
-        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
-            Gdx.files.internal(path));
+        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal(path));
         FreeTypeFontParameter parameter = new FreeTypeFontParameter();
         parameter.size = size;
         parameter.characters = DEFAULT_CHARS + EXTRA_CHARS;

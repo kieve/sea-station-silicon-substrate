@@ -9,10 +9,7 @@ import javafx.scene.control.MenuItem;
  * underscores in text are displayed literally.
  */
 public class EditorMenuButton extends MenuButton {
-    public EditorMenuButton(
-            String text,
-            Node graphic,
-            MenuItem... items) {
+    public EditorMenuButton(String text, Node graphic, MenuItem... items) {
         super(text, graphic, items);
         setMnemonicParsing(false);
     }

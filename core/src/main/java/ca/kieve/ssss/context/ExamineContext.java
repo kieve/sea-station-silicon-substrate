@@ -1,13 +1,13 @@
 package ca.kieve.ssss.context;
 
+import com.badlogic.gdx.graphics.Color;
+import dev.dominion.ecs.api.Entity;
+
 import ca.kieve.ssss.component.Descriptor;
 import ca.kieve.ssss.component.RenderingHint;
 import ca.kieve.ssss.ui.TileHighlight;
 import ca.kieve.ssss.ui.TileHighlightProvider;
 import ca.kieve.ssss.util.Vec3i;
-
-import com.badlogic.gdx.graphics.Color;
-import dev.dominion.ecs.api.Entity;
 
 import java.util.Comparator;
 import java.util.List;
@@ -41,8 +41,7 @@ public class ExamineContext implements TileHighlightProvider {
 
     @Override
     public List<TileHighlight> getHighlights() {
-        return List.of(new TileHighlight(
-            m_crosshairPos.x, m_crosshairPos.y, Color.YELLOW));
+        return List.of(new TileHighlight(m_crosshairPos.x, m_crosshairPos.y, Color.YELLOW));
     }
 
     public void init(GameContext gameContext) {

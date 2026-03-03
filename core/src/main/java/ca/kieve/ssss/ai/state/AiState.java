@@ -10,8 +10,9 @@ import java.util.Map;
  * Abstract base class for AI states.
  */
 public abstract class AiState implements YamlInitializable {
-    protected Map<String, Object> m_properties;
     private final Map<Integer, ConditionData> m_conditionData = new HashMap<>();
+
+    protected Map<String, Object> m_properties;
 
     @Override
     public void initialize(Map<String, Object> properties) {
@@ -21,12 +22,14 @@ public abstract class AiState implements YamlInitializable {
     /**
      * Called when this state becomes active for an entity.
      */
-    public void onEnter(StateContext context) {}
+    public void onEnter(StateContext context) {
+    }
 
     /**
      * Called when this state becomes inactive for an entity.
      */
-    public void onExit(StateContext context) {}
+    public void onExit(StateContext context) {
+    }
 
     /**
      * Execute this state's behavior.

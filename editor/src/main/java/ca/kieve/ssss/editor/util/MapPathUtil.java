@@ -6,8 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class MapPathUtil {
-    private static final String MAPS_REL_PATH =
-            "core/src/main/resources/content/maps";
+    private static final String MAPS_REL_PATH = "core/src/main/resources/content/maps";
 
     private MapPathUtil() {
     }
@@ -19,8 +18,7 @@ public final class MapPathUtil {
             return fromUserDir.toFile();
         }
 
-        Path fromParent =
-                userDir.getParent().resolve(MAPS_REL_PATH);
+        Path fromParent = userDir.getParent().resolve(MAPS_REL_PATH);
         if (fromParent.toFile().isDirectory()) {
             return fromParent.toFile();
         }
@@ -53,11 +51,10 @@ public final class MapPathUtil {
             return mapFile.getName();
         }
         return mapsPath.relativize(filePath)
-                .toString().replace('\\', '/');
+            .toString().replace('\\', '/');
     }
 
-    private static void collectMaps(
-            Path mapsRoot, File dir, List<String> out) {
+    private static void collectMaps(Path mapsRoot, File dir, List<String> out) {
         File[] entries = dir.listFiles();
         if (entries == null) {
             return;
@@ -66,8 +63,7 @@ public final class MapPathUtil {
             if (f.isDirectory()) {
                 collectMaps(mapsRoot, f, out);
             } else if (f.getName().endsWith(".yaml")) {
-                out.add(mapsRoot.relativize(f.toPath())
-                        .toString().replace('\\', '/'));
+                out.add(mapsRoot.relativize(f.toPath()).toString().replace('\\', '/'));
             }
         }
     }

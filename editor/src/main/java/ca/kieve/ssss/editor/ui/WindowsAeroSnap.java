@@ -1,5 +1,7 @@
 package ca.kieve.ssss.editor.ui;
 
+import javafx.stage.Stage;
+
 import ca.kieve.ssss.editor.Globals;
 
 import java.lang.foreign.Arena;
@@ -11,7 +13,7 @@ import java.lang.foreign.ValueLayout;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
-import javafx.stage.Stage;
+import java.util.List;
 
 /**
  * Re-enables Windows Aero Snap on an undecorated JavaFX stage.
@@ -53,7 +55,8 @@ public final class WindowsAeroSnap {
     private static MethodHandle s_releaseCapture;
     private static MethodHandle s_sendMessage;
 
-    private WindowsAeroSnap() {}
+    private WindowsAeroSnap() {
+    }
 
     /**
      * Call after {@code stage.show()} to patch the native window
@@ -71,8 +74,7 @@ public final class WindowsAeroSnap {
             }
             patchWindowStyle(hwnd);
         } catch (Throwable t) {
-            IO.println("Aero snap patch failed: "
-                    + t.getMessage());
+            IO.println("Aero snap patch failed: " + t.getMessage());
         }
     }
 
@@ -85,14 +87,12 @@ public final class WindowsAeroSnap {
      */
     public static boolean startNativeDrag() {
         if (s_hwnd == null || s_releaseCapture == null
-                || s_sendMessage == null) {
+            || s_sendMessage == null) {
             return false;
         }
         try {
             s_releaseCapture.invoke();
-            s_sendMessage.invoke(
-                    s_hwnd, WM_NCLBUTTONDOWN,
-                    (long) HTCAPTION, 0L);
+            s_sendMessage.invoke(s_hwnd, WM_NCLBUTTONDOWN, (long) HTCAPTION, 0L);
             return true;
         } catch (Throwable t) {
             return false;
@@ -102,73 +102,72 @@ public final class WindowsAeroSnap {
     private static long getNativeHandle() throws Exception {
         // Requires:
         //   --add-opens javafx.graphics/com.sun.glass.ui=ALL-UNNAMED
-        Class<?> windowClass =
-                Class.forName("com.sun.glass.ui.Window");
+        Class<?> windowClass = Class.forName("com.sun.glass.ui.Window");
         @SuppressWarnings("unchecked")
-        var windows = (java.util.List<?>)
-                windowClass.getMethod("getWindows").invoke(null);
+        var windows = (List<?>) windowClass.getMethod("getWindows").invoke(null);
         if (windows.isEmpty()) {
             return 0;
         }
         Object glassWindow = windows.getFirst();
         return (long) windowClass
-                .getMethod("getNativeHandle")
-                .invoke(glassWindow);
+            .getMethod("getNativeHandle")
+            .invoke(glassWindow);
     }
 
-    private static void patchWindowStyle(long hwnd)
-            throws Throwable {
+    private static void patchWindowStyle(long hwnd) throws Throwable {
         Linker linker = Linker.nativeLinker();
         Arena arena = Arena.global();
 
-        SymbolLookup user32 =
-                SymbolLookup.libraryLookup("user32.dll", arena);
+        SymbolLookup user32 = SymbolLookup.libraryLookup("user32.dll", arena);
 
         MethodHandle getWindowLong = linker.downcallHandle(
-                user32.findOrThrow("GetWindowLongW"),
-                FunctionDescriptor.of(
-                        ValueLayout.JAVA_INT,
-                        ValueLayout.ADDRESS,
-                        ValueLayout.JAVA_INT));
+            user32.findOrThrow("GetWindowLongW"),
+            FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.JAVA_INT)
+        );
 
         MethodHandle setWindowLong = linker.downcallHandle(
-                user32.findOrThrow("SetWindowLongW"),
-                FunctionDescriptor.of(
-                        ValueLayout.JAVA_INT,
-                        ValueLayout.ADDRESS,
-                        ValueLayout.JAVA_INT,
-                        ValueLayout.JAVA_INT));
+            user32.findOrThrow("SetWindowLongW"),
+            FunctionDescriptor.of(
+                ValueLayout.JAVA_INT,
+                ValueLayout.ADDRESS,
+                ValueLayout.JAVA_INT,
+                ValueLayout.JAVA_INT
+            )
+        );
 
         MethodHandle setWindowPos = linker.downcallHandle(
-                user32.findOrThrow("SetWindowPos"),
-                FunctionDescriptor.of(
-                        ValueLayout.JAVA_INT,
-                        ValueLayout.ADDRESS,
-                        ValueLayout.ADDRESS,
-                        ValueLayout.JAVA_INT,
-                        ValueLayout.JAVA_INT,
-                        ValueLayout.JAVA_INT,
-                        ValueLayout.JAVA_INT,
-                        ValueLayout.JAVA_INT));
+            user32.findOrThrow("SetWindowPos"),
+            FunctionDescriptor.of(
+                ValueLayout.JAVA_INT,
+                ValueLayout.ADDRESS,
+                ValueLayout.ADDRESS,
+                ValueLayout.JAVA_INT,
+                ValueLayout.JAVA_INT,
+                ValueLayout.JAVA_INT,
+                ValueLayout.JAVA_INT,
+                ValueLayout.JAVA_INT
+            )
+        );
 
-        MemorySegment hwndSeg =
-                MemorySegment.ofAddress(hwnd);
+        MemorySegment hwndSeg = MemorySegment.ofAddress(hwnd);
         s_hwnd = hwndSeg;
 
         // Cache ReleaseCapture and SendMessageW for native drag
         s_releaseCapture = linker.downcallHandle(
-                user32.findOrThrow("ReleaseCapture"),
-                FunctionDescriptor.of(
-                        ValueLayout.JAVA_INT));
+            user32.findOrThrow("ReleaseCapture"),
+            FunctionDescriptor.of(ValueLayout.JAVA_INT)
+        );
 
         s_sendMessage = linker.downcallHandle(
-                user32.findOrThrow("SendMessageW"),
-                FunctionDescriptor.of(
-                        ValueLayout.JAVA_LONG,
-                        ValueLayout.ADDRESS,
-                        ValueLayout.JAVA_INT,
-                        ValueLayout.JAVA_LONG,
-                        ValueLayout.JAVA_LONG));
+            user32.findOrThrow("SendMessageW"),
+            FunctionDescriptor.of(
+                ValueLayout.JAVA_LONG,
+                ValueLayout.ADDRESS,
+                ValueLayout.JAVA_INT,
+                ValueLayout.JAVA_LONG,
+                ValueLayout.JAVA_LONG
+            )
+        );
 
         // Install WM_NCCALCSIZE subclass BEFORE changing styles
         // so the frame is suppressed immediately
@@ -177,84 +176,91 @@ public final class WindowsAeroSnap {
         // WS_THICKFRAME + WS_CAPTION enable WM_NCHITTEST which
         // is required for Aero Snap. WM_NCCALCSIZE returning 0
         // hides the caption and frame visually.
-        int style = (int) getWindowLong.invoke(
-                hwndSeg, GWL_STYLE);
+        int style = (int) getWindowLong.invoke(hwndSeg, GWL_STYLE);
         int newStyle = style
-                | WS_THICKFRAME
-                | WS_CAPTION
-                | WS_MAXIMIZEBOX
-                | WS_MINIMIZEBOX;
+            | WS_THICKFRAME
+            | WS_CAPTION
+            | WS_MAXIMIZEBOX
+            | WS_MINIMIZEBOX;
         setWindowLong.invoke(hwndSeg, GWL_STYLE, newStyle);
 
         // Notify Windows the frame changed
         setWindowPos.invoke(
-                hwndSeg,
-                MemorySegment.NULL,
-                0, 0, 0, 0,
-                SWP_NOMOVE | SWP_NOSIZE
-                        | SWP_NOZORDER | SWP_FRAMECHANGED);
+            hwndSeg,
+            MemorySegment.NULL,
+            0,
+            0,
+            0,
+            0,
+            SWP_NOMOVE | SWP_NOSIZE
+                | SWP_NOZORDER | SWP_FRAMECHANGED
+        );
     }
 
     private static void installSubclass(
-            MemorySegment hwndSeg,
-            Arena arena,
-            Linker linker) throws Throwable {
-        SymbolLookup comctl32 = SymbolLookup.libraryLookup(
-                "comctl32.dll", arena);
+        MemorySegment hwndSeg,
+        Arena arena,
+        Linker linker
+    ) throws Throwable {
+        SymbolLookup comctl32 = SymbolLookup.libraryLookup("comctl32.dll", arena);
 
         // Cache DefSubclassProc for use in the callback
         s_defSubclassProc = linker.downcallHandle(
-                comctl32.findOrThrow("DefSubclassProc"),
-                FunctionDescriptor.of(
-                        ValueLayout.JAVA_LONG,
-                        ValueLayout.ADDRESS,
-                        ValueLayout.JAVA_INT,
-                        ValueLayout.JAVA_LONG,
-                        ValueLayout.JAVA_LONG));
+            comctl32.findOrThrow("DefSubclassProc"),
+            FunctionDescriptor.of(
+                ValueLayout.JAVA_LONG,
+                ValueLayout.ADDRESS,
+                ValueLayout.JAVA_INT,
+                ValueLayout.JAVA_LONG,
+                ValueLayout.JAVA_LONG
+            )
+        );
 
         // SUBCLASSPROC signature:
         //   LRESULT (HWND, UINT, WPARAM, LPARAM,
         //            UINT_PTR, DWORD_PTR)
-        FunctionDescriptor subclassProcDesc =
-                FunctionDescriptor.of(
-                        ValueLayout.JAVA_LONG,
-                        ValueLayout.ADDRESS,
-                        ValueLayout.JAVA_INT,
-                        ValueLayout.JAVA_LONG,
-                        ValueLayout.JAVA_LONG,
-                        ValueLayout.JAVA_LONG,
-                        ValueLayout.JAVA_LONG);
+        FunctionDescriptor subclassProcDesc = FunctionDescriptor.of(
+            ValueLayout.JAVA_LONG,
+            ValueLayout.ADDRESS,
+            ValueLayout.JAVA_INT,
+            ValueLayout.JAVA_LONG,
+            ValueLayout.JAVA_LONG,
+            ValueLayout.JAVA_LONG,
+            ValueLayout.JAVA_LONG
+        );
 
         MethodHandle callback = MethodHandles.lookup().findStatic(
-                WindowsAeroSnap.class,
-                "subclassProc",
-                MethodType.methodType(
-                        long.class,
-                        MemorySegment.class,
-                        int.class,
-                        long.class,
-                        long.class,
-                        long.class,
-                        long.class));
+            WindowsAeroSnap.class,
+            "subclassProc",
+            MethodType.methodType(
+                long.class,
+                MemorySegment.class,
+                int.class,
+                long.class,
+                long.class,
+                long.class,
+                long.class
+            )
+        );
 
         // Create native function pointer — lives in global arena
         // so it's never freed
-        s_callbackStub = linker.upcallStub(
-                callback, subclassProcDesc, arena);
+        s_callbackStub = linker.upcallStub(callback, subclassProcDesc, arena);
 
         // BOOL SetWindowSubclass(HWND, SUBCLASSPROC,
         //                        UINT_PTR, DWORD_PTR)
         MethodHandle setWindowSubclass = linker.downcallHandle(
-                comctl32.findOrThrow("SetWindowSubclass"),
-                FunctionDescriptor.of(
-                        ValueLayout.JAVA_INT,
-                        ValueLayout.ADDRESS,
-                        ValueLayout.ADDRESS,
-                        ValueLayout.JAVA_LONG,
-                        ValueLayout.JAVA_LONG));
+            comctl32.findOrThrow("SetWindowSubclass"),
+            FunctionDescriptor.of(
+                ValueLayout.JAVA_INT,
+                ValueLayout.ADDRESS,
+                ValueLayout.ADDRESS,
+                ValueLayout.JAVA_LONG,
+                ValueLayout.JAVA_LONG
+            )
+        );
 
-        int ok = (int) setWindowSubclass.invoke(
-                hwndSeg, s_callbackStub, 1L, 0L);
+        int ok = (int) setWindowSubclass.invoke(hwndSeg, s_callbackStub, 1L, 0L);
         if (ok == 0) {
             IO.println("SetWindowSubclass failed");
         }
@@ -274,12 +280,13 @@ public final class WindowsAeroSnap {
      */
     @SuppressWarnings("unused") // called via upcall stub
     private static long subclassProc(
-            MemorySegment hWnd,
-            int uMsg,
-            long wParam,
-            long lParam,
-            long uIdSubclass,
-            long dwRefData) {
+        MemorySegment hWnd,
+        int uMsg,
+        long wParam,
+        long lParam,
+        long uIdSubclass,
+        long dwRefData
+    ) {
         if (uMsg == WM_NCCALCSIZE && wParam != 0) {
             return 0;
         }
@@ -293,8 +300,7 @@ public final class WindowsAeroSnap {
             return 0;
         }
         try {
-            return (long) s_defSubclassProc.invoke(
-                    hWnd, uMsg, wParam, lParam);
+            return (long) s_defSubclassProc.invoke(hWnd, uMsg, wParam, lParam);
         } catch (Throwable t) {
             return 0;
         }

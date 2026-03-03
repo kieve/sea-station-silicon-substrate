@@ -1,9 +1,9 @@
 package ca.kieve.ssss.component;
 
+import dev.dominion.ecs.api.Entity;
+
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.util.Vec3i;
-
-import dev.dominion.ecs.api.Entity;
 
 import java.util.Objects;
 
@@ -41,8 +41,8 @@ public class Position implements Component {
 
     @Override
     public String toString() {
-        return "Position{" +
-            "pos=" + m_position +
-            '}';
+        return "Position{"
+            + "pos=" + m_position
+            + '}';
     }
 }

@@ -44,7 +44,10 @@ public class InteractSystem extends System {
 
         for (var entity : entitiesAtTarget) {
             var event = InteractionResolver.resolveBumpInteraction(
-                controlledEntity, socketPlug, entity);
+                controlledEntity,
+                socketPlug,
+                entity
+            );
             if (event == null) {
                 continue;
             }

@@ -1,19 +1,5 @@
 package ca.kieve.ssss.editor.component;
 
-import static ca.kieve.ssss.editor.util.CssUtil.inline;
-
-import ca.kieve.ssss.content.MapBlockDefinition;
-import ca.kieve.ssss.editor.BlockColorResolver;
-import ca.kieve.ssss.editor.BlockGlyphResolver;
-import ca.kieve.ssss.editor.EditorContext;
-import ca.kieve.ssss.editor.model.EditorMapModel;
-import ca.kieve.ssss.editor.ui.fx.EditorButton;
-import ca.kieve.ssss.editor.ui.fx.EditorLabel;
-import ca.kieve.ssss.editor.util.DialogUtil;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
@@ -27,34 +13,88 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
+import ca.kieve.ssss.content.MapBlockDefinition;
+import ca.kieve.ssss.editor.BlockColorResolver;
+import ca.kieve.ssss.editor.BlockGlyphResolver;
+import ca.kieve.ssss.editor.EditorContext;
+import ca.kieve.ssss.editor.model.EditorMapModel;
+import ca.kieve.ssss.editor.ui.fx.EditorButton;
+import ca.kieve.ssss.editor.ui.fx.EditorLabel;
+import ca.kieve.ssss.editor.util.DialogUtil;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+
+import static ca.kieve.ssss.editor.util.CssUtil.inline;
+
 public class BlockPanel extends VBox {
-    private static final String STYLE_BLOCK_PANEL =
-            "editor-block-panel";
-    private static final String STYLE_TOOLBAR_LABEL_BOLD =
-            "editor-toolbar-label-bold";
+    private class BlockListCell extends ListCell<String> {
+        @Override
+        protected void updateItem(String name, boolean empty) {
+            super.updateItem(name, empty);
+            if (empty || name == null) {
+                setGraphic(null);
+                setText(null);
+                return;
+            }
+
+            MapBlockDefinition blockDef = m_model.getBlocks().get(name);
+            if (blockDef == null) {
+                setText(name);
+                setGraphic(null);
+                return;
+            }
+
+            Color color = m_colorResolver.resolve(blockDef.bpId());
+            var swatch = new Rectangle(12, 12, color);
+            swatch.setStroke(Color.gray(0.5));
+            swatch.setStrokeWidth(0.5);
+
+            char glyph = m_glyphResolver.resolve(blockDef.bpId());
+
+            var label = new EditorLabel(name + " (");
+            label.setPadding(new Insets(0, 0, 0, 6));
+
+            var glyphLabel = new EditorLabel(String.valueOf(glyph));
+            glyphLabel.setTextFill(color);
+            glyphLabel.setStyle("-fx-font-weight: bold;");
+
+            var closeLabel = new EditorLabel(")");
+
+            var cell = new HBox(swatch, label, glyphLabel, closeLabel);
+            cell.setAlignment(Pos.CENTER_LEFT);
+            setGraphic(cell);
+            setText(null);
+        }
+    }
+
+    private static final String STYLE_BLOCK_PANEL = "editor-block-panel";
+    private static final String STYLE_TOOLBAR_LABEL_BOLD = "editor-toolbar-label-bold";
 
     // language=css
     private static final String CSS = """
-            .%1$s {
-                -fx-background-color: -color-bg-subtle;
-                -fx-padding: 8;
-                -fx-spacing: 4;
-            }
-            .%1$s .list-cell {
-                -fx-cell-size: 1.5em;
-                -fx-padding: 0.125em 0.583em;
-            }
-            .%2$s {
-                -fx-font-weight: bold;
-                -fx-padding: 0 8 0 4;
-            }
-            """.formatted(STYLE_BLOCK_PANEL, STYLE_TOOLBAR_LABEL_BOLD);
+        .%1$s {
+            -fx-background-color: -color-bg-subtle;
+            -fx-padding: 8;
+            -fx-spacing: 4;
+        }
+        .%1$s .list-cell {
+            -fx-cell-size: 1.5em;
+            -fx-padding: 0.125em 0.583em;
+        }
+        .%2$s {
+            -fx-font-weight: bold;
+            -fx-padding: 0 8 0 4;
+        }
+        """.formatted(STYLE_BLOCK_PANEL, STYLE_TOOLBAR_LABEL_BOLD);
 
     private final EditorMapModel m_model;
     private final BlockColorResolver m_colorResolver;
     private final BlockGlyphResolver m_glyphResolver;
     private final ListView<String> m_blockList;
     private final List<String> m_blockTypes;
+
     private Consumer<String> m_onSelectionChanged;
     private Runnable m_onBlocksChanged;
 
@@ -79,11 +119,11 @@ public class BlockPanel extends VBox {
         VBox.setVgrow(m_blockList, Priority.ALWAYS);
 
         m_blockList.getSelectionModel().selectedItemProperty()
-                .addListener((obs, oldVal, newVal) -> {
-            if (m_onSelectionChanged != null && newVal != null) {
-                m_onSelectionChanged.accept(newVal);
-            }
-        });
+            .addListener((obs, oldVal, newVal) -> {
+                if (m_onSelectionChanged != null && newVal != null) {
+                    m_onSelectionChanged.accept(newVal);
+                }
+            });
 
         var addBtn = new EditorButton("Add");
         addBtn.setFocusTraversable(false);
@@ -106,8 +146,7 @@ public class BlockPanel extends VBox {
         refreshList();
     }
 
-    public void setOnSelectionChanged(
-            Consumer<String> callback) {
+    public void setOnSelectionChanged(Consumer<String> callback) {
         m_onSelectionChanged = callback;
     }
 
@@ -125,11 +164,9 @@ public class BlockPanel extends VBox {
 
     private void refreshList() {
         String selected = getSelectedBlock();
-        m_blockList.getItems().setAll(
-                m_model.getBlocks().keySet().stream()
-                        .sorted().toList());
+        m_blockList.getItems().setAll(m_model.getBlocks().keySet().stream().sorted().toList());
         if (selected != null
-                && m_blockList.getItems().contains(selected)) {
+            && m_blockList.getItems().contains(selected)) {
             m_blockList.getSelectionModel().select(selected);
         } else if (!m_blockList.getItems().isEmpty()) {
             m_blockList.getSelectionModel().selectFirst();
@@ -138,13 +175,13 @@ public class BlockPanel extends VBox {
 
     private void onAdd() {
         BlockEditDialog.showAdd(m_blockTypes)
-                .ifPresent(result -> {
-            m_model.addBlock(result.name(), result.blockDef());
-            refreshList();
-            m_blockList.getSelectionModel().select(result.name());
-            fireSelectionChanged();
-            fireBlocksChanged();
-        });
+            .ifPresent(result -> {
+                m_model.addBlock(result.name(), result.blockDef());
+                refreshList();
+                m_blockList.getSelectionModel().select(result.name());
+                fireSelectionChanged();
+                fireBlocksChanged();
+            });
     }
 
     private void onEdit() {
@@ -152,11 +189,8 @@ public class BlockPanel extends VBox {
         if (selected == null) {
             return;
         }
-        MapBlockDefinition existing =
-                m_model.getBlocks().get(selected);
-        BlockEditDialog.showEdit(
-                m_blockTypes, selected, existing
-        ).ifPresent(result -> {
+        MapBlockDefinition existing = m_model.getBlocks().get(selected);
+        BlockEditDialog.showEdit(m_blockTypes, selected, existing).ifPresent(result -> {
             m_model.addBlock(result.name(), result.blockDef());
             refreshList();
             fireSelectionChanged();
@@ -183,10 +217,13 @@ public class BlockPanel extends VBox {
         var ignoreType = new ButtonType("Ignore");
 
         var alert = new Alert(
-                Alert.AlertType.WARNING,
-                "Block '" + selected + "' is currently used in the map.",
-                replaceType, deleteType, ignoreType,
-                ButtonType.CANCEL);
+            Alert.AlertType.WARNING,
+            "Block '" + selected + "' is currently used in the map.",
+            replaceType,
+            deleteType,
+            ignoreType,
+            ButtonType.CANCEL
+        );
         DialogUtil.style(alert, "Block In Use");
 
         alert.showAndWait().ifPresent(btn -> {
@@ -208,28 +245,22 @@ public class BlockPanel extends VBox {
     }
 
     private void onRemoveReplace(String selected) {
-        List<String> remaining =
-                m_model.getBlocks().keySet().stream()
-                        .filter(n -> !n.equals(selected))
-                        .sorted()
-                        .toList();
+        List<String> remaining = m_model.getBlocks().keySet().stream()
+            .filter(n -> !n.equals(selected))
+            .sorted()
+            .toList();
         if (remaining.isEmpty()) {
-            var err = new Alert(
-                    Alert.AlertType.WARNING,
-                    "No other blocks to replace with.");
+            var err = new Alert(Alert.AlertType.WARNING, "No other blocks to replace with.");
             DialogUtil.style(err, "No Replacement Available");
             err.showAndWait();
             return;
         }
 
-        var choice = new ChoiceDialog<>(
-                remaining.getFirst(), remaining);
+        var choice = new ChoiceDialog<>(remaining.getFirst(), remaining);
         DialogUtil.style(choice, "Replace Block");
-        choice.setContentText(
-                "Replace '" + selected + "' with:");
+        choice.setContentText("Replace '" + selected + "' with:");
         choice.showAndWait().ifPresent(replacement -> {
-            m_model.replaceBlockInLayers(
-                    selected, replacement);
+            m_model.replaceBlockInLayers(selected, replacement);
             m_model.removeBlock(selected);
             refreshList();
             fireSelectionChanged();
@@ -238,11 +269,12 @@ public class BlockPanel extends VBox {
     }
 
     private void fireSelectionChanged() {
-        if (m_onSelectionChanged != null) {
-            String sel = getSelectedBlock();
-            if (sel != null) {
-                m_onSelectionChanged.accept(sel);
-            }
+        if (m_onSelectionChanged == null) {
+            return;
+        }
+        String sel = getSelectedBlock();
+        if (sel != null) {
+            m_onSelectionChanged.accept(sel);
         }
     }
 
@@ -253,8 +285,7 @@ public class BlockPanel extends VBox {
     }
 
     private List<String> buildBlockTypeList() {
-        var registry =
-                EditorContext.getInstance().getRegistry();
+        var registry = EditorContext.getInstance().getRegistry();
         List<String> types = new ArrayList<>();
         types.add("air");
         for (String entityId : registry.getEntityIds()) {
@@ -264,49 +295,5 @@ public class BlockPanel extends VBox {
         }
         types.sort(String::compareTo);
         return types;
-    }
-
-    private class BlockListCell extends ListCell<String> {
-        @Override
-        protected void updateItem(String name, boolean empty) {
-            super.updateItem(name, empty);
-            if (empty || name == null) {
-                setGraphic(null);
-                setText(null);
-                return;
-            }
-
-            MapBlockDefinition blockDef =
-                    m_model.getBlocks().get(name);
-            if (blockDef == null) {
-                setText(name);
-                setGraphic(null);
-                return;
-            }
-
-            Color color =
-                    m_colorResolver.resolve(blockDef.bpId());
-            var swatch = new Rectangle(12, 12, color);
-            swatch.setStroke(Color.gray(0.5));
-            swatch.setStrokeWidth(0.5);
-
-            char glyph =
-                    m_glyphResolver.resolve(blockDef.bpId());
-
-            var label = new EditorLabel(name + " (");
-            label.setPadding(new Insets(0, 0, 0, 6));
-
-            var glyphLabel = new EditorLabel(String.valueOf(glyph));
-            glyphLabel.setTextFill(color);
-            glyphLabel.setStyle("-fx-font-weight: bold;");
-
-            var closeLabel = new EditorLabel(")");
-
-            var cell = new HBox(
-                    swatch, label, glyphLabel, closeLabel);
-            cell.setAlignment(Pos.CENTER_LEFT);
-            setGraphic(cell);
-            setText(null);
-        }
     }
 }

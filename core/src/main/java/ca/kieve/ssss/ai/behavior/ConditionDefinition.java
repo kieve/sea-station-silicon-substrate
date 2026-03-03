@@ -10,10 +10,7 @@ import java.util.Map;
 /**
  * YAML-loaded condition definition.
  */
-public record ConditionDefinition(
-        String type,
-        Map<String, Object> properties
-) {
+public record ConditionDefinition(String type, Map<String, Object> properties) {
     @JsonCreator
     public ConditionDefinition(@JsonProperty("type") String type) {
         this(type, new HashMap<>());

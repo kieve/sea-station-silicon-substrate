@@ -1,17 +1,17 @@
 package ca.kieve.ssss.system;
 
+import ca.kieve.ssss.component.Speed;
+import ca.kieve.ssss.component.Velocity;
+import ca.kieve.ssss.context.GameContext;
+import ca.kieve.ssss.context.InputContext;
+import ca.kieve.ssss.util.PlayerUtil;
+
 import static ca.kieve.ssss.context.InputContext.Mode.MODE_NORMAL;
 import static ca.kieve.ssss.input.InputAction.DOWN;
 import static ca.kieve.ssss.input.InputAction.LEFT;
 import static ca.kieve.ssss.input.InputAction.RIGHT;
 import static ca.kieve.ssss.input.InputAction.UP;
 import static ca.kieve.ssss.input.InputAction.WAIT;
-
-import ca.kieve.ssss.component.Speed;
-import ca.kieve.ssss.component.Velocity;
-import ca.kieve.ssss.context.GameContext;
-import ca.kieve.ssss.context.InputContext;
-import ca.kieve.ssss.util.PlayerUtil;
 
 public class WasdSystem extends System {
     private final InputContext m_input;
@@ -27,8 +27,7 @@ public class WasdSystem extends System {
             return;
         }
 
-        var controlledEntity =
-            PlayerUtil.getControlledEntity(m_gameContext.ecs());
+        var controlledEntity = PlayerUtil.getControlledEntity(m_gameContext.ecs());
         if (controlledEntity == null) {
             return;
         }

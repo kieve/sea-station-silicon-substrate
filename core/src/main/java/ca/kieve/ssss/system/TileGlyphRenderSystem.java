@@ -1,5 +1,11 @@
 package ca.kieve.ssss.system;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import dev.dominion.ecs.api.Entity;
+
 import ca.kieve.ssss.component.CameraComp;
 import ca.kieve.ssss.component.ColorComp;
 import ca.kieve.ssss.component.Hidden;
@@ -9,12 +15,6 @@ import ca.kieve.ssss.component.RenderingHint;
 import ca.kieve.ssss.component.SocketPlug;
 import ca.kieve.ssss.component.TileGlyph;
 import ca.kieve.ssss.context.GameContext;
-
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import dev.dominion.ecs.api.Entity;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -87,11 +87,12 @@ public class TileGlyphRenderSystem extends System {
             // This prioritizes current level (Z=0) over floor (Z=-1)
             int priority = relativeZ * 100 + zIndex;
             var currentTop = topZIndex.get(key);
-            if (currentTop == null || priority > currentTop) {
-                topEntities.put(key, entity);
-                topZIndex.put(key, priority);
-                topEntityZ.put(key, pos.z);
+            if (currentTop != null && priority <= currentTop) {
+                return;
             }
+            topEntities.put(key, entity);
+            topZIndex.put(key, priority);
+            topEntityZ.put(key, pos.z);
         });
 
         // Render only the top entity at each 2D position
@@ -124,25 +125,29 @@ public class TileGlyphRenderSystem extends System {
 
             font.setColor(color);
 
-            font.draw(m_spriteBatch, "" + renderGlyph.glyph(),
+            font.draw(
+                m_spriteBatch,
+                "" + renderGlyph.glyph(),
                 pos.x + renderGlyph.dx(),
-                pos.y + renderGlyph.dy());
+                pos.y + renderGlyph.dy()
+            );
         }
         m_spriteBatch.end();
 
-        if (m_debugGrid) {
-            m_shapeRenderer.begin(ShapeType.Line);
-            m_shapeRenderer.setColor(Color.BLUE);
-
-            for (var key : topEntities.keySet()) {
-                var parts = key.split(",");
-                int x = Integer.parseInt(parts[0]);
-                int y = Integer.parseInt(parts[1]);
-                m_shapeRenderer.rect(x, y, 1, 1);
-            }
-
-            m_shapeRenderer.end();
+        if (!m_debugGrid) {
+            return;
         }
+        m_shapeRenderer.begin(ShapeType.Line);
+        m_shapeRenderer.setColor(Color.BLUE);
+
+        for (var key : topEntities.keySet()) {
+            var parts = key.split(",");
+            int x = Integer.parseInt(parts[0]);
+            int y = Integer.parseInt(parts[1]);
+            m_shapeRenderer.rect(x, y, 1, 1);
+        }
+
+        m_shapeRenderer.end();
     }
 
     private int getCameraZ() {

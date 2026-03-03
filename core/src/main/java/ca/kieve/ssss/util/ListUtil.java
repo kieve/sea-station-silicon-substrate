@@ -10,7 +10,7 @@ public class ListUtil {
         // Do not instantiate
     }
 
-    public static Object[] flatten(Object ...objects) {
+    public static Object[] flatten(Object... objects) {
         return Arrays.stream(objects)
             .map((obj) -> {
                 if (obj instanceof List) {

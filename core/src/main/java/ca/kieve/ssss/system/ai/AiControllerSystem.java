@@ -1,5 +1,8 @@
 package ca.kieve.ssss.system.ai;
 
+import dev.dominion.ecs.api.Dominion;
+import dev.dominion.ecs.api.Entity;
+
 import ca.kieve.ssss.ai.StateEvaluator;
 import ca.kieve.ssss.ai.behavior.AiController;
 import ca.kieve.ssss.ai.behavior.StateDefinition;
@@ -11,9 +14,6 @@ import ca.kieve.ssss.component.Speed;
 import ca.kieve.ssss.context.AiControllerContext;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.system.System;
-
-import dev.dominion.ecs.api.Dominion;
-import dev.dominion.ecs.api.Entity;
 
 import java.util.Comparator;
 import java.util.List;
@@ -35,11 +35,7 @@ public class AiControllerSystem extends System {
 
     @Override
     public void tick() {
-        var entities = m_ecs.findEntitiesWith(
-            AiController.class,
-            Position.class,
-            Speed.class
-        );
+        var entities = m_ecs.findEntitiesWith(AiController.class, Position.class, Speed.class);
 
         entities.forEach(result -> {
             var controller = result.comp1();
@@ -73,7 +69,10 @@ public class AiControllerSystem extends System {
 
         // Find first state whose conditions all pass
         StateDefinition selectedState = m_stateEvaluator.selectState(
-            entity, controller, sortedStates);
+            entity,
+            controller,
+            sortedStates
+        );
 
         if (selectedState == null) {
             return;
@@ -81,8 +80,7 @@ public class AiControllerSystem extends System {
 
         // Notify conditions that this state was selected
         AiState selectedAiState = controller.getState(selectedState.state());
-        m_stateEvaluator.notifyConditionsOfSelection(
-            entity, selectedAiState, selectedState);
+        m_stateEvaluator.notifyConditionsOfSelection(entity, selectedAiState, selectedState);
 
         // Handle state transitions
         String newStateId = selectedState.state();
@@ -113,12 +111,11 @@ public class AiControllerSystem extends System {
     }
 
     private StateContext createStateContext(
-            Entity entity,
-            AiController controller,
-            StateDefinition stateDef
+        Entity entity,
+        AiController controller,
+        StateDefinition stateDef
     ) {
-        Entity target = m_aiControllerContext.resolveTarget(
-            entity, stateDef.target(), m_ecs);
+        Entity target = m_aiControllerContext.resolveTarget(entity, stateDef.target(), m_ecs);
         return new StateContext(m_gameContext, entity, controller, target);
     }
 }

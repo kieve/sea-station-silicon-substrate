@@ -57,10 +57,7 @@ public abstract class UiLayout extends UiNode {
     protected void updateChildOrigin(UiNode child) {
         var ox = m_origin.x();
         var oy = m_origin.y();
-        child.setOrigin(new UiPosition(
-            ox + m_position.x(),
-            oy + m_position.y()
-        ));
+        child.setOrigin(new UiPosition(ox + m_position.x(), oy + m_position.y()));
     }
 
     @Override
@@ -72,11 +69,12 @@ public abstract class UiLayout extends UiNode {
     public void render(UiRenderContext renderContext, float delta) {
         m_children.forEach(child -> {
             child.render(renderContext, delta);
-            if (m_parentWindow != null && child instanceof UiWindow) {
-                // UiWindows will apply their own viewport.
-                // So, we have to reset the viewport back.
-                m_parentWindow.applyViewport();
+            if (m_parentWindow == null || !(child instanceof UiWindow)) {
+                return;
             }
+            // UiWindows will apply their own viewport.
+            // So, we have to reset the viewport back.
+            m_parentWindow.applyViewport();
         });
     }
 }

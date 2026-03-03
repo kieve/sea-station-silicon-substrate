@@ -1,11 +1,12 @@
 package ca.kieve.ssss.editor.model;
 
-import java.io.File;
-import java.util.Objects;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+
+import java.io.File;
+import java.util.Objects;
 
 public class SystemConfigModel {
     private final StringProperty m_launchMap = new SimpleStringProperty();
@@ -61,8 +62,7 @@ public class SystemConfigModel {
     }
 
     private void updateDirty() {
-        boolean launchMapDirty =
-                !Objects.equals(m_launchMap.get(), m_savedLaunchMap);
+        boolean launchMapDirty = !Objects.equals(m_launchMap.get(), m_savedLaunchMap);
         m_launchMapDirty.set(launchMapDirty);
         m_modified.set(launchMapDirty);
     }

@@ -46,7 +46,7 @@ public class WanderState extends AiState {
 
         // Check bounds and potentially reverse direction
         if (m_goingUp && pos.y >= m_initialPos.y + range
-                || !m_goingUp && pos.y <= m_initialPos.y - range) {
+            || !m_goingUp && pos.y <= m_initialPos.y - range) {
             m_goingUp = !m_goingUp;
         }
 

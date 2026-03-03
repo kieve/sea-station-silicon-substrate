@@ -134,10 +134,10 @@ public class Vec3i {
 
     @Override
     public String toString() {
-        return "Vec3i{" +
-            "x=" + x +
-            ", y=" + y +
-            ", z=" + z +
-            '}';
+        return "Vec3i{"
+            + "x=" + x
+            + ", y=" + y
+            + ", z=" + z
+            + '}';
     }
 }

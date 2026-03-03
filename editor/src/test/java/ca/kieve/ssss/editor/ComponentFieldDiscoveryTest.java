@@ -1,80 +1,76 @@
 package ca.kieve.ssss.editor;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 import ca.kieve.ssss.annotations.EditorRef;
 import ca.kieve.ssss.content.ComponentTypeDeserializer;
 import ca.kieve.ssss.editor.component.ComponentIntrospector;
 import ca.kieve.ssss.editor.component.ComponentIntrospector.FieldInfo;
 
-import org.junit.jupiter.api.Test;
-
 import java.util.List;
 
-class ComponentFieldDiscoveryTest {
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+class ComponentFieldDiscoveryTest {
     @Test
     void allComponentTypesCanBeIntrospected() {
-        List<String> names =
-                ComponentTypeDeserializer
-                        .getAllTypeNames();
-        assertFalse(names.isEmpty(),
-                "Should find component types");
+        List<String> names = ComponentTypeDeserializer
+            .getAllTypeNames();
+        assertFalse(names.isEmpty(), "Should find component types");
 
         for (String name : names) {
             assertDoesNotThrow(
-                    () -> ComponentIntrospector
-                            .getEditableFields(name),
-                    "Should introspect: " + name);
+                () -> ComponentIntrospector
+                    .getEditableFields(name),
+                "Should introspect: " + name
+            );
         }
     }
 
     @Test
     void allComponentFieldsCanBeDiscovered() {
-        List<String> names =
-                ComponentTypeDeserializer
-                        .getAllTypeNames();
+        List<String> names = ComponentTypeDeserializer
+            .getAllTypeNames();
 
         var sb = new StringBuilder();
         sb.append("\n=== Component Field Discovery ===\n");
 
         for (String name : names) {
-            Class<?> clazz =
-                    ComponentTypeDeserializer
-                            .resolveType(name);
+            Class<?> clazz = ComponentTypeDeserializer
+                .resolveType(name);
             assertNotNull(clazz);
 
-            List<FieldInfo> fields =
-                    ComponentIntrospector
-                            .getEditableFields(clazz);
+            List<FieldInfo> fields = ComponentIntrospector
+                .getEditableFields(clazz);
 
             sb.append("\n").append(name);
             if (clazz.isEnum()) {
                 sb.append(" (enum): ");
-                sb.append(String.join(", ",
-                        ComponentIntrospector
-                                .getEnumConstants(
-                                        clazz)));
+                sb.append(String.join(", ", ComponentIntrospector.getEnumConstants(clazz)));
             } else if (clazz.isRecord()) {
                 sb.append(" (record)");
             }
 
             if (fields.isEmpty()
-                    && !clazz.isEnum()) {
+                && !clazz.isEnum()) {
                 sb.append(": (marker)");
             }
             sb.append("\n");
 
             for (FieldInfo field : fields) {
                 sb.append("  - ")
-                        .append(field.name())
-                        .append(": ")
-                        .append(field.type()
-                                .getSimpleName());
+                    .append(field.name())
+                    .append(": ")
+                    .append(field.type().getSimpleName());
                 if (field.isRef()) {
                     sb.append(" (ref -> ")
-                            .append(field.refSource())
-                            .append(")");
+                        .append(field.refSource())
+                        .append(")");
                 }
                 sb.append("\n");
             }
@@ -89,7 +85,7 @@ class ComponentFieldDiscoveryTest {
     @Test
     void healthHasMaxHpAndHp() {
         var fields = ComponentIntrospector
-                .getEditableFields("Health");
+            .getEditableFields("Health");
         assertFieldExists(fields, "maxHp", long.class);
         assertFieldExists(fields, "hp", long.class);
         assertEquals(2, fields.size());
@@ -98,7 +94,7 @@ class ComponentFieldDiscoveryTest {
     @Test
     void positionHasDecomposedXyz() {
         var fields = ComponentIntrospector
-                .getEditableFields("Position");
+            .getEditableFields("Position");
         assertFieldExists(fields, "x", int.class);
         assertFieldExists(fields, "y", int.class);
         assertFieldExists(fields, "z", int.class);
@@ -109,7 +105,7 @@ class ComponentFieldDiscoveryTest {
     @Test
     void velocityHasDecomposedXyz() {
         var fields = ComponentIntrospector
-                .getEditableFields("Velocity");
+            .getEditableFields("Velocity");
         assertFieldExists(fields, "x", int.class);
         assertFieldExists(fields, "y", int.class);
         assertFieldExists(fields, "z", int.class);
@@ -120,44 +116,40 @@ class ComponentFieldDiscoveryTest {
     @Test
     void scurryConfigHasClockwiseAndXyz() {
         var fields = ComponentIntrospector
-                .getEditableFields("ScurryConfig");
-        assertFieldExists(fields, "clockwise",
-                boolean.class);
+            .getEditableFields("ScurryConfig");
+        assertFieldExists(fields, "clockwise", boolean.class);
         assertFieldExists(fields, "x", int.class);
         assertFieldExists(fields, "y", int.class);
         assertFieldExists(fields, "z", int.class);
-        assertFieldNotPresent(fields,
-                "initialDirection");
+        assertFieldNotPresent(fields, "initialDirection");
         assertEquals(4, fields.size());
     }
 
     @Test
     void scurryInitHasDecomposedXyz() {
         var fields = ComponentIntrospector
-                .getEditableFields("ScurryInit");
+            .getEditableFields("ScurryInit");
         assertFieldExists(fields, "x", int.class);
         assertFieldExists(fields, "y", int.class);
         assertFieldExists(fields, "z", int.class);
-        assertFieldNotPresent(fields,
-                "initialDirection");
+        assertFieldNotPresent(fields, "initialDirection");
         assertEquals(3, fields.size());
     }
 
     @Test
     void speedHasAllFields() {
         var fields = ComponentIntrospector
-                .getEditableFields("Speed");
+            .getEditableFields("Speed");
         assertFieldExists(fields, "val", int.class);
         assertFieldExists(fields, "canActAt", long.class);
-        assertFieldExists(fields, "canAct",
-                boolean.class);
+        assertFieldExists(fields, "canAct", boolean.class);
         assertEquals(3, fields.size());
     }
 
     @Test
     void colorCompHasColor() {
         var fields = ComponentIntrospector
-                .getEditableFields("ColorComp");
+            .getEditableFields("ColorComp");
         assertFieldExists(fields, "color");
         assertEquals(1, fields.size());
     }
@@ -165,50 +157,39 @@ class ComponentFieldDiscoveryTest {
     @Test
     void descriptorHasNameAndDescription() {
         var fields = ComponentIntrospector
-                .getEditableFields("Descriptor");
-        assertFieldExists(fields, "name",
-                String.class);
-        assertFieldExists(fields, "description",
-                String.class);
+            .getEditableFields("Descriptor");
+        assertFieldExists(fields, "name", String.class);
+        assertFieldExists(fields, "description", String.class);
         assertEquals(2, fields.size());
     }
 
     @Test
     void openableHasAllFields() {
         var fields = ComponentIntrospector
-                .getEditableFields("Openable");
-        assertFieldExists(fields, "isOpen",
-                boolean.class);
-        assertFieldExists(fields, "openGlyphId",
-                String.class);
-        assertFieldExists(fields, "closedGlyphId",
-                String.class);
-        assertFieldExists(fields, "openColorHex",
-                String.class);
-        assertFieldExists(fields, "closedColorHex",
-                String.class);
+            .getEditableFields("Openable");
+        assertFieldExists(fields, "isOpen", boolean.class);
+        assertFieldExists(fields, "openGlyphId", String.class);
+        assertFieldExists(fields, "closedGlyphId", String.class);
+        assertFieldExists(fields, "openColorHex", String.class);
+        assertFieldExists(fields, "closedColorHex", String.class);
         assertEquals(5, fields.size());
     }
 
     @Test
     void socketHasEditableFieldsOnly() {
         var fields = ComponentIntrospector
-                .getEditableFields("Socket");
-        assertFieldExists(fields, "socketedMaxHp",
-                long.class);
-        assertFieldExists(fields, "socketedHp",
-                long.class);
-        assertFieldExists(fields, "destroyed",
-                boolean.class);
-        assertFieldNotPresent(fields,
-                "socketedEntity");
+            .getEditableFields("Socket");
+        assertFieldExists(fields, "socketedMaxHp", long.class);
+        assertFieldExists(fields, "socketedHp", long.class);
+        assertFieldExists(fields, "destroyed", boolean.class);
+        assertFieldNotPresent(fields, "socketedEntity");
         assertEquals(3, fields.size());
     }
 
     @Test
     void renderingHintHasZIndex() {
         var fields = ComponentIntrospector
-                .getEditableFields("RenderingHint");
+            .getEditableFields("RenderingHint");
         assertFieldExists(fields, "zIndex", int.class);
         assertEquals(1, fields.size());
     }
@@ -216,9 +197,8 @@ class ComponentFieldDiscoveryTest {
     @Test
     void lockableHasIsLocked() {
         var fields = ComponentIntrospector
-                .getEditableFields("Lockable");
-        assertFieldExists(fields, "isLocked",
-                boolean.class);
+            .getEditableFields("Lockable");
+        assertFieldExists(fields, "isLocked", boolean.class);
         assertEquals(1, fields.size());
     }
 
@@ -227,53 +207,49 @@ class ComponentFieldDiscoveryTest {
     @Test
     void materialHasEntityRef() {
         var fields = ComponentIntrospector
-                .getEditableFields("Material");
+            .getEditableFields("Material");
         assertEquals(1, fields.size());
         var field = fields.getFirst();
         assertEquals("id", field.name());
         assertEquals(String.class, field.type());
         assertTrue(field.isRef());
-        assertEquals(EditorRef.Source.ENTITY,
-                field.refSource());
+        assertEquals(EditorRef.Source.ENTITY, field.refSource());
     }
 
     @Test
     void equipmentHasWeaponRef() {
         var fields = ComponentIntrospector
-                .getEditableFields("Equipment");
+            .getEditableFields("Equipment");
         assertEquals(1, fields.size());
         var field = fields.getFirst();
         assertEquals("weaponId", field.name());
         assertEquals(String.class, field.type());
         assertTrue(field.isRef());
-        assertEquals(EditorRef.Source.ENTITY,
-                field.refSource());
+        assertEquals(EditorRef.Source.ENTITY, field.refSource());
     }
 
     @Test
     void tileGlyphHasGlyphRef() {
         var fields = ComponentIntrospector
-                .getEditableFields("TileGlyph");
+            .getEditableFields("TileGlyph");
         assertEquals(1, fields.size());
         var field = fields.getFirst();
         assertEquals("glyphId", field.name());
         assertEquals(String.class, field.type());
         assertTrue(field.isRef());
-        assertEquals(EditorRef.Source.GLYPH,
-                field.refSource());
+        assertEquals(EditorRef.Source.GLYPH, field.refSource());
     }
 
     @Test
     void aiControllerHasBehaviorRef() {
         var fields = ComponentIntrospector
-                .getEditableFields("AiController");
+            .getEditableFields("AiController");
         assertEquals(1, fields.size());
         var field = fields.getFirst();
         assertEquals("behavior", field.name());
         assertEquals(String.class, field.type());
         assertTrue(field.isRef());
-        assertEquals(EditorRef.Source.BEHAVIOR,
-                field.refSource());
+        assertEquals(EditorRef.Source.BEHAVIOR, field.refSource());
     }
 
     // -- @EditorIgnore fields --
@@ -281,31 +257,31 @@ class ComponentFieldDiscoveryTest {
     @Test
     void cameraCompIsFullyIgnored() {
         var fields = ComponentIntrospector
-                .getEditableFields("CameraComp");
+            .getEditableFields("CameraComp");
         assertTrue(fields.isEmpty());
-        assertTrue(ComponentIntrospector.isMarker(
-                ComponentTypeDeserializer
-                        .resolveType("CameraComp")));
+        assertTrue(
+            ComponentIntrospector.isMarker(ComponentTypeDeserializer.resolveType("CameraComp"))
+        );
     }
 
     @Test
     void socketPlugIsFullyIgnored() {
         var fields = ComponentIntrospector
-                .getEditableFields("SocketPlug");
+            .getEditableFields("SocketPlug");
         assertTrue(fields.isEmpty());
     }
 
     @Test
     void lastAttackerIsFullyIgnored() {
         var fields = ComponentIntrospector
-                .getEditableFields("LastAttacker");
+            .getEditableFields("LastAttacker");
         assertTrue(fields.isEmpty());
     }
 
     @Test
     void inventoryIsFullyIgnored() {
         var fields = ComponentIntrospector
-                .getEditableFields("Inventory");
+            .getEditableFields("Inventory");
         assertTrue(fields.isEmpty());
     }
 
@@ -314,25 +290,22 @@ class ComponentFieldDiscoveryTest {
     @Test
     void markerComponentsHaveNoFields() {
         String[] markers = {
-                "Player", "Solid", "Collider",
-                "Attackable", "Examinable",
-                "Socketable", "PlayerController",
-                "Hidden", "Opaque", "Item"
+            "Player", "Solid", "Collider",
+            "Attackable", "Examinable",
+            "Socketable", "PlayerController",
+            "Hidden", "Opaque", "Item"
         };
         for (String name : markers) {
-            Class<?> clazz =
-                    ComponentTypeDeserializer
-                            .resolveType(name);
-            assertNotNull(clazz,
-                    "Should resolve: " + name);
+            Class<?> clazz = ComponentTypeDeserializer
+                .resolveType(name);
+            assertNotNull(clazz, "Should resolve: " + name);
+            assertTrue(ComponentIntrospector.isMarker(clazz), name + " should be a marker");
             assertTrue(
-                    ComponentIntrospector.isMarker(clazz),
-                    name + " should be a marker");
-            assertTrue(
-                    ComponentIntrospector
-                            .getEditableFields(clazz)
-                            .isEmpty(),
-                    name + " should have no fields");
+                ComponentIntrospector
+                    .getEditableFields(clazz)
+                    .isEmpty(),
+                name + " should have no fields"
+            );
         }
     }
 
@@ -340,51 +313,41 @@ class ComponentFieldDiscoveryTest {
 
     @Test
     void sizeEnumHasConstants() {
-        Class<?> sizeClass =
-                ComponentTypeDeserializer
-                        .resolveType("Size");
+        Class<?> sizeClass = ComponentTypeDeserializer
+            .resolveType("Size");
         assertNotNull(sizeClass);
         assertFalse(
-                ComponentIntrospector.isMarker(
-                        sizeClass),
-                "Enum should not be reported"
-                        + " as marker");
+            ComponentIntrospector.isMarker(sizeClass),
+            "Enum should not be reported"
+                + " as marker"
+        );
 
-        List<String> constants =
-                ComponentIntrospector
-                        .getEnumConstants(sizeClass);
+        List<String> constants = ComponentIntrospector
+            .getEnumConstants(sizeClass);
         assertAll(
-                () -> assertTrue(
-                        constants.contains("TINY")),
-                () -> assertTrue(
-                        constants.contains("SMALL")),
-                () -> assertTrue(
-                        constants.contains("MEDIUM")),
-                () -> assertTrue(
-                        constants.contains("LARGE")),
-                () -> assertTrue(
-                        constants.contains("GIGANTIC"))
+            () -> assertTrue(constants.contains("TINY")),
+            () -> assertTrue(constants.contains("SMALL")),
+            () -> assertTrue(constants.contains("MEDIUM")),
+            () -> assertTrue(constants.contains("LARGE")),
+            () -> assertTrue(constants.contains("GIGANTIC"))
         );
 
         // Enum should have no editable fields
-        assertTrue(ComponentIntrospector
-                .getEditableFields(sizeClass).isEmpty());
+        assertTrue(ComponentIntrospector.getEditableFields(sizeClass).isEmpty());
     }
 
     @Test
     void enumConstantsByNameWorks() {
-        List<String> constants =
-                ComponentIntrospector
-                        .getEnumConstants("Size");
+        List<String> constants = ComponentIntrospector
+            .getEnumConstants("Size");
         assertFalse(constants.isEmpty());
         assertTrue(constants.contains("TINY"));
     }
 
     @Test
     void enumConstantsForNonEnumIsEmpty() {
-        List<String> constants =
-                ComponentIntrospector
-                        .getEnumConstants("Health");
+        List<String> constants = ComponentIntrospector
+            .getEnumConstants("Health");
         assertTrue(constants.isEmpty());
     }
 
@@ -393,14 +356,14 @@ class ComponentFieldDiscoveryTest {
     @Test
     void unknownTypeNameReturnsEmpty() {
         var fields = ComponentIntrospector
-                .getEditableFields("DoesNotExist");
+            .getEditableFields("DoesNotExist");
         assertTrue(fields.isEmpty());
     }
 
     @Test
     void unknownTypeEnumConstantsReturnsEmpty() {
         var constants = ComponentIntrospector
-                .getEnumConstants("DoesNotExist");
+            .getEnumConstants("DoesNotExist");
         assertTrue(constants.isEmpty());
     }
 
@@ -408,51 +371,48 @@ class ComponentFieldDiscoveryTest {
     void refFieldsAreNotDirectlyEditable() {
         // All ref fields should report String.class
         // as their type, not the runtime field type
-        for (String name
-                : ComponentTypeDeserializer
-                        .getAllTypeNames()) {
+        for (String name : ComponentTypeDeserializer
+            .getAllTypeNames()) {
             var fields = ComponentIntrospector
-                    .getEditableFields(name);
+                .getEditableFields(name);
             for (FieldInfo field : fields) {
-                if (field.isRef()) {
-                    assertEquals(String.class,
-                            field.type(),
-                            name + "." + field.name()
-                                    + " ref should"
-                                    + " have String"
-                                    + " type");
+                if (!field.isRef()) {
+                    continue;
                 }
+                assertEquals(
+                    String.class,
+                    field.type(),
+                    name + "." + field.name()
+                        + " ref should"
+                        + " have String"
+                        + " type"
+                );
             }
         }
     }
 
     // -- Helpers --
 
-    private static void assertFieldExists(
-            List<FieldInfo> fields, String name) {
+    private static void assertFieldExists(List<FieldInfo> fields, String name) {
         assertTrue(
-                fields.stream().anyMatch(
-                        f -> f.name().equals(name)),
-                "Should have field: " + name);
+            fields.stream().anyMatch(f -> f.name().equals(name)),
+            "Should have field: " + name
+        );
     }
 
-    private static void assertFieldExists(
-            List<FieldInfo> fields,
-            String name, Class<?> type) {
+    private static void assertFieldExists(List<FieldInfo> fields, String name, Class<?> type) {
         assertTrue(
-                fields.stream().anyMatch(
-                        f -> f.name().equals(name)
-                                && f.type() == type),
-                "Should have field: " + name
-                        + " of type "
-                        + type.getSimpleName());
+            fields.stream().anyMatch(f -> f.name().equals(name) && f.type() == type),
+            "Should have field: " + name
+                + " of type "
+                + type.getSimpleName()
+        );
     }
 
-    private static void assertFieldNotPresent(
-            List<FieldInfo> fields, String name) {
+    private static void assertFieldNotPresent(List<FieldInfo> fields, String name) {
         assertFalse(
-                fields.stream().anyMatch(
-                        f -> f.name().equals(name)),
-                "Should NOT have field: " + name);
+            fields.stream().anyMatch(f -> f.name().equals(name)),
+            "Should NOT have field: " + name
+        );
     }
 }

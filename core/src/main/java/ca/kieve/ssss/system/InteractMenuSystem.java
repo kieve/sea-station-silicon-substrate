@@ -1,5 +1,17 @@
 package ca.kieve.ssss.system;
 
+import ca.kieve.ssss.component.Speed;
+import ca.kieve.ssss.context.GameContext;
+import ca.kieve.ssss.context.InputContext;
+import ca.kieve.ssss.context.InteractContext;
+import ca.kieve.ssss.context.InteractContext.Phase;
+import ca.kieve.ssss.event.Interaction;
+import ca.kieve.ssss.util.InventoryUtil;
+import ca.kieve.ssss.util.LockableUtil;
+import ca.kieve.ssss.util.OpenableUtil;
+import ca.kieve.ssss.util.PlayerUtil;
+import ca.kieve.ssss.util.Vec3i;
+
 import static ca.kieve.ssss.context.InputContext.Mode.MODE_INTERACT;
 import static ca.kieve.ssss.context.InputContext.Mode.MODE_NORMAL;
 import static ca.kieve.ssss.input.InputAction.CANCEL;
@@ -14,18 +26,6 @@ import static ca.kieve.ssss.util.Vec3i.EAST;
 import static ca.kieve.ssss.util.Vec3i.NORTH;
 import static ca.kieve.ssss.util.Vec3i.SOUTH;
 import static ca.kieve.ssss.util.Vec3i.WEST;
-
-import ca.kieve.ssss.component.Speed;
-import ca.kieve.ssss.context.GameContext;
-import ca.kieve.ssss.context.InputContext;
-import ca.kieve.ssss.context.InteractContext;
-import ca.kieve.ssss.context.InteractContext.Phase;
-import ca.kieve.ssss.event.Interaction;
-import ca.kieve.ssss.util.InventoryUtil;
-import ca.kieve.ssss.util.LockableUtil;
-import ca.kieve.ssss.util.OpenableUtil;
-import ca.kieve.ssss.util.PlayerUtil;
-import ca.kieve.ssss.util.Vec3i;
 
 public class InteractMenuSystem extends System {
     private final InputContext m_input;
@@ -50,8 +50,7 @@ public class InteractMenuSystem extends System {
                 return;
             }
 
-            var playerPos =
-                PlayerUtil.getControlledPosition(m_gameContext.ecs());
+            var playerPos = PlayerUtil.getControlledPosition(m_gameContext.ecs());
             if (playerPos == null) {
                 return;
             }
@@ -98,8 +97,7 @@ public class InteractMenuSystem extends System {
             return;
         }
 
-        var playerPos =
-            PlayerUtil.getControlledPosition(m_gameContext.ecs());
+        var playerPos = PlayerUtil.getControlledPosition(m_gameContext.ecs());
         if (playerPos == null) {
             return;
         }
@@ -133,12 +131,13 @@ public class InteractMenuSystem extends System {
         m_input.consume(LEFT);
         m_input.consume(RIGHT);
 
-        if (m_input.consume(CONFIRM)) {
-            var interactions = m_interactContext.getInteractions();
-            int index = m_interactContext.getSelectedIndex();
-            if (index < interactions.size()) {
-                executeInteraction(interactions.get(index));
-            }
+        if (!m_input.consume(CONFIRM)) {
+            return;
+        }
+        var interactions = m_interactContext.getInteractions();
+        int index = m_interactContext.getSelectedIndex();
+        if (index < interactions.size()) {
+            executeInteraction(interactions.get(index));
         }
     }
 
@@ -148,8 +147,7 @@ public class InteractMenuSystem extends System {
 
         boolean success = switch (interaction.verb()) {
         case PICK_UP ->
-            InventoryUtil.pickUp(
-                m_gameContext, playerEntity, interaction.entity());
+            InventoryUtil.pickUp(m_gameContext, playerEntity, interaction.entity());
         case OPEN -> {
             OpenableUtil.open(m_gameContext, interaction.entity());
             yield true;
@@ -157,8 +155,7 @@ public class InteractMenuSystem extends System {
         case CLOSE ->
             OpenableUtil.tryClose(m_gameContext, interaction.entity());
         case UNLOCK ->
-            LockableUtil.unlock(
-                m_gameContext, playerEntity, interaction.entity());
+            LockableUtil.unlock(m_gameContext, playerEntity, interaction.entity());
         case LOCK ->
             LockableUtil.lock(m_gameContext, interaction.entity());
         };
@@ -166,7 +163,8 @@ public class InteractMenuSystem extends System {
         if (success) {
             var controlled = PlayerUtil.getControlledEntity(ecs);
             var playerSpeed = controlled != null
-                ? controlled.get(Speed.class) : null;
+                ? controlled.get(Speed.class)
+                : null;
             int speedVal = playerSpeed != null ? playerSpeed.val : 100;
             m_clock.processPlayerActed(speedVal);
         }

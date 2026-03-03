@@ -1,5 +1,19 @@
 package ca.kieve.ssss.context;
 
+import com.badlogic.gdx.Input.Keys;
+
+import ca.kieve.ssss.input.InputAction;
+import ca.kieve.ssss.input.KeyState;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import static ca.kieve.ssss.input.InputAction.CANCEL;
 import static ca.kieve.ssss.input.InputAction.CONFIRM;
 import static ca.kieve.ssss.input.InputAction.DOWN;
@@ -12,25 +26,7 @@ import static ca.kieve.ssss.input.InputAction.RIGHT;
 import static ca.kieve.ssss.input.InputAction.UP;
 import static ca.kieve.ssss.input.InputAction.WAIT;
 
-import ca.kieve.ssss.input.InputAction;
-import ca.kieve.ssss.input.KeyState;
-
-import com.badlogic.gdx.Input.Keys;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 public class InputContext {
-    private static final Set<InputAction> DIRECTIONS = EnumSet.of(UP, DOWN, LEFT, RIGHT);
-    private static final Set<InputAction> PROMPT = EnumSet.of(CANCEL, CONFIRM);
-    private static final Set<InputAction> GLOBAL_ACTIONS = EnumSet.of(EXIT_GAME);
-
     public enum Mode {
         MODE_NORMAL(DIRECTIONS, List.of(EXAMINE, EJECT, INTERACT, WAIT)),
         MODE_EXAMINE(DIRECTIONS, PROMPT, List.of(EXAMINE)),
@@ -56,6 +52,10 @@ public class InputContext {
             return Collections.unmodifiableSet(m_activeActions);
         }
     }
+
+    private static final Set<InputAction> DIRECTIONS = EnumSet.of(UP, DOWN, LEFT, RIGHT);
+    private static final Set<InputAction> PROMPT = EnumSet.of(CANCEL, CONFIRM);
+    private static final Set<InputAction> GLOBAL_ACTIONS = EnumSet.of(EXIT_GAME);
 
     private final Map<InputAction, Integer> m_keyMappings = new EnumMap<>(InputAction.class);
     private final Map<InputAction, KeyState> m_keyStates = new EnumMap<>(InputAction.class);
@@ -163,8 +163,9 @@ public class InputContext {
                 InputAction existing = keysInMode.get(keycode);
                 if (existing != null) {
                     throw new IllegalStateException(
-                            "Hotkey conflict in " + mode + ": " + existing + " and " + action
-                            + " both mapped to key " + keycode);
+                        "Hotkey conflict in " + mode + ": " + existing + " and " + action
+                            + " both mapped to key " + keycode
+                    );
                 }
                 keysInMode.put(keycode, action);
             }

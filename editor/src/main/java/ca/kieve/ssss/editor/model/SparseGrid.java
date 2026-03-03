@@ -10,10 +10,11 @@ import java.util.Map;
  * bounding box of all occupied cells.
  */
 public class SparseGrid {
-    public record CellPos(int row, int col) {}
+    public record CellPos(int row, int col) {
+    }
 
-    private final Map<CellPos, String> m_cells =
-            new HashMap<>();
+    private final Map<CellPos, String> m_cells = new HashMap<>();
+
     private int m_minRow = Integer.MAX_VALUE;
     private int m_minCol = Integer.MAX_VALUE;
     private int m_maxRow = Integer.MIN_VALUE;

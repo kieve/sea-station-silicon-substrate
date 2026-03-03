@@ -15,10 +15,7 @@ public class CameraSystem extends System {
 
     @Override
     public void run() {
-        var searchResults = m_gameContext.ecs().findEntitiesWith(
-            CameraComp.class,
-            Position.class
-        );
+        var searchResults = m_gameContext.ecs().findEntitiesWith(CameraComp.class, Position.class);
 
         var optionalResults = searchResults.stream().findFirst();
         if (optionalResults.isEmpty()) {

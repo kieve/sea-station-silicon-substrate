@@ -1,41 +1,63 @@
 package ca.kieve.ssss.editor.component;
 
-import static ca.kieve.ssss.editor.util.CssUtil.inline;
-
-import ca.kieve.ssss.editor.EditorTheme;
-import ca.kieve.ssss.editor.ui.fx.EditorLabel;
-
-import java.util.List;
-import java.util.function.Consumer;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
+import ca.kieve.ssss.editor.EditorTheme;
+import ca.kieve.ssss.editor.ui.fx.EditorLabel;
+
+import java.util.List;
+import java.util.function.Consumer;
+
+import static ca.kieve.ssss.editor.util.CssUtil.inline;
+
 public class SelectedCellOverlay extends VBox {
-    public enum ItemType { BLOCK, ENTITY }
+    public enum ItemType {
+        BLOCK,
+        ENTITY
+    }
 
-    public record CellItem(
-            String label, ItemType type, int index) {}
+    public record CellItem(String label, ItemType type, int index) {
+    }
 
-    public record EntityInfo(int index, String id) {}
+    public record EntityInfo(int index, String id) {
+    }
+
+    private static class CellItemCell
+        extends
+        ListCell<CellItem> {
+        @Override
+        protected void updateItem(CellItem item, boolean empty) {
+            super.updateItem(item, empty);
+            if (empty || item == null) {
+                setText(null);
+                return;
+            }
+            String prefix = item.type() == ItemType.BLOCK
+                ? "[B] "
+                : "[E] ";
+            setText(prefix + item.label());
+        }
+    }
 
     // language=css
-    private static final String CSS =
-            EditorTheme.OVERLAY_CSS + """
-            .%1$s .list-cell {
-                -fx-cell-size: 1.4em;
-                -fx-padding: 1 4;
-                -fx-cursor: hand;
-            }
-            .%1$s .list-cell:hover {
-                -fx-background-color: -color-neutral-muted;
-            }
-            """.formatted(EditorTheme.STYLE_OVERLAY);
+    private static final String CSS = EditorTheme.OVERLAY_CSS + """
+        .%1$s .list-cell {
+            -fx-cell-size: 1.4em;
+            -fx-padding: 1 4;
+            -fx-cursor: hand;
+        }
+        .%1$s .list-cell:hover {
+            -fx-background-color: -color-neutral-muted;
+        }
+        """.formatted(EditorTheme.STYLE_OVERLAY);
 
     private final Label m_header;
     private final ListView<CellItem> m_list;
+
     private Consumer<CellItem> m_onItemSelected;
 
     public SelectedCellOverlay() {
@@ -57,9 +79,9 @@ public class SelectedCellOverlay extends VBox {
 
         m_list.setOnMouseClicked(e -> {
             CellItem item = m_list.getSelectionModel()
-                    .getSelectedItem();
+                .getSelectedItem();
             if (item != null
-                    && m_onItemSelected != null) {
+                && m_onItemSelected != null) {
                 m_onItemSelected.accept(item);
             }
         });
@@ -69,29 +91,24 @@ public class SelectedCellOverlay extends VBox {
         setManaged(false);
     }
 
-    public void setOnItemSelected(
-            Consumer<CellItem> callback) {
+    public void setOnItemSelected(Consumer<CellItem> callback) {
         m_onItemSelected = callback;
     }
 
-    public void update(
-            String blockName,
-            List<EntityInfo> entities) {
+    public void update(String blockName, List<EntityInfo> entities) {
         setVisible(true);
         setManaged(true);
 
         m_list.getItems().clear();
 
         if (blockName != null) {
-            m_list.getItems().add(new CellItem(
-                    blockName, ItemType.BLOCK, 0));
+            m_list.getItems().add(new CellItem(blockName, ItemType.BLOCK, 0));
         }
 
         for (var entity : entities) {
-            m_list.getItems().add(new CellItem(
-                    entity.index() + ": " + entity.id(),
-                    ItemType.ENTITY,
-                    entity.index()));
+            m_list.getItems().add(
+                new CellItem(entity.index() + ": " + entity.id(), ItemType.ENTITY, entity.index())
+            );
         }
 
         if (m_list.getItems().isEmpty()) {
@@ -103,7 +120,7 @@ public class SelectedCellOverlay extends VBox {
         for (int i = 0; i < m_list.getItems().size(); i++) {
             var item = m_list.getItems().get(i);
             if (item.type() == ItemType.ENTITY
-                    && item.index() == entityIndex) {
+                && item.index() == entityIndex) {
                 m_list.getSelectionModel().select(i);
                 return;
             }
@@ -119,21 +136,5 @@ public class SelectedCellOverlay extends VBox {
         m_list.getItems().clear();
         setVisible(false);
         setManaged(false);
-    }
-
-    private static class CellItemCell
-            extends ListCell<CellItem> {
-        @Override
-        protected void updateItem(
-                CellItem item, boolean empty) {
-            super.updateItem(item, empty);
-            if (empty || item == null) {
-                setText(null);
-                return;
-            }
-            String prefix = item.type() == ItemType.BLOCK
-                    ? "[B] " : "[E] ";
-            setText(prefix + item.label());
-        }
     }
 }

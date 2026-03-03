@@ -12,5 +12,6 @@ public interface Condition extends YamlInitializable {
      * Called when the state containing this condition is selected.
      * Use this to update stateful data (like MaxTimes counter).
      */
-    default void onStateSelected(ConditionContext context) {}
+    default void onStateSelected(ConditionContext context) {
+    }
 }

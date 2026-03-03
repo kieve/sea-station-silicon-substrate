@@ -1,12 +1,12 @@
 package ca.kieve.ssss.ui.core;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.Test;
 
 import ca.kieve.ssss.ui.TestUiNode;
 import ca.kieve.ssss.ui.layout.UiLayoutParams;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 class UiNodeTest {
     private static class TestLayoutParams implements UiLayoutParams {

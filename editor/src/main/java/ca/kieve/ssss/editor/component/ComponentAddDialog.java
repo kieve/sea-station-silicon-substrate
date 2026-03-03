@@ -1,5 +1,11 @@
 package ca.kieve.ssss.editor.component;
 
+import javafx.geometry.Insets;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Dialog;
+import javafx.scene.layout.GridPane;
+
 import ca.kieve.ssss.content.ComponentTypeDeserializer;
 import ca.kieve.ssss.editor.ui.fx.EditorLabel;
 import ca.kieve.ssss.editor.util.DialogUtil;
@@ -7,15 +13,12 @@ import ca.kieve.ssss.editor.util.DialogUtil;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import javafx.geometry.Insets;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Dialog;
-import javafx.scene.layout.GridPane;
 
 public class ComponentAddDialog
-        extends Dialog<ComponentAddDialog.Result> {
-    public record Result(String componentTypeName) {}
+    extends
+    Dialog<ComponentAddDialog.Result> {
+    public record Result(String componentTypeName) {
+    }
 
     private final ComboBox<String> m_typeCombo;
 
@@ -36,8 +39,7 @@ public class ComponentAddDialog
         grid.add(m_typeCombo, 1, 0);
 
         getDialogPane().setContent(grid);
-        getDialogPane().getButtonTypes().addAll(
-                ButtonType.OK, ButtonType.CANCEL);
+        getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
         setResultConverter(btn -> {
             if (btn != ButtonType.OK) {
@@ -45,22 +47,18 @@ public class ComponentAddDialog
             }
             String typeName = m_typeCombo.getValue();
             if (typeName == null
-                    || typeName.isEmpty()) {
+                || typeName.isEmpty()) {
                 return null;
             }
             return new Result(typeName);
         });
     }
 
-    public static Optional<Result> showAdd(
-            Set<String> excludeTypes) {
-        List<String> available =
-                ComponentTypeDeserializer
-                        .getAllTypeNames().stream()
-                        .filter(name ->
-                                !excludeTypes.contains(
-                                        name))
-                        .toList();
+    public static Optional<Result> showAdd(Set<String> excludeTypes) {
+        List<String> available = ComponentTypeDeserializer
+            .getAllTypeNames().stream()
+            .filter(name -> !excludeTypes.contains(name))
+            .toList();
         var dialog = new ComponentAddDialog(available);
         return dialog.showAndWait();
     }
