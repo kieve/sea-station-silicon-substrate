@@ -20,6 +20,17 @@ Sea Station Silicon Substrate is a roguelike game built with libGDX (Java game f
 ./gradlew build
 ```
 
+Building automatically runs the formatter and linter. The formatter auto-formats all Java sources
+before compilation, and Checkstyle linting runs as part of the `check` lifecycle. To run them
+independently:
+
+```bash
+./gradlew format        # auto-format all Java source files
+./gradlew formatCheck   # verify formatting (fails if files need changes)
+./gradlew lint          # lint main source files
+./gradlew lintTest      # lint test source files
+```
+
 **Run tests:**
 ```bash
 ./gradlew test
