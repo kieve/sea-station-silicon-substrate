@@ -6,39 +6,100 @@ blocks:
   floor:
     bpId: block_steel
     layoutChar: b
+  mouse hole:
+    bpId: block_mouse_hole
+    layoutChar: c
   wall:
     bpId: block_steel
-    layoutChar: c
+    layoutChar: d
 layers:
   "0": |
-    ccccccccc
-    cbbbbbbbc
-    cbbbbbbbc
-    cbbbbbbbc
-    cbbbbbbbc
-    cbbbbbbbc
-    ccccccccc
+    dddddddddddd
+    dddddddddddd
+    dddddddddddd
+    ddddbbbbbbbd
+    ddddbbbbbbbd
+    ddddbbbbbbbd
+    ddddbbbbbbbd
+    ddddbbdbbbbd
+    dddddddddddd
+    dddddddddddd
+    dddddddddddd
+    dddddddddddd
   "1": |
-    ccccccccc
-    caaaaaaac
-    caaaaaaac
-    caaaaaaac
-    caaaaaaac
-    caaaaaaac
-    ccccccccc
+    dddddddddddd
+    daacaaaaaaad
+    daaddddddddd
+    daadaaaaaaad
+    daadaaaaaaad
+    daaaaaaaaaaa
+    daadaaaaaaad
+    daadaaaaaaad
+    ddadcddadddd
+    daaaaadaaaad
+    daaaaadaaaad
+    dddddddddddd
   "2": |
-    ccccccccc
-    ccccccccc
-    ccccccccc
-    ccccccccc
-    ccccccccc
-    ccccccccc
-    ccccccccc
+    dddddddddddd
+    dddddddddddd
+    dddddddddddd
+    dddddddddddd
+    dddddddddddd
+    dddddddddddd
+    dddddddddddd
+    dddddddddddd
+    dddddddddddd
+    dddddddddddd
+    dddddddddddd
+    dddddddddddd
 floorGlyph: interpunct
 entities:
 - id: player
   components:
   - type: Position
-    x: 4
-    "y": 3
+    x: 7
+    "y": 5
     z: 1
+- id: door
+  components:
+  - type: Position
+    x: 2
+    "y": 8
+    z: 1
+  - type: Lockable
+    isLocked: "true"
+- id: maintenanceSubDoor
+  components:
+  - type: Position
+    x: 11
+    "y": 5
+    z: 1
+- id: maintenanceSubDoorKey
+  components:
+  - type: Position
+    x: 1
+    "y": 10
+    z: 1
+- id: door
+  components:
+  - type: Position
+    x: 7
+    "y": 8
+    z: 1
+  - type: Lockable
+    isLocked: "true"
+- id: door
+  components:
+  - type: Position
+    x: 3
+    "y": 5
+    z: 1
+- id: roboMouse
+  components:
+  - type: ScurryInit
+  - type: Position
+    x: 10
+    "y": 1
+    z: 1
+  - type: AiController
+    behavior: agro_robo_mouse

@@ -6,4 +6,8 @@ public class Lockable implements Component {
     public Lockable() {
         isLocked = true;
     }
+
+    public Lockable(boolean isLocked) {
+        this.isLocked = isLocked;
+    }
 }

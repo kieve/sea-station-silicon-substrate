@@ -84,3 +84,26 @@ states:
 
   - state: ScurryState
     priority: 2
+
+---
+id: agro_robo_mouse
+states:
+  - state: AttackState
+    priority: 0
+    target: LAST_ATTACKER
+    conditions:
+      - type: WasAttacked
+      - type: DistanceToEntity
+        target: LAST_ATTACKER
+        distance: 1
+      - type: HasWeapon
+  - state: ChaseState
+    priority: 1
+    target: LAST_ATTACKER
+    conditions:
+      - type: WasAttacked
+      - type: DistanceToEntity
+        target: LAST_ATTACKER
+        distance: 20
+  - state: ScurryState
+    priority: 2
