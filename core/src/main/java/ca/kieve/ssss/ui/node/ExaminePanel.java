@@ -2,6 +2,7 @@ package ca.kieve.ssss.ui.node;
 
 import ca.kieve.ssss.component.Descriptor;
 import ca.kieve.ssss.context.ExamineContext;
+import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.system.ExamineSystem.ExamineItem;
 import ca.kieve.ssss.ui.core.UiRenderContext;
 
@@ -10,7 +11,8 @@ import java.util.List;
 
 /**
  * UI panel that displays names of entities under the examine crosshair.
- * Shows '>' prefix for selected entity in selection mode.
+ * Visible tiles show live entities; explored-but-not-visible tiles show
+ * remembered (ghost) entities; unexplored tiles show nothing.
  */
 public class ExaminePanel extends SelectionPanel {
     private List<String> m_entityNames = new ArrayList<>();
@@ -29,32 +31,42 @@ public class ExaminePanel extends SelectionPanel {
         setShowSelectionIndicator(examineContext.isSelectionMode());
         setSelectedIndex(examineContext.getSelectedIndex());
 
-        // Build the list of examine items (main level + ceiling + floor)
+        var crosshair = examineContext.getCrosshairPos();
+        var vision = gc.vision();
+        boolean visible = vision.isVisible(crosshair.x, crosshair.y);
+        boolean explored = vision.isExplored(crosshair.x, crosshair.y, crosshair.z);
+
+        m_entityNames.clear();
+        if (visible) {
+            populateFromCurrent(gc, examineContext);
+        } else if (explored) {
+            populateFromGhost(gc, examineContext);
+        }
+        // unexplored: leave the list empty so the panel hides itself
+        setItems(m_entityNames);
+    }
+
+    private void populateFromCurrent(GameContext gc, ExamineContext examineContext) {
         var items = new ArrayList<ExamineItem>();
 
-        // Get entities at main level (crosshair position)
         var mainPos = examineContext.getCrosshairPos();
         var mainEntities = ExamineContext.sortEntitiesByZIndex(gc.pos().getAt(mainPos));
         for (var entity : mainEntities) {
             items.add(new ExamineItem(entity, ExamineItem.ItemType.MAIN));
         }
 
-        // Get entities at ceiling level (z+1)
         var ceilingPos = examineContext.getCeilingPos();
         var ceilingEntities = ExamineContext.sortEntitiesByZIndex(gc.pos().getAt(ceilingPos));
         for (var entity : ceilingEntities) {
             items.add(new ExamineItem(entity, ExamineItem.ItemType.CEILING));
         }
 
-        // Get entities at floor level (z-1)
         var floorPos = examineContext.getFloorPos();
         var floorEntities = ExamineContext.sortEntitiesByZIndex(gc.pos().getAt(floorPos));
         for (var entity : floorEntities) {
             items.add(new ExamineItem(entity, ExamineItem.ItemType.FLOOR));
         }
 
-        // Convert items to display names
-        m_entityNames.clear();
         for (var item : items) {
             var name = item.entity().get(Descriptor.class).name();
             String displayName = switch (item.type()) {
@@ -64,8 +76,22 @@ public class ExaminePanel extends SelectionPanel {
             };
             m_entityNames.add(displayName);
         }
+    }
 
-        setItems(m_entityNames);
+    private void populateFromGhost(GameContext gc, ExamineContext examineContext) {
+        var crosshair = examineContext.getCrosshairPos();
+        var ghost = gc.vision().getGhost(crosshair.x, crosshair.y, crosshair.z);
+        if (ghost == null) {
+            return;
+        }
+        for (var ghostEntity : ghost.entities) {
+            String displayName = switch (ghostEntity.type()) {
+            case MAIN -> ghostEntity.name() + " (memory)";
+            case FLOOR -> ghostEntity.name() + " (memory, floor)";
+            case CEILING -> ghostEntity.name() + " (memory, ceiling)";
+            };
+            m_entityNames.add(displayName);
+        }
     }
 
     public List<String> getEntityNames() {

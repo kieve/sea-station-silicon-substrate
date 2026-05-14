@@ -9,6 +9,7 @@ import ca.kieve.ssss.content.ContentRegistry;
 import ca.kieve.ssss.content.EntityFactory;
 import ca.kieve.ssss.system.System;
 import ca.kieve.ssss.util.PerfClock;
+import ca.kieve.ssss.world.MapGenerator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,15 +30,17 @@ public record GameContext(
     RenderContext render,
     AiControllerContext aiController,
     PathingContext pathing,
+    VisionContext vision,
     ContentRegistry content,
     EntityFactory entityFactory,
     BlockTypeFactory blockTypes,
     List<System> updateSystems,
     List<System> renderSystems,
     GameEngine gameEngine,
+    MapGenerator mapGenerator,
     PerfClock perf
 ) {
-    public GameContext(ContentRegistry content) {
+    public GameContext(ContentRegistry content, MapGenerator mapGenerator) {
         this(
             new Random(),
             Dominion.create(),
@@ -53,12 +56,14 @@ public record GameContext(
             new RenderContext(),
             new AiControllerContext(),
             new PathingContext(),
+            new VisionContext(),
             content,
             new EntityFactory(content),
             content.getBlockTypeFactory(),
             new ArrayList<>(),
             new ArrayList<>(),
             new GameEngine(),
+            mapGenerator,
             new PerfClock()
         );
     }

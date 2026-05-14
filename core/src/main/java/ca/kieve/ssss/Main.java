@@ -11,6 +11,8 @@ import ca.kieve.ssss.content.ContentRegistry;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.screen.PlayScreen;
 import ca.kieve.ssss.ui.core.UiScreen;
+import ca.kieve.ssss.world.MapGenerator;
+import ca.kieve.ssss.world.StaticTestMapGenerator;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends ApplicationAdapter {
@@ -29,7 +31,10 @@ public class Main extends ApplicationAdapter {
         ContentLoader contentLoader = new ContentLoader();
         ContentRegistry content = contentLoader.loadAll();
 
-        m_gameContext = new GameContext(content);
+        MapGenerator mapGenerator = new StaticTestMapGenerator(
+            content.getSystemConfig().launchMap()
+        );
+        m_gameContext = new GameContext(content, mapGenerator);
         // Initialize contexts that need cross-references
         m_gameContext.gameEngine().init(m_gameContext);
         m_gameContext.examine().init(m_gameContext);

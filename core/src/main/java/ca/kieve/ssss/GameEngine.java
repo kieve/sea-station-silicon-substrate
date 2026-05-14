@@ -26,10 +26,9 @@ import ca.kieve.ssss.system.SocketSystem;
 import ca.kieve.ssss.system.TileGlyphRenderSystem;
 import ca.kieve.ssss.system.TileHighlightRenderSystem;
 import ca.kieve.ssss.system.VelocitySystem;
+import ca.kieve.ssss.system.VisionSystem;
 import ca.kieve.ssss.system.WasdSystem;
 import ca.kieve.ssss.system.ai.AiControllerSystem;
-import ca.kieve.ssss.world.MapGenerator;
-import ca.kieve.ssss.world.StaticTestMapGenerator;
 import ca.kieve.ssss.world.WorldEntityFactory;
 import ca.kieve.ssss.world.WorldModel;
 
@@ -39,14 +38,11 @@ public class GameEngine {
     public static final boolean DEBUG_GRID = false;
 
     private GameContext m_gameContext;
-    private MapGenerator m_mapGenerator;
     private WorldModel m_worldModel;
 
     public void init(GameContext gameContext) {
         m_gameContext = gameContext;
-        String launchMap = gameContext.content().getSystemConfig().launchMap();
-        m_mapGenerator = new StaticTestMapGenerator(launchMap);
-        m_worldModel = m_mapGenerator.generate(gameContext.blockTypes());
+        m_worldModel = gameContext.mapGenerator().generate(gameContext.blockTypes());
 
         var inputActionController = new InputActionController(gameContext);
         gameContext.inputMux().addProcessor(0, inputActionController);
@@ -71,6 +67,7 @@ public class GameEngine {
                 new AttackSystem(m_gameContext),
                 new VelocitySystem(m_gameContext),
                 new CameraSystem(m_gameContext),
+                new VisionSystem(m_gameContext),
                 new SanityCheckSystem(m_gameContext),
                 new EventSystem(m_gameContext)
             )
@@ -91,8 +88,7 @@ public class GameEngine {
         var tileGlyphRenderSystem = new TileGlyphRenderSystem(
             m_gameContext,
             spriteBatch,
-            shapeRenderer,
-            m_mapGenerator.getFloorGlyphId()
+            shapeRenderer
         );
         tileGlyphRenderSystem.setDebugGrid(DEBUG_GRID);
 
@@ -120,7 +116,7 @@ public class GameEngine {
 
         // Create map entities from YAML definitions
         var factory = m_gameContext.entityFactory();
-        for (MapEntityDefinition entityDef : m_mapGenerator.getEntities()) {
+        for (MapEntityDefinition entityDef : m_gameContext.mapGenerator().getEntities()) {
             factory.createEntityWithOverrides(
                 m_gameContext,
                 entityDef.id(),
@@ -128,14 +124,17 @@ public class GameEngine {
             );
         }
 
-        // Run map init systems for post-spawn processing
+        // Run map init systems for post-spawn processing. Standalone init
+        // systems run first; any update system that also implements
+        // MapInitSystem opts into the same one-shot post-spawn hook.
         List<MapInitSystem> mapInitSystems = List.of(new ScurryInitSystem());
         for (MapInitSystem initSystem : mapInitSystems) {
             initSystem.run(m_gameContext);
         }
-    }
-
-    public MapGenerator getMapGenerator() {
-        return m_mapGenerator;
+        for (var system : m_gameContext.updateSystems()) {
+            if (system instanceof MapInitSystem mapInit) {
+                mapInit.run(m_gameContext);
+            }
+        }
     }
 }

@@ -4,22 +4,25 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import dev.dominion.ecs.api.Dominion;
 import dev.dominion.ecs.api.Entity;
 
-import ca.kieve.ssss.component.CameraComp;
 import ca.kieve.ssss.component.ColorComp;
 import ca.kieve.ssss.component.Hidden;
-import ca.kieve.ssss.component.Player;
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.component.RenderingHint;
-import ca.kieve.ssss.component.SocketPlug;
 import ca.kieve.ssss.component.TileGlyph;
 import ca.kieve.ssss.context.GameContext;
+import ca.kieve.ssss.context.VisionContext;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class TileGlyphRenderSystem extends System {
+    private static final float GHOST_BRIGHTNESS = 0.3f;
+
+    private final Dominion m_ecs;
+    private final VisionContext m_vision;
     private final SpriteBatch m_spriteBatch;
     private final ShapeRenderer m_shapeRenderer;
     private final TileGlyph m_floorGlyph;
@@ -29,12 +32,14 @@ public class TileGlyphRenderSystem extends System {
     public TileGlyphRenderSystem(
         GameContext gameContext,
         SpriteBatch spriteBatch,
-        ShapeRenderer shapeRenderer,
-        String floorGlyphId
+        ShapeRenderer shapeRenderer
     ) {
         super(gameContext);
+        m_ecs = gameContext.ecs();
+        m_vision = gameContext.vision();
         m_spriteBatch = spriteBatch;
         m_shapeRenderer = shapeRenderer;
+        var floorGlyphId = gameContext.mapGenerator().getFloorGlyphId();
         m_floorGlyph = gameContext.entityFactory().getGlyphFactory().getGlyph(floorGlyphId);
     }
 
@@ -44,12 +49,10 @@ public class TileGlyphRenderSystem extends System {
 
     @Override
     public void run() {
-        int cameraZ = getCameraZ();
+        int cameraZ = m_vision.getCameraZ();
 
-        var entities = m_gameContext.ecs().findEntitiesWith(Position.class, TileGlyph.class);
+        var entities = m_ecs.findEntitiesWith(Position.class, TileGlyph.class);
 
-        // Group entities by 2D position (x,y), keeping only the one with highest zIndex
-        // Only include entities at Z-1, Z, or Z+1 relative to camera
         Map<String, Entity> topEntities = new HashMap<>();
         Map<String, Integer> topZIndex = new HashMap<>();
         Map<String, Integer> topEntityZ = new HashMap<>();
@@ -59,33 +62,25 @@ public class TileGlyphRenderSystem extends System {
             var pos = position.getPosition();
             var entity = with.entity();
 
-            // Skip hidden entities (e.g., player while socketed into a body)
             if (entity.has(Hidden.class)) {
                 return;
             }
 
-            // Only render entities within camera's Z range
             int relativeZ = pos.z - cameraZ;
             if (relativeZ < -1 || relativeZ > 0) {
-                // Skip ceiling blocks (Z+1) and anything outside range
-                // We only want to render floor (Z-1) and current level (Z)
                 return;
             }
 
             var hint = entity.get(RenderingHint.class);
             int zIndex = (hint != null) ? hint.zIndex : 0;
 
-            // Skip entities with zIndex = -1 (never draw)
             if (zIndex == -1) {
                 return;
             }
 
-            // Use 2D key (x,y) for grouping
             String key = pos.x + "," + pos.y;
-
-            // Keep entity with highest combined priority (relativeZ * 100 + zIndex)
-            // This prioritizes current level (Z=0) over floor (Z=-1)
             int priority = relativeZ * 100 + zIndex;
+
             var currentTop = topZIndex.get(key);
             if (currentTop != null && priority <= currentTop) {
                 return;
@@ -95,7 +90,6 @@ public class TileGlyphRenderSystem extends System {
             topEntityZ.put(key, pos.z);
         });
 
-        // Render only the top entity at each 2D position
         m_spriteBatch.begin();
         for (var entry : topEntities.entrySet()) {
             var key = entry.getKey();
@@ -105,14 +99,15 @@ public class TileGlyphRenderSystem extends System {
             var pos = position.getPosition();
             int relativeZ = topEntityZ.get(key) - cameraZ;
 
+            if (!m_vision.isVisible(pos.x, pos.y)) {
+                continue;
+            }
+
             var glyph = entity.get(TileGlyph.class);
             if (glyph == null) {
                 continue;
             }
 
-            // Choose glyph based on relative Z-level
-            // relativeZ == -1: floor level, use floor glyph
-            // relativeZ == 0: current level, use entity's normal glyph
             TileGlyph renderGlyph = (relativeZ == -1) ? m_floorGlyph : glyph;
 
             var font = renderGlyph.font();
@@ -132,6 +127,25 @@ public class TileGlyphRenderSystem extends System {
                 pos.y + renderGlyph.dy()
             );
         }
+
+        for (var ghostEntry : m_vision.getGhostEntries(cameraZ).entrySet()) {
+            var parts = ghostEntry.getKey().split(",");
+            int gx = Integer.parseInt(parts[0]);
+            int gy = Integer.parseInt(parts[1]);
+
+            if (m_vision.isVisible(gx, gy)) {
+                continue;
+            }
+
+            var ghost = ghostEntry.getValue();
+            ghost.font.setColor(
+                ghost.color.r * GHOST_BRIGHTNESS,
+                ghost.color.g * GHOST_BRIGHTNESS,
+                ghost.color.b * GHOST_BRIGHTNESS,
+                ghost.color.a
+            );
+            ghost.font.draw(m_spriteBatch, "" + ghost.glyph, gx + ghost.dx, gy + ghost.dy);
+        }
         m_spriteBatch.end();
 
         if (!m_debugGrid) {
@@ -148,34 +162,5 @@ public class TileGlyphRenderSystem extends System {
         }
 
         m_shapeRenderer.end();
-    }
-
-    private int getCameraZ() {
-        // Get the camera Z-level from the player's current body
-        var playerResults = m_gameContext.ecs().findEntitiesWith(Player.class, CameraComp.class);
-        var playerResult = playerResults.stream().findFirst();
-        if (playerResult.isEmpty()) {
-            return 1;
-        }
-
-        var playerEntity = playerResult.get().entity();
-        var socketPlug = playerEntity.get(SocketPlug.class);
-
-        // If socketed, use body's position for camera Z
-        if (socketPlug != null && socketPlug.currentBody != null) {
-            var bodyPos = socketPlug.currentBody.get(Position.class);
-            if (bodyPos != null) {
-                return bodyPos.getPosition().z;
-            }
-        }
-
-        // Use player's position for camera Z
-        var playerPos = playerEntity.get(Position.class);
-        if (playerPos != null) {
-            return playerPos.getPosition().z;
-        }
-
-        // Default to Z=1 if no position found
-        return 1;
     }
 }

@@ -1,14 +1,20 @@
 package ca.kieve.ssss.system;
 
+import dev.dominion.ecs.api.Dominion;
 import dev.dominion.ecs.api.Entity;
 
 import ca.kieve.ssss.component.Descriptor;
 import ca.kieve.ssss.component.Player;
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.component.SocketPlug;
+import ca.kieve.ssss.context.EventContext;
 import ca.kieve.ssss.context.ExamineContext;
 import ca.kieve.ssss.context.GameContext;
+import ca.kieve.ssss.context.GhostEntity;
 import ca.kieve.ssss.context.InputContext;
+import ca.kieve.ssss.context.LogContext;
+import ca.kieve.ssss.context.PositionContext;
+import ca.kieve.ssss.context.VisionContext;
 import ca.kieve.ssss.event.ExamineEvent;
 import ca.kieve.ssss.util.DescriptionComposer;
 import ca.kieve.ssss.util.Vec3i;
@@ -46,21 +52,37 @@ public class ExamineSystem extends System {
         }
     }
 
+    private enum ExamineMode {
+        VISIBLE,
+        MEMORY,
+        UNKNOWN
+    }
+
+    private final Dominion m_ecs;
     private final InputContext m_input;
+    private final EventContext m_events;
+    private final ExamineContext m_examine;
+    private final VisionContext m_vision;
+    private final PositionContext m_pos;
+    private final LogContext m_log;
 
     public ExamineSystem(GameContext gameContext) {
         super(gameContext);
+        m_ecs = gameContext.ecs();
         m_input = gameContext.input();
+        m_events = gameContext.events();
+        m_examine = gameContext.examine();
+        m_vision = gameContext.vision();
+        m_pos = gameContext.pos();
+        m_log = gameContext.log();
     }
 
     @Override
     public void awaitingUserInput() {
-        var examineContext = m_gameContext.examine();
-
         if (m_input.consume(EXAMINE)) {
             if (m_input.isMode(MODE_EXAMINE)) {
                 m_input.setMode(MODE_NORMAL);
-                examineContext.exit();
+                m_examine.exit();
                 return;
             }
 
@@ -71,7 +93,7 @@ public class ExamineSystem extends System {
             var playerPos = getPlayerPosition();
             if (playerPos != null) {
                 m_input.setMode(MODE_EXAMINE);
-                examineContext.enter(playerPos);
+                m_examine.enter(playerPos);
             }
             return;
         }
@@ -82,43 +104,43 @@ public class ExamineSystem extends System {
 
         if (m_input.consume(CANCEL)) {
             m_input.setMode(MODE_NORMAL);
-            examineContext.exit();
+            m_examine.exit();
             return;
         }
 
-        if (examineContext.isSelectionMode()) {
-            int itemCount = getExamineItems(examineContext).size();
+        if (m_examine.isSelectionMode()) {
+            int itemCount = getItemCount();
             if (m_input.consume(UP)) {
-                examineContext.decrementSelectedIndex(itemCount);
+                m_examine.decrementSelectedIndex(itemCount);
             }
             if (m_input.consume(DOWN)) {
-                examineContext.incrementSelectedIndex(itemCount);
+                m_examine.incrementSelectedIndex(itemCount);
             }
             m_input.consume(LEFT);
             m_input.consume(RIGHT);
         } else {
             if (m_input.consume(UP)) {
-                examineContext.moveCrosshair(NORTH);
+                m_examine.moveCrosshair(NORTH);
             }
             if (m_input.consume(LEFT)) {
-                examineContext.moveCrosshair(WEST);
+                m_examine.moveCrosshair(WEST);
             }
             if (m_input.consume(DOWN)) {
-                examineContext.moveCrosshair(SOUTH);
+                m_examine.moveCrosshair(SOUTH);
             }
             if (m_input.consume(RIGHT)) {
-                examineContext.moveCrosshair(EAST);
+                m_examine.moveCrosshair(EAST);
             }
         }
 
         if (m_input.consume(CONFIRM)) {
-            handleEnterKey(examineContext);
+            handleEnterKey();
         }
     }
 
     @Override
     public void postTick() {
-        var examineEvents = m_gameContext.events().getEvents(ExamineEvent.class);
+        var examineEvents = m_events.getEvents(ExamineEvent.class);
         for (var event : examineEvents) {
             var entity = event.target();
             var descriptor = entity.get(Descriptor.class);
@@ -128,27 +150,51 @@ public class ExamineSystem extends System {
         }
     }
 
-    private List<ExamineItem> getExamineItems(ExamineContext examineContext) {
+    private ExamineMode getMode() {
+        var crosshair = m_examine.getCrosshairPos();
+        if (m_vision.isVisible(crosshair.x, crosshair.y)) {
+            return ExamineMode.VISIBLE;
+        }
+        if (m_vision.isExplored(crosshair.x, crosshair.y, crosshair.z)) {
+            return ExamineMode.MEMORY;
+        }
+        return ExamineMode.UNKNOWN;
+    }
+
+    private int getItemCount() {
+        return switch (getMode()) {
+        case VISIBLE -> getExamineItems().size();
+        case MEMORY -> getGhostItems().size();
+        case UNKNOWN -> 0;
+        };
+    }
+
+    private List<GhostEntity> getGhostItems() {
+        var crosshair = m_examine.getCrosshairPos();
+        var ghost = m_vision.getGhost(crosshair.x, crosshair.y, crosshair.z);
+        if (ghost == null) {
+            return List.of();
+        }
+        return ghost.entities;
+    }
+
+    private List<ExamineItem> getExamineItems() {
         var items = new ArrayList<ExamineItem>();
 
-        var mainPos = examineContext.getCrosshairPos();
-        var mainEntities = ExamineContext.sortEntitiesByZIndex(m_gameContext.pos().getAt(mainPos));
+        var mainPos = m_examine.getCrosshairPos();
+        var mainEntities = ExamineContext.sortEntitiesByZIndex(m_pos.getAt(mainPos));
         for (var entity : mainEntities) {
             items.add(new ExamineItem(entity, MAIN));
         }
 
-        var ceilingPos = examineContext.getCeilingPos();
-        var ceilingEntities = ExamineContext.sortEntitiesByZIndex(
-            m_gameContext.pos().getAt(ceilingPos)
-        );
+        var ceilingPos = m_examine.getCeilingPos();
+        var ceilingEntities = ExamineContext.sortEntitiesByZIndex(m_pos.getAt(ceilingPos));
         for (var entity : ceilingEntities) {
             items.add(new ExamineItem(entity, CEILING));
         }
 
-        var floorPos = examineContext.getFloorPos();
-        var floorEntities = ExamineContext.sortEntitiesByZIndex(
-            m_gameContext.pos().getAt(floorPos)
-        );
+        var floorPos = m_examine.getFloorPos();
+        var floorEntities = ExamineContext.sortEntitiesByZIndex(m_pos.getAt(floorPos));
         for (var entity : floorEntities) {
             items.add(new ExamineItem(entity, FLOOR));
         }
@@ -156,27 +202,64 @@ public class ExamineSystem extends System {
         return items;
     }
 
-    private void handleEnterKey(ExamineContext examineContext) {
-        var items = getExamineItems(examineContext);
+    private void handleEnterKey() {
+        switch (getMode()) {
+        case VISIBLE -> handleVisibleEnterKey();
+        case MEMORY -> handleGhostEnterKey();
+        case UNKNOWN -> logNothingHere();
+        }
+    }
+
+    private void handleVisibleEnterKey() {
+        var items = getExamineItems();
 
         if (items.isEmpty()) {
+            logNothingHere();
             return;
         }
 
-        if (!examineContext.isSelectionMode()) {
+        if (!m_examine.isSelectionMode()) {
             if (items.size() == 1) {
                 logExamineItem(items.getFirst());
             } else {
-                examineContext.enterSelectionMode();
+                m_examine.enterSelectionMode();
             }
             return;
         }
 
-        int selectedIndex = examineContext.getSelectedIndex();
+        int selectedIndex = m_examine.getSelectedIndex();
         if (selectedIndex < items.size()) {
             logExamineItem(items.get(selectedIndex));
-            examineContext.exitSelectionMode();
+            m_examine.exitSelectionMode();
         }
+    }
+
+    private void handleGhostEnterKey() {
+        var items = getGhostItems();
+
+        if (items.isEmpty()) {
+            logNothingHere();
+            return;
+        }
+
+        if (!m_examine.isSelectionMode()) {
+            if (items.size() == 1) {
+                logGhostItem(items.getFirst());
+            } else {
+                m_examine.enterSelectionMode();
+            }
+            return;
+        }
+
+        int selectedIndex = m_examine.getSelectedIndex();
+        if (selectedIndex < items.size()) {
+            logGhostItem(items.get(selectedIndex));
+            m_examine.exitSelectionMode();
+        }
+    }
+
+    private void logNothingHere() {
+        m_log.log("You don't see anything there.");
     }
 
     private void logExamineItem(ExamineItem item) {
@@ -185,15 +268,24 @@ public class ExamineSystem extends System {
         case FLOOR -> "[Floor] ";
         case CEILING -> "[Ceiling] ";
         };
-        m_gameContext.log().log(prefix + DescriptionComposer.compose(item.entity()));
+        m_log.log(prefix + DescriptionComposer.compose(item.entity()));
+    }
+
+    private void logGhostItem(GhostEntity ghost) {
+        String prefix = switch (ghost.type()) {
+        case MAIN -> "[Memory] ";
+        case FLOOR -> "[Memory] [Floor] ";
+        case CEILING -> "[Memory] [Ceiling] ";
+        };
+        m_log.log(prefix + ghost.composedDescription());
     }
 
     private void logDescription(Entity entity) {
-        m_gameContext.log().log(DescriptionComposer.compose(entity));
+        m_log.log(DescriptionComposer.compose(entity));
     }
 
     private Vec3i getPlayerPosition() {
-        var playerResults = m_gameContext.ecs().findEntitiesWith(Player.class, Position.class);
+        var playerResults = m_ecs.findEntitiesWith(Player.class, Position.class);
         var playerResult = playerResults.stream().findFirst();
         if (playerResult.isEmpty()) {
             return null;

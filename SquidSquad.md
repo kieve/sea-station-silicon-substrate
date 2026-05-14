@@ -16,10 +16,23 @@ All modules depend on `squidcore`, which in turn depends on:
 
 Some modules (squidglyph, squidsmooth, squidpress, squidstore) depend on libGDX, but many modules can be used without libGDX for server-side code or testing.
 
+## Detailed API Documentation
+
+For comprehensive API docs with full method signatures and usage examples, see:
+
+- **[squidgrid — FOV](docs/squidgrid-fov.md)**: Field of View calculation (`FOV.reuseFOV()`, resistance maps, Radius types)
+- **[squidgrid — Coord & Region](docs/squidgrid-coord.md)**: Immutable pooled coordinates, region set operations
+- **[squidgrid — Line of Sight](docs/squidgrid-los.md)**: BresenhamLine, OrthoLine, LineTools
+- **[squidgrid — Lighting](docs/squidgrid-lighting.md)**: Radiance, LightSource, LightingManager
+- **[squidgrid — Noise](docs/squidgrid-noise.md)**: Perlin, Simplex, Cellular, Foam noise generation
+
 ## Modules Currently Used
 
 This project uses the following SquidSquad modules:
 - **squidcore**: Core utilities
+- **squidgrid**: 2D grid utilities (FOV, Coord, Region, line drawing, noise)
+- **squidpath**: Pathfinding (DijkstraMap)
+- **squidplace**: Map generation utilities
 - **squidsmooth**: Animation and interpolation
 
 ## Module Reference
@@ -304,11 +317,14 @@ Coord moved = c.translate(1, 0);  // c unchanged
 
 ## Notes for This Project
 
-Currently, the project includes squidcore and squidsmooth but hasn't utilized their features yet. Potential uses include:
+The project actively uses:
+- **squidgrid**: `FOV.reuseFOV()` for fog of war, `Coord` for pathfinding coordinates
+- **squidpath**: `DijkstraMap` for AI pathfinding (see `PathingContext`)
 
+Potential future uses:
 1. **squidsmooth**: Add smooth movement animations to entities using VectorGlider
 2. **squidcore**: Use Dice for damage calculations, String utilities for text processing
-3. **Future additions**: Consider squidgrid for FOV calculations, squidplace for procedural dungeon generation, squidpath for AI pathfinding
+3. **squidplace**: Procedural dungeon generation
 
 ## ProGuard Configuration (Desktop/iOS)
 
