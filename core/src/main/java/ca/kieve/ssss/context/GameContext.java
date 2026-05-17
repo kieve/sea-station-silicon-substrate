@@ -38,9 +38,14 @@ public record GameContext(
     List<System> renderSystems,
     GameEngine gameEngine,
     MapGenerator mapGenerator,
-    PerfClock perf
+    PerfClock perf,
+    DebugContext debug
 ) {
     public GameContext(ContentRegistry content, MapGenerator mapGenerator) {
+        this(content, mapGenerator, false);
+    }
+
+    public GameContext(ContentRegistry content, MapGenerator mapGenerator, boolean headless) {
         this(
             new Random(),
             Dominion.create(),
@@ -58,13 +63,14 @@ public record GameContext(
             new PathingContext(),
             new VisionContext(),
             content,
-            new EntityFactory(content),
+            new EntityFactory(content, headless),
             content.getBlockTypeFactory(),
             new ArrayList<>(),
             new ArrayList<>(),
             new GameEngine(),
             mapGenerator,
-            new PerfClock()
+            new PerfClock(),
+            new DebugContext()
         );
     }
 }

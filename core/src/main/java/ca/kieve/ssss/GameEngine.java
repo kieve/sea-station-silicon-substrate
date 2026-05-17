@@ -11,6 +11,7 @@ import ca.kieve.ssss.input.InputActionController;
 import ca.kieve.ssss.system.AttackSystem;
 import ca.kieve.ssss.system.CameraSystem;
 import ca.kieve.ssss.system.ClockSystem;
+import ca.kieve.ssss.system.DebugMenuSystem;
 import ca.kieve.ssss.system.DebugRectRenderSystem;
 import ca.kieve.ssss.system.EjectSystem;
 import ca.kieve.ssss.system.EventSystem;
@@ -35,8 +36,6 @@ import ca.kieve.ssss.world.WorldModel;
 import java.util.List;
 
 public class GameEngine {
-    public static final boolean DEBUG_GRID = false;
-
     private GameContext m_gameContext;
     private WorldModel m_worldModel;
 
@@ -55,6 +54,7 @@ public class GameEngine {
         m_gameContext.updateSystems().addAll(
             List.of(
                 new ClockSystem(m_gameContext),
+                new DebugMenuSystem(m_gameContext),
                 new InteractSystem(m_gameContext),
                 new OpenSystem(m_gameContext),
                 new SocketSystem(m_gameContext),
@@ -90,7 +90,6 @@ public class GameEngine {
             spriteBatch,
             shapeRenderer
         );
-        tileGlyphRenderSystem.setDebugGrid(DEBUG_GRID);
 
         var debugRectRenderSystem = new DebugRectRenderSystem(m_gameContext, shapeRenderer);
 

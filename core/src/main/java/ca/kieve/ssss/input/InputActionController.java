@@ -5,12 +5,15 @@ import com.badlogic.gdx.InputAdapter;
 
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.context.InputContext;
+import ca.kieve.ssss.context.RenderContext;
 
 public class InputActionController extends InputAdapter {
     private final InputContext m_inputContext;
+    private final RenderContext m_renderContext;
 
     public InputActionController(GameContext gameContext) {
         m_inputContext = gameContext.input();
+        m_renderContext = gameContext.render();
     }
 
     @Override
@@ -51,6 +54,25 @@ public class InputActionController extends InputAdapter {
             Gdx.app.exit();
             return true;
         }
+
+        KeyState debugMenuState = m_inputContext.getKeyState(InputAction.DEBUG_MENU);
+        if (debugMenuState != null && debugMenuState.keycode == keycode) {
+            toggleDebugMenu();
+            return true;
+        }
         return false;
+    }
+
+    private void toggleDebugMenu() {
+        if (m_inputContext.isMode(InputContext.Mode.MODE_DEBUG_MENU)) {
+            m_inputContext.setMode(InputContext.Mode.MODE_NORMAL);
+            m_renderContext.markDirty();
+            return;
+        }
+        if (!m_inputContext.isMode(InputContext.Mode.MODE_NORMAL)) {
+            return;
+        }
+        m_inputContext.setMode(InputContext.Mode.MODE_DEBUG_MENU);
+        m_renderContext.markDirty();
     }
 }

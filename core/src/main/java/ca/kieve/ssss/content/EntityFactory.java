@@ -16,8 +16,12 @@ public class EntityFactory {
     private final GlyphFactory m_glyphFactory;
 
     public EntityFactory(ContentRegistry registry) {
+        this(registry, false);
+    }
+
+    public EntityFactory(ContentRegistry registry, boolean headless) {
         m_registry = registry;
-        m_glyphFactory = new GlyphFactory(registry);
+        m_glyphFactory = new GlyphFactory(registry, headless);
     }
 
     public Entity createEntity(GameContext context, String entityId, Vec3i pos) {

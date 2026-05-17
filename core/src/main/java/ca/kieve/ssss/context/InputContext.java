@@ -16,6 +16,7 @@ import java.util.Set;
 
 import static ca.kieve.ssss.input.InputAction.CANCEL;
 import static ca.kieve.ssss.input.InputAction.CONFIRM;
+import static ca.kieve.ssss.input.InputAction.DEBUG_MENU;
 import static ca.kieve.ssss.input.InputAction.DOWN;
 import static ca.kieve.ssss.input.InputAction.EJECT;
 import static ca.kieve.ssss.input.InputAction.EXAMINE;
@@ -31,7 +32,8 @@ public class InputContext {
         MODE_NORMAL(DIRECTIONS, List.of(EXAMINE, EJECT, INTERACT, WAIT)),
         MODE_EXAMINE(DIRECTIONS, PROMPT, List.of(EXAMINE)),
         MODE_EJECT(DIRECTIONS, List.of(EJECT)),
-        MODE_INTERACT(DIRECTIONS, PROMPT, List.of(INTERACT, WAIT));
+        MODE_INTERACT(DIRECTIONS, PROMPT, List.of(INTERACT, WAIT)),
+        MODE_DEBUG_MENU(DIRECTIONS, PROMPT);
 
         private final Set<InputAction> m_activeActions;
 
@@ -55,7 +57,7 @@ public class InputContext {
 
     private static final Set<InputAction> DIRECTIONS = EnumSet.of(UP, DOWN, LEFT, RIGHT);
     private static final Set<InputAction> PROMPT = EnumSet.of(CANCEL, CONFIRM);
-    private static final Set<InputAction> GLOBAL_ACTIONS = EnumSet.of(EXIT_GAME);
+    private static final Set<InputAction> GLOBAL_ACTIONS = EnumSet.of(EXIT_GAME, DEBUG_MENU);
 
     private final Map<InputAction, Integer> m_keyMappings = new EnumMap<>(InputAction.class);
     private final Map<InputAction, KeyState> m_keyStates = new EnumMap<>(InputAction.class);
@@ -80,6 +82,7 @@ public class InputContext {
         setKeyMapping(INTERACT, Keys.F);
         setKeyMapping(WAIT, Keys.SPACE);
         setKeyMapping(EXIT_GAME, Keys.ESCAPE);
+        setKeyMapping(DEBUG_MENU, Keys.GRAVE);
     }
 
     public void setKeyMapping(InputAction action, int keycode) {

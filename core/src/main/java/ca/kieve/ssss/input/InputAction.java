@@ -11,5 +11,6 @@ public enum InputAction {
     EJECT,
     INTERACT,
     WAIT,
-    EXIT_GAME
+    EXIT_GAME,
+    DEBUG_MENU
 }

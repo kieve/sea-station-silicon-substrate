@@ -30,6 +30,9 @@ public class CameraSystem extends System {
         } else {
             camera.setPosition(withResult.comp2());
         }
+        if (camera.gdx() == null) {
+            return;
+        }
         camera.gdx().update();
     }
 }

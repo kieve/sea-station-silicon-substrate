@@ -12,6 +12,7 @@ import ca.kieve.ssss.component.Hidden;
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.component.RenderingHint;
 import ca.kieve.ssss.component.TileGlyph;
+import ca.kieve.ssss.context.DebugContext;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.context.VisionContext;
 
@@ -23,11 +24,10 @@ public class TileGlyphRenderSystem extends System {
 
     private final Dominion m_ecs;
     private final VisionContext m_vision;
+    private final DebugContext m_debug;
     private final SpriteBatch m_spriteBatch;
     private final ShapeRenderer m_shapeRenderer;
     private final TileGlyph m_floorGlyph;
-
-    private boolean m_debugGrid = false;
 
     public TileGlyphRenderSystem(
         GameContext gameContext,
@@ -37,14 +37,11 @@ public class TileGlyphRenderSystem extends System {
         super(gameContext);
         m_ecs = gameContext.ecs();
         m_vision = gameContext.vision();
+        m_debug = gameContext.debug();
         m_spriteBatch = spriteBatch;
         m_shapeRenderer = shapeRenderer;
         var floorGlyphId = gameContext.mapGenerator().getFloorGlyphId();
         m_floorGlyph = gameContext.entityFactory().getGlyphFactory().getGlyph(floorGlyphId);
-    }
-
-    public void setDebugGrid(boolean debugGrid) {
-        m_debugGrid = debugGrid;
     }
 
     @Override
@@ -148,7 +145,7 @@ public class TileGlyphRenderSystem extends System {
         }
         m_spriteBatch.end();
 
-        if (!m_debugGrid) {
+        if (!m_debug.isDebugGrid()) {
             return;
         }
         m_shapeRenderer.begin(ShapeType.Line);

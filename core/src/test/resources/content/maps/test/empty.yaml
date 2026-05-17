@@ -1,0 +1,57 @@
+---
+# Default empty test map: 9x9 open floor, walls on the border, player at the
+# center (4, 4, 1). Use this when a test does not care about world geometry
+# and just needs a valid GameContext with a controllable player.
+#
+# If a test needs specific geometry (a wall in a known spot, multiple rooms,
+# etc.), define a dedicated map fixture alongside this one — do NOT extend
+# this file.
+blocks:
+  air:
+    bpId: air
+    layoutChar: a
+  floor:
+    bpId: block_wood
+    layoutChar: b
+  wall:
+    bpId: block_stone
+    layoutChar: d
+layers:
+  "0": |
+    bbbbbbbbb
+    bbbbbbbbb
+    bbbbbbbbb
+    bbbbbbbbb
+    bbbbbbbbb
+    bbbbbbbbb
+    bbbbbbbbb
+    bbbbbbbbb
+    bbbbbbbbb
+  "1": |
+    ddddddddd
+    daaaaaaad
+    daaaaaaad
+    daaaaaaad
+    daaaaaaad
+    daaaaaaad
+    daaaaaaad
+    daaaaaaad
+    ddddddddd
+  "2": |
+    ddddddddd
+    ddddddddd
+    ddddddddd
+    ddddddddd
+    ddddddddd
+    ddddddddd
+    ddddddddd
+    ddddddddd
+    ddddddddd
+floorGlyph: interpunct
+entities:
+- id: player
+  components:
+  - type: Position
+    x: 4
+    "y": 4
+    z: 1

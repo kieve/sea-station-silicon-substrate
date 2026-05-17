@@ -1,0 +1,35 @@
+---
+# Purpose-built fixture for WasdSystem blocked-by-Solid testing.
+# Player at (1, 1, 1) is surrounded by stone walls on every side — any
+# directional input must leave the player in place.
+blocks:
+  air:
+    bpId: air
+    layoutChar: a
+  floor:
+    bpId: block_wood
+    layoutChar: b
+  wall:
+    bpId: block_stone
+    layoutChar: d
+layers:
+  "0": |
+    bbb
+    bbb
+    bbb
+  "1": |
+    ddd
+    dad
+    ddd
+  "2": |
+    ddd
+    ddd
+    ddd
+floorGlyph: interpunct
+entities:
+- id: player
+  components:
+  - type: Position
+    x: 1
+    "y": 1
+    z: 1

@@ -18,11 +18,19 @@ public class GlyphFactory {
     private static final String EXTRA_CHARS = "█";
 
     private final ContentRegistry m_registry;
+    private final boolean m_headless;
     private final Map<String, BitmapFont> m_fontCache = new HashMap<>();
     private final Map<String, TileGlyph> m_glyphCache = new HashMap<>();
 
     public GlyphFactory(ContentRegistry registry) {
+        this(registry, false);
+    }
+
+    // Headless mode: skip FreeType font loading. TileGlyph.font() will be null;
+    // safe because render systems are not constructed in headless contexts.
+    public GlyphFactory(ContentRegistry registry, boolean headless) {
         m_registry = registry;
+        m_headless = headless;
     }
 
     public TileGlyph getGlyph(String id) {
@@ -32,7 +40,7 @@ public class GlyphFactory {
         }
 
         GlyphDefinition def = m_registry.getGlyphDefinition(id);
-        BitmapFont font = getFont(def.font());
+        BitmapFont font = m_headless ? null : getFont(def.font());
 
         float dx = def.offsetX() / TILE_SIZE;
         float dy = 1 + def.offsetY() / TILE_SIZE;
