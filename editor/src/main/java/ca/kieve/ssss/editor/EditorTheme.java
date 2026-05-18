@@ -12,6 +12,9 @@ public final class EditorTheme {
     public static final Color INFINITE_GRID_COLOR = Color.gray(0.28);
     public static final Color ENTITY_MARKER_COLOR = Color.LIMEGREEN;
     public static final Color SELECTION_COLOR = Color.CYAN;
+    public static final Color SUBMAP_GHOST_COLOR = Color.web("#ff9b3a");
+    public static final Color CONNECTOR_COLOR = Color.web("#ffd24a");
+    public static final Color OVERLAP_WARNING_COLOR = Color.web("#ff4040");
 
     public static final String STYLE_OVERLAY = "editor-overlay";
 

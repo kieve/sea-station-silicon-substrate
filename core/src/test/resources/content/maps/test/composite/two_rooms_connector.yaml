@@ -1,0 +1,30 @@
+---
+# Pure-composition: leaf_a placed by offset, leaf_b aligned via connector.
+# Parent connector "dock" at (5,1,0) faces east; leaf_b's "west_edge" at
+# (0,1,0). Resolver: child_offset = (5,1,0) + (1,0,0) - (0,1,0) = (6,0,0).
+# Final world is 9x3x1 (leaf_a 0..3, gap 3..6, leaf_b 6..9).
+floorGlyph: interpunct
+connectors:
+- id: dock
+  components:
+  - type: Connector
+    direction: east
+  - type: Position
+    x: 5
+    "y": 1
+    z: 0
+submaps:
+- id: a
+  components:
+  - type: Submap
+    ref: ./leaf_a.yaml
+  - type: Position
+    x: 0
+    "y": 0
+    z: 0
+- id: b
+  components:
+  - type: Submap
+    ref: ./leaf_b.yaml
+    localConnector: dock
+    remoteConnector: west_edge

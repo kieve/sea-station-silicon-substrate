@@ -1,0 +1,20 @@
+---
+# 2x3x2 leaf — entire east column is air at z=1. Used with
+# leaf_open_west.yaml to exercise multi-portal connectivity.
+blocks:
+  air:
+    bpId: air
+    layoutChar: a
+  wall:
+    bpId: block_steel
+    layoutChar: '#'
+layers:
+  "0": |
+    ##
+    ##
+    ##
+  "1": |
+    #a
+    #a
+    #a
+floorGlyph: interpunct

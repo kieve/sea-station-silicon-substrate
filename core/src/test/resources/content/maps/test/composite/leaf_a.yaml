@@ -1,0 +1,20 @@
+---
+# 3x3x1 floor leaf. Connector at the east edge midpoint.
+blocks:
+  floor:
+    bpId: block_wood
+    layoutChar: f
+layers:
+  "0": |
+    fff
+    fff
+    fff
+floorGlyph: interpunct
+connectors:
+- id: east_edge
+  components:
+  - type: Connector
+  - type: Position
+    x: 2
+    "y": 1
+    z: 0

@@ -1,0 +1,49 @@
+---
+# Maintenance sub — connects to damaged_sub via its west_door. Deliberately
+# different layout style from damaged_sub: smaller, square-ish, and uses a
+# different layoutChar palette ('.', 'f', '#' vs damaged_sub's 'a','b','d').
+# Single 5×5 interior, walls on all sides except the west door at (0,3,1).
+blocks:
+  air:
+    bpId: air
+    layoutChar: '.'
+  floor:
+    bpId: block_steel
+    layoutChar: f
+  wall:
+    bpId: block_steel
+    layoutChar: '#'
+layers:
+  "0": |
+    #######
+    #fffff#
+    #fffff#
+    ffffff#
+    #fffff#
+    #fffff#
+    #######
+  "1": |
+    #######
+    #.....#
+    #.....#
+    ......#
+    #.....#
+    #.....#
+    #######
+  "2": |
+    #######
+    #######
+    #######
+    #######
+    #######
+    #######
+    #######
+floorGlyph: interpunct
+connectors:
+- id: west_door
+  components:
+  - type: Connector
+  - type: Position
+    x: 0
+    "y": 3
+    z: 1

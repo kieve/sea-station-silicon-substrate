@@ -195,8 +195,16 @@ public class EditorFxApp extends Application {
             return;
         }
 
-        var mapDef = new MapDefinition(Map.of(), Map.of("0", "\n"), "interpunct", List.of());
+        var mapDef = new MapDefinition(
+            Map.of(),
+            Map.of("0", "\n"),
+            "interpunct",
+            List.of(),
+            List.of(),
+            List.of()
+        );
         var mapViewPanel = new MapViewPanel(mapDef, null);
+        mapViewPanel.setOnOpenSubmap(this::loadMapFileFromSubmap);
         openMapTab(mapViewPanel, "untitled");
     }
 
@@ -421,6 +429,7 @@ public class EditorFxApp extends Application {
         try {
             MapDefinition mapDef = MapLoader.load(file);
             var mapViewPanel = new MapViewPanel(mapDef, file);
+            mapViewPanel.setOnOpenSubmap(this::loadMapFileFromSubmap);
             openMapTab(mapViewPanel, file.getName());
         } catch (IOException ex) {
             var alert = new Alert(Alert.AlertType.ERROR);
@@ -428,6 +437,13 @@ public class EditorFxApp extends Application {
             alert.setContentText(ex.getMessage());
             alert.showAndWait();
         }
+    }
+
+    private void loadMapFileFromSubmap(File file) {
+        if (!checkUnsavedChanges()) {
+            return;
+        }
+        loadMapFile(file);
     }
 
     private void openMapTab(MapViewPanel mapViewPanel, String displayName) {

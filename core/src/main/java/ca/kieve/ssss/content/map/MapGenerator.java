@@ -1,7 +1,9 @@
-package ca.kieve.ssss.world;
+package ca.kieve.ssss.content.map;
 
 import ca.kieve.ssss.content.BlockTypeFactory;
 import ca.kieve.ssss.content.MapEntityDefinition;
+import ca.kieve.ssss.context.MapContext;
+import ca.kieve.ssss.context.WorldContext;
 
 import java.util.List;
 
@@ -12,12 +14,16 @@ import java.util.List;
  */
 public interface MapGenerator {
     /**
-     * Generates a WorldModel containing the 3D block data.
-     *
-     * @param blockTypeFactory Factory for querying block type properties
-     * @return The generated world model
+     * Generates the world geometry: populates {@code worldContext} with
+     * a fresh {@link ca.kieve.ssss.world.WorldModel} and registers every
+     * produced {@link ca.kieve.ssss.world.MapRegion} into
+     * {@code mapContext}.
      */
-    WorldModel generate(BlockTypeFactory blockTypeFactory);
+    void generate(
+        BlockTypeFactory blockTypeFactory,
+        MapContext mapContext,
+        WorldContext worldContext
+    );
 
     /**
      * Returns the glyph ID to use for rendering floor tiles.

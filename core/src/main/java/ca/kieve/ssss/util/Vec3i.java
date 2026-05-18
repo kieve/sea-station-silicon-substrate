@@ -14,6 +14,8 @@ public class Vec3i {
     public static final Vec3i SOUTH = new Vec3i(0, -1, 0);
     public static final Vec3i EAST = new Vec3i(1, 0, 0);
     public static final Vec3i WEST = new Vec3i(-1, 0, 0);
+    public static final Vec3i UP = new Vec3i(0, 0, 1);
+    public static final Vec3i DOWN = new Vec3i(0, 0, -1);
 
     public static final Vec3i NORTHEAST = new Vec3i(1, 1, 0);
     public static final Vec3i NORTHWEST = new Vec3i(-1, 1, 0);
@@ -59,6 +61,18 @@ public class Vec3i {
     public Vec3i add(Vec3i val) {
         var result = copy();
         result.addMut(val);
+        return result;
+    }
+
+    public void subtractMut(Vec3i val) {
+        this.x -= val.x;
+        this.y -= val.y;
+        this.z -= val.z;
+    }
+
+    public Vec3i subtract(Vec3i val) {
+        var result = copy();
+        result.subtractMut(val);
         return result;
     }
 
@@ -134,10 +148,6 @@ public class Vec3i {
 
     @Override
     public String toString() {
-        return "Vec3i{"
-            + "x=" + x
-            + ", y=" + y
-            + ", z=" + z
-            + '}';
+        return "(" + x + ", " + y + ", " + z + ")";
     }
 }

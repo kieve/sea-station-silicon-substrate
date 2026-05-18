@@ -1,0 +1,31 @@
+---
+# Composes damaged_sub (the home base) with maintenance_sub to its east.
+# Connector-mode placement: sub_complex's own east_door (at world (11,5,1),
+# matching damaged_sub's east_door since damaged_sub is at offset (0,0,0))
+# faces east. maintenance_sub's west_door is at its local (0,3,1), so it
+# lands at world (11,5,1) + (1,0,0) - (0,3,1) = (12,2,0). No overlap.
+floorGlyph: interpunct
+connectors:
+- id: east_door
+  components:
+  - type: Connector
+    direction: east
+  - type: Position
+    x: 11
+    "y": 5
+    z: 1
+submaps:
+- id: damaged_sub_root
+  components:
+  - type: Submap
+    ref: ./damaged_sub.yaml
+  - type: Position
+    x: 0
+    "y": 0
+    z: 0
+- id: maintenance_east
+  components:
+  - type: Submap
+    ref: ./maintenance_sub.yaml
+    localConnector: east_door
+    remoteConnector: west_door

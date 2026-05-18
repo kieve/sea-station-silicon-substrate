@@ -1,0 +1,22 @@
+---
+# room_east at (0,0,0), room_west at (4,0,0). Interior air on each side
+# at y=1; the boundary at x=3/x=4 is a single open portal at (3,1,1) ↔
+# (4,1,1). Used for "walk toward portal then step across" tests.
+floorGlyph: interpunct
+submaps:
+- id: east
+  components:
+  - type: Submap
+    ref: ./room_east.yaml
+  - type: Position
+    x: 0
+    "y": 0
+    z: 0
+- id: west
+  components:
+  - type: Submap
+    ref: ./room_west.yaml
+  - type: Position
+    x: 4
+    "y": 0
+    z: 0

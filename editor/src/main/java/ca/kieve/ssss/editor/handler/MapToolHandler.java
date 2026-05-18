@@ -17,7 +17,8 @@ public class MapToolHandler {
             int row,
             int col,
             String blockName,
-            List<SelectedCellOverlay.EntityInfo> entityInfos
+            List<SelectedCellOverlay.EntityInfo> entityInfos,
+            List<SelectedCellOverlay.ConnectorInfo> connectorInfos
         );
         void onEntityMoved(EditorEntity entity, int row, int col);
         void onSelectionCleared();
@@ -122,7 +123,20 @@ public class MapToolHandler {
             }
         }
 
-        m_viewUpdater.onCellSelected(row, col, blockName, entityInfos);
+        var connectorInfos = new ArrayList<SelectedCellOverlay.ConnectorInfo>();
+        var connectors = m_model.getConnectors();
+        for (int i = 0; i < connectors.size(); i++) {
+            var c = connectors.get(i);
+            var cPos = c.getEntityPos();
+            if (cPos != null
+                && cPos.x() == col
+                && cPos.y() == row
+                && cPos.z() == currentZ) {
+                connectorInfos.add(new SelectedCellOverlay.ConnectorInfo(i, c.id()));
+            }
+        }
+
+        m_viewUpdater.onCellSelected(row, col, blockName, entityInfos, connectorInfos);
         m_panCanvas.requestRedraw();
     }
 
@@ -134,11 +148,23 @@ public class MapToolHandler {
         if (entityIndex < 0 || entityIndex >= entities.size()) {
             return;
         }
+        moveTargetTo(entities.get(entityIndex), mouseX, mouseY, currentZ);
+    }
+
+    /**
+     * Moves any {@link EditorEntity} (regular entity, connector, or
+     * submap) to the cell under the cursor. Skips silently if the entity
+     * has no Position component, since a moving-without-position is
+     * meaningless (a connector-mode submap, e.g.).
+     */
+    public void moveTargetTo(EditorEntity entity, double mouseX, double mouseY, int currentZ) {
+        if (entity.getPositionComponent() == null) {
+            return;
+        }
         var cell = mouseToGrid(mouseX, mouseY);
         int row = cell.row();
         int col = cell.col();
 
-        var entity = entities.get(entityIndex);
         entity.movePosition(col, row, currentZ);
         m_model.markModified();
 

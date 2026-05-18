@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class Vec3iTest {
     @Test
@@ -106,14 +105,10 @@ class Vec3iTest {
     }
 
     @Test
-    void toStringIncludesComponentValues() {
+    void toStringIsCompactTuple() {
         Vec3i vec = new Vec3i(7, 8, 9);
 
-        String text = vec.toString();
-
-        assertTrue(text.contains("x=7"));
-        assertTrue(text.contains("y=8"));
-        assertTrue(text.contains("z=9"));
+        assertEquals("(7, 8, 9)", vec.toString());
     }
 
     @Test

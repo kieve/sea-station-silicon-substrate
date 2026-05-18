@@ -1,0 +1,21 @@
+---
+# 4x3x2 room with interior air at z=1 row y=1 and east edge open.
+# Used together with room_west.yaml for cross-region pathing tests
+# that exercise "walk toward portal across multiple cells."
+blocks:
+  air:
+    bpId: air
+    layoutChar: a
+  wall:
+    bpId: block_steel
+    layoutChar: '#'
+layers:
+  "0": |
+    ####
+    ####
+    ####
+  "1": |
+    ####
+    #aaa
+    ####
+floorGlyph: interpunct

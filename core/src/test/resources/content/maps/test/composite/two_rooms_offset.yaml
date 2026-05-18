@@ -1,0 +1,21 @@
+---
+# Pure-composition: two leafs placed by explicit offset.
+# leaf_a at (0,0,0), leaf_b at (3,0,0). Final world is 6x3x1.
+floorGlyph: interpunct
+submaps:
+- id: a
+  components:
+  - type: Submap
+    ref: ./leaf_a.yaml
+  - type: Position
+    x: 0
+    "y": 0
+    z: 0
+- id: b
+  components:
+  - type: Submap
+    ref: ./leaf_b.yaml
+  - type: Position
+    x: 3
+    "y": 0
+    z: 0

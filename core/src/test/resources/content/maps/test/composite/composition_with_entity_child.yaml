@@ -1,0 +1,13 @@
+---
+# Places leaf_with_entity at offset (5,0,0) so the entity's local (1,1,0)
+# becomes world (6,1,0) — exercises Position component translation.
+floorGlyph: interpunct
+submaps:
+- id: leaf
+  components:
+  - type: Submap
+    ref: ./leaf_with_entity.yaml
+  - type: Position
+    x: 5
+    "y": 0
+    z: 0

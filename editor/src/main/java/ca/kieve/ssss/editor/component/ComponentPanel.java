@@ -265,6 +265,14 @@ public class ComponentPanel
         }
     }
 
+    /**
+     * Sentinel {@code componentType} value for the inline-entity id row.
+     * The property-edit callback receives this when the user changes the
+     * entity's id (which lives on {@link EditorEntity#id()}, not on a
+     * component) so the caller can route the edit accordingly.
+     */
+    public static final String INLINE_ID_MARKER = "<id>";
+
     private static final String STYLE_COMPONENT_PANEL = "component-panel";
     private static final String STYLE_ROW_REPLACED = "component-row-replaced";
     private static final String STYLE_ROW_ADDED = "component-row-added";
@@ -404,6 +412,48 @@ public class ComponentPanel
             ComponentDefinition baseComp = baseMap.get(typeName);
             var item = buildComponentItem(comp, status, baseComp, true);
             if (expanded.contains(typeName)) {
+                item.setExpanded(true);
+            }
+            root.getChildren().add(item);
+        }
+
+        setRoot(null);
+        setRoot(root);
+    }
+
+    /**
+     * Show a list of components without resolving against a base
+     * blueprint — used for connectors and submaps, whose ids are
+     * instance names, not registry references. The entity's id is
+     * shown as an editable first row; component rows follow. All rows
+     * are editable; none carry override status (there is nothing to
+     * compare against).
+     */
+    public void showInlineEntity(String entityId, List<ComponentDefinition> components) {
+        commitPendingEdit();
+        m_baseEntityId = null;
+
+        Set<String> expanded = getExpandedNames();
+
+        var root = new TreeItem<>(new ComponentRow("", ""));
+        root.getChildren().add(
+            new TreeItem<>(
+                new ComponentRow(
+                    "id",
+                    entityId == null ? "" : entityId,
+                    OverrideStatus.NONE,
+                    null,
+                    INLINE_ID_MARKER,
+                    "id",
+                    true,
+                    entityId,
+                    String.class
+                )
+            )
+        );
+        for (ComponentDefinition comp : components) {
+            var item = buildComponentItem(comp, OverrideStatus.NONE, null, true);
+            if (expanded.contains(comp.type().getSimpleName())) {
                 item.setExpanded(true);
             }
             root.getChildren().add(item);

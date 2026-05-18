@@ -8,6 +8,7 @@ import ca.kieve.ssss.component.Size;
 import ca.kieve.ssss.component.Solid;
 import ca.kieve.ssss.component.Velocity;
 import ca.kieve.ssss.context.GameContext;
+import ca.kieve.ssss.context.PositionContext;
 
 /**
  * Utility methods for checking solid entities at positions.
@@ -29,10 +30,52 @@ public final class SolidUtil {
     }
 
     /**
+     * Central per-entity blocking predicate: returns true when
+     * {@code entity}'s presence at its cell would block a mover of size
+     * {@code moverSize}. Combines all currently-known blocking conditions:
+     * <ul>
+     *   <li>Solid (respecting {@link Openable#isOpen}).</li>
+     *   <li>{@link MaxPassableSize} restrictions, when a mover size is
+     *       provided.</li>
+     * </ul>
+     *
+     * <p>Pathing grid construction and per-cell passability checks both
+     * route through here, so future condition-based passability rules
+     * (faction allies, key-bearing movers, etc.) can extend this single
+     * method instead of being scattered across systems.
+     *
+     * @param entity entity occupying the cell under consideration
+     * @param moverSize size of the mover the grid is being built for; {@code null} means "any
+     *                  mover" — size restrictions don't apply
+     */
+    public static boolean blocksMover(Entity entity, Size moverSize) {
+        if (isSolid(entity)) {
+            return true;
+        }
+        if (moverSize != null) {
+            MaxPassableSize restriction = entity.get(MaxPassableSize.class);
+            if (restriction != null
+                && !canSizePassThrough(moverSize, restriction.maxSize())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Checks if there is any solid entity at the given position.
      */
     public static boolean hasSolid(GameContext context, Vec3i pos) {
-        for (Entity entity : context.pos().getAt(pos)) {
+        return hasSolid(context.pos(), pos);
+    }
+
+    /**
+     * Checks if there is any solid entity at the given position. Variant
+     * that takes {@link PositionContext} directly for callers that don't
+     * hold a full {@link GameContext}.
+     */
+    public static boolean hasSolid(PositionContext positions, Vec3i pos) {
+        for (Entity entity : positions.getAt(pos)) {
             if (isSolid(entity)) {
                 return true;
             }
@@ -74,7 +117,15 @@ public final class SolidUtil {
      * - A MaxPassableSize entity where the mover's size exceeds maxSize
      */
     public static boolean isBlockedFor(GameContext context, Vec3i pos, Entity mover) {
-        for (Entity entity : context.pos().getAt(pos)) {
+        return isBlockedFor(context.pos(), pos, mover);
+    }
+
+    /**
+     * {@link PositionContext}-only variant of
+     * {@link #isBlockedFor(GameContext, Vec3i, Entity)}.
+     */
+    public static boolean isBlockedFor(PositionContext positions, Vec3i pos, Entity mover) {
+        for (Entity entity : positions.getAt(pos)) {
             if (isSolid(entity)) {
                 return true;
             }

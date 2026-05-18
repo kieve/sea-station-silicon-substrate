@@ -1,12 +1,17 @@
 package ca.kieve.ssss.world;
 
 import ca.kieve.ssss.context.GameContext;
-import ca.kieve.ssss.util.Vec3i;
+import ca.kieve.ssss.util.LambdaCount;
 
 /**
- * Converts a WorldModel into ECS entities.
- * Only creates entities for solid blocks that are adjacent to air (exposed blocks).
- * This optimization prevents creating entities for blocks that will never be visible.
+ * Converts a {@link WorldModel} into ECS entities.
+ *
+ * <p>One entity per non-air cell, no exposure optimisation: future mining
+ * / excavation will turn previously-buried blocks into the player's
+ * neighbourhood, and a "create on reveal" path is fragile compared to
+ * just keeping the entities around from the start. Memory cost scales
+ * with total solid cells, which is small at current map sizes; revisit
+ * if maps grow past 100k cells.
  */
 public class WorldEntityFactory {
     private WorldEntityFactory() {
@@ -14,78 +19,25 @@ public class WorldEntityFactory {
     }
 
     /**
-     * Creates ECS entities for all exposed blocks in the world model.
-     * An exposed block is a solid block that has at least one adjacent air block.
+     * Creates an ECS entity for every non-air cell in
+     * {@code context.world()}.
      *
-     * @param context The game context
-     * @param world The world model to convert
-     * @return The number of block entities created
+     * @return the number of block entities created
      */
-    public static int createEntities(GameContext context, WorldModel world) {
-        int count = 0;
+    public static int createEntities(GameContext context) {
+        WorldModel world = context.world().getModel();
         var factory = context.entityFactory();
+        LambdaCount count = new LambdaCount();
 
-        for (int x = 0; x < world.getWidth(); x++) {
-            for (int y = 0; y < world.getHeight(); y++) {
-                for (int z = 0; z < world.getDepth(); z++) {
-                    String blockTypeId = world.getBlock(x, y, z);
-
-                    // Skip air blocks - they don't have entities
-                    if (world.isAir(x, y, z)) {
-                        continue;
-                    }
-
-                    // Only create entities for exposed blocks (adjacent to air)
-                    if (!world.isExposed(x, y, z)) {
-                        continue;
-                    }
-
-                    var pos = new Vec3i(x, y, z);
-                    var entity = factory.createEntity(context, blockTypeId, pos);
-
-                    if (entity != null) {
-                        count++;
-                    }
-                }
+        world.box().forEach(cell -> {
+            if (world.isAir(cell)) {
+                return;
             }
-        }
-
-        return count;
-    }
-
-    /**
-     * Creates ECS entities for all solid blocks in the world model,
-     * regardless of whether they are exposed.
-     * Use this for debugging or small maps where optimization isn't needed.
-     *
-     * @param context The game context
-     * @param world The world model to convert
-     * @return The number of block entities created
-     */
-    public static int createAllEntities(GameContext context, WorldModel world) {
-        int count = 0;
-        var factory = context.entityFactory();
-
-        for (int x = 0; x < world.getWidth(); x++) {
-            for (int y = 0; y < world.getHeight(); y++) {
-                for (int z = 0; z < world.getDepth(); z++) {
-                    String blockTypeId = world.getBlock(x, y, z);
-
-                    // Skip air blocks
-                    if (world.isAir(x, y, z)) {
-                        continue;
-                    }
-
-                    var pos = new Vec3i(x, y, z);
-                    var entity = factory.createEntity(context, blockTypeId, pos);
-
-                    if (entity != null) {
-                        count++;
-                    }
-                }
+            var entity = factory.createEntity(context, world.getBlock(cell), cell);
+            if (entity != null) {
+                count.increment();
             }
-        }
-
-        return count;
+        });
+        return count.get();
     }
 }

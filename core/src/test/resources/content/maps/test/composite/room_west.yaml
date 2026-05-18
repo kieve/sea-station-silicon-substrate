@@ -1,0 +1,19 @@
+---
+# Mirror of room_east: west edge open, interior air at y=1.
+blocks:
+  air:
+    bpId: air
+    layoutChar: a
+  wall:
+    bpId: block_steel
+    layoutChar: '#'
+layers:
+  "0": |
+    ####
+    ####
+    ####
+  "1": |
+    ####
+    aaa#
+    ####
+floorGlyph: interpunct

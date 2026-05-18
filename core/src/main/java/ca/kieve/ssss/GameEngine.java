@@ -31,17 +31,19 @@ import ca.kieve.ssss.system.VisionSystem;
 import ca.kieve.ssss.system.WasdSystem;
 import ca.kieve.ssss.system.ai.AiControllerSystem;
 import ca.kieve.ssss.world.WorldEntityFactory;
-import ca.kieve.ssss.world.WorldModel;
 
 import java.util.List;
 
 public class GameEngine {
     private GameContext m_gameContext;
-    private WorldModel m_worldModel;
 
     public void init(GameContext gameContext) {
         m_gameContext = gameContext;
-        m_worldModel = gameContext.mapGenerator().generate(gameContext.blockTypes());
+        gameContext.mapGenerator().generate(
+            gameContext.blockTypes(),
+            gameContext.map(),
+            gameContext.world()
+        );
 
         var inputActionController = new InputActionController(gameContext);
         gameContext.inputMux().addProcessor(0, inputActionController);
@@ -111,7 +113,7 @@ public class GameEngine {
 
     private void createEntities() {
         // Create block entities from the world model
-        WorldEntityFactory.createEntities(m_gameContext, m_worldModel);
+        WorldEntityFactory.createEntities(m_gameContext);
 
         // Create map entities from YAML definitions
         var factory = m_gameContext.entityFactory();

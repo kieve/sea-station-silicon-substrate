@@ -1,9 +1,13 @@
 package ca.kieve.ssss.editor.component;
 
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.control.Separator;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.VBox;
@@ -55,6 +59,7 @@ public class EditorToolBar extends VBox {
         """.formatted(STYLE_EDITOR_TOOL_BAR, STYLE_TOOL_BUTTON);
 
     private final ObjectProperty<Tool> m_activeTool = new SimpleObjectProperty<>(Tool.SELECT);
+    private final BooleanProperty m_composedMode = new SimpleBooleanProperty(false);
 
     public EditorToolBar() {
         getStylesheets().add(inline(CSS));
@@ -102,7 +107,26 @@ public class EditorToolBar extends VBox {
             paintBtn.setSelected(true);
         });
 
-        getChildren().addAll(selectBtn, moveBtn, paintBtn);
+        var separator = new Separator();
+        VBox.setMargin(separator, new Insets(4, 2, 4, 2));
+
+        var composedBtn = new EditorToggleButton();
+        composedBtn.setGraphic(createComposedIcon());
+        composedBtn.getStyleClass().add(STYLE_TOOL_BUTTON);
+        composedBtn.setTooltip(new Tooltip("Composed view (read-only)"));
+        composedBtn.setFocusTraversable(false);
+        composedBtn.selectedProperty().bindBidirectional(m_composedMode);
+
+        getChildren().addAll(selectBtn, moveBtn, paintBtn, separator, composedBtn);
+    }
+
+    private static Node createComposedIcon() {
+        // Two overlapping squares to suggest layered composition
+        var back = new Rectangle(2, 2, 9, 9);
+        back.setStyle("-fx-fill: transparent;" + ICON_STROKE_STYLE);
+        var front = new Rectangle(6, 6, 9, 9);
+        front.setStyle("-fx-fill: transparent;" + ICON_STROKE_STYLE);
+        return new Group(back, front);
     }
 
     private static Node createSelectIcon() {
@@ -178,5 +202,13 @@ public class EditorToolBar extends VBox {
 
     public Tool getActiveTool() {
         return m_activeTool.get();
+    }
+
+    public BooleanProperty composedModeProperty() {
+        return m_composedMode;
+    }
+
+    public boolean isComposedMode() {
+        return m_composedMode.get();
     }
 }

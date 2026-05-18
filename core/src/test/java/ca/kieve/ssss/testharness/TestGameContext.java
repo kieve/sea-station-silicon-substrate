@@ -2,9 +2,9 @@ package ca.kieve.ssss.testharness;
 
 import ca.kieve.ssss.content.ContentLoader;
 import ca.kieve.ssss.content.ContentRegistry;
+import ca.kieve.ssss.content.map.MapGenerator;
+import ca.kieve.ssss.content.map.YamlMapGenerator;
 import ca.kieve.ssss.context.GameContext;
-import ca.kieve.ssss.world.MapGenerator;
-import ca.kieve.ssss.world.StaticTestMapGenerator;
 
 /**
  * Constructs a {@link GameContext} for tests.
@@ -42,7 +42,7 @@ public final class TestGameContext {
         HeadlessGdxBootstrap.ensureInitialized();
 
         ContentRegistry content = new ContentLoader().loadAll();
-        MapGenerator mapGenerator = new StaticTestMapGenerator(mapFilename);
+        MapGenerator mapGenerator = new YamlMapGenerator(mapFilename);
         GameContext context = new GameContext(content, mapGenerator, true);
 
         context.gameEngine().init(context);

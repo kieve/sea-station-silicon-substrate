@@ -1,0 +1,21 @@
+---
+# Places leaf_a twice with overlapping footprints and no allowOverlap.
+# Loader must reject this with an overlap-conflict diagnostic.
+floorGlyph: interpunct
+submaps:
+- id: first
+  components:
+  - type: Submap
+    ref: ./leaf_a.yaml
+  - type: Position
+    x: 0
+    "y": 0
+    z: 0
+- id: second
+  components:
+  - type: Submap
+    ref: ./leaf_a.yaml
+  - type: Position
+    x: 1
+    "y": 0
+    z: 0

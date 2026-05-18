@@ -1,0 +1,22 @@
+---
+# leaf_open_east at (0,0,0), leaf_open_west at (2,0,0). Their boundary
+# columns at world x=1/x=2 are fully air at z=1, producing 3 portals
+# (one per y). Used to test closest-portal selection.
+floorGlyph: interpunct
+submaps:
+- id: east
+  components:
+  - type: Submap
+    ref: ./leaf_open_east.yaml
+  - type: Position
+    x: 0
+    "y": 0
+    z: 0
+- id: west
+  components:
+  - type: Submap
+    ref: ./leaf_open_west.yaml
+  - type: Position
+    x: 2
+    "y": 0
+    z: 0

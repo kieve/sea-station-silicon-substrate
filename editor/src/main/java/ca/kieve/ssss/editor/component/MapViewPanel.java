@@ -17,24 +17,34 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
+import ca.kieve.ssss.component.Position;
+import ca.kieve.ssss.component.Submap;
+import ca.kieve.ssss.content.ComponentDefinition;
 import ca.kieve.ssss.content.MapDefinition;
+import ca.kieve.ssss.content.MapEntityDefinition;
 import ca.kieve.ssss.editor.BlockColorResolver;
 import ca.kieve.ssss.editor.EditorContext;
 import ca.kieve.ssss.editor.EditorTheme;
+import ca.kieve.ssss.editor.MapLoader;
 import ca.kieve.ssss.editor.MapSaver;
 import ca.kieve.ssss.editor.handler.EntityOverrideHandler;
 import ca.kieve.ssss.editor.handler.MapToolHandler;
+import ca.kieve.ssss.editor.model.ComposedWorld;
 import ca.kieve.ssss.editor.model.EditorEntity;
 import ca.kieve.ssss.editor.model.EditorMapModel;
+import ca.kieve.ssss.editor.model.SparseGrid;
 import ca.kieve.ssss.editor.ui.PanCanvas;
 import ca.kieve.ssss.editor.ui.fx.EditorButton;
 import ca.kieve.ssss.editor.util.DialogUtil;
 import ca.kieve.ssss.editor.util.MapPathUtil;
+import ca.kieve.ssss.util.Vec3i;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeSet;
+import java.util.function.Consumer;
 
 public class MapViewPanel extends BorderPane {
     private static final int OVERLAY_SPACING = 4;
@@ -57,6 +67,8 @@ public class MapViewPanel extends BorderPane {
     private final TabPane m_tabPane;
     private final Tab m_blocksTab;
     private final Tab m_entitiesTab;
+    private final Tab m_submapsTab;
+    private final SubmapPanel m_submapPanel;
     private final Button m_addOverrideBtn;
     private final EntityOverrideHandler m_overrideHandler;
     private final MapToolHandler m_toolHandler;
@@ -64,6 +76,9 @@ public class MapViewPanel extends BorderPane {
     private int m_currentZ;
     private String m_selectedBlockName;
     private Integer m_selectedEntityIndex;
+    private Integer m_selectedConnectorIndex;
+    private Integer m_selectedSubmapIndex;
+    private ComposedWorld m_composedWorld;
 
     public MapViewPanel(MapDefinition mapDef, File mapFile) {
         m_model = EditorMapModel.fromDefinition(mapDef, mapFile);
@@ -86,6 +101,8 @@ public class MapViewPanel extends BorderPane {
         m_blockPanel.setOnSelectionChanged(name -> {
             m_componentPanel.commitPendingEdit();
             m_selectedBlockName = name;
+            m_selectedConnectorIndex = null;
+            m_selectedSubmapIndex = null;
             var blockDef = m_model.getBlocks().get(name);
             if (blockDef != null) {
                 m_componentPanel.showEntity(blockDef.bpId());
@@ -97,6 +114,8 @@ public class MapViewPanel extends BorderPane {
 
         m_entityPanel.setOnSelectionChanged(index -> {
             m_componentPanel.commitPendingEdit();
+            m_selectedConnectorIndex = null;
+            m_selectedSubmapIndex = null;
             m_selectedEntityIndex = index;
             List<EditorEntity> entities = m_model.getEntities();
             if (index >= entities.size()) {
@@ -134,10 +153,11 @@ public class MapViewPanel extends BorderPane {
                 int row,
                 int col,
                 String blockName,
-                List<SelectedCellOverlay.EntityInfo> entityInfos
+                List<SelectedCellOverlay.EntityInfo> entityInfos,
+                List<SelectedCellOverlay.ConnectorInfo> connectorInfos
             ) {
                 m_selectedCellOverlay.setHeaderText("Cell: (" + col + ", " + row + ")");
-                m_selectedCellOverlay.update(blockName, entityInfos);
+                m_selectedCellOverlay.update(blockName, entityInfos, connectorInfos);
             }
 
             @Override
@@ -154,14 +174,7 @@ public class MapViewPanel extends BorderPane {
             }
         });
 
-        m_componentPanel.setOnPropertyEdited(
-            (compType, propName, newValue) -> m_overrideHandler.onPropertyEdited(
-                m_selectedEntityIndex,
-                compType,
-                propName,
-                newValue
-            )
-        );
+        m_componentPanel.setOnPropertyEdited(this::routePropertyEdit);
         var overrideCallback = new ComponentPanel.ComponentOverrideCallback() {
             @Override
             public void onOverrideAdded(String componentTypeName) {
@@ -203,14 +216,18 @@ public class MapViewPanel extends BorderPane {
             break;
         }
 
-        // TabPane for blocks and entities
+        // TabPane for blocks, entities, and submaps
         m_blocksTab = new Tab("Blocks", m_blockPanel);
         m_blocksTab.setClosable(false);
 
         m_entitiesTab = new Tab("Entities", m_entityPanel);
         m_entitiesTab.setClosable(false);
 
-        m_tabPane = new TabPane(m_blocksTab, m_entitiesTab);
+        m_submapPanel = new SubmapPanel(m_model);
+        m_submapsTab = new Tab("Submaps", m_submapPanel);
+        m_submapsTab.setClosable(false);
+
+        m_tabPane = new TabPane(m_blocksTab, m_entitiesTab, m_submapsTab);
         m_tabPane.getSelectionModel()
             .selectedItemProperty()
             .addListener((obs, oldTab, newTab) -> onTabChanged(newTab));
@@ -221,13 +238,20 @@ public class MapViewPanel extends BorderPane {
 
         // Floating Z-level overlay
         m_zOverlay = new ZLevelOverlay();
-        var zLevels = m_model.getZLevels();
-        int defaultZ = zLevels.contains(1)
-            ? 1
-            : zLevels.getFirst();
+        // Build the composed world up-front so the dropdown can union
+        // local + submap layers from the start.
+        m_composedWorld = buildComposedWorld();
+        var zLevels = allZLevels();
+        int defaultZ = zLevels.contains(1) ? 1 : zLevels.getFirst();
         m_zOverlay.setZLevels(zLevels, defaultZ);
         m_zOverlay.setOnZLevelRequested(this::setZLevel);
         m_zOverlay.setOnAddLayerRequested(this::addZLayer);
+
+        // Hook the SubmapPanel callbacks now that all dependencies
+        // (renderer, z-overlay, canvas) are initialized.
+        m_submapPanel.setOnChanged(this::refreshAfterSubmapChange);
+        m_submapPanel.setOnConnectorSelected(idx -> selectConnector(idx));
+        m_submapPanel.setOnSubmapSelected(idx -> selectSubmap(idx));
 
         // Floating zoom overlay
         m_zoomOverlay = new ZoomOverlay();
@@ -237,21 +261,31 @@ public class MapViewPanel extends BorderPane {
         // Floating selection overlay
         m_selectedCellOverlay = new SelectedCellOverlay();
         m_selectedCellOverlay.setOnItemSelected(item -> {
-            if (item.type() != SelectedCellOverlay.ItemType.BLOCK) {
-                m_tabPane.getSelectionModel()
-                    .select(m_entitiesTab);
+            switch (item.type()) {
+            case ENTITY -> {
+                m_tabPane.getSelectionModel().select(m_entitiesTab);
                 m_entityPanel.selectEntity(item.index());
-                return;
             }
-            m_selectedEntityIndex = null;
-            m_tabPane.getSelectionModel()
-                .select(m_blocksTab);
-            m_blockPanel.selectBlock(item.label());
+            case CONNECTOR -> {
+                m_tabPane.getSelectionModel().select(m_submapsTab);
+                m_submapPanel.selectConnector(item.index());
+            }
+            case BLOCK -> {
+                clearSectionSelection();
+                m_tabPane.getSelectionModel().select(m_blocksTab);
+                m_blockPanel.selectBlock(item.label());
+            }
+            }
         });
 
         // Clear selection when switching to PAINT
         m_toolBar.activeToolProperty().addListener(
             (obs, oldTool, newTool) -> onToolChanged(newTool)
+        );
+
+        // Composed-mode toggle from the toolbar
+        m_toolBar.composedModeProperty().addListener(
+            (obs, oldVal, newVal) -> setComposedMode(newVal)
         );
 
         // Center: canvas with floating overlays
@@ -308,6 +342,208 @@ public class MapViewPanel extends BorderPane {
 
     public EditorMapModel getModel() {
         return m_model;
+    }
+
+    /**
+     * Routes a SubmapPanel connector selection: tracks which inline
+     * entity is active so property edits route correctly, displays its
+     * components in the {@link ComponentPanel}, and focuses the canvas
+     * on the connector's cell.
+     */
+    private void selectConnector(int index) {
+        if (index < 0 || index >= m_model.getConnectors().size()) {
+            return;
+        }
+        m_selectedEntityIndex = null;
+        m_selectedSubmapIndex = null;
+        m_selectedConnectorIndex = index;
+        EditorEntity c = m_model.getConnectors().get(index);
+        m_componentPanel.showInlineEntity(c.id(), c.components());
+        setAddOverrideVisible(false);
+        focusOnInlineEntity(c);
+    }
+
+    private void selectSubmap(int index) {
+        if (index < 0 || index >= m_model.getSubmaps().size()) {
+            return;
+        }
+        m_selectedEntityIndex = null;
+        m_selectedConnectorIndex = null;
+        m_selectedSubmapIndex = index;
+        EditorEntity s = m_model.getSubmaps().get(index);
+        m_componentPanel.showInlineEntity(s.id(), s.components());
+        setAddOverrideVisible(false);
+        focusOnInlineEntity(s);
+    }
+
+    private void clearSectionSelection() {
+        m_selectedEntityIndex = null;
+        m_selectedConnectorIndex = null;
+        m_selectedSubmapIndex = null;
+    }
+
+    private void focusOnInlineEntity(EditorEntity entity) {
+        var pos = entity.getEntityPos();
+        if (pos == null) {
+            return;
+        }
+        if (pos.z() != m_currentZ && allZLevels().contains(pos.z())) {
+            setZLevel(pos.z());
+        }
+        m_renderer.setSelectedCell(pos.y(), pos.x());
+        m_panCanvas.requestRedraw();
+    }
+
+    /**
+     * Returns whichever {@link EditorEntity} the move tool should target,
+     * given the current selection. Order of precedence: connector,
+     * submap, entity. Returns {@code null} if no movable target is
+     * selected.
+     */
+    private EditorEntity currentMoveTarget() {
+        if (m_selectedConnectorIndex != null) {
+            int idx = m_selectedConnectorIndex;
+            var list = m_model.getConnectors();
+            return idx >= 0 && idx < list.size() ? list.get(idx) : null;
+        }
+        if (m_selectedSubmapIndex != null) {
+            int idx = m_selectedSubmapIndex;
+            var list = m_model.getSubmaps();
+            return idx >= 0 && idx < list.size() ? list.get(idx) : null;
+        }
+        if (m_selectedEntityIndex != null) {
+            int idx = m_selectedEntityIndex;
+            var list = m_model.getEntities();
+            return idx >= 0 && idx < list.size() ? list.get(idx) : null;
+        }
+        return null;
+    }
+
+    /**
+     * After moving a connector or submap, refresh the inline view + all
+     * overlays. For regular entities, the existing
+     * {@link MapToolHandler.ViewUpdater#onEntityMoved} hook already
+     * handles redraw.
+     */
+    private void onMoveCompleted(EditorEntity target) {
+        if (m_selectedConnectorIndex == null && m_selectedSubmapIndex == null) {
+            return;
+        }
+        m_componentPanel.showInlineEntity(target.id(), target.components());
+        m_submapPanel.refreshLists();
+        refreshAfterSubmapChange();
+    }
+
+    private void refreshAfterSubmapChange() {
+        m_composedWorld = buildComposedWorld();
+        m_renderer.setSubmapOverlay(buildSubmapOverlay());
+        m_renderer.setSubmapCells(submapCellsAt(m_currentZ));
+        m_renderer.setSubmapEntities(submapEntityMarkersAt(m_currentZ));
+        m_renderer.setConnectorMarkers(buildConnectorMarkers(m_currentZ));
+        m_renderer.setSubmapConnectorMarkers(buildSubmapConnectorMarkers(m_currentZ));
+        if (m_renderer.isComposedMode()) {
+            m_renderer.setComposedWorld(m_composedWorld, m_currentZ);
+        }
+        m_zOverlay.setZLevels(allZLevels(), m_currentZ);
+        m_panCanvas.requestRedraw();
+    }
+
+    /**
+     * Dispatches a {@link ComponentPanel} property edit to the
+     * appropriate target list based on what's currently selected.
+     * Entities go through the {@link EntityOverrideHandler}; connectors
+     * and submaps are simple in-place property updates (no blueprint
+     * merging, no override status).
+     */
+    private void routePropertyEdit(String componentType, String propertyName, String newValue) {
+        if (m_selectedConnectorIndex != null) {
+            applyInlineEdit(
+                m_model.getConnectors(),
+                m_selectedConnectorIndex,
+                componentType,
+                propertyName,
+                newValue,
+                SubmapPanel.SectionKind.CONNECTOR
+            );
+            return;
+        }
+        if (m_selectedSubmapIndex != null) {
+            applyInlineEdit(
+                m_model.getSubmaps(),
+                m_selectedSubmapIndex,
+                componentType,
+                propertyName,
+                newValue,
+                SubmapPanel.SectionKind.SUBMAP
+            );
+            return;
+        }
+        m_overrideHandler.onPropertyEdited(
+            m_selectedEntityIndex,
+            componentType,
+            propertyName,
+            newValue
+        );
+    }
+
+    private void applyInlineEdit(
+        List<EditorEntity> list,
+        int index,
+        String componentType,
+        String propertyName,
+        String newValue,
+        SubmapPanel.SectionKind kind
+    ) {
+        if (index < 0 || index >= list.size()) {
+            return;
+        }
+        EditorEntity entity = list.get(index);
+
+        if (ComponentPanel.INLINE_ID_MARKER.equals(componentType)) {
+            // The id row is a virtual property on the entity itself,
+            // not on any component. setId is a no-op for empty input
+            // (an id is required), so trim and bail out if blank.
+            String trimmed = newValue == null ? "" : newValue.trim();
+            if (trimmed.isEmpty() || trimmed.equals(entity.id())) {
+                return;
+            }
+            entity.setId(trimmed);
+        } else {
+            ComponentDefinition comp = null;
+            for (ComponentDefinition c : entity.components()) {
+                if (c.type().getSimpleName().equals(componentType)) {
+                    comp = c;
+                    break;
+                }
+            }
+            if (comp == null) {
+                return;
+            }
+            Object oldValue = comp.properties().get(propertyName);
+            Object parsed = EntityOverrideHandler.parseValue(newValue, oldValue);
+            comp.setProperty(propertyName, parsed);
+        }
+        m_model.markModified();
+
+        m_componentPanel.showInlineEntity(entity.id(), entity.components());
+        // Refresh all dependent overlays — the edit may have moved the
+        // connector/submap, changed direction, etc.
+        m_submapPanel.refreshLists();
+        m_composedWorld = buildComposedWorld();
+        m_renderer.setSubmapOverlay(buildSubmapOverlay());
+        m_renderer.setSubmapCells(submapCellsAt(m_currentZ));
+        m_renderer.setSubmapEntities(submapEntityMarkersAt(m_currentZ));
+        m_renderer.setConnectorMarkers(buildConnectorMarkers(m_currentZ));
+        m_renderer.setSubmapConnectorMarkers(buildSubmapConnectorMarkers(m_currentZ));
+        if (m_renderer.isComposedMode()) {
+            m_renderer.setComposedWorld(m_composedWorld, m_currentZ);
+        }
+        m_zOverlay.setZLevels(allZLevels(), m_currentZ);
+        m_panCanvas.requestRedraw();
+    }
+
+    public void setOnOpenSubmap(Consumer<File> handler) {
+        m_submapPanel.setOnOpenReferenced(handler);
     }
 
     public int getCurrentZ() {
@@ -402,6 +638,9 @@ public class MapViewPanel extends BorderPane {
         if (e.getButton() == MouseButton.MIDDLE) {
             return;
         }
+        if (m_renderer.isComposedMode()) {
+            return;
+        }
 
         var tool = m_toolBar.getActiveTool();
 
@@ -418,7 +657,11 @@ public class MapViewPanel extends BorderPane {
 
         if (tool == EditorToolBar.Tool.MOVE) {
             if (e.getButton() == MouseButton.PRIMARY) {
-                m_toolHandler.moveEntityTo(e.getX(), e.getY(), m_selectedEntityIndex, m_currentZ);
+                EditorEntity target = currentMoveTarget();
+                if (target != null) {
+                    m_toolHandler.moveTargetTo(target, e.getX(), e.getY(), m_currentZ);
+                    onMoveCompleted(target);
+                }
                 e.consume();
             } else if (e.getButton() == MouseButton.SECONDARY) {
                 m_toolHandler.clearSelection();
@@ -481,9 +724,21 @@ public class MapViewPanel extends BorderPane {
                 entityInfos.add(new SelectedCellOverlay.EntityInfo(i, e.id()));
             }
         }
+        var connectorInfos = new ArrayList<SelectedCellOverlay.ConnectorInfo>();
+        var connectors = m_model.getConnectors();
+        for (int i = 0; i < connectors.size(); i++) {
+            var c = connectors.get(i);
+            var cPos = c.getEntityPos();
+            if (cPos != null
+                && cPos.x() == col
+                && cPos.y() == row
+                && cPos.z() == m_currentZ) {
+                connectorInfos.add(new SelectedCellOverlay.ConnectorInfo(i, c.id()));
+            }
+        }
 
         m_selectedCellOverlay.setHeaderText("Cell: (" + col + ", " + row + ")");
-        m_selectedCellOverlay.update(blockName, entityInfos);
+        m_selectedCellOverlay.update(blockName, entityInfos, connectorInfos);
         if (m_selectedEntityIndex != null) {
             m_selectedCellOverlay.selectEntity(m_selectedEntityIndex);
         }
@@ -499,8 +754,7 @@ public class MapViewPanel extends BorderPane {
 
     private void addZLayer() {
         int newZ = m_model.addZLayer();
-        var zLevels = m_model.getZLevels();
-        m_zOverlay.setZLevels(zLevels, newZ);
+        m_zOverlay.setZLevels(allZLevels(), newZ);
         loadLayer(newZ);
     }
 
@@ -510,11 +764,15 @@ public class MapViewPanel extends BorderPane {
     }
 
     private void stepZ(int direction) {
-        var zLevels = m_model.getZLevels();
+        var zLevels = allZLevels();
         if (zLevels.isEmpty()) {
             return;
         }
         int idx = zLevels.indexOf(m_currentZ);
+        if (idx < 0) {
+            setZLevel(zLevels.getFirst());
+            return;
+        }
         int next = (idx + direction + zLevels.size())
             % zLevels.size();
         setZLevel(zLevels.get(next));
@@ -522,6 +780,11 @@ public class MapViewPanel extends BorderPane {
 
     private void loadLayer(int zLevel) {
         var cells = m_model.getLayer(zLevel);
+        if (cells == null) {
+            // No local layer at this z — show an empty editable canvas
+            // so submap-only z-levels still render via the ghost overlay.
+            cells = new SparseGrid();
+        }
         if (!m_renderer.loadLayer(cells)) {
             return;
         }
@@ -530,10 +793,223 @@ public class MapViewPanel extends BorderPane {
         // selection so entities can be moved between layers.
         m_renderer.setSelectedCell(null, null);
         m_selectedCellOverlay.clear();
+
+        m_composedWorld = buildComposedWorld();
         m_renderer.loadEntities(buildEntityMarkers(zLevel));
+        m_renderer.setSubmapCells(submapCellsAt(zLevel));
+        m_renderer.setSubmapEntities(submapEntityMarkersAt(zLevel));
+        m_renderer.setSubmapOverlay(buildSubmapOverlay());
+        m_renderer.setConnectorMarkers(buildConnectorMarkers(zLevel));
+        if (m_renderer.isComposedMode()) {
+            m_renderer.setComposedWorld(m_composedWorld, zLevel);
+        }
         m_currentZ = zLevel;
         m_infoBar.setDimensions(m_renderer.getMapCols(), m_renderer.getMapRows());
         m_panCanvas.requestRedraw();
+    }
+
+    public ComposedWorld buildComposedWorld() {
+        MapDefinition def = m_model.toDefinition();
+        return ComposedWorld.flatten(def, m_model.getFile());
+    }
+
+    /**
+     * Union of local layers and every submap's declared z-levels (translated
+     * into the parent's world Z). Ascending order. Drives the Z-level
+     * dropdown so a composition-only file still shows its submaps' layers.
+     */
+    private List<Integer> allZLevels() {
+        var set = new TreeSet<>(m_model.getZLevels());
+        if (m_composedWorld != null) {
+            set.addAll(m_composedWorld.allDeclaredZLevels());
+        }
+        if (set.isEmpty()) {
+            set.add(0);
+        }
+        return List.copyOf(set);
+    }
+
+    private List<ComposedWorld.Cell> submapCellsAt(int z) {
+        if (m_composedWorld == null) {
+            return List.of();
+        }
+        var out = new ArrayList<ComposedWorld.Cell>();
+        for (ComposedWorld.Cell cell : m_composedWorld.cellsAt(z)) {
+            if (!ComposedWorld.ROOT_REGION_ID.equals(cell.regionId())) {
+                out.add(cell);
+            }
+        }
+        return out;
+    }
+
+    private List<MapRenderer.EntityMarker> submapEntityMarkersAt(int z) {
+        if (m_composedWorld == null) {
+            return List.of();
+        }
+        BlockColorResolver colorResolver = EditorContext.getInstance().getColorResolver();
+        var out = new ArrayList<MapRenderer.EntityMarker>();
+        for (ComposedWorld.Entity entity : m_composedWorld.entitiesAt(z)) {
+            if (ComposedWorld.ROOT_REGION_ID.equals(entity.regionId())) {
+                continue;
+            }
+            Color color = colorResolver.resolveWithOverrides(entity.id(), entity.components());
+            if (color.equals(Color.WHITE)) {
+                color = EditorTheme.ENTITY_MARKER_COLOR;
+            }
+            out.add(new MapRenderer.EntityMarker(entity.row(), entity.col(), color));
+        }
+        return out;
+    }
+
+    public void setComposedMode(boolean enabled) {
+        m_renderer.setComposedMode(enabled);
+        if (enabled) {
+            m_renderer.setComposedWorld(m_composedWorld, m_currentZ);
+        }
+        m_panCanvas.requestRedraw();
+    }
+
+    public boolean isComposedMode() {
+        return m_renderer.isComposedMode();
+    }
+
+    public List<MapRenderer.SubmapGhost> buildSubmapOverlay() {
+        var ghosts = new ArrayList<MapRenderer.SubmapGhost>();
+        for (EditorEntity submap : m_model.getSubmaps()) {
+            MapRenderer.SubmapGhost ghost = buildGhostFor(submap);
+            if (ghost != null) {
+                ghosts.add(ghost);
+            }
+        }
+        return ghosts;
+    }
+
+    private MapRenderer.SubmapGhost buildGhostFor(EditorEntity submap) {
+        String refStr = readSubmapField(submap, "ref");
+        if (refStr == null) {
+            return null;
+        }
+        File ref = MapPathUtil.resolveSubmapRef(m_model.getFile(), refStr);
+        if (ref == null || !ref.isFile()) {
+            return null;
+        }
+        MapDefinition childDef;
+        try {
+            childDef = MapLoader.load(ref);
+        } catch (IOException ex) {
+            return null;
+        }
+        Vec3i bounds = computeBounds(childDef);
+        if (bounds.x == 0 || bounds.y == 0) {
+            return null;
+        }
+        Vec3i offset = resolveOffset(submap, childDef);
+        if (offset == null) {
+            return null;
+        }
+        String label = submap.id() != null ? submap.id() : refStr;
+        return new MapRenderer.SubmapGhost(label, offset.y, offset.x, bounds.y, bounds.x);
+    }
+
+    private Vec3i resolveOffset(EditorEntity submap, MapDefinition childDef) {
+        Vec3i posOffset = readVec3i(submap);
+        if (posOffset != null) {
+            return posOffset;
+        }
+        String localId = readSubmapField(submap, "localConnector");
+        String remoteId = readSubmapField(submap, "remoteConnector");
+        if (localId == null || remoteId == null) {
+            return null;
+        }
+        var parentConnectorDefs = m_model.getConnectors().stream()
+            .map(EditorEntity::toDefinition)
+            .toList();
+        return ComposedWorld.computeConnectorOffset(
+            parentConnectorDefs,
+            childDef.connectors(),
+            localId,
+            remoteId
+        );
+    }
+
+    private static String readSubmapField(EditorEntity entity, String fieldName) {
+        for (ComponentDefinition comp : entity.components()) {
+            if (comp.type() != Submap.class) {
+                continue;
+            }
+            Object value = comp.properties().get(fieldName);
+            return value == null ? null : value.toString();
+        }
+        return null;
+    }
+
+    private static Vec3i readVec3i(EditorEntity entity) {
+        var pos = entity.getEntityPos();
+        return pos == null ? null : new Vec3i(pos.x(), pos.y(), pos.z());
+    }
+
+    private static Vec3i computeBounds(MapDefinition def) {
+        int width = 0;
+        int height = 0;
+        int depth = def.layers().size();
+        for (String layerData : def.layers().values()) {
+            String[] lines = layerData.split("\n");
+            height = Math.max(height, lines.length);
+            for (String line : lines) {
+                width = Math.max(width, line.length());
+            }
+        }
+        return new Vec3i(width, height, depth);
+    }
+
+    public List<MapRenderer.ConnectorMarker> buildConnectorMarkers(int zLevel) {
+        var markers = new ArrayList<MapRenderer.ConnectorMarker>();
+        for (EditorEntity c : m_model.getConnectors()) {
+            var pos = c.getEntityPos();
+            if (pos == null || pos.z() != zLevel) {
+                continue;
+            }
+            markers.add(new MapRenderer.ConnectorMarker(c.id(), pos.y(), pos.x(), pos.z()));
+        }
+        return markers;
+    }
+
+    /**
+     * Connectors owned by submaps (non-root regions), translated into
+     * world coords by each region's offset and filtered to the current
+     * z. Drawn dimmed by the renderer so a parent/child connector pair
+     * lined up around an edge is visible at a glance.
+     */
+    public List<MapRenderer.ConnectorMarker> buildSubmapConnectorMarkers(int zLevel) {
+        if (m_composedWorld == null) {
+            return List.of();
+        }
+        var out = new ArrayList<MapRenderer.ConnectorMarker>();
+        for (ComposedWorld.RegionInfo region : m_composedWorld.regions()) {
+            if (ComposedWorld.ROOT_REGION_ID.equals(region.id())) {
+                continue;
+            }
+            Vec3i offset = region.offset();
+            for (MapEntityDefinition conn : region.connectors()) {
+                Vec3i pos = Position.readFromDefinition(conn);
+                if (pos == null) {
+                    continue;
+                }
+                int worldZ = pos.z + offset.z;
+                if (worldZ != zLevel) {
+                    continue;
+                }
+                out.add(
+                    new MapRenderer.ConnectorMarker(
+                        conn.id(),
+                        pos.y + offset.y,
+                        pos.x + offset.x,
+                        worldZ
+                    )
+                );
+            }
+        }
+        return out;
     }
 
     private List<MapRenderer.EntityMarker> buildEntityMarkers(int zLevel) {

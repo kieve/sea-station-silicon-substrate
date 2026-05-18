@@ -74,8 +74,11 @@ Listed in execution order (see `GameEngine.create`).
       one turn), blocked-by-wall (single-axis), wait-advances-clock-only (smoke).
       Still TODO: blocked-by-`MaxPassableSize`, multi-axis blocked (e.g. UP+RIGHT
       with a wall to the north — does east still resolve?).
-- [ ] 🔴 **PathingSystem** — harness + unit. Path resolution around obstacles,
-      no-path case, multi-step path consumption, target re-pathing.
+- [~] 🔴 **PathingSystem** — harness + unit. Per-tick driver wiring `Velocity`
+      from cached paths is still bare; the planning side is covered indirectly
+      through `PathingContext` (cross-region routes, locked-door rejection,
+      door-state invalidation). Still TODO: multi-step path consumption across
+      ticks, target re-pathing when the goal moves.
 - [ ] 🔴 **AiControllerSystem** — harness. State machine ticks, target acquisition,
       idle entities not consuming clock budget incorrectly.
 - [ ] 🔴 **AttackSystem** — harness. Damage application, `Health` decrement,
@@ -95,8 +98,10 @@ Listed in execution order (see `GameEngine.create`).
 
 ## Init systems
 
-- [ ] 🟡 **MapInitSystem** — harness. Map load → tile + entity spawn count
-      matches YAML.
+- [~] 🟡 **MapInitSystem** — harness. Map load + spawn pipeline is exercised
+      indirectly by `TestEngineSmokeTest`, `SubComplexCompositionTest`, and the
+      pathing-context tests that load real fixtures. No direct spawn-count
+      assertion yet.
 - [ ] 🟡 **ScurryInitSystem** — harness. `ScurryInit` consumed, `ScurryConfig`
       applied, init component removed.
 
@@ -114,6 +119,9 @@ All **Skip** — out of scope per the harness plan. Cover via manual playtest on
 - [x] Vec3i
 - [x] ListUtil
 - [x] DescriptionComposer
+- [x] 🟢 **BoundingBox3i** — `contains` edges, defensive copy of origin/size,
+      `forEach` visits every cell, zero/negative-size rejection. Covered by
+      `BoundingBox3iTest`.
 - [x] 🔴 **VisionUtil** — `blocksVision(Entity)` branches: no Opaque,
       Opaque+no Openable, Opaque+closed, Opaque+open.
 - [~] 🟢 **OpaqueGrid** — single-method functional interface with no logic
@@ -149,10 +157,61 @@ Mostly storage. Test only the ones with behavior beyond getters/setters.
 - [ ] 🟡 **PositionContext** — entity↔position bookkeeping under move/spawn/
       despawn.
 - [ ] 🟡 **VisionContext** — visibility flag set/clear, "ever-seen" memory.
-- [ ] 🟡 **PathingContext** — queued path get/set/clear per entity.
+- [x] 🟡 **PathingContext** — same-region planning, cross-region portal
+      selection, per-mover passability (locked door at portal, closed door
+      within region, opened door allowing the route), no-path branches.
+      Covered by `PathingContextTest`.
 - [ ] 🟢 InputContext, RenderContext, EventContext, ExamineContext,
       EjectContext, InteractContext, AiControllerContext — skip unless logic
       grows.
+
+---
+
+## Map composition (modular-maps branch)
+
+Added by the modular-maps work — multiple YAML files compose into one
+world via offsets or connector pairs, regions track per-cell ownership,
+and pathing routes across them via portals.
+
+- [x] 🟢 **MapRegion** — id/box invariants, `contains` via box, null
+      rejection. Covered by `MapRegionTest`.
+- [x] 🟡 **MapContext** — cell-stamp ownership beats bounding-box overlap
+      lookups, before-init defensive behaviour, out-of-bounds → null,
+      unmodifiable region view. Covered by `MapContextTest`.
+- [x] 🔴 **CompositeMapLoader** — offset-mode placements, connector-mode
+      offset math, nested composition, missing-connector and cycle
+      diagnostics. Covered by `CompositeMapLoaderTest`.
+- [x] 🟡 **YamlMapGenerator** — leaf load (`YamlMapGeneratorTest`) and
+      composite load (`YamlMapGeneratorCompositeTest`): world sizing to
+      the union, region-per-leaf registration, cell-stamp consultation,
+      overlap fail-fast vs `allowOverlap: true`, child entity position
+      translation.
+- [x] 🟡 **RegionGraph** — portal discovery between adjacent regions,
+      `portalsFor` symmetry, `findPortalTowards` closest-portal choice on
+      multi-portal edges, unreachable-region returns null. Covered by
+      `RegionGraphTest`.
+- [x] 🟢 **WorldModel** — get/set round-trip, out-of-bounds → AIR,
+      `isInBounds` matches box, `isSolid` via `BlockTypeFactory`,
+      `isPassable` inversion, `hasFloor`/`hasCeiling` neighbour reads.
+      Covered by `WorldModelTest`.
+- [x] 🟢 **ContentRef** — `./` resolves against the referring file's
+      directory, `/` rooted at content, parent-segment escape rejection.
+      Covered by `ContentRefTest`.
+- [ ] 🟢 **Portal** — `otherRegion`/`cellIn` lookups + the not-connected
+      `IllegalArgumentException` branch. Implicitly exercised by
+      `RegionGraphTest` but no direct test.
+- [x] 🟡 **sub_complex composition (end-to-end)** — boundary cells stamp
+      the right regions, wall cells on both sides of the join still spawn
+      block entities, player walks east through `damaged_sub` up to the
+      locked door at the portal. Covered by `SubComplexCompositionTest`.
+
+### Editor (modular-maps branch)
+
+Per `test-backfill.md`'s "out of scope" list the JavaFX editor module
+relies on manual playtest. Modular-maps added a "Submaps" tab,
+connector-aware rendering, and ghost-region overlays. No unit coverage
+added; treat as manual playtest territory unless a pure-model regression
+shows up.
 
 ---
 

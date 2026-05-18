@@ -1,0 +1,13 @@
+---
+# Depth-3 nesting: this -> nested_mid.yaml -> leaf_a.yaml.
+# Final placement: leaf_a at world (1,1,0). World = 4x4x1.
+floorGlyph: interpunct
+submaps:
+- id: mid
+  components:
+  - type: Submap
+    ref: ./nested_mid.yaml
+  - type: Position
+    x: 0
+    "y": 0
+    z: 0

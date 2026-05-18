@@ -1,0 +1,22 @@
+---
+# Same overlap as overlap_conflict.yaml, but the second placement opts in
+# to allowOverlap. Second wins for the conflict cells (last-writer-wins).
+floorGlyph: interpunct
+submaps:
+- id: first
+  components:
+  - type: Submap
+    ref: ./leaf_a.yaml
+  - type: Position
+    x: 0
+    "y": 0
+    z: 0
+- id: second
+  components:
+  - type: Submap
+    ref: ./leaf_a.yaml
+    allowOverlap: true
+  - type: Position
+    x: 1
+    "y": 0
+    z: 0

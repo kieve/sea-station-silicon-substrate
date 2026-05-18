@@ -238,7 +238,7 @@ public class EntityOverrideHandler {
         result.ifPresent(r -> handleOverrideAdded(entityIndex, r.componentTypeName()));
     }
 
-    static Object parseValue(String value, Object original) {
+    public static Object parseValue(String value, Object original) {
         if (original instanceof Integer) {
             try {
                 return Integer.parseInt(value);

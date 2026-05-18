@@ -17,13 +17,17 @@ import static ca.kieve.ssss.editor.util.CssUtil.inline;
 public class SelectedCellOverlay extends VBox {
     public enum ItemType {
         BLOCK,
-        ENTITY
+        ENTITY,
+        CONNECTOR
     }
 
     public record CellItem(String label, ItemType type, int index) {
     }
 
     public record EntityInfo(int index, String id) {
+    }
+
+    public record ConnectorInfo(int index, String id) {
     }
 
     private static class CellItemCell
@@ -36,9 +40,11 @@ public class SelectedCellOverlay extends VBox {
                 setText(null);
                 return;
             }
-            String prefix = item.type() == ItemType.BLOCK
-                ? "[B] "
-                : "[E] ";
+            String prefix = switch (item.type()) {
+            case BLOCK -> "[B] ";
+            case ENTITY -> "[E] ";
+            case CONNECTOR -> "[C] ";
+            };
             setText(prefix + item.label());
         }
     }
@@ -95,7 +101,11 @@ public class SelectedCellOverlay extends VBox {
         m_onItemSelected = callback;
     }
 
-    public void update(String blockName, List<EntityInfo> entities) {
+    public void update(
+        String blockName,
+        List<EntityInfo> entities,
+        List<ConnectorInfo> connectors
+    ) {
         setVisible(true);
         setManaged(true);
 
@@ -108,6 +118,12 @@ public class SelectedCellOverlay extends VBox {
         for (var entity : entities) {
             m_list.getItems().add(
                 new CellItem(entity.index() + ": " + entity.id(), ItemType.ENTITY, entity.index())
+            );
+        }
+
+        for (var connector : connectors) {
+            m_list.getItems().add(
+                new CellItem(connector.id(), ItemType.CONNECTOR, connector.index())
             );
         }
 

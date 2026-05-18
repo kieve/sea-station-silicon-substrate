@@ -58,6 +58,36 @@ Output is at `lwjgl3/build/libs/`
 
 ## Architecture
 
+### Game state lives in `GameContext`
+
+All game data (world model, regions, pathing caches, vision, clock, ECS,
+etc.) is held by `GameContext` — typically through dedicated mutable
+`*Context` classes (`WorldContext`, `MapContext`, `PathingContext`, …).
+`GameEngine` is for orchestration only: it wires systems together, drives
+the tick loop, and populates contexts at init. Never add data fields to
+`GameEngine` if other systems need to read or mutate them — add a context
+(or extend an existing one) instead.
+
+The same applies to map generation: `MapGenerator.generate` takes the
+contexts it needs to populate (`MapContext`, `WorldContext`) and mutates
+them as a side effect. It doesn't return data the caller has to thread
+into context manually.
+
+### Passability and blocking conditions
+
+`SolidUtil.blocksMover(entity, moverSize)` is the single source of truth
+for "does this entity at this cell block a mover?" — combining `Solid`
+(with `Openable.isOpen` respected), `MaxPassableSize`, and any future
+conditions. Both within-region pathing grid construction
+(`PathingContext.rebuildGrid`) and cross-region portal traversability
+(`PathingContext.crossRegionNextStep`) route through it.
+
+When adding a new blocking condition (faction allies, key-bearing movers,
+state-gated tiles), extend `blocksMover` — don't sprinkle parallel checks
+through systems. If the new condition needs more than `Size` to evaluate
+(e.g., the mover's inventory), widen the predicate to take an `Entity`
+and adjust the pathing grid cache key accordingly.
+
 ### Game World Coordinate System
 
 The game world uses a **Y-up coordinate system** where:
@@ -86,7 +116,7 @@ This is consistent across all systems that handle directional input (WasdSystem,
 
 ## Editor (Map Editor)
 
-The `editor` module is a standalone JavaFX application for editing map YAML files. It loads and saves the same map format used by the game's `StaticTestMapGenerator`.
+The `editor` module is a standalone JavaFX application for editing map YAML files. It loads and saves the same map format used by the game's `YamlMapGenerator`.
 
 **Run the editor:**
 ```bash

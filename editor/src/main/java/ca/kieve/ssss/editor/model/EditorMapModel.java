@@ -22,6 +22,8 @@ public class EditorMapModel {
 
     private String m_floorGlyph;
     private List<EditorEntity> m_entities;
+    private List<EditorEntity> m_connectors = new ArrayList<>();
+    private List<EditorEntity> m_submaps = new ArrayList<>();
     private File m_file;
 
     public static EditorMapModel fromDefinition(MapDefinition def, File file) {
@@ -34,6 +36,12 @@ public class EditorMapModel {
                 .toList()
         );
         model.m_blocks.putAll(def.blocks());
+        model.m_connectors = new ArrayList<>(
+            def.connectors().stream().map(EditorEntity::fromDefinition).toList()
+        );
+        model.m_submaps = new ArrayList<>(
+            def.submaps().stream().map(EditorEntity::fromDefinition).toList()
+        );
 
         // Build a reverse map: layoutChar -> block name
         Map<Character, String> charToName = new HashMap<>();
@@ -55,6 +63,13 @@ public class EditorMapModel {
                 }
             }
             model.m_layers.put(z, grid);
+        }
+
+        // Composition-only files have no local layers. Ensure the editor
+        // always has at least z=0 to anchor on so the layer overlay and
+        // initial view don't crash on an empty list.
+        if (model.m_layers.isEmpty()) {
+            model.m_layers.put(0, new SparseGrid());
         }
 
         return model;
@@ -100,6 +115,13 @@ public class EditorMapModel {
         Map<String, String> layers = new HashMap<>();
         for (var entry : m_layers.entrySet()) {
             var grid = entry.getValue();
+            // Skip layers with no painted cells. This keeps composition-only
+            // YAMLs (no `layers:`) round-trip clean — the synthetic z=0 we
+            // add at load time so the UI has something to anchor on doesn't
+            // get written back unless the user actually painted into it.
+            if (grid.isEmpty()) {
+                continue;
+            }
             var sb = new StringBuilder();
             for (int r = minRow; r <= maxRow; r++) {
                 if (r > minRow) {
@@ -133,7 +155,48 @@ public class EditorMapModel {
             .toList();
         List<MapEntityDefinition> entities = adjustEntityPositions(entityDefs, -minCol, -minRow);
 
-        return new MapDefinition(blocks, layers, m_floorGlyph, entities);
+        List<MapEntityDefinition> connectorDefs = m_connectors.stream()
+            .map(EditorEntity::toDefinition)
+            .toList();
+        List<MapEntityDefinition> submapDefs = m_submaps.stream()
+            .map(EditorEntity::toDefinition)
+            .toList();
+
+        return new MapDefinition(blocks, layers, m_floorGlyph, entities, connectorDefs, submapDefs);
+    }
+
+    public List<EditorEntity> getConnectors() {
+        return m_connectors;
+    }
+
+    public void addConnector(EditorEntity connector) {
+        m_connectors.add(connector);
+        m_modified.set(true);
+    }
+
+    public void removeConnector(int index) {
+        if (index < 0 || index >= m_connectors.size()) {
+            return;
+        }
+        m_connectors.remove(index);
+        m_modified.set(true);
+    }
+
+    public List<EditorEntity> getSubmaps() {
+        return m_submaps;
+    }
+
+    public void addSubmap(EditorEntity submap) {
+        m_submaps.add(submap);
+        m_modified.set(true);
+    }
+
+    public void removeSubmap(int index) {
+        if (index < 0 || index >= m_submaps.size()) {
+            return;
+        }
+        m_submaps.remove(index);
+        m_modified.set(true);
     }
 
     private static List<MapEntityDefinition> adjustEntityPositions(

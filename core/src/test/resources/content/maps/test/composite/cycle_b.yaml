@@ -1,0 +1,12 @@
+---
+# Other half of the cycle.
+floorGlyph: interpunct
+submaps:
+- id: a
+  components:
+  - type: Submap
+    ref: ./cycle_a.yaml
+  - type: Position
+    x: 0
+    "y": 0
+    z: 0

@@ -53,6 +53,15 @@ layers:
     dddddddddddd
     dddddddddddd
 floorGlyph: interpunct
+connectors:
+- id: east_door
+  components:
+  - type: Connector
+    direction: east
+  - type: Position
+    x: 11
+    "y": 5
+    z: 1
 entities:
 - id: player
   components:

@@ -1,0 +1,12 @@
+---
+# Half of a cycle: cycle_a -> cycle_b -> cycle_a. Loader must detect.
+floorGlyph: interpunct
+submaps:
+- id: b
+  components:
+  - type: Submap
+    ref: ./cycle_b.yaml
+  - type: Position
+    x: 0
+    "y": 0
+    z: 0

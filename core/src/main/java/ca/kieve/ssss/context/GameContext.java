@@ -7,9 +7,9 @@ import ca.kieve.ssss.GameEngine;
 import ca.kieve.ssss.content.BlockTypeFactory;
 import ca.kieve.ssss.content.ContentRegistry;
 import ca.kieve.ssss.content.EntityFactory;
+import ca.kieve.ssss.content.map.MapGenerator;
 import ca.kieve.ssss.system.System;
 import ca.kieve.ssss.util.PerfClock;
-import ca.kieve.ssss.world.MapGenerator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +31,8 @@ public record GameContext(
     AiControllerContext aiController,
     PathingContext pathing,
     VisionContext vision,
+    MapContext map,
+    WorldContext world,
     ContentRegistry content,
     EntityFactory entityFactory,
     BlockTypeFactory blockTypes,
@@ -62,6 +64,8 @@ public record GameContext(
             new AiControllerContext(),
             new PathingContext(),
             new VisionContext(),
+            new MapContext(),
+            new WorldContext(),
             content,
             new EntityFactory(content, headless),
             content.getBlockTypeFactory(),

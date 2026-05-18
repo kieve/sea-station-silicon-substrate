@@ -1,0 +1,19 @@
+---
+# Parent connector "dock" has no direction. Connector-mode placement must
+# reject this with a clear "no direction" diagnostic.
+floorGlyph: interpunct
+connectors:
+- id: dock
+  components:
+  - type: Connector
+  - type: Position
+    x: 0
+    "y": 0
+    z: 0
+submaps:
+- id: b
+  components:
+  - type: Submap
+    ref: ./leaf_b.yaml
+    localConnector: dock
+    remoteConnector: west_edge

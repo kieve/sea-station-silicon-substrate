@@ -1,0 +1,19 @@
+---
+# References a connector "nonexistent" that this map doesn't declare.
+# Loader must reject with a clear "connector not found" diagnostic.
+floorGlyph: interpunct
+connectors:
+- id: real_anchor
+  components:
+  - type: Connector
+  - type: Position
+    x: 0
+    "y": 0
+    z: 0
+submaps:
+- id: bad_ref
+  components:
+  - type: Submap
+    ref: ./leaf_a.yaml
+    localConnector: nonexistent
+    remoteConnector: east_edge

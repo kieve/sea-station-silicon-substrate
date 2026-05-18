@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 
 import ca.kieve.ssss.component.Component;
+import ca.kieve.ssss.component.EngineComponent;
 import ca.kieve.ssss.util.ClasspathUtil;
 
 import java.io.IOException;
@@ -31,6 +32,12 @@ public class ComponentTypeDeserializer
         return null;
     }
 
+    /**
+     * Returns all picker-eligible component class names. Engine
+     * components (Connector, Submap) are excluded — they belong in
+     * the {@code connectors:} / {@code submaps:} sections and are
+     * never added through the regular entity-override flow.
+     */
     public static List<String> getAllTypeNames() {
         var names = new TreeSet<String>();
         var loader = Component.class.getClassLoader();
@@ -52,6 +59,9 @@ public class ComponentTypeDeserializer
                 if (clazz.isInterface()
                     || !Component.class
                         .isAssignableFrom(clazz)) {
+                    continue;
+                }
+                if (EngineComponent.class.isAssignableFrom(clazz)) {
                     continue;
                 }
                 names.add(simpleName);

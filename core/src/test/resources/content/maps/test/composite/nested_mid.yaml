@@ -1,0 +1,13 @@
+---
+# Middle layer of the depth-3 chain. Places leaf_a at (1,1,0) relative to
+# this map (which itself is at world (0,0,0) in nested_three_deep).
+floorGlyph: interpunct
+submaps:
+- id: leaf
+  components:
+  - type: Submap
+    ref: ./leaf_a.yaml
+  - type: Position
+    x: 1
+    "y": 1
+    z: 0

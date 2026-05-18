@@ -4,6 +4,7 @@ import dev.dominion.ecs.api.Entity;
 
 import ca.kieve.ssss.ai.behavior.AiController;
 import ca.kieve.ssss.ai.behavior.BehaviorDefinition;
+import ca.kieve.ssss.component.EngineComponent;
 import ca.kieve.ssss.component.Equipment;
 import ca.kieve.ssss.component.Material;
 import ca.kieve.ssss.component.TileGlyph;
@@ -29,6 +30,18 @@ public class ComponentFactory {
         try {
             Class<?> componentType = definition.type();
             Map<String, Object> properties = definition.properties();
+
+            // Engine components (Connector, Submap) are load-time-only data
+            // carriers; they belong in MapDefinition.connectors / .submaps,
+            // not on live ECS entities. Catch this early with a clear error
+            // rather than silently attaching them.
+            if (EngineComponent.class.isAssignableFrom(componentType)) {
+                throw new IllegalStateException(
+                    componentType.getSimpleName() + " is an EngineComponent and cannot be "
+                        + "attached to a runtime entity; it belongs in the connectors: / "
+                        + "submaps: YAML section."
+                );
+            }
 
             // Handle special component types that need content lookup
             if (componentType == TileGlyph.class) {
