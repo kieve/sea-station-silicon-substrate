@@ -57,6 +57,17 @@ public class InteractMenuSystem extends System {
 
             m_input.setMode(MODE_INTERACT);
             m_interactContext.enter(playerPos);
+
+            if (!m_interactContext.hasAnyInteractable()) {
+                m_gameContext.log().log("Nothing to interact with here.");
+                m_input.setMode(MODE_NORMAL);
+                m_interactContext.exit();
+                return;
+            }
+
+            if (m_interactContext.onlySelfHasInteractables()) {
+                selectAndProcess(playerPos);
+            }
             return;
         }
 
@@ -103,6 +114,10 @@ public class InteractMenuSystem extends System {
         }
 
         Vec3i targetPos = selfTile ? playerPos : playerPos.add(direction);
+        selectAndProcess(targetPos);
+    }
+
+    private void selectAndProcess(Vec3i targetPos) {
         m_interactContext.selectTarget(targetPos);
 
         var interactions = m_interactContext.getInteractions();

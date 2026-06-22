@@ -10,9 +10,5 @@
 
 - Content -> Blueprint rename
 
-- "F" mode
-    - You can't pick up an item underneath you with "F" mode
-    - Pressing "F" with nothing to interact with should short circuit to the
-        "nothing to interact with" message
 - When you kill a mouse, the attack move that kills actually moves you into that cell, when it
     shouldn't

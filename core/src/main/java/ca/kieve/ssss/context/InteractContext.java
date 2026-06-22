@@ -165,6 +165,30 @@ public class InteractContext implements TileHighlightProvider {
         return m_validDirections.getOrDefault(Vec3i.ZERO, false);
     }
 
+    public boolean hasAnyInteractable() {
+        for (var valid : m_validDirections.values()) {
+            if (valid) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean onlySelfHasInteractables() {
+        if (!selfHasInteractions()) {
+            return false;
+        }
+        for (var entry : m_validDirections.entrySet()) {
+            if (entry.getKey().equals(Vec3i.ZERO)) {
+                continue;
+            }
+            if (entry.getValue()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private void calculateValidDirections() {
         m_validDirections.clear();
         if (m_positionContext == null || m_currentPos == null) {
