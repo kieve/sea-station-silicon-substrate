@@ -1,49 +1,62 @@
 ---
-# Maintenance sub — connects to damaged_sub via its west_door. Deliberately
-# different layout style from damaged_sub: smaller, square-ish, and uses a
-# different layoutChar palette ('.', 'f', '#' vs damaged_sub's 'a','b','d').
-# Single 5×5 interior, walls on all sides except the west door at (0,3,1).
 blocks:
   air:
     bpId: air
-    layoutChar: '.'
+    layoutChar: a
   floor:
     bpId: block_steel
-    layoutChar: f
+    layoutChar: b
   wall:
     bpId: block_steel
-    layoutChar: '#'
+    layoutChar: c
 layers:
   "0": |
-    #######
-    #fffff#
-    #fffff#
-    ffffff#
-    #fffff#
-    #fffff#
-    #######
+    bbbbbbbbbbbb
+    bbbbbbbbbbbb
+    cccccccbbbbb
+    cbbbbbcbbbbb
+    cbbbbbcbbbbb
+    bbbbbbcbbbbb
+    cbbbbbbbbbbb
+    cbbbbbbbbbbb
+    ccccccbbbbbb
+    bbbbbbbbbbbb
+    bbbbbbbbbbbb
+    bbbbbbbbbbbb
   "1": |
-    #######
-    #.....#
-    #.....#
-    ......#
-    #.....#
-    #.....#
-    #######
+    bbbbbbbbbbbb
+    baaaaaaaaaab
+    caaaaaaaaaab
+    caaaaaaaaaab
+    caaaaaaaaaab
+    aaaaaaaaaaab
+    caaaaaaaaaab
+    caaaaaaaaaab
+    caaaaaaaaaab
+    baaaaaaaaaab
+    baaaaaaaaaab
+    bbbbbbbbbbbb
   "2": |
-    #######
-    #######
-    #######
-    #######
-    #######
-    #######
-    #######
+    bbbbbbbbbbbb
+    bbbbbbbbbbbb
+    cccccccbbbbb
+    cccccccbbbbb
+    cccccccbbbbb
+    cccccccbbbbb
+    cccccccbbbbb
+    cccccccbbbbb
+    cccccccbbbbb
+    bbbbbbbbbbbb
+    bbbbbbbbbbbb
+    bbbbbbbbbbbb
 floorGlyph: interpunct
+entities: []
 connectors:
 - id: west_door
   components:
   - type: Connector
   - type: Position
     x: 0
-    "y": 3
+    "y": 5
     z: 1
+submaps: []
