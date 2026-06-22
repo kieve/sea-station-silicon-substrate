@@ -8,6 +8,9 @@ import ca.kieve.ssss.component.CameraComp;
 import ca.kieve.ssss.content.MapEntityDefinition;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.input.InputActionController;
+import ca.kieve.ssss.render.DeadTint;
+import ca.kieve.ssss.render.DestroyedBodyTint;
+import ca.kieve.ssss.render.GlyphColorResolver;
 import ca.kieve.ssss.system.AttackSystem;
 import ca.kieve.ssss.system.CameraSystem;
 import ca.kieve.ssss.system.ClockSystem;
@@ -89,10 +92,14 @@ public class GameEngine {
             result.comp().setGdx(camera);
         }
 
+        var glyphColorResolver = new GlyphColorResolver(
+            List.of(new DestroyedBodyTint(), new DeadTint())
+        );
         var tileGlyphRenderSystem = new TileGlyphRenderSystem(
             m_gameContext,
             spriteBatch,
-            shapeRenderer
+            shapeRenderer,
+            glyphColorResolver
         );
 
         var debugRectRenderSystem = new DebugRectRenderSystem(m_gameContext, shapeRenderer);

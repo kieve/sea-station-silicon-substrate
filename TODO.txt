@@ -9,6 +9,3 @@
 
 
 - Content -> Blueprint rename
-
-- When you kill a mouse, the attack move that kills actually moves you into that cell, when it
-    shouldn't

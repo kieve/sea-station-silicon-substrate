@@ -1,9 +1,7 @@
 package ca.kieve.ssss.system;
 
-import com.badlogic.gdx.graphics.Color;
 import dev.dominion.ecs.api.Entity;
 
-import ca.kieve.ssss.component.ColorComp;
 import ca.kieve.ssss.component.Damage;
 import ca.kieve.ssss.component.Descriptor;
 import ca.kieve.ssss.component.Equipment;
@@ -81,10 +79,6 @@ public class AttackSystem extends System {
             return;
         }
         m_gameContext.log().log(targetName + " is destroyed!");
-        var colorComp = targetEntity.get(ColorComp.class);
-        if (colorComp != null) {
-            colorComp.color = Color.MAROON;
-        }
     }
 
     private void processSocketedDamage(
@@ -141,12 +135,6 @@ public class AttackSystem extends System {
         m_gameContext.events().addEvent(
             new EjectEvent(playerEntity, socketPlug, bodyEntity, socket)
         );
-
-        // Change color to indicate permanent destruction
-        var colorComp = bodyEntity.get(ColorComp.class);
-        if (colorComp != null) {
-            colorComp.color = Color.DARK_GRAY;
-        }
     }
 
     private void trackLastAttacker(Entity targetEntity, Entity attackerEntity) {

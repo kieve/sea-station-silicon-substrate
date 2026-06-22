@@ -15,6 +15,7 @@ import ca.kieve.ssss.component.TileGlyph;
 import ca.kieve.ssss.context.DebugContext;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.context.VisionContext;
+import ca.kieve.ssss.render.GlyphColorResolver;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,11 +29,13 @@ public class TileGlyphRenderSystem extends System {
     private final SpriteBatch m_spriteBatch;
     private final ShapeRenderer m_shapeRenderer;
     private final TileGlyph m_floorGlyph;
+    private final GlyphColorResolver m_colorResolver;
 
     public TileGlyphRenderSystem(
         GameContext gameContext,
         SpriteBatch spriteBatch,
-        ShapeRenderer shapeRenderer
+        ShapeRenderer shapeRenderer,
+        GlyphColorResolver colorResolver
     ) {
         super(gameContext);
         m_ecs = gameContext.ecs();
@@ -40,6 +43,7 @@ public class TileGlyphRenderSystem extends System {
         m_debug = gameContext.debug();
         m_spriteBatch = spriteBatch;
         m_shapeRenderer = shapeRenderer;
+        m_colorResolver = colorResolver;
         var floorGlyphId = gameContext.mapGenerator().getFloorGlyphId();
         m_floorGlyph = gameContext.entityFactory().getGlyphFactory().getGlyph(floorGlyphId);
     }
@@ -109,13 +113,10 @@ public class TileGlyphRenderSystem extends System {
 
             var font = renderGlyph.font();
 
-            var color = Color.WHITE;
             var colorComp = entity.get(ColorComp.class);
-            if (colorComp != null) {
-                color = colorComp.color;
-            }
+            var base = colorComp != null ? colorComp.color : Color.WHITE;
 
-            font.setColor(color);
+            font.setColor(m_colorResolver.resolve(entity, base));
 
             font.draw(
                 m_spriteBatch,
