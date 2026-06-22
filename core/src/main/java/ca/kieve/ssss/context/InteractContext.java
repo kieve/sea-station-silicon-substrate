@@ -161,10 +161,6 @@ public class InteractContext implements TileHighlightProvider {
         return result;
     }
 
-    public boolean selfHasInteractions() {
-        return m_validDirections.getOrDefault(Vec3i.ZERO, false);
-    }
-
     public boolean hasAnyInteractable() {
         for (var valid : m_validDirections.values()) {
             if (valid) {
@@ -174,19 +170,18 @@ public class InteractContext implements TileHighlightProvider {
         return false;
     }
 
-    public boolean onlySelfHasInteractables() {
-        if (!selfHasInteractions()) {
-            return false;
-        }
+    public Vec3i getSingleValidDirection() {
+        Vec3i found = null;
         for (var entry : m_validDirections.entrySet()) {
-            if (entry.getKey().equals(Vec3i.ZERO)) {
+            if (!entry.getValue()) {
                 continue;
             }
-            if (entry.getValue()) {
-                return false;
+            if (found != null) {
+                return null;
             }
+            found = entry.getKey();
         }
-        return true;
+        return found;
     }
 
     private void calculateValidDirections() {

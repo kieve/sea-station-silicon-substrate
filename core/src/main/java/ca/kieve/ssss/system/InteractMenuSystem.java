@@ -65,8 +65,9 @@ public class InteractMenuSystem extends System {
                 return;
             }
 
-            if (m_interactContext.onlySelfHasInteractables()) {
-                selectAndProcess(playerPos);
+            var singleDirection = m_interactContext.getSingleValidDirection();
+            if (singleDirection != null) {
+                selectAndProcess(playerPos.add(singleDirection));
             }
             return;
         }

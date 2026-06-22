@@ -67,7 +67,7 @@ class InteractMenuSystemTest {
     }
 
     @Test
-    void f_withItemAdjacent_thenDirection_picksUpItem() {
+    void f_withSingleAdjacentItem_picksItUpImmediately() {
         TestEngine engine = TestEngine.createEmpty();
         var ctx = engine.context();
         Vec3i north = PLAYER_START.add(Vec3i.NORTH);
@@ -75,15 +75,41 @@ class InteractMenuSystemTest {
 
         engine.pressAction(InputAction.INTERACT);
         engine.step();
-        engine.pressAction(InputAction.UP);
-        engine.step();
 
         var player = PlayerUtil.getPlayerEntity(ctx.ecs());
         var inventory = player.get(Inventory.class);
         assertTrue(
             inventory.items().contains(item),
-            "item north of player should land in inventory after F + UP"
+            "F alone should pick up the single adjacent item without a direction press"
         );
+        assertEquals(Mode.MODE_NORMAL, ctx.input().getMode(), "should return to normal mode");
+        assertFalse(ctx.interact().isActive(), "interact context should be inactive");
+    }
+
+    @Test
+    void f_withMultipleAdjacentItems_thenDirection_picksUpChosenItem() {
+        TestEngine engine = TestEngine.createEmpty();
+        var ctx = engine.context();
+        var northItem = ctx.entityFactory()
+            .createEntity(ctx, "note", PLAYER_START.add(Vec3i.NORTH));
+        var eastItem = ctx.entityFactory()
+            .createEntity(ctx, "greenNote", PLAYER_START.add(Vec3i.EAST));
+
+        engine.pressAction(InputAction.INTERACT);
+        engine.step();
+        assertEquals(
+            Mode.MODE_INTERACT,
+            ctx.input().getMode(),
+            "two valid directions must require an explicit direction choice"
+        );
+
+        engine.pressAction(InputAction.UP);
+        engine.step();
+
+        var player = PlayerUtil.getPlayerEntity(ctx.ecs());
+        var inventory = player.get(Inventory.class);
+        assertTrue(inventory.items().contains(northItem), "UP should pick up the north item");
+        assertFalse(inventory.items().contains(eastItem), "the east item should be left alone");
         assertEquals(Mode.MODE_NORMAL, ctx.input().getMode());
     }
 
