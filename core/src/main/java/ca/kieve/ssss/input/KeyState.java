@@ -1,17 +1,28 @@
 package ca.kieve.ssss.input;
 
-public class KeyState {
-    public final int keycode;
+import java.util.HashSet;
+import java.util.Set;
 
+public class KeyState {
     public boolean event = false;
     public boolean held = false;
 
+    private final Set<Integer> m_keycodes = new HashSet<>();
+
     public KeyState(int keycode) {
-        this.keycode = keycode;
+        m_keycodes.add(keycode);
+    }
+
+    public void addKeycode(int keycode) {
+        m_keycodes.add(keycode);
+    }
+
+    public boolean matches(int keycode) {
+        return m_keycodes.contains(keycode);
     }
 
     public boolean handleKeyDown(int inKey) {
-        if (inKey != keycode) {
+        if (!matches(inKey)) {
             return false;
         }
         event = true;
@@ -20,7 +31,7 @@ public class KeyState {
     }
 
     public boolean handleKeyUp(int inKey) {
-        if (inKey != keycode) {
+        if (!matches(inKey)) {
             return false;
         }
         held = false;

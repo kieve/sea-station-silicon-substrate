@@ -12,6 +12,7 @@ import ca.kieve.ssss.ui.layout.VerticalLayout;
 import ca.kieve.ssss.ui.node.DebugMenuPanel;
 import ca.kieve.ssss.ui.node.ExaminePanel;
 import ca.kieve.ssss.ui.node.InteractPanel;
+import ca.kieve.ssss.ui.node.InventoryPanel;
 import ca.kieve.ssss.ui.node.LogPanel;
 import ca.kieve.ssss.ui.node.Text;
 import ca.kieve.ssss.ui.widget.GameWindow;
@@ -53,6 +54,10 @@ public class PlayScreen implements UiScreen {
         // InteractPanel overlays for multi-item interaction selection
         var interactPanel = new InteractPanel();
         gameStackLayout.add(interactPanel);
+
+        // InventoryPanel overlays on top of game view when inventory is open
+        var inventoryPanel = new InventoryPanel();
+        gameStackLayout.add(inventoryPanel);
 
         // DebugMenuPanel overlays on top of everything, toggled with `
         var debugMenuPanel = new DebugMenuPanel();

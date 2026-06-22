@@ -1,14 +1,7 @@
-- Connect two maps together
-
-
 - Attack system is checking where the damage should go. Really these should be damage events and
   some other system selects the correct HP pool to apply it to
 
-- Pathfinding could grouped by rooms rather than the whole map
-
 - When interacting with only one valid option, enter should select only that one option
-
-- An inventory system, it's currently missing any UI
 
 - Colors
     In the map system, there's named colors for spawning entities and stuff. It would be nice if we
@@ -16,3 +9,10 @@
 
 
 - Content -> Blueprint rename
+
+- "F" mode
+    - You can't pick up an item underneath you with "F" mode
+    - Pressing "F" with nothing to interact with should short circuit to the
+        "nothing to interact with" message
+- When you kill a mouse, the attack move that kills actually moves you into that cell, when it
+    shouldn't

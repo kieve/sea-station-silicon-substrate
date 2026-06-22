@@ -50,13 +50,13 @@ public class InputActionController extends InputAdapter {
 
     private boolean handleGlobalActions(int keycode) {
         KeyState exitState = m_inputContext.getKeyState(InputAction.EXIT_GAME);
-        if (exitState != null && exitState.keycode == keycode) {
+        if (exitState != null && exitState.matches(keycode)) {
             Gdx.app.exit();
             return true;
         }
 
         KeyState debugMenuState = m_inputContext.getKeyState(InputAction.DEBUG_MENU);
-        if (debugMenuState != null && debugMenuState.keycode == keycode) {
+        if (debugMenuState != null && debugMenuState.matches(keycode)) {
             toggleDebugMenu();
             return true;
         }

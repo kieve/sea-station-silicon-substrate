@@ -52,6 +52,14 @@ public class GameWindow extends UiWindow {
         int screenWidth = Gdx.graphics.getBackBufferWidth();
         int screenHeight = Gdx.graphics.getBackBufferHeight();
 
+        // When the window is minimized the back buffer is 0x0. A FrameBuffer
+        // can't be built at that size (OpenGL reports "incomplete attachment"),
+        // and there's nothing to draw anyway. Skip the frame and keep the
+        // existing cached FrameBuffer for when the window is restored.
+        if (screenWidth <= 0 || screenHeight <= 0) {
+            return;
+        }
+
         // Recreate FrameBuffer if size changed
         if (m_frameBuffer == null
             || screenWidth != m_lastWidth

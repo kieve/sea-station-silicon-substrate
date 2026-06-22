@@ -18,6 +18,7 @@ import ca.kieve.ssss.system.EventSystem;
 import ca.kieve.ssss.system.ExamineSystem;
 import ca.kieve.ssss.system.InteractMenuSystem;
 import ca.kieve.ssss.system.InteractSystem;
+import ca.kieve.ssss.system.InventorySystem;
 import ca.kieve.ssss.system.MapInitSystem;
 import ca.kieve.ssss.system.OpenSystem;
 import ca.kieve.ssss.system.PathingSystem;
@@ -63,6 +64,7 @@ public class GameEngine {
                 new ExamineSystem(m_gameContext),
                 new EjectSystem(m_gameContext),
                 new InteractMenuSystem(m_gameContext),
+                new InventorySystem(m_gameContext),
                 new WasdSystem(m_gameContext),
                 new PathingSystem(m_gameContext),
                 new AiControllerSystem(m_gameContext),
