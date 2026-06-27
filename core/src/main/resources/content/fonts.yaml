@@ -8,3 +8,6 @@ fonts:
   ubuntu_32:
     path: "fonts/UbuntuMono-R.ttf"
     size: 32
+  unifont_32:
+    path: "fonts/unifont-17.0.04.otf"
+    size: 32

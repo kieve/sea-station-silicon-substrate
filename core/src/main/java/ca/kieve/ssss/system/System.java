@@ -29,6 +29,9 @@ public abstract class System implements Runnable {
     public void postTick() {
     }
 
+    public void reportResults() {
+    }
+
     @Override
     public void run() {
         var stage = m_clock.getTickStage();
@@ -39,6 +42,7 @@ public abstract class System implements Runnable {
         case PRE_TICK -> preTick();
         case TICK -> tick();
         case POST_TICK -> postTick();
+        case REPORT_RESULTS -> reportResults();
         }
         m_perf.end(key);
     }

@@ -86,7 +86,15 @@ public class EditorMapModel {
             char layoutChar = charIndex < charPool.length()
                 ? charPool.charAt(charIndex)
                 : (char) ('!' + charIndex);
-            blocks.put(entry.getKey(), new MapBlockDefinition(entry.getValue().bpId(), layoutChar));
+            blocks.put(
+                entry.getKey(),
+                new MapBlockDefinition(
+                    entry.getValue().bpId(),
+                    layoutChar,
+                    entry.getValue().waterFill(),
+                    entry.getValue().waterDepth()
+                )
+            );
             charIndex++;
         }
 
@@ -352,18 +360,5 @@ public class EditorMapModel {
 
     public String getFloorGlyph() {
         return m_floorGlyph;
-    }
-
-    /**
-     * Build a mapping from block name to blueprint ID for
-     * rendering.
-     */
-    public Map<String, String> buildNameToBpIdMap() {
-        Map<String, String> map = new HashMap<>();
-        for (var entry : m_blocks.entrySet()) {
-            MapBlockDefinition blockDef = entry.getValue();
-            map.put(entry.getKey(), blockDef.bpId());
-        }
-        return map;
     }
 }

@@ -30,7 +30,7 @@ public class DebugRectRenderSystem extends System {
             var pos = position.getPosition();
 
             m_shapeRenderer.setColor(debugRect.color());
-            m_shapeRenderer.rect(pos.x + 0.1f, pos.y + 0.1f, 0.8f, 0.8f);
+            m_shapeRenderer.rect(pos.x + 0.02f, pos.y + 0.1f, 0.8f, 0.8f);
         });
 
         m_shapeRenderer.end();

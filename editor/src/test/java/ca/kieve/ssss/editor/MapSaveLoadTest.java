@@ -144,6 +144,35 @@ class MapSaveLoadTest {
     }
 
     @Test
+    void roundTrip_waterLevelSurvivesSaveAndReload(@TempDir Path tempDir) throws IOException {
+        var blocks = Map.of(
+            "wall",
+            new MapBlockDefinition("block_steel", 'a'),
+            "water",
+            new MapBlockDefinition("air", 'b', 1.0)
+        );
+        var def = new MapDefinition(
+            blocks,
+            Map.of("0", "ab\nba\n"),
+            "interpunct",
+            List.of(),
+            List.of(),
+            List.of()
+        );
+
+        var model = EditorMapModel.fromDefinition(def, null);
+        File tempFile = tempDir.resolve("water_map.yaml").toFile();
+        MapSaver.save(model, tempFile);
+
+        var reloaded = EditorMapModel.fromDefinition(MapLoader.load(tempFile), tempFile);
+
+        var water = reloaded.getBlocks().get("water");
+        assertNotNull(water);
+        assertEquals(Double.valueOf(1.0), water.waterFill());
+        assertNull(reloaded.getBlocks().get("wall").waterFill());
+    }
+
+    @Test
     void roundTrip_connectorsAndSubmaps(@TempDir Path tempDir) throws IOException {
         // Build a model with one block, two connectors (with and without
         // direction), and two submap placements (offset and connector pair).

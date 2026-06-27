@@ -7,6 +7,7 @@ import ca.kieve.ssss.context.GameContext;
 import static ca.kieve.ssss.util.TickStage.AWAIT_INPUT;
 import static ca.kieve.ssss.util.TickStage.POST_TICK;
 import static ca.kieve.ssss.util.TickStage.PRE_TICK;
+import static ca.kieve.ssss.util.TickStage.REPORT_RESULTS;
 import static ca.kieve.ssss.util.TickStage.TICK;
 import static ca.kieve.ssss.util.TurnPhase.AI;
 import static ca.kieve.ssss.util.TurnPhase.PLAYER;
@@ -128,11 +129,16 @@ public class ClockSystem extends System {
             // More AI needs to act
             m_clock.setTickStage(PRE_TICK);
         } else {
-            // All AI have acted, return to waiting for player input
+            // All AI have acted, report accumulated results before awaiting input
             m_clock.setTurnPhase(PLAYER);
-            m_clock.setTickStage(AWAIT_INPUT);
-            m_gameContext.render().markDirty();
+            m_clock.setTickStage(REPORT_RESULTS);
         }
+    }
+
+    @Override
+    public void reportResults() {
+        m_clock.setTickStage(AWAIT_INPUT);
+        m_gameContext.render().markDirty();
     }
 
     @Override

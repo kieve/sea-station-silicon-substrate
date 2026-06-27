@@ -46,12 +46,12 @@ public class BlockPanel extends VBox {
                 return;
             }
 
-            Color color = m_colorResolver.resolve(blockDef.bpId());
+            Color color = m_colorResolver.resolve(blockDef);
             var swatch = new Rectangle(12, 12, color);
             swatch.setStroke(Color.gray(0.5));
             swatch.setStrokeWidth(0.5);
 
-            char glyph = m_glyphResolver.resolve(blockDef.bpId());
+            char glyph = m_glyphResolver.resolve(blockDef);
 
             var label = new EditorLabel(name + " (");
             label.setPadding(new Insets(0, 0, 0, 6));

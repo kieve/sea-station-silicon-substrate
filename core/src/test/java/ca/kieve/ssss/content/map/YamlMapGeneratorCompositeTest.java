@@ -8,6 +8,7 @@ import ca.kieve.ssss.content.ComponentDefinition;
 import ca.kieve.ssss.content.ContentLoader;
 import ca.kieve.ssss.content.ContentRegistry;
 import ca.kieve.ssss.content.MapEntityDefinition;
+import ca.kieve.ssss.context.FluidContext;
 import ca.kieve.ssss.context.MapContext;
 import ca.kieve.ssss.context.WorldContext;
 import ca.kieve.ssss.testharness.HeadlessGdxBootstrap;
@@ -29,6 +30,7 @@ class YamlMapGeneratorCompositeTest {
     private ContentRegistry content;
     private MapContext mapContext;
     private WorldContext worldContext;
+    private FluidContext fluidContext;
 
     @BeforeEach
     void setUp() {
@@ -36,13 +38,14 @@ class YamlMapGeneratorCompositeTest {
         content = new ContentLoader().loadAll();
         mapContext = new MapContext();
         worldContext = new WorldContext();
+        fluidContext = new FluidContext();
     }
 
     @Test
     void twoRoomsOffsetSizesWorldToTheUnion() {
         YamlMapGenerator gen = new YamlMapGenerator("test/composite/two_rooms_offset.yaml");
 
-        gen.generate(content.getBlockTypeFactory(), mapContext, worldContext);
+        gen.generate(content.getBlockTypeFactory(), mapContext, worldContext, fluidContext);
         WorldModel world = worldContext.getModel();
 
         // leaf_a (3x3x1) at (0,0,0) ∪ leaf_b (3x3x1) at (3,0,0) → 6x3x1
@@ -55,7 +58,7 @@ class YamlMapGeneratorCompositeTest {
     void twoRoomsOffsetRegistersOneRegionPerLeaf() {
         YamlMapGenerator gen = new YamlMapGenerator("test/composite/two_rooms_offset.yaml");
 
-        gen.generate(content.getBlockTypeFactory(), mapContext, worldContext);
+        gen.generate(content.getBlockTypeFactory(), mapContext, worldContext, fluidContext);
 
         // pure-composition root contributes no region; only the two leafs
         assertEquals(2, mapContext.getRegions().size());
@@ -68,7 +71,7 @@ class YamlMapGeneratorCompositeTest {
     void regionAtConsultsCellStampsAfterComposite() {
         YamlMapGenerator gen = new YamlMapGenerator("test/composite/two_rooms_offset.yaml");
 
-        gen.generate(content.getBlockTypeFactory(), mapContext, worldContext);
+        gen.generate(content.getBlockTypeFactory(), mapContext, worldContext, fluidContext);
 
         var leafA = mapContext.regionAt(new Vec3i(0, 0, 0));
         var leafB = mapContext.regionAt(new Vec3i(3, 0, 0));
@@ -84,7 +87,7 @@ class YamlMapGeneratorCompositeTest {
     void connectorModeYieldsExpectedWorld() {
         YamlMapGenerator gen = new YamlMapGenerator("test/composite/two_rooms_connector.yaml");
 
-        gen.generate(content.getBlockTypeFactory(), mapContext, worldContext);
+        gen.generate(content.getBlockTypeFactory(), mapContext, worldContext, fluidContext);
         WorldModel world = worldContext.getModel();
 
         // leaf_a at (0,0,0) ∪ leaf_b at (6,0,0) → 9x3x1
@@ -100,7 +103,7 @@ class YamlMapGeneratorCompositeTest {
     void nestedThreeDeepPlacesLeafAtComposedOffset() {
         YamlMapGenerator gen = new YamlMapGenerator("test/composite/nested_three_deep.yaml");
 
-        gen.generate(content.getBlockTypeFactory(), mapContext, worldContext);
+        gen.generate(content.getBlockTypeFactory(), mapContext, worldContext, fluidContext);
 
         var leaf = mapContext.regionAt(new Vec3i(1, 1, 0));
         assertNotNull(leaf);
@@ -114,7 +117,8 @@ class YamlMapGeneratorCompositeTest {
 
         IllegalStateException ex = assertThrows(
             IllegalStateException.class,
-            () -> gen.generate(content.getBlockTypeFactory(), mapContext, worldContext)
+            () -> gen
+                .generate(content.getBlockTypeFactory(), mapContext, worldContext, fluidContext)
         );
         assertTrue(
             ex.getMessage().toLowerCase().contains("overlap"),
@@ -126,7 +130,7 @@ class YamlMapGeneratorCompositeTest {
     void overlapAllowedYieldsLastWriterWins() {
         YamlMapGenerator gen = new YamlMapGenerator("test/composite/overlap_allowed.yaml");
 
-        gen.generate(content.getBlockTypeFactory(), mapContext, worldContext);
+        gen.generate(content.getBlockTypeFactory(), mapContext, worldContext, fluidContext);
 
         // Cells (1..2, *, 0) are claimed by both; "second" (placed last)
         // owns them after last-writer-wins.
@@ -145,7 +149,7 @@ class YamlMapGeneratorCompositeTest {
             "test/composite/composition_with_entity_child.yaml"
         );
 
-        gen.generate(content.getBlockTypeFactory(), mapContext, worldContext);
+        gen.generate(content.getBlockTypeFactory(), mapContext, worldContext, fluidContext);
         MapEntityDefinition player = gen.getEntities().get(0);
 
         ComponentDefinition pos = player.components().stream()

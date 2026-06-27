@@ -3,3 +3,11 @@ enum field editor
 Break out ComponentPanel into most individual files
 
 relaunch editor button?
+
+When trying to "move" an entity with no position component override, it should add one
+
+Be able to "label" entities in the editor with custom names/labels/description only displayed in the editor
+
+Searchable filter when adding component overrides
+
+When saving a new map, it should be added to the "launch maps" dropdown

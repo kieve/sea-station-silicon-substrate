@@ -1,0 +1,37 @@
+---
+blocks:
+  air:
+    bpId: air
+    layoutChar: a
+  wall:
+    bpId: block_steel
+    layoutChar: '#'
+layers:
+  "0": |
+    ######
+    ######
+    ######
+    ######
+    ######
+  "1": |
+    ######
+    aaaaaa
+    ######
+    ######
+    ######
+floorGlyph: interpunct
+entities:
+- id: door
+  components:
+  - type: Position
+    x: 2
+    "y": 1
+    z: 1
+- id: door
+  components:
+  - type: Position
+    x: 5
+    "y": 1
+    z: 1
+  - type: Lockable
+    isLocked: "true"

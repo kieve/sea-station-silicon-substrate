@@ -13,16 +13,30 @@ public class DebugContext {
     private final List<Toggle> m_toggles;
 
     private boolean m_debugGrid = false;
+    private boolean m_showWaterDepth = false;
+    private boolean m_fullVision = false;
     private int m_selectedIndex = 0;
 
     public DebugContext() {
         var toggles = new ArrayList<Toggle>();
         toggles.add(new Toggle("Debug Grid", () -> m_debugGrid, v -> m_debugGrid = v));
+        toggles.add(
+            new Toggle("Show Water Depth", () -> m_showWaterDepth, v -> m_showWaterDepth = v)
+        );
+        toggles.add(new Toggle("Full Vision", () -> m_fullVision, v -> m_fullVision = v));
         m_toggles = Collections.unmodifiableList(toggles);
     }
 
     public boolean isDebugGrid() {
         return m_debugGrid;
+    }
+
+    public boolean isShowWaterDepth() {
+        return m_showWaterDepth;
+    }
+
+    public boolean isFullVision() {
+        return m_fullVision;
     }
 
     public int getSelectedIndex() {

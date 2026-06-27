@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import ca.kieve.ssss.content.ContentLoader;
 import ca.kieve.ssss.content.ContentRegistry;
 import ca.kieve.ssss.content.map.YamlMapGenerator;
+import ca.kieve.ssss.context.FluidContext;
 import ca.kieve.ssss.context.MapContext;
 import ca.kieve.ssss.context.WorldContext;
 import ca.kieve.ssss.testharness.HeadlessGdxBootstrap;
@@ -145,7 +146,8 @@ class RegionGraphTest {
     private void loadComposite(String mapPath) {
         YamlMapGenerator gen = new YamlMapGenerator(mapPath);
         WorldContext worldContext = new WorldContext();
-        gen.generate(content.getBlockTypeFactory(), mapContext, worldContext);
+        FluidContext fluidContext = new FluidContext();
+        gen.generate(content.getBlockTypeFactory(), mapContext, worldContext, fluidContext);
         world = worldContext.getModel();
     }
 }

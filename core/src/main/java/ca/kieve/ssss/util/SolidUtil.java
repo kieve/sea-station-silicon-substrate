@@ -7,8 +7,10 @@ import ca.kieve.ssss.component.Openable;
 import ca.kieve.ssss.component.Size;
 import ca.kieve.ssss.component.Solid;
 import ca.kieve.ssss.component.Velocity;
+import ca.kieve.ssss.context.FluidContext;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.context.PositionContext;
+import ca.kieve.ssss.world.WorldModel;
 
 /**
  * Utility methods for checking solid entities at positions.
@@ -173,6 +175,26 @@ public final class SolidUtil {
             }
         }
         return false;
+    }
+
+    public static boolean hasSupport(GameContext context, Vec3i pos) {
+        Vec3i below = pos.add(Vec3i.DOWN);
+
+        WorldModel world = context.world().getModel();
+        if (world != null) {
+            if (!world.isInBounds(below)) {
+                return true;
+            }
+            if (world.isSolid(below)) {
+                return true;
+            }
+        }
+
+        FluidContext fluid = context.fluid();
+        if (fluid.getLevel(below) >= FluidContext.MAX_LEVEL) {
+            return true;
+        }
+        return fluid.hasWater(pos);
     }
 
     /**

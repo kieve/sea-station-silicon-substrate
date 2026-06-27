@@ -7,14 +7,11 @@ import ca.kieve.ssss.component.Descriptor;
 import ca.kieve.ssss.component.Equipment;
 import ca.kieve.ssss.component.Health;
 import ca.kieve.ssss.component.LastAttacker;
-import ca.kieve.ssss.component.Player;
-import ca.kieve.ssss.component.PlayerController;
 import ca.kieve.ssss.component.Socket;
-import ca.kieve.ssss.component.SocketPlug;
-import ca.kieve.ssss.component.Socketable;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.event.AttackEvent;
-import ca.kieve.ssss.event.EjectEvent;
+import ca.kieve.ssss.util.NameUtil;
+import ca.kieve.ssss.util.SocketUtil;
 
 public class AttackSystem extends System {
     public AttackSystem(GameContext gameContext) {
@@ -67,8 +64,8 @@ public class AttackSystem extends System {
         // Track who attacked this entity for use in AI behaviors
         trackLastAttacker(targetEntity, attackerEntity);
 
-        var attackerName = getEntityName(attackerEntity);
-        var targetName = getEntityName(targetEntity);
+        var attackerName = NameUtil.nameOf(m_gameContext.ecs(), attackerEntity);
+        var targetName = NameUtil.nameOf(m_gameContext.ecs(), targetEntity);
 
         m_gameContext.log().log(
             attackerName + " hit " + targetName + " for " + damage
@@ -99,42 +96,15 @@ public class AttackSystem extends System {
             socket.socketedHp = 0;
         }
 
-        var attackerName = getEntityName(attackerEntity);
+        var attackerName = NameUtil.nameOf(m_gameContext.ecs(), attackerEntity);
 
         m_gameContext.log().log(
             attackerName + " hit You for " + damage + " damage with " + weaponName + "!"
         );
 
         if (socket.socketedHp == 0) {
-            handleSocketedDeath(targetEntity, socket);
+            SocketUtil.handleSocketedDeath(m_gameContext, targetEntity, socket);
         }
-    }
-
-    private void handleSocketedDeath(Entity bodyEntity, Socket socket) {
-        var playerEntity = socket.socketedEntity;
-        if (playerEntity == null) {
-            return;
-        }
-
-        var socketPlug = playerEntity.get(SocketPlug.class);
-        if (socketPlug == null) {
-            return;
-        }
-
-        m_gameContext.log().log("Your robotic body is destroyed! You are forcibly ejected!");
-
-        // Mark mech as permanently destroyed
-        socket.destroyed = true;
-
-        // Remove Socketable so it can't be re-entered
-        if (bodyEntity.has(Socketable.class)) {
-            bodyEntity.removeType(Socketable.class);
-        }
-
-        // Post eject event to be processed by SocketSystem
-        m_gameContext.events().addEvent(
-            new EjectEvent(playerEntity, socketPlug, bodyEntity, socket)
-        );
     }
 
     private void trackLastAttacker(Entity targetEntity, Entity attackerEntity) {
@@ -144,30 +114,5 @@ public class AttackSystem extends System {
         } else {
             lastAttacker.attacker = attackerEntity;
         }
-    }
-
-    private String getEntityName(Entity entity) {
-        // Check if this is the player (either directly or via socketed body)
-        if (entity.has(PlayerController.class) || entity.has(Player.class)) {
-            return "You";
-        }
-
-        // Check if this entity is currently being controlled by the player
-        var playerResults = m_gameContext.ecs().findEntitiesWith(Player.class);
-        for (var result : playerResults) {
-            var playerEntity = result.entity();
-            var socketPlug = playerEntity.get(SocketPlug.class);
-            if (socketPlug != null && socketPlug.currentBody == entity) {
-                return "You";
-            }
-        }
-
-        // Otherwise use the entity's descriptor name
-        var descriptor = entity.get(Descriptor.class);
-        if (descriptor != null) {
-            return descriptor.name();
-        }
-
-        return "something";
     }
 }

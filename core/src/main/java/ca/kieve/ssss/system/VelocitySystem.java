@@ -42,6 +42,9 @@ public class VelocitySystem extends System {
                 if (SolidUtil.isBlockedFor(m_gameContext, newPos, entity)) {
                     return;
                 }
+                if (!SolidUtil.hasSupport(m_gameContext, newPos)) {
+                    return;
+                }
 
                 pos.set(newPos);
                 m_gameContext.pos().move(entity, oldPos, pos);

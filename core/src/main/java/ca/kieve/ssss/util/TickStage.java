@@ -4,5 +4,6 @@ public enum TickStage {
     AWAIT_INPUT,
     PRE_TICK,
     TICK,
-    POST_TICK
+    POST_TICK,
+    REPORT_RESULTS
 }

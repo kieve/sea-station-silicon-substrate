@@ -69,3 +69,18 @@ glyphs:
     character: '-'
     offsetX: 8.0
     offsetY: -6.0
+  water_1:
+    font: unifont_32
+    character: '~'
+    offsetX: 8.0
+    offsetY: -15.0
+  water_3:
+    font: unifont_32
+    character: '≈'
+    offsetX: 9.0
+    offsetY: -7.0
+  water_5:
+    font: unifont_32
+    character: '≋'
+    offsetX: 8.0
+    offsetY: -7.0

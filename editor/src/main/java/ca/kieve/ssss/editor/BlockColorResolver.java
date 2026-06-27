@@ -5,6 +5,9 @@ import javafx.scene.paint.Color;
 import ca.kieve.ssss.component.ColorComp;
 import ca.kieve.ssss.content.ComponentDefinition;
 import ca.kieve.ssss.content.ContentRegistry;
+import ca.kieve.ssss.content.MapBlockDefinition;
+import ca.kieve.ssss.context.FluidContext;
+import ca.kieve.ssss.render.WaterGlyphs;
 
 import java.util.List;
 
@@ -13,6 +16,22 @@ public class BlockColorResolver {
 
     public BlockColorResolver(ContentRegistry registry) {
         m_registry = registry;
+    }
+
+    public Color resolve(MapBlockDefinition def) {
+        if (def.waterDepth() != null && def.waterDepth() > 0) {
+            return waterColor(FluidContext.MAX_LEVEL);
+        }
+        Double fill = def.waterFill();
+        if (fill != null && fill > 0) {
+            return waterColor(FluidContext.levelForMass(fill));
+        }
+        return resolve(def.bpId());
+    }
+
+    private static Color waterColor(int level) {
+        com.badlogic.gdx.graphics.Color c = WaterGlyphs.colorForLevel(level);
+        return new Color(c.r, c.g, c.b, c.a);
     }
 
     public Color resolve(String bpId) {

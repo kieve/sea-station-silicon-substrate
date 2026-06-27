@@ -1,54 +1,58 @@
 ---
 blocks:
-  air:
+  Water 7:
     bpId: air
     layoutChar: a
+    waterFill: 1.0
+  air:
+    bpId: air
+    layoutChar: b
   floor:
     bpId: block_steel
-    layoutChar: b
+    layoutChar: c
   wall:
     bpId: block_steel
-    layoutChar: c
+    layoutChar: d
 layers:
   "0": |
-    bbbbbbbbbbbb
-    bbbbbbbbbbbb
-    cccccccbbbbb
-    cbbbbbcbbbbb
-    cbbbbbcbbbbb
-    bbbbbbcbbbbb
-    cbbbbbbbbbbb
-    cbbbbbbbbbbb
-    ccccccbbbbbb
-    bbbbbbbbbbbb
-    bbbbbbbbbbbb
-    bbbbbbbbbbbb
+    cccccccccccc
+    cccccccccccc
+    dddddddccccc
+    dcccccdccccc
+    dcccccdccccc
+    ccccccdccccc
+    dccccccccccc
+    dccccccccccc
+    ddddddcccccc
+    cccccccccccc
+    cccccccccccc
+    cccccccccccc
   "1": |
-    bbbbbbbbbbbb
-    baaaaaaaaaab
-    caaaaaaaaaab
-    caaaaaaaaaab
-    caaaaaaaaaab
-    aaaaaaaaaaab
-    caaaaaaaaaab
-    caaaaaaaaaab
-    caaaaaaaaaab
-    baaaaaaaaaab
-    baaaaaaaaaab
-    bbbbbbbbbbbb
+    cccccccccccc
+    cbbbbbbbbbbc
+    daabbbbbbbbc
+    daabbbbbbbbc
+    dbbbbbbbbbbc
+    bbbbbbbbbbbc
+    dbbbbbbbbbbc
+    dbbbbbbbbbbc
+    dbbbbbbbbbbc
+    cbbbbbbbbbbc
+    cbbbbbbbbbbc
+    cccccccccccc
   "2": |
-    bbbbbbbbbbbb
-    bbbbbbbbbbbb
-    cccccccbbbbb
-    cccccccbbbbb
-    cccccccbbbbb
-    cccccccbbbbb
-    cccccccbbbbb
-    cccccccbbbbb
-    cccccccbbbbb
-    bbbbbbbbbbbb
-    bbbbbbbbbbbb
-    bbbbbbbbbbbb
+    cccccccccccc
+    cccccccccccc
+    dddddddccccc
+    dddddddccccc
+    dddddddccccc
+    dddddddccccc
+    dddddddccccc
+    dddddddccccc
+    dddddddccccc
+    cccccccccccc
+    cccccccccccc
+    cccccccccccc
 floorGlyph: interpunct
 entities: []
 connectors:

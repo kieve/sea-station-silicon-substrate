@@ -120,40 +120,31 @@ class PathingContextTest {
 
     @Test
     void startOutsideAnyRegionReturnsNull() {
-        TestEngine engine = TestEngine.create("home_base/sub_complex.yaml");
-        // (15, 1, 1) is in the unstamped gap north of maintenance_sub —
-        // inside the world bounds but not claimed by any region.
-        Vec3i outside = new Vec3i(15, 1, 1);
-        Vec3i insideMaintenance = new Vec3i(14, 5, 1);
+        TestEngine engine = TestEngine.create("test/composite/two_rooms_doors.yaml");
+        Vec3i outside = new Vec3i(8, 3, 1);
+        Vec3i insideEast = new Vec3i(8, 1, 1);
 
-        Coord next = engine.context().pathing().findNextStep(outside, insideMaintenance);
+        Coord next = engine.context().pathing().findNextStep(outside, insideEast);
 
         assertNull(next);
     }
 
     @Test
     void lockedDoorAtPortalBlocksCrossRegion() {
-        TestEngine engine = TestEngine.create("home_base/sub_complex.yaml");
-        // The only portal between the two regions is the door at
-        // (11, 5, 1) and it's closed-and-locked at load time. The
-        // per-mover predicate must reject it.
-        Vec3i fromPortalSide = new Vec3i(11, 5, 1);
-        Vec3i intoMaintenance = new Vec3i(14, 5, 1);
+        TestEngine engine = TestEngine.create("test/composite/two_rooms_doors.yaml");
+        Vec3i fromPortalSide = new Vec3i(5, 1, 1);
+        Vec3i intoEast = new Vec3i(8, 1, 1);
 
-        Coord next = engine.context().pathing().findNextStep(fromPortalSide, intoMaintenance);
+        Coord next = engine.context().pathing().findNextStep(fromPortalSide, intoEast);
 
         assertNull(next, "closed/locked door must block cross-region pathing");
     }
 
     @Test
     void closedDoorBlocksWithinRegionPath() {
-        TestEngine engine = TestEngine.create("home_base/sub_complex.yaml");
-        // damaged_sub has an interior door at (3, 5, 1). The corridor at
-        // y=5 is the only east-west route; walls flank the door at
-        // (3, 4) and (3, 6). With the door closed (its default), pathing
-        // west to (1, 5, 1) is impossible.
-        Vec3i start = new Vec3i(5, 5, 1);
-        Vec3i westOfDoor = new Vec3i(1, 5, 1);
+        TestEngine engine = TestEngine.create("test/composite/two_rooms_doors.yaml");
+        Vec3i start = new Vec3i(4, 1, 1);
+        Vec3i westOfDoor = new Vec3i(0, 1, 1);
 
         Coord next = engine.context().pathing().findNextStep(start, westOfDoor);
 
@@ -162,11 +153,11 @@ class PathingContextTest {
 
     @Test
     void openDoorAllowsWithinRegionPath() {
-        TestEngine engine = TestEngine.create("home_base/sub_complex.yaml");
-        openDoorAt(engine, new Vec3i(3, 5, 1));
+        TestEngine engine = TestEngine.create("test/composite/two_rooms_doors.yaml");
+        openDoorAt(engine, new Vec3i(2, 1, 1));
 
-        Vec3i start = new Vec3i(5, 5, 1);
-        Vec3i westOfDoor = new Vec3i(1, 5, 1);
+        Vec3i start = new Vec3i(4, 1, 1);
+        Vec3i westOfDoor = new Vec3i(0, 1, 1);
 
         Coord next = engine.context().pathing().findNextStep(start, westOfDoor);
 
@@ -176,17 +167,17 @@ class PathingContextTest {
 
     @Test
     void openDoorAtPortalAllowsCrossRegion() {
-        TestEngine engine = TestEngine.create("home_base/sub_complex.yaml");
-        openDoorAt(engine, new Vec3i(11, 5, 1));
+        TestEngine engine = TestEngine.create("test/composite/two_rooms_doors.yaml");
+        openDoorAt(engine, new Vec3i(5, 1, 1));
 
-        Vec3i fromPortalSide = new Vec3i(11, 5, 1);
-        Vec3i intoMaintenance = new Vec3i(14, 5, 1);
+        Vec3i fromPortalSide = new Vec3i(5, 1, 1);
+        Vec3i intoEast = new Vec3i(8, 1, 1);
 
-        Coord next = engine.context().pathing().findNextStep(fromPortalSide, intoMaintenance);
+        Coord next = engine.context().pathing().findNextStep(fromPortalSide, intoEast);
 
         assertNotNull(next, "open door must let cross-region pathing through");
-        assertEquals(12, next.x);
-        assertEquals(5, next.y);
+        assertEquals(6, next.x);
+        assertEquals(1, next.y);
     }
 
     private static void openDoorAt(TestEngine engine, Vec3i pos) {

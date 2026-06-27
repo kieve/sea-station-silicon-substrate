@@ -10,6 +10,9 @@ components:
   - type: Examinable
   - type: RenderingHint
     zIndex: 0
+  - type: FluidBarrier
+    barrierHeight: 10
+    flowResistance: 10
 
 ---
 parents: [block]

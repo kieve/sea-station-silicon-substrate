@@ -1,0 +1,31 @@
+---
+blocks:
+  air:
+    bpId: air
+    layoutChar: a
+  floor:
+    bpId: block_stone
+    layoutChar: d
+  water_full:
+    layoutChar: W
+    waterFill: 1.0
+  water_pool:
+    layoutChar: p
+    waterFill: 0.5
+layers:
+  "0": |
+    ddd
+    ddd
+    ddd
+  "1": |
+    aaa
+    aWp
+    aaa
+floorGlyph: interpunct
+entities:
+- id: player
+  components:
+  - type: Position
+    x: 0
+    "y": 0
+    z: 1

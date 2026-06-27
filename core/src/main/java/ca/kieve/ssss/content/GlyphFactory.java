@@ -15,7 +15,7 @@ import static ca.kieve.ssss.ui.widget.GameWindow.TILE_SIZE;
 import static com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.DEFAULT_CHARS;
 
 public class GlyphFactory {
-    private static final String EXTRA_CHARS = "█";
+    private static final String EXTRA_CHARS = "█≈≋";
 
     private final ContentRegistry m_registry;
     private final boolean m_headless;

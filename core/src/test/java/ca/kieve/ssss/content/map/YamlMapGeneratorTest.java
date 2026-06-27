@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import ca.kieve.ssss.content.ContentLoader;
 import ca.kieve.ssss.content.ContentRegistry;
+import ca.kieve.ssss.context.FluidContext;
 import ca.kieve.ssss.context.MapContext;
 import ca.kieve.ssss.context.WorldContext;
 import ca.kieve.ssss.testharness.HeadlessGdxBootstrap;
@@ -26,6 +27,7 @@ class YamlMapGeneratorTest {
     private ContentRegistry content;
     private MapContext mapContext;
     private WorldContext worldContext;
+    private FluidContext fluidContext;
 
     @BeforeEach
     void setUp() {
@@ -33,13 +35,14 @@ class YamlMapGeneratorTest {
         content = new ContentLoader().loadAll();
         mapContext = new MapContext();
         worldContext = new WorldContext();
+        fluidContext = new FluidContext();
     }
 
     @Test
     void generateProducesWorldWithExpectedDimensions() {
         YamlMapGenerator generator = new YamlMapGenerator("test/empty.yaml");
 
-        generator.generate(content.getBlockTypeFactory(), mapContext, worldContext);
+        generator.generate(content.getBlockTypeFactory(), mapContext, worldContext, fluidContext);
         WorldModel world = worldContext.getModel();
 
         // test/empty.yaml is a 9×9 grid with 3 z-layers
@@ -52,7 +55,7 @@ class YamlMapGeneratorTest {
     void generateRegistersSingleRegionWithExpectedFields() {
         YamlMapGenerator generator = new YamlMapGenerator("test/empty.yaml");
 
-        generator.generate(content.getBlockTypeFactory(), mapContext, worldContext);
+        generator.generate(content.getBlockTypeFactory(), mapContext, worldContext, fluidContext);
         var regions = mapContext.getRegions();
 
         assertEquals(1, regions.size());
@@ -66,7 +69,7 @@ class YamlMapGeneratorTest {
     void regionContainsAllWorldCells() {
         YamlMapGenerator generator = new YamlMapGenerator("test/empty.yaml");
 
-        generator.generate(content.getBlockTypeFactory(), mapContext, worldContext);
+        generator.generate(content.getBlockTypeFactory(), mapContext, worldContext, fluidContext);
         MapRegion region = mapContext.getRegions().get(0);
 
         assertTrue(region.contains(new Vec3i(0, 0, 0)));
@@ -78,7 +81,7 @@ class YamlMapGeneratorTest {
     void getFloorGlyphIdPreservedFromYaml() {
         YamlMapGenerator generator = new YamlMapGenerator("test/empty.yaml");
 
-        generator.generate(content.getBlockTypeFactory(), mapContext, worldContext);
+        generator.generate(content.getBlockTypeFactory(), mapContext, worldContext, fluidContext);
 
         assertEquals("interpunct", generator.getFloorGlyphId());
     }
@@ -87,11 +90,35 @@ class YamlMapGeneratorTest {
     void getEntitiesPreservedFromYaml() {
         YamlMapGenerator generator = new YamlMapGenerator("test/empty.yaml");
 
-        generator.generate(content.getBlockTypeFactory(), mapContext, worldContext);
+        generator.generate(content.getBlockTypeFactory(), mapContext, worldContext, fluidContext);
         var entities = generator.getEntities();
 
         assertNotNull(entities);
         assertEquals(1, entities.size());
         assertEquals("player", entities.get(0).id());
+    }
+
+    @Test
+    void waterLevelCharsSeedFluidField() {
+        YamlMapGenerator generator = new YamlMapGenerator("test/water.yaml");
+
+        generator.generate(content.getBlockTypeFactory(), mapContext, worldContext, fluidContext);
+
+        assertEquals(4, fluidContext.getLevel(new Vec3i(1, 1, 1)));
+        assertEquals(2, fluidContext.getLevel(new Vec3i(2, 1, 1)));
+        assertEquals(0, fluidContext.getLevel(new Vec3i(0, 1, 1)));
+        assertEquals(1.5, fluidContext.totalVolume(), 1e-9);
+    }
+
+    @Test
+    void waterCellsStayPassableAir() {
+        YamlMapGenerator generator = new YamlMapGenerator("test/water.yaml");
+
+        generator.generate(content.getBlockTypeFactory(), mapContext, worldContext, fluidContext);
+        WorldModel world = worldContext.getModel();
+
+        assertTrue(world.isAir(new Vec3i(1, 1, 1)));
+        assertTrue(world.isPassable(new Vec3i(1, 1, 1)));
+        assertNotNull(mapContext.regionAt(new Vec3i(1, 1, 1)));
     }
 }

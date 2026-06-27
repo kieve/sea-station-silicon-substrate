@@ -1,0 +1,29 @@
+---
+blocks:
+  air:
+    bpId: air
+    layoutChar: a
+  floor:
+    bpId: block_stone
+    layoutChar: d
+layers:
+  "0": |
+    ddddd
+    ddddd
+    ddadd
+    ddddd
+    ddddd
+  "1": |
+    ddddd
+    daaad
+    daaad
+    daaad
+    ddddd
+floorGlyph: interpunct
+entities:
+- id: player
+  components:
+  - type: Position
+    x: 2
+    "y": 1
+    z: 1

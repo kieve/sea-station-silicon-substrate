@@ -1,0 +1,18 @@
+---
+blocks:
+  air:
+    bpId: air
+    layoutChar: a
+  wall:
+    bpId: block_steel
+    layoutChar: '#'
+layers:
+  "0": |
+    ######
+    ######
+    ######
+  "1": |
+    ######
+    aaaaaa
+    ######
+floorGlyph: interpunct

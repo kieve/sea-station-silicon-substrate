@@ -84,7 +84,7 @@ public class MapViewPanel extends BorderPane {
         m_model = EditorMapModel.fromDefinition(mapDef, mapFile);
 
         m_renderer = new MapRenderer();
-        m_renderer.updateNameToBpId(m_model.buildNameToBpIdMap());
+        m_renderer.updateBlocks(m_model.getBlocks());
 
         m_panCanvas = new PanCanvas();
         m_panCanvas.setOnRedraw(this::redraw);
@@ -601,7 +601,7 @@ public class MapViewPanel extends BorderPane {
     }
 
     public void refreshBlockTypes() {
-        m_renderer.updateNameToBpId(m_model.buildNameToBpIdMap());
+        m_renderer.updateBlocks(m_model.getBlocks());
         m_panCanvas.requestRedraw();
     }
 

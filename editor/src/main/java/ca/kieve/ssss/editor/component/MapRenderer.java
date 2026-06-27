@@ -6,6 +6,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 
+import ca.kieve.ssss.content.MapBlockDefinition;
 import ca.kieve.ssss.editor.BlockColorResolver;
 import ca.kieve.ssss.editor.BlockGlyphResolver;
 import ca.kieve.ssss.editor.EditorContext;
@@ -49,7 +50,7 @@ public class MapRenderer {
     private final BlockColorResolver m_colorResolver;
     private final BlockGlyphResolver m_glyphResolver;
 
-    private Map<String, String> m_nameToBpId = Map.of();
+    private Map<String, MapBlockDefinition> m_nameToBlock = Map.of();
     private List<EntityMarker> m_entityMarkers = List.of();
     private List<EntityMarker> m_submapEntityMarkers = List.of();
     private List<ComposedWorld.Cell> m_submapCells = List.of();
@@ -72,8 +73,8 @@ public class MapRenderer {
         m_glyphResolver = ctx.getGlyphResolver();
     }
 
-    public void updateNameToBpId(Map<String, String> nameToBpId) {
-        m_nameToBpId = nameToBpId;
+    public void updateBlocks(Map<String, MapBlockDefinition> nameToBlock) {
+        m_nameToBlock = nameToBlock;
     }
 
     public void loadEntities(List<EntityMarker> markers) {
@@ -232,12 +233,12 @@ public class MapRenderer {
                 continue;
             }
 
-            String bpId = m_nameToBpId.get(blockName);
+            MapBlockDefinition def = m_nameToBlock.get(blockName);
             Color color;
             char glyph;
-            if (bpId != null) {
-                color = m_colorResolver.resolve(bpId);
-                glyph = m_glyphResolver.resolve(bpId);
+            if (def != null) {
+                color = m_colorResolver.resolve(def);
+                glyph = m_glyphResolver.resolve(def);
             } else {
                 color = Color.MAGENTA;
                 glyph = '?';

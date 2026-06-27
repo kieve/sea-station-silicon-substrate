@@ -19,6 +19,7 @@ import ca.kieve.ssss.system.DebugRectRenderSystem;
 import ca.kieve.ssss.system.EjectSystem;
 import ca.kieve.ssss.system.EventSystem;
 import ca.kieve.ssss.system.ExamineSystem;
+import ca.kieve.ssss.system.FluidSystem;
 import ca.kieve.ssss.system.InteractMenuSystem;
 import ca.kieve.ssss.system.InteractSystem;
 import ca.kieve.ssss.system.InventorySystem;
@@ -33,6 +34,7 @@ import ca.kieve.ssss.system.TileHighlightRenderSystem;
 import ca.kieve.ssss.system.VelocitySystem;
 import ca.kieve.ssss.system.VisionSystem;
 import ca.kieve.ssss.system.WasdSystem;
+import ca.kieve.ssss.system.WaterDamageSystem;
 import ca.kieve.ssss.system.ai.AiControllerSystem;
 import ca.kieve.ssss.world.WorldEntityFactory;
 
@@ -46,7 +48,8 @@ public class GameEngine {
         gameContext.mapGenerator().generate(
             gameContext.blockTypes(),
             gameContext.map(),
-            gameContext.world()
+            gameContext.world(),
+            gameContext.fluid()
         );
 
         var inputActionController = new InputActionController(gameContext);
@@ -73,6 +76,8 @@ public class GameEngine {
                 new AiControllerSystem(m_gameContext),
                 new AttackSystem(m_gameContext),
                 new VelocitySystem(m_gameContext),
+                new FluidSystem(m_gameContext),
+                new WaterDamageSystem(m_gameContext),
                 new CameraSystem(m_gameContext),
                 new VisionSystem(m_gameContext),
                 new SanityCheckSystem(m_gameContext),

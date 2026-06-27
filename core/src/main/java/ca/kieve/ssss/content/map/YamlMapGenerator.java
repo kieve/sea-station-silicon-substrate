@@ -5,6 +5,7 @@ import ca.kieve.ssss.content.BlockTypeFactory;
 import ca.kieve.ssss.content.ComponentDefinition;
 import ca.kieve.ssss.content.MapBlockDefinition;
 import ca.kieve.ssss.content.MapEntityDefinition;
+import ca.kieve.ssss.context.FluidContext;
 import ca.kieve.ssss.context.MapContext;
 import ca.kieve.ssss.context.WorldContext;
 import ca.kieve.ssss.util.Vec3i;
@@ -45,7 +46,8 @@ public class YamlMapGenerator implements MapGenerator {
     public void generate(
         BlockTypeFactory blockTypeFactory,
         MapContext mapContext,
-        WorldContext worldContext
+        WorldContext worldContext,
+        FluidContext fluidContext
     ) {
         List<CompositeMapLoader.Placement> placements = m_loader.load(m_rootMapPath);
         m_floorGlyph = placements.get(0).definition().floorGlyph();
@@ -64,6 +66,7 @@ public class YamlMapGenerator implements MapGenerator {
             blockTypeFactory
         );
         mapContext.init(worldBounds);
+        fluidContext.init(worldBounds);
 
         Map<String, MapRegion> regionsById = new HashMap<>();
         for (CompositeMapLoader.Placement p : placements) {
@@ -80,7 +83,7 @@ public class YamlMapGenerator implements MapGenerator {
             if (region == null) {
                 continue;
             }
-            stampPlacement(p, region, world, mapContext);
+            stampPlacement(p, region, world, mapContext, fluidContext);
         }
 
         m_translatedEntities = collectTranslatedEntities(placements);
@@ -120,9 +123,10 @@ public class YamlMapGenerator implements MapGenerator {
         CompositeMapLoader.Placement placement,
         MapRegion region,
         WorldModel world,
-        MapContext mapContext
+        MapContext mapContext,
+        FluidContext fluidContext
     ) {
-        Map<Character, String> charMap = buildCharMap(placement.definition().blocks());
+        Map<Character, MapBlockDefinition> charMap = buildCharMap(placement.definition().blocks());
         Vec3i offset = placement.worldOffset();
 
         for (Map.Entry<String, String> layerEntry : placement.definition().layers().entrySet()) {
@@ -131,8 +135,8 @@ public class YamlMapGenerator implements MapGenerator {
             for (int localY = 0; localY < lines.length; localY++) {
                 String line = lines[localY];
                 for (int localX = 0; localX < line.length(); localX++) {
-                    String blockType = charMap.get(line.charAt(localX));
-                    if (blockType == null) {
+                    MapBlockDefinition blockDef = charMap.get(line.charAt(localX));
+                    if (blockDef == null) {
                         continue;
                     }
                     Vec3i worldCell = offset.add(new Vec3i(localX, localY, localZ));
@@ -146,17 +150,27 @@ public class YamlMapGenerator implements MapGenerator {
                             );
                         }
                     }
-                    world.setBlock(worldCell, blockType);
+                    if (blockDef.bpId() != null) {
+                        world.setBlock(worldCell, blockDef.bpId());
+                    }
+                    if (blockDef.waterFill() != null) {
+                        fluidContext.setMass(worldCell, blockDef.waterFill());
+                    }
+                    if (blockDef.waterDepth() != null) {
+                        fluidContext.setSource(worldCell, blockDef.waterDepth());
+                    }
                     mapContext.markOwnership(worldCell, region);
                 }
             }
         }
     }
 
-    private static Map<Character, String> buildCharMap(Map<String, MapBlockDefinition> blocks) {
-        Map<Character, String> result = new HashMap<>();
+    private static Map<Character, MapBlockDefinition> buildCharMap(
+        Map<String, MapBlockDefinition> blocks
+    ) {
+        Map<Character, MapBlockDefinition> result = new HashMap<>();
         for (MapBlockDefinition blockDef : blocks.values()) {
-            result.put(blockDef.layoutChar(), blockDef.bpId());
+            result.put(blockDef.layoutChar(), blockDef);
         }
         return result;
     }

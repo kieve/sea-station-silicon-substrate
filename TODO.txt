@@ -7,3 +7,13 @@
 
 
 - Content -> Blueprint rename
+
+- Break up the TileGlyphRenderSystem
+    Ghost, water, etc. It's doing a lot.
+
+
+
+
+WATER:
+- Maybe the MapBlockDefinition shouldn't have waterFill / waterDepth, and instead that should be a
+  component on blocks?
