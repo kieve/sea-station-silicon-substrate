@@ -11,6 +11,15 @@ import ca.kieve.ssss.input.InputActionController;
 import ca.kieve.ssss.render.DeadTint;
 import ca.kieve.ssss.render.DestroyedBodyTint;
 import ca.kieve.ssss.render.GlyphColorResolver;
+import ca.kieve.ssss.render.glyphs.CellGlyphSource;
+import ca.kieve.ssss.render.glyphs.EntityGlyphSource;
+import ca.kieve.ssss.render.glyphs.WaterSurfaceGlyphSource;
+import ca.kieve.ssss.render.layer.DebugGridLayer;
+import ca.kieve.ssss.render.layer.GhostLayer;
+import ca.kieve.ssss.render.layer.GlyphLayer;
+import ca.kieve.ssss.render.layer.RenderLayer;
+import ca.kieve.ssss.render.layer.WaterDepthLayer;
+import ca.kieve.ssss.render.layer.WaterFillLayer;
 import ca.kieve.ssss.system.AttackSystem;
 import ca.kieve.ssss.system.CameraSystem;
 import ca.kieve.ssss.system.ClockSystem;
@@ -100,11 +109,29 @@ public class GameEngine {
         var glyphColorResolver = new GlyphColorResolver(
             List.of(new DestroyedBodyTint(), new DeadTint())
         );
+        var glyphFactory = m_gameContext.entityFactory().getGlyphFactory();
+        var floorGlyph = glyphFactory.getGlyph(m_gameContext.mapGenerator().getFloorGlyphId());
+        var vision = m_gameContext.vision();
+        var fluid = m_gameContext.fluid();
+        var debug = m_gameContext.debug();
+
+        List<CellGlyphSource> cellGlyphSources = List.of(
+            new EntityGlyphSource(m_gameContext.ecs(), floorGlyph, glyphColorResolver),
+            new WaterSurfaceGlyphSource(fluid, glyphFactory)
+        );
+        List<RenderLayer> renderLayers = List.of(
+            new WaterFillLayer(spriteBatch, fluid, vision),
+            new GlyphLayer(spriteBatch, vision),
+            new GhostLayer(spriteBatch, vision),
+            new WaterDepthLayer(spriteBatch, fluid, vision, debug, floorGlyph),
+            new DebugGridLayer(shapeRenderer, debug)
+        );
         var tileGlyphRenderSystem = new TileGlyphRenderSystem(
             m_gameContext,
             spriteBatch,
             shapeRenderer,
-            glyphColorResolver
+            cellGlyphSources,
+            renderLayers
         );
 
         var debugRectRenderSystem = new DebugRectRenderSystem(m_gameContext, shapeRenderer);

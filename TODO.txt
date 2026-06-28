@@ -17,3 +17,4 @@
 WATER:
 - Maybe the MapBlockDefinition shouldn't have waterFill / waterDepth, and instead that should be a
   component on blocks?
+- Examining / water/ ghosts / memory doesn't work with water
