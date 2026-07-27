@@ -1,9 +1,8 @@
 package ca.kieve.ssss.ui.node;
 
-import ca.kieve.ssss.component.Descriptor;
 import ca.kieve.ssss.context.ExamineContext;
 import ca.kieve.ssss.context.GameContext;
-import ca.kieve.ssss.system.ExamineSystem.ExamineItem;
+import ca.kieve.ssss.system.ExamineSystem;
 import ca.kieve.ssss.ui.core.UiRenderContext;
 
 import java.util.ArrayList;
@@ -33,7 +32,7 @@ public class ExaminePanel extends SelectionPanel {
 
         var crosshair = examineContext.getCrosshairPos();
         var vision = gc.vision();
-        boolean visible = vision.isVisible(crosshair.x, crosshair.y);
+        boolean visible = gc.debug().isFullVision() || vision.isVisible(crosshair.x, crosshair.y);
         boolean explored = vision.isExplored(crosshair.x, crosshair.y, crosshair.z);
 
         m_entityNames.clear();
@@ -47,32 +46,12 @@ public class ExaminePanel extends SelectionPanel {
     }
 
     private void populateFromCurrent(GameContext gc, ExamineContext examineContext) {
-        var items = new ArrayList<ExamineItem>();
-
-        var mainPos = examineContext.getCrosshairPos();
-        var mainEntities = ExamineContext.sortEntitiesByZIndex(gc.pos().getAt(mainPos));
-        for (var entity : mainEntities) {
-            items.add(new ExamineItem(entity, ExamineItem.ItemType.MAIN));
-        }
-
-        var ceilingPos = examineContext.getCeilingPos();
-        var ceilingEntities = ExamineContext.sortEntitiesByZIndex(gc.pos().getAt(ceilingPos));
-        for (var entity : ceilingEntities) {
-            items.add(new ExamineItem(entity, ExamineItem.ItemType.CEILING));
-        }
-
-        var floorPos = examineContext.getFloorPos();
-        var floorEntities = ExamineContext.sortEntitiesByZIndex(gc.pos().getAt(floorPos));
-        for (var entity : floorEntities) {
-            items.add(new ExamineItem(entity, ExamineItem.ItemType.FLOOR));
-        }
-
+        var items = ExamineSystem.visibleItems(gc.pos(), gc.fluid(), examineContext);
         for (var item : items) {
-            var name = item.entity().get(Descriptor.class).name();
             String displayName = switch (item.type()) {
-            case MAIN -> name;
-            case FLOOR -> name + " (Floor)";
-            case CEILING -> name + " (Ceiling)";
+            case MAIN -> item.name();
+            case FLOOR -> item.name() + " (Floor)";
+            case CEILING -> item.name() + " (Ceiling)";
             };
             m_entityNames.add(displayName);
         }

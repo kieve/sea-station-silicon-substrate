@@ -7,8 +7,10 @@ import ca.kieve.ssss.component.Descriptor;
 import ca.kieve.ssss.component.Player;
 import ca.kieve.ssss.component.Position;
 import ca.kieve.ssss.component.SocketPlug;
+import ca.kieve.ssss.context.DebugContext;
 import ca.kieve.ssss.context.EventContext;
 import ca.kieve.ssss.context.ExamineContext;
+import ca.kieve.ssss.context.FluidContext;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.context.GhostEntity;
 import ca.kieve.ssss.context.InputContext;
@@ -18,6 +20,7 @@ import ca.kieve.ssss.context.VisionContext;
 import ca.kieve.ssss.event.ExamineEvent;
 import ca.kieve.ssss.util.DescriptionComposer;
 import ca.kieve.ssss.util.Vec3i;
+import ca.kieve.ssss.util.WaterExamine;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +47,7 @@ public class ExamineSystem extends System {
      * Represents an item in the examine selection list.
      * Can be an entity at main level, floor level, or ceiling level.
      */
-    public record ExamineItem(Entity entity, ItemType type) {
+    public record ExamineItem(String name, String description, ItemType type) {
         public enum ItemType {
             MAIN,
             FLOOR,
@@ -64,6 +67,8 @@ public class ExamineSystem extends System {
     private final ExamineContext m_examine;
     private final VisionContext m_vision;
     private final PositionContext m_pos;
+    private final FluidContext m_fluid;
+    private final DebugContext m_debug;
     private final LogContext m_log;
 
     public ExamineSystem(GameContext gameContext) {
@@ -74,6 +79,8 @@ public class ExamineSystem extends System {
         m_examine = gameContext.examine();
         m_vision = gameContext.vision();
         m_pos = gameContext.pos();
+        m_fluid = gameContext.fluid();
+        m_debug = gameContext.debug();
         m_log = gameContext.log();
     }
 
@@ -152,7 +159,7 @@ public class ExamineSystem extends System {
 
     private ExamineMode getMode() {
         var crosshair = m_examine.getCrosshairPos();
-        if (m_vision.isVisible(crosshair.x, crosshair.y)) {
+        if (m_debug.isFullVision() || m_vision.isVisible(crosshair.x, crosshair.y)) {
             return ExamineMode.VISIBLE;
         }
         if (m_vision.isExplored(crosshair.x, crosshair.y, crosshair.z)) {
@@ -179,27 +186,47 @@ public class ExamineSystem extends System {
     }
 
     private List<ExamineItem> getExamineItems() {
+        return visibleItems(m_pos, m_fluid, m_examine);
+    }
+
+    public static List<ExamineItem> visibleItems(
+        PositionContext pos,
+        FluidContext fluid,
+        ExamineContext examine
+    ) {
         var items = new ArrayList<ExamineItem>();
-
-        var mainPos = m_examine.getCrosshairPos();
-        var mainEntities = ExamineContext.sortEntitiesByZIndex(m_pos.getAt(mainPos));
-        for (var entity : mainEntities) {
-            items.add(new ExamineItem(entity, MAIN));
-        }
-
-        var ceilingPos = m_examine.getCeilingPos();
-        var ceilingEntities = ExamineContext.sortEntitiesByZIndex(m_pos.getAt(ceilingPos));
-        for (var entity : ceilingEntities) {
-            items.add(new ExamineItem(entity, CEILING));
-        }
-
-        var floorPos = m_examine.getFloorPos();
-        var floorEntities = ExamineContext.sortEntitiesByZIndex(m_pos.getAt(floorPos));
-        for (var entity : floorEntities) {
-            items.add(new ExamineItem(entity, FLOOR));
-        }
-
+        addEntityItems(items, pos, examine.getCrosshairPos(), MAIN);
+        addWaterItem(items, fluid, examine.getCrosshairPos(), MAIN);
+        addEntityItems(items, pos, examine.getCeilingPos(), CEILING);
+        addEntityItems(items, pos, examine.getFloorPos(), FLOOR);
         return items;
+    }
+
+    private static void addEntityItems(
+        List<ExamineItem> items,
+        PositionContext pos,
+        Vec3i at,
+        ExamineItem.ItemType type
+    ) {
+        for (var entity : ExamineContext.sortEntitiesByZIndex(pos.getAt(at))) {
+            var descriptor = entity.get(Descriptor.class);
+            items
+                .add(new ExamineItem(descriptor.name(), DescriptionComposer.compose(entity), type));
+        }
+    }
+
+    private static void addWaterItem(
+        List<ExamineItem> items,
+        FluidContext fluid,
+        Vec3i at,
+        ExamineItem.ItemType type
+    ) {
+        if (!fluid.hasWater(at)) {
+            return;
+        }
+        items.add(
+            new ExamineItem(WaterExamine.name(fluid, at), WaterExamine.description(fluid, at), type)
+        );
     }
 
     private void handleEnterKey() {
@@ -268,7 +295,7 @@ public class ExamineSystem extends System {
         case FLOOR -> "[Floor] ";
         case CEILING -> "[Ceiling] ";
         };
-        m_log.log(prefix + DescriptionComposer.compose(item.entity()));
+        m_log.log(prefix + item.description());
     }
 
     private void logGhostItem(GhostEntity ghost) {

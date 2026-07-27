@@ -15,6 +15,7 @@ import ca.kieve.ssss.component.RenderingHint;
 import ca.kieve.ssss.component.SocketPlug;
 import ca.kieve.ssss.component.TileGlyph;
 import ca.kieve.ssss.context.ExamineContext;
+import ca.kieve.ssss.context.FluidContext;
 import ca.kieve.ssss.context.GameContext;
 import ca.kieve.ssss.context.GhostEntity;
 import ca.kieve.ssss.context.GhostTile;
@@ -23,6 +24,7 @@ import ca.kieve.ssss.context.VisionContext;
 import ca.kieve.ssss.util.DescriptionComposer;
 import ca.kieve.ssss.util.Vec3i;
 import ca.kieve.ssss.util.VisionUtil;
+import ca.kieve.ssss.util.WaterExamine;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,6 +46,7 @@ public class VisionSystem extends System implements MapInitSystem {
     private final Dominion m_ecs;
     private final VisionContext m_vision;
     private final PositionContext m_pos;
+    private final FluidContext m_fluid;
     private final TileGlyph m_floorGlyph;
 
     public VisionSystem(GameContext gameContext) {
@@ -51,6 +54,7 @@ public class VisionSystem extends System implements MapInitSystem {
         m_ecs = gameContext.ecs();
         m_vision = gameContext.vision();
         m_pos = gameContext.pos();
+        m_fluid = gameContext.fluid();
         var floorGlyphId = gameContext.mapGenerator().getFloorGlyphId();
         m_floorGlyph = gameContext.entityFactory().getGlyphFactory().getGlyph(floorGlyphId);
     }
@@ -190,6 +194,16 @@ public class VisionSystem extends System implements MapInitSystem {
                 new GhostEntity(descriptor.name(), DescriptionComposer.compose(entity), type)
             );
         }
+        if (type != MAIN || !m_fluid.hasWater(pos)) {
+            return;
+        }
+        ghostEntities.add(
+            new GhostEntity(
+                WaterExamine.name(m_fluid, pos),
+                WaterExamine.description(m_fluid, pos),
+                type
+            )
+        );
     }
 
     private Entity getPlayerBody() {
