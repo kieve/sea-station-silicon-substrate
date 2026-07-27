@@ -10,12 +10,3 @@
 
 - Break up the TileGlyphRenderSystem
     Ghost, water, etc. It's doing a lot.
-
-
-
-
-WATER:
-- Maybe the MapBlockDefinition shouldn't have waterFill / waterDepth, and instead that should be a
-  component on blocks?
-- Examining / ghosts / memory doesn't work with water
-claude --resume 1e961785-4b2a-41f1-926c-473de839f201
