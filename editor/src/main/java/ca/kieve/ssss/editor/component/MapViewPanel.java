@@ -43,6 +43,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Consumer;
 
@@ -149,15 +150,8 @@ public class MapViewPanel extends BorderPane {
             }
 
             @Override
-            public void onCellSelected(
-                int row,
-                int col,
-                String blockName,
-                List<SelectedCellOverlay.EntityInfo> entityInfos,
-                List<SelectedCellOverlay.ConnectorInfo> connectorInfos
-            ) {
-                m_selectedCellOverlay.setHeaderText("Cell: (" + col + ", " + row + ")");
-                m_selectedCellOverlay.update(blockName, entityInfos, connectorInfos);
+            public void onCellSelected(int row, int col) {
+                updateCellOverlay(row, col);
             }
 
             @Override
@@ -269,6 +263,10 @@ public class MapViewPanel extends BorderPane {
             case CONNECTOR -> {
                 m_tabPane.getSelectionModel().select(m_submapsTab);
                 m_submapPanel.selectConnector(item.index());
+            }
+            case SUBMAP -> {
+                m_tabPane.getSelectionModel().select(m_submapsTab);
+                m_submapPanel.selectSubmap(item.index());
             }
             case BLOCK -> {
                 clearSectionSelection();
@@ -391,6 +389,7 @@ public class MapViewPanel extends BorderPane {
             setZLevel(pos.z());
         }
         m_renderer.setSelectedCell(pos.y(), pos.x());
+        updateCellOverlay(pos.y(), pos.x());
         m_panCanvas.requestRedraw();
     }
 
@@ -646,7 +645,7 @@ public class MapViewPanel extends BorderPane {
 
         if (tool == EditorToolBar.Tool.SELECT) {
             if (e.getButton() == MouseButton.PRIMARY) {
-                m_toolHandler.selectAt(e.getX(), e.getY(), m_currentZ);
+                m_toolHandler.selectAt(e.getX(), e.getY());
                 e.consume();
             } else if (e.getButton() == MouseButton.SECONDARY) {
                 m_toolHandler.clearSelection();
@@ -685,6 +684,121 @@ public class MapViewPanel extends BorderPane {
         m_addOverrideBtn.setManaged(visible);
     }
 
+    private void updateCellOverlay(int row, int col) {
+        m_selectedCellOverlay.setHeaderText("Cell: (" + col + ", " + row + ")");
+        m_selectedCellOverlay.update(buildCellItems(row, col, m_currentZ));
+        restoreOverlayHighlight();
+    }
+
+    private void restoreOverlayHighlight() {
+        if (m_selectedEntityIndex != null) {
+            m_selectedCellOverlay.selectItem(
+                SelectedCellOverlay.ItemType.ENTITY,
+                m_selectedEntityIndex
+            );
+            return;
+        }
+        if (m_selectedConnectorIndex != null) {
+            m_selectedCellOverlay.selectItem(
+                SelectedCellOverlay.ItemType.CONNECTOR,
+                m_selectedConnectorIndex
+            );
+            return;
+        }
+        if (m_selectedSubmapIndex == null) {
+            return;
+        }
+        m_selectedCellOverlay.selectItem(
+            SelectedCellOverlay.ItemType.SUBMAP,
+            m_selectedSubmapIndex
+        );
+    }
+
+    private List<SelectedCellOverlay.CellItem> buildCellItems(int row, int col, int z) {
+        var items = new ArrayList<SelectedCellOverlay.CellItem>();
+
+        String blockName = m_model.getCell(z, row, col);
+        if (blockName != null) {
+            items.add(
+                new SelectedCellOverlay.CellItem(blockName, SelectedCellOverlay.ItemType.BLOCK, 0)
+            );
+        }
+
+        var entities = m_model.getEntities();
+        for (int i = 0; i < entities.size(); i++) {
+            EditorEntity entity = entities.get(i);
+            if (!isAt(entity, row, col, z)) {
+                continue;
+            }
+            items.add(
+                new SelectedCellOverlay.CellItem(
+                    i + ": " + entity.id(),
+                    SelectedCellOverlay.ItemType.ENTITY,
+                    i
+                )
+            );
+        }
+
+        var connectors = m_model.getConnectors();
+        for (int i = 0; i < connectors.size(); i++) {
+            EditorEntity connector = connectors.get(i);
+            if (!isAt(connector, row, col, z)) {
+                continue;
+            }
+            items.add(
+                new SelectedCellOverlay.CellItem(
+                    connector.id(),
+                    SelectedCellOverlay.ItemType.CONNECTOR,
+                    i
+                )
+            );
+        }
+
+        var submaps = m_model.getSubmaps();
+        for (int index : submapIndicesAt(row, col)) {
+            items.add(
+                new SelectedCellOverlay.CellItem(
+                    ComposedWorld.regionIdFor(submaps.get(index).toDefinition()),
+                    SelectedCellOverlay.ItemType.SUBMAP,
+                    index
+                )
+            );
+        }
+
+        return items;
+    }
+
+    private List<Integer> submapIndicesAt(int row, int col) {
+        var indices = new ArrayList<Integer>();
+        Set<String> regions = m_composedWorld == null
+            ? Set.of()
+            : m_composedWorld.submapRegionsAt(row, col);
+        var submaps = m_model.getSubmaps();
+        for (int i = 0; i < submaps.size(); i++) {
+            EditorEntity submap = submaps.get(i);
+            if (isAnchoredAt(submap, row, col)
+                || regions.contains(ComposedWorld.regionIdFor(submap.toDefinition()))) {
+                indices.add(i);
+            }
+        }
+        return indices;
+    }
+
+    private static boolean isAnchoredAt(EditorEntity entity, int row, int col) {
+        var pos = entity.getEntityPos();
+        return pos != null
+            && pos.x() == col
+            && pos.y() == row;
+    }
+
+    private static boolean isAt(EditorEntity entity, int row, int col, int z) {
+        var pos = entity.getEntityPos();
+        return pos != null
+            && pos.x() == col
+            && pos.y() == row
+            && pos.z() == z;
+    }
+
     private void refreshEntityView(EditorEntity entity) {
         m_renderer.loadEntities(buildEntityMarkers(m_currentZ));
         m_componentPanel.showMapEntity(entity.id(), entity.components());
@@ -710,38 +824,7 @@ public class MapViewPanel extends BorderPane {
         int row = pos.y();
         int col = pos.x();
         m_renderer.setSelectedCell(row, col);
-
-        String blockName = m_model.getCell(m_currentZ, row, col);
-        var entityInfos = new ArrayList<SelectedCellOverlay.EntityInfo>();
-        var entities = m_model.getEntities();
-        for (int i = 0; i < entities.size(); i++) {
-            var e = entities.get(i);
-            var ePos = e.getEntityPos();
-            if (ePos != null
-                && ePos.x() == col
-                && ePos.y() == row
-                && ePos.z() == m_currentZ) {
-                entityInfos.add(new SelectedCellOverlay.EntityInfo(i, e.id()));
-            }
-        }
-        var connectorInfos = new ArrayList<SelectedCellOverlay.ConnectorInfo>();
-        var connectors = m_model.getConnectors();
-        for (int i = 0; i < connectors.size(); i++) {
-            var c = connectors.get(i);
-            var cPos = c.getEntityPos();
-            if (cPos != null
-                && cPos.x() == col
-                && cPos.y() == row
-                && cPos.z() == m_currentZ) {
-                connectorInfos.add(new SelectedCellOverlay.ConnectorInfo(i, c.id()));
-            }
-        }
-
-        m_selectedCellOverlay.setHeaderText("Cell: (" + col + ", " + row + ")");
-        m_selectedCellOverlay.update(blockName, entityInfos, connectorInfos);
-        if (m_selectedEntityIndex != null) {
-            m_selectedCellOverlay.selectEntity(m_selectedEntityIndex);
-        }
+        updateCellOverlay(row, col);
 
         // Center map on the entity's cell
         double worldX = col * MapRenderer.CELL_SIZE

@@ -1,25 +1,15 @@
 package ca.kieve.ssss.editor.handler;
 
 import ca.kieve.ssss.editor.component.MapRenderer;
-import ca.kieve.ssss.editor.component.SelectedCellOverlay;
 import ca.kieve.ssss.editor.model.EditorEntity;
 import ca.kieve.ssss.editor.model.EditorMapModel;
 import ca.kieve.ssss.editor.model.GridCell;
 import ca.kieve.ssss.editor.ui.PanCanvas;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class MapToolHandler {
     public interface ViewUpdater {
         void onCellChanged(int mapCols, int mapRows);
-        void onCellSelected(
-            int row,
-            int col,
-            String blockName,
-            List<SelectedCellOverlay.EntityInfo> entityInfos,
-            List<SelectedCellOverlay.ConnectorInfo> connectorInfos
-        );
+        void onCellSelected(int row, int col);
         void onEntityMoved(EditorEntity entity, int row, int col);
         void onSelectionCleared();
     }
@@ -102,53 +92,14 @@ public class MapToolHandler {
         m_panCanvas.requestRedraw();
     }
 
-    public void selectAt(double mouseX, double mouseY, int currentZ) {
+    public void selectAt(double mouseX, double mouseY) {
         var cell = mouseToGrid(mouseX, mouseY);
         int row = cell.row();
         int col = cell.col();
         m_renderer.setSelectedCell(row, col);
 
-        String blockName = m_model.getCell(currentZ, row, col);
-
-        var entityInfos = new ArrayList<SelectedCellOverlay.EntityInfo>();
-        var entities = m_model.getEntities();
-        for (int i = 0; i < entities.size(); i++) {
-            var entity = entities.get(i);
-            var pos = entity.getEntityPos();
-            if (pos != null
-                && pos.x() == col
-                && pos.y() == row
-                && pos.z() == currentZ) {
-                entityInfos.add(new SelectedCellOverlay.EntityInfo(i, entity.id()));
-            }
-        }
-
-        var connectorInfos = new ArrayList<SelectedCellOverlay.ConnectorInfo>();
-        var connectors = m_model.getConnectors();
-        for (int i = 0; i < connectors.size(); i++) {
-            var c = connectors.get(i);
-            var cPos = c.getEntityPos();
-            if (cPos != null
-                && cPos.x() == col
-                && cPos.y() == row
-                && cPos.z() == currentZ) {
-                connectorInfos.add(new SelectedCellOverlay.ConnectorInfo(i, c.id()));
-            }
-        }
-
-        m_viewUpdater.onCellSelected(row, col, blockName, entityInfos, connectorInfos);
+        m_viewUpdater.onCellSelected(row, col);
         m_panCanvas.requestRedraw();
-    }
-
-    public void moveEntityTo(double mouseX, double mouseY, Integer entityIndex, int currentZ) {
-        if (entityIndex == null) {
-            return;
-        }
-        var entities = m_model.getEntities();
-        if (entityIndex < 0 || entityIndex >= entities.size()) {
-            return;
-        }
-        moveTargetTo(entities.get(entityIndex), mouseX, mouseY, currentZ);
     }
 
     /**

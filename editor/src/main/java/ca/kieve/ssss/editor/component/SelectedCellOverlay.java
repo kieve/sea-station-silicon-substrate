@@ -18,16 +18,11 @@ public class SelectedCellOverlay extends VBox {
     public enum ItemType {
         BLOCK,
         ENTITY,
-        CONNECTOR
+        CONNECTOR,
+        SUBMAP
     }
 
     public record CellItem(String label, ItemType type, int index) {
-    }
-
-    public record EntityInfo(int index, String id) {
-    }
-
-    public record ConnectorInfo(int index, String id) {
     }
 
     private static class CellItemCell
@@ -44,6 +39,7 @@ public class SelectedCellOverlay extends VBox {
             case BLOCK -> "[B] ";
             case ENTITY -> "[E] ";
             case CONNECTOR -> "[C] ";
+            case SUBMAP -> "[S] ";
             };
             setText(prefix + item.label());
         }
@@ -101,42 +97,22 @@ public class SelectedCellOverlay extends VBox {
         m_onItemSelected = callback;
     }
 
-    public void update(
-        String blockName,
-        List<EntityInfo> entities,
-        List<ConnectorInfo> connectors
-    ) {
+    public void update(List<CellItem> items) {
         setVisible(true);
         setManaged(true);
 
-        m_list.getItems().clear();
-
-        if (blockName != null) {
-            m_list.getItems().add(new CellItem(blockName, ItemType.BLOCK, 0));
-        }
-
-        for (var entity : entities) {
-            m_list.getItems().add(
-                new CellItem(entity.index() + ": " + entity.id(), ItemType.ENTITY, entity.index())
-            );
-        }
-
-        for (var connector : connectors) {
-            m_list.getItems().add(
-                new CellItem(connector.id(), ItemType.CONNECTOR, connector.index())
-            );
-        }
+        m_list.getItems().setAll(items);
 
         if (m_list.getItems().isEmpty()) {
             m_header.setText("Cell: (empty)");
         }
     }
 
-    public void selectEntity(int entityIndex) {
+    public void selectItem(ItemType type, int index) {
         for (int i = 0; i < m_list.getItems().size(); i++) {
             var item = m_list.getItems().get(i);
-            if (item.type() == ItemType.ENTITY
-                && item.index() == entityIndex) {
+            if (item.type() == type
+                && item.index() == index) {
                 m_list.getSelectionModel().select(i);
                 return;
             }

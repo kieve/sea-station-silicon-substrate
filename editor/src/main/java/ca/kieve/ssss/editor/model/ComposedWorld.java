@@ -64,6 +64,7 @@ public final class ComposedWorld {
 
     public record RegionInfo(
         String id,
+        String parentId,
         Vec3i offset,
         Vec3i bounds,
         List<MapEntityDefinition> connectors,
@@ -82,6 +83,7 @@ public final class ComposedWorld {
             File file,
             MapDefinition def,
             String regionId,
+            String parentId,
             Vec3i offset,
             boolean allowOverlap,
             Set<File> ancestors
@@ -107,6 +109,7 @@ public final class ComposedWorld {
                 regions.add(
                     new RegionInfo(
                         regionId,
+                        parentId,
                         offset,
                         bounds,
                         def.connectors(),
@@ -140,13 +143,11 @@ public final class ComposedWorld {
                         warnings.add("could not resolve offset for submap: " + ref);
                         continue;
                     }
-                    String childId = submapEntity.id() != null
-                        ? submapEntity.id()
-                        : ContentRef.stripYamlSuffix(ref);
                     loadRecursive(
                         childFile,
                         childDef,
-                        childId,
+                        regionIdFor(submapEntity),
+                        regionId,
                         childOffset,
                         readAllowOverlap(submapEntity),
                         ancestors
@@ -254,6 +255,7 @@ public final class ComposedWorld {
 
     private final Map<Integer, List<Cell>> m_cellsByZ;
     private final Map<Integer, List<Entity>> m_entitiesByZ;
+    private final Map<String, String> m_regionParents;
     private final Set<CellPos> m_overlapCells;
     private final List<RegionInfo> m_regions;
     private final List<String> m_warnings;
@@ -270,6 +272,14 @@ public final class ComposedWorld {
         m_overlapCells = overlapCells;
         m_regions = regions;
         m_warnings = warnings;
+
+        Map<String, String> parents = new HashMap<>();
+        for (RegionInfo region : regions) {
+            if (region.parentId() != null) {
+                parents.put(region.id(), region.parentId());
+            }
+        }
+        m_regionParents = parents;
     }
 
     public List<Cell> cellsAt(int z) {
@@ -282,6 +292,42 @@ public final class ComposedWorld {
 
     public Set<CellPos> overlapCells() {
         return m_overlapCells;
+    }
+
+    public Set<String> submapRegionsAt(int row, int col) {
+        Set<String> out = new LinkedHashSet<>();
+        for (RegionInfo region : m_regions) {
+            if (!covers(region, row, col)) {
+                continue;
+            }
+            String topLevel = rootChildAncestor(m_regionParents, region.id());
+            if (topLevel != null) {
+                out.add(topLevel);
+            }
+        }
+        return out;
+    }
+
+    static boolean covers(RegionInfo region, int row, int col) {
+        Vec3i offset = region.offset();
+        Vec3i bounds = region.bounds();
+        return col >= offset.x
+            && col < offset.x + bounds.x
+            && row >= offset.y
+            && row < offset.y + bounds.y;
+    }
+
+    static String rootChildAncestor(Map<String, String> regionParents, String regionId) {
+        String current = regionId;
+        Set<String> visited = new HashSet<>();
+        while (current != null && visited.add(current)) {
+            String parent = regionParents.get(current);
+            if (ROOT_REGION_ID.equals(parent)) {
+                return current;
+            }
+            current = parent;
+        }
+        return null;
     }
 
     public List<RegionInfo> regions() {
@@ -315,6 +361,7 @@ public final class ComposedWorld {
             rootFile,
             rootDef,
             ROOT_REGION_ID,
+            null,
             Vec3i.ZERO,
             false,
             new LinkedHashSet<>()
@@ -334,6 +381,14 @@ public final class ComposedWorld {
             List.copyOf(ctx.regions),
             List.copyOf(ctx.warnings)
         );
+    }
+
+    public static String regionIdFor(MapEntityDefinition submapEntity) {
+        if (submapEntity.id() != null) {
+            return submapEntity.id();
+        }
+        String ref = readSubmapRef(submapEntity);
+        return ref == null ? null : ContentRef.stripYamlSuffix(ref);
     }
 
     /**

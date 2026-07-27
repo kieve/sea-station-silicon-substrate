@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import ca.kieve.ssss.component.Connector;
 import ca.kieve.ssss.component.Position;
+import ca.kieve.ssss.component.Submap;
 import ca.kieve.ssss.content.ComponentDefinition;
 import ca.kieve.ssss.content.MapBlockDefinition;
 import ca.kieve.ssss.content.MapDefinition;
@@ -14,6 +15,7 @@ import ca.kieve.ssss.util.Vec3i;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -97,6 +99,91 @@ class ComposedWorldTest {
         assertTrue(world.overlapCells().isEmpty(), "no overlaps in single-region map");
         assertEquals(1, world.regions().size());
         assertEquals(new Vec3i(3, 2, 1), world.regions().getFirst().bounds());
+    }
+
+    @Test
+    void submapRegionsAtIgnoresRootOwnedCells() {
+        var blocks = Map.of("wall", new MapBlockDefinition("block_wall", '#'));
+        var layers = Map.of("0", "##\n");
+        var def = new MapDefinition(blocks, layers, "interpunct", List.of(), List.of(), List.of());
+
+        ComposedWorld world = ComposedWorld.flatten(def, null);
+
+        assertTrue(world.submapRegionsAt(0, 0).isEmpty(), "root cells belong to no submap");
+        assertTrue(world.submapRegionsAt(9, 9).isEmpty(), "cell outside every region");
+    }
+
+    @Test
+    void regionCoversEveryCellInItsBoundsIncludingAir() {
+        var region = region(new Vec3i(10, 4, 0), new Vec3i(3, 2, 1));
+
+        assertTrue(ComposedWorld.covers(region, 4, 10), "top-left corner");
+        assertTrue(ComposedWorld.covers(region, 5, 12), "bottom-right corner");
+        assertTrue(ComposedWorld.covers(region, 4, 11), "interior cell");
+
+        assertFalse(ComposedWorld.covers(region, 4, 9), "one column west");
+        assertFalse(ComposedWorld.covers(region, 4, 13), "one column east");
+        assertFalse(ComposedWorld.covers(region, 3, 10), "one row below");
+        assertFalse(ComposedWorld.covers(region, 6, 10), "one row above");
+    }
+
+    @Test
+    void emptyRegionCoversNothing() {
+        var region = region(Vec3i.ZERO, Vec3i.ZERO);
+
+        assertFalse(ComposedWorld.covers(region, 0, 0));
+    }
+
+    private static ComposedWorld.RegionInfo region(Vec3i offset, Vec3i bounds) {
+        return new ComposedWorld.RegionInfo(
+            "east_wing",
+            ComposedWorld.ROOT_REGION_ID,
+            offset,
+            bounds,
+            List.of(),
+            Set.of(0)
+        );
+    }
+
+    @Test
+    void rootChildAncestorResolvesNestedRegionToTopLevelSubmap() {
+        var parents = Map.of("east_wing", ComposedWorld.ROOT_REGION_ID, "pump_room", "east_wing");
+
+        assertEquals("east_wing", ComposedWorld.rootChildAncestor(parents, "pump_room"));
+        assertEquals("east_wing", ComposedWorld.rootChildAncestor(parents, "east_wing"));
+    }
+
+    @Test
+    void rootChildAncestorReturnsNullWhenChainNeverReachesRoot() {
+        var parents = Map.of("orphan", "detached_parent");
+
+        assertNull(
+            ComposedWorld.rootChildAncestor(parents, "orphan"),
+            "a chain that never reaches root names nothing selectable"
+        );
+        assertNull(
+            ComposedWorld.rootChildAncestor(parents, ComposedWorld.ROOT_REGION_ID),
+            "the root is not one of its own submaps"
+        );
+        assertNull(
+            ComposedWorld.rootChildAncestor(Map.of("a", "b", "b", "a"), "a"),
+            "a parent cycle terminates instead of spinning"
+        );
+    }
+
+    @Test
+    void regionIdFallsBackToRefWhenSubmapHasNoId() {
+        var withId = submapEntity("east_wing", "maintenance_sub.yaml");
+        var withoutId = submapEntity(null, "maintenance_sub.yaml");
+
+        assertEquals("east_wing", ComposedWorld.regionIdFor(withId));
+        assertEquals("maintenance_sub", ComposedWorld.regionIdFor(withoutId));
+    }
+
+    private static MapEntityDefinition submapEntity(String id, String ref) {
+        var submap = new ComponentDefinition(Submap.class);
+        submap.setProperty("ref", ref);
+        return new MapEntityDefinition(id, List.of(submap));
     }
 
     @Test
